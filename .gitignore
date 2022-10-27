@@ -11,3 +11,6 @@ __pycache__/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+
+# PDFs, like plots
+*.pdf
