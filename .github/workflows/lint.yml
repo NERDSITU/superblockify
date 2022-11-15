@@ -1,0 +1,26 @@
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  run-linters:
+    name: Run linters
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Python dependencies
+        run: pip install black
+
+      - name: Run Black
+        uses: wearerequired/lint-action@v2
+        with:
+          black: true
+          auto_fix: true
