@@ -17,10 +17,15 @@ jobs:
           python-version: '3.10'
 
       - name: Install Python dependencies
-        run: pip install black
+        run: pip install black pylint
 
-      - name: Run Black
+      - name: Run Linters
         uses: wearerequired/lint-action@v2
         with:
-          black: true
           auto_fix: true
+          black: true
+          black_auto_fix: true
+          pylint: true
+          pylint_auto_fix: false
+          git_name: ${GITHUB_ACTOR}
+          git_email: ${GITHUB_ACTOR}@users.noreply.github.com
