@@ -16,6 +16,7 @@ jobs:
         id: step1
         with:
           envFileName: 'environment.yaml'
+          channels: conda-forge
       - name: Get the Conda and Python version
         run: echo "Using conda version ${{ steps.step1.outputs.conda_version }} and
           python version python version is ${{ steps.step1.outputs.python_version }}"
