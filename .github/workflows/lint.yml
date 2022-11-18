@@ -13,7 +13,7 @@ jobs:
 
       - name: Setup Anaconda environment
         run: |
-          chmod +x
+          chmod +x ${PWD}/environmentSetupVersionless.sh
           ${PWD}/environmentSetupVersionless.sh
         shell: bash
 
