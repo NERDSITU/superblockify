@@ -1,6 +1,6 @@
 name: Lint
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 jobs:
   run-linters:
@@ -11,13 +11,14 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Setup Anaconda environment
+        uses: fdiblen/anaconda-action@master
+        id: step1
         with:
-          python-version: '3.10'
-
-      - name: Install Python dependencies
-        run: pip install black pylint
+          envFileName: 'environment.yaml'
+      - name: Get the Conda and Python version
+        run: echo "Using conda version ${{ steps.step1.outputs.conda_version }} and
+          python version python version is ${{ steps.step1.outputs.python_version }}"
 
       - name: Run Linters
         uses: wearerequired/lint-action@v2
