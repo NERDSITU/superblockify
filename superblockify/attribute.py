@@ -2,8 +2,9 @@
 from networkx import get_edge_attributes, set_edge_attributes
 
 
+
 def new_edge_attribute_by_function(
-    graph, function, source_attribute, destination_attribute, allow_overwriting=False
+    graph, function, source_attribute,  destination_attribute, allow_overwriting=False
 ):
     """Maps new edge attributes from an existing attribute to a new one.
 
@@ -53,7 +54,7 @@ def new_edge_attribute_by_function(
 
     if (source_attribute == destination_attribute) and not allow_overwriting:
         raise ValueError(
-            f"Cannot overwrite the attribute '{source_attribute}' if "
+             f"Cannot overwrite the attribute '{source_attribute}' if "
             f"`allow_overwriting` is set to `False`."
         )
 
