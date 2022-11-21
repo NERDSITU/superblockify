@@ -12,11 +12,14 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup and activate Anaconda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          activate-environment: OSMnxPyrLab
+          environment-file: environment.yaml
         run: |
-          chmod +x ${PWD}/environmentSetupVersionless.sh
-          ${PWD}/environmentSetupVersionless.sh
-          conda activate OSMnxPyrLab
-        shell: bash
+          conda info
+          conda list
 
       - name: Run Linters
         uses: wearerequired/lint-action@v2
