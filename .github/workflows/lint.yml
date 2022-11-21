@@ -24,7 +24,6 @@ jobs:
         run: |
           conda info
           conda list
-          pylint --version
 
       - name: Run Linters
         uses: wearerequired/lint-action@v2
@@ -32,7 +31,9 @@ jobs:
           auto_fix: true
           black: true
           black_auto_fix: true
+          black_dir: /usr/share/miniconda/envs/OSMnxPyrLab/bin/
           pylint: true
           pylint_auto_fix: false
+          pylint_dir: /usr/share/miniconda/envs/OSMnxPyrLab/bin/
           git_name: ${GITHUB_ACTOR}
           git_email: ${GITHUB_ACTOR}@users.noreply.github.com
