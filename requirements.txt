@@ -1,0 +1,7 @@
+matplotlib~=3.6.0
+networkx~=2.8.7
+numpy~=1.23.3
+osmnx~=1.2.2
+pytest~=7.2.0
+superblockify~=0.0.0
+setuptools~=65.4.1

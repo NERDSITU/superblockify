@@ -6,8 +6,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Development
+*.egg-info
+
 # OSMnx cache
-*/cache/
+**/cache/
 
 # Jupyter Notebook
 .ipynb_checkpoints

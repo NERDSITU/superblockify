@@ -1,0 +1,46 @@
+name: Lint
+
+on: [ push, pull_request ]
+
+jobs:
+  run-black:
+    name: Run Black codestyle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Run Black
+        uses: psf/black@stable
+        with:
+          options: ''
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Fix code style issues with Black
+          commit_user_name: ${GITHUB_ACTOR}
+          commit_user_email: ${GITHUB_ACTOR}@users.noreply.github.com
+
+  run-pylint:
+    name: Run Pylint code analyzer
+    needs: run-black
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install pylint
+        run: pip install pylint
+
+      - name: Run Pylint
+        run: pylint -d E0401 superblockify/ tests/
+        # ignore import-errors first, analyze later with tests in anaconda environment
