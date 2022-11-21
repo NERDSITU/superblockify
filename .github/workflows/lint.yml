@@ -24,6 +24,7 @@ jobs:
         run: |
           conda info
           conda list
+          pylint --version
 
       - name: Run Linters
         uses: wearerequired/lint-action@v2
