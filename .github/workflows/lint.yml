@@ -1,39 +1,41 @@
 name: Lint
 
-on: [ push, pull_request ]
+on: [push, pull_request]
 
 jobs:
-  run-linters:
-    name: Run linters
+  run-black:
+    name: Run Black codestyle
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -el {0}
 
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v3
 
-      - name: Setup and activate Anaconda environment
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          auto-update-conda: true
-          activate-environment: OSMnxPyrLab
-          environment-file: environment.yaml
-      - name: Show environment infos
-        run: |
-          conda info
-          conda list
+      - name: Run Black
+        uses: psf/black@stable
 
-      - name: Run Linters
-        uses: wearerequired/lint-action@v2
+      - uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          auto_fix: true
-          black: true
-          black_auto_fix: true
-          black_dir: /../../../../../usr/share/miniconda/envs/OSMnxPyrLab/bin/
-          pylint: true
-          pylint_auto_fix: false
-          pylint_dir: /../../../../../usr/share/miniconda/envs/OSMnxPyrLab/bin/
-          git_name: ${GITHUB_ACTOR}
-          git_email: ${GITHUB_ACTOR}@users.noreply.github.com
+          commit_message: Fix code style issues with Black
+          commit_user_name: ${GITHUB_ACTOR}
+          commit_user_email: ${GITHUB_ACTOR}@users.noreply.github.com
+
+  run-pylint:
+    name: Run Pylint code analyzer
+    if: jobs.run-black.outcome == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install pylint
+        run: pip install pylint
+
+      - name: Run Pylint
+        run: pylint superblockify/ tests/
