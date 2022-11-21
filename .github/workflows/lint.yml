@@ -17,7 +17,9 @@ jobs:
           auto-update-conda: true
           activate-environment: OSMnxPyrLab
           environment-file: environment.yaml
+          auto-activate-base: false
       - name: Show environment infos
+        shell: bash -el {0}
         run: |
           conda info
           conda list
