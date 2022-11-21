@@ -11,10 +11,11 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v3
 
-      - name: Setup Anaconda environment
+      - name: Setup and activate Anaconda environment
         run: |
           chmod +x ${PWD}/environmentSetupVersionless.sh
           ${PWD}/environmentSetupVersionless.sh
+          conda activate OSMnxPyrLab
         shell: bash
 
       - name: Run Linters
