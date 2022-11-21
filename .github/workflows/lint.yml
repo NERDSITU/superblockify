@@ -1,6 +1,6 @@
 name: Lint
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 jobs:
   run-black:
@@ -13,6 +13,8 @@ jobs:
 
       - name: Run Black
         uses: psf/black@stable
+        with:
+          options: ''
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
