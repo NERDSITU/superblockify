@@ -22,7 +22,7 @@ jobs:
 
   run-pylint:
     name: Run Pylint code analyzer
-    if: jobs.run-black.outcome == 'success'
+    needs: run-black
     runs-on: ubuntu-latest
 
     steps:
