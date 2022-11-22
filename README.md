@@ -13,7 +13,7 @@ The environment to run the projects' code can be set up using the
 `environment.yaml` by running:
 
 ```bash
-conda env create --file=environment.yaml
+conda env create --file=environment.yml
 ```
 
 This initializes a conda environment by the name `OSMnxPyrLab`, which can be
