@@ -63,7 +63,7 @@ def test_new_edge_attribute_by_function_overwriting_disallowed(source, destinati
 @pytest.mark.parametrize("test_input", [4, -4, 0, 2.0, 10e5])
 @pytest.mark.parametrize("graph_len", [2, 3, 20])
 def test_new_edge_attribute_by_function_overwriting_allowed(test_input, graph_len):
-    """Test `new_edge_attribute_by_function` by design."""
+    """Test `new_edge_attribute_by_function` by design, with overwriting."""
 
     expected = __func(test_input)
 
