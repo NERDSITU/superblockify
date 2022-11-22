@@ -16,5 +16,6 @@ __pycache__/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# PDFs, like plots
-*.pdf
+# outputs - add manually
+results/*
+tests/test_data/output/*

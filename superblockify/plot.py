@@ -25,9 +25,9 @@ def paint_streets(graph, edge_linewidth=1, node_alpha=0, edge_color=None, **pg_k
     ValueError
         If edge_color was set to anything but None.
     ValueError
-        If `edge_linewidth` or `node_size` both <= 0, otherwise the plot will be empty.
+        If `edge_linewidth` and `node_size` both <= 0, otherwise the plot will be empty.
     ValueError
-        If graph is DiGraph?
+        If graph is DiGraph? TODO
 
     Examples
     --------
