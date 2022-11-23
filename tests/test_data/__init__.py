@@ -40,8 +40,8 @@ if __name__ == "__main__":
             for att in excess_attributes:
                 d.pop(att, None)
 
-        # Add edge bearings
-        graph = ox.add_edge_bearings(graph)
+        # Add edge bearings - the precision >1 is important for binning
+        graph = ox.add_edge_bearings(graph, precision=2)
 
         ox.io.save_graphml(graph, filepath=f"./tests/test_data/cities"
                                            f"/{place[0]}_bearing.graphml")
