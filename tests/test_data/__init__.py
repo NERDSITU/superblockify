@@ -43,5 +43,5 @@ if __name__ == "__main__":
         # Add edge bearings
         graph = ox.add_edge_bearings(graph)
 
-        ox.io.save_graphml(graph, filepath=f".tests/test_data/cities"
+        ox.io.save_graphml(graph, filepath=f"./tests/test_data/cities"
                                            f"/{place[0]}_bearing.graphml")
