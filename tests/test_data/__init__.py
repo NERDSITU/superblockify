@@ -43,5 +43,6 @@ if __name__ == "__main__":
         # Add edge bearings - the precision >1 is important for binning
         graph = ox.add_edge_bearings(graph, precision=2)
 
-        ox.io.save_graphml(graph, filepath=f"./tests/test_data/cities"
-                                           f"/{place[0]}_bearing.graphml")
+        ox.io.save_graphml(
+            graph, filepath=f"./tests/test_data/cities" f"/{place[0]}_bearing.graphml"
+        )
