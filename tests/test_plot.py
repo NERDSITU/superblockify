@@ -7,10 +7,11 @@ import pytest
 from superblockify.plot import paint_streets
 
 TEST_DATA = "./tests/test_data/"
+
+
 @pytest.mark.parametrize(
     "city_path",
-    [city for city in listdir(f"{TEST_DATA}cities/") if city.endswith(
-        ".graphml")],
+    [city for city in listdir(f"{TEST_DATA}cities/") if city.endswith(".graphml")],
 )
 @pytest.mark.parametrize("e_l,n_a", [(0.5, 0.5), (1, 0)])
 @pytest.mark.parametrize("save", [True, False])
