@@ -56,7 +56,8 @@ def paint_streets(
 
     # Write attribute where bearings are baked down modulo 90 degrees.
     attribute.new_edge_attribute_by_function(
-        graph, lambda bear: bear % 90, "bearing", "bearing_90")
+        graph, lambda bear: bear % 90, "bearing", "bearing_90"
+    )
 
     # Make series of edge colors, labels are edge IDs (u, v, key) and values are colors
     e_c = ox.plot.get_edge_colors_by_attr(graph, attr="bearing_90", cmap=cmap)
