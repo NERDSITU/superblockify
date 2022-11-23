@@ -10,8 +10,8 @@ from superblockify.plot import paint_streets
 @pytest.mark.parametrize("city_path", [city for city in
                                        listdir('./test_data/cities/') if
                                        city.endswith('.graphml')])
-@pytest.mark.parametrize("e_l,n_a", [(1, 0), (0.5, 0.5)])
-@pytest.mark.parametrize("save", [False, True])
+@pytest.mark.parametrize("e_l,n_a", [(0.5, 0.5), (1, 0)])
+@pytest.mark.parametrize("save", [True, False])
 def test_paint_streets(city_path, e_l, n_a, save):
     """Test `paint_streets` by design."""
     graph = ox.load_graphml(filepath='./test_data/cities/' + city_path)
