@@ -5,8 +5,9 @@ import osmnx as ox
 from superblockify import attribute
 
 
-def paint_streets(graph, cmap='hsv', edge_linewidth=1, node_alpha=0, edge_color=None,
-                  **pg_kwargs):
+def paint_streets(
+    graph, cmap="hsv", edge_linewidth=1, node_alpha=0, edge_color=None, **pg_kwargs
+):
     """Plot a graph with (cyclic) colormap related to street direction.
 
     Color will be chosen based on edge bearing, cyclic in 90 degree.
@@ -43,17 +44,19 @@ def paint_streets(graph, cmap='hsv', edge_linewidth=1, node_alpha=0, edge_color=
     """
 
     if edge_color is not None:
-        raise ValueError(f'The `edge_color` attribute was set to {edge_color}, '
-                         f'it will be overwritten by the colors determined with the '
-                         f'bearings and colormap.')
+        raise ValueError(
+            f"The `edge_color` attribute was set to {edge_color}, "
+            f"it will be overwritten by the colors determined with the "
+            f"bearings and colormap."
+        )
 
     # Calculate bearings if no edge has `bearing` attribute.
-    if not bool(nx.get_edge_attributes(graph, 'bearing')):
+    if not bool(nx.get_edge_attributes(graph, "bearing")):
         graph = ox.add_edge_bearings(graph)
 
     # Write attribute where bearings are baked down modulo 90 degrees.
     attribute.new_edge_attribute_by_function(
-        graph, lambda bear: bear % 90, 'bearing', 'bearing_90'
+        graph, lambda bear: bear % 90, "bearing", "bearing_90"
     )
 
     # Make series of edge colors, labels are edge IDs (u, v, key) and values are colors
@@ -64,11 +67,16 @@ def paint_streets(graph, cmap='hsv', edge_linewidth=1, node_alpha=0, edge_color=
     # color transparent.
     # Get all edges
     edges_wo_bearings = list(nx.edges(graph))
-    for node in nx.get_edge_attributes(graph, 'bearing_90').keys():
+    for node in nx.get_edge_attributes(graph, "bearing_90").keys():
         edges_wo_bearings.remove(node[:2])  # remove edges where `bearing_90` is set
     for edge in edges_wo_bearings:
         e_c[(*edge, 0)] = (0, 0, 0, 0)  # transparent color for remaining edges
 
     # Plot graph with osmnx's function, pass further attributes
-    return ox.plot_graph(graph, node_alpha=node_alpha, edge_color=e_c,
-                         edge_linewidth=edge_linewidth, **pg_kwargs)
+    return ox.plot_graph(
+        graph,
+        node_alpha=node_alpha,
+        edge_color=e_c,
+        edge_linewidth=edge_linewidth,
+        **pg_kwargs,
+    )
