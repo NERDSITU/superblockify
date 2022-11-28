@@ -63,11 +63,11 @@ def test_plot_by_attribute(city_path):
     new_edge_attribute_by_function(
         graph,
         lambda osmid: osmid if isinstance(osmid, int) else osmid[0],
-        'osmid',
-        'osmid_0'
+        "osmid",
+        "osmid_0",
     )
 
-    plot_by_attribute(graph, 'osmid_0', cmap="rainbow")
+    plot_by_attribute(graph, "osmid_0", cmap="rainbow")
 
 
 @pytest.mark.parametrize(
@@ -78,4 +78,4 @@ def test_plot_by_attribute_no_attribute(city_path):
     """Test `plot_by_attribute` with missing attribute."""
     graph = ox.load_graphml(filepath=f"{TEST_DATA}cities/" + city_path)
     with pytest.raises(ValueError):
-        plot_by_attribute(graph, 'non_existent_attribute')
+        plot_by_attribute(graph, "non_existent_attribute")

@@ -35,11 +35,11 @@ def paint_streets(graph, cmap="hsv", **pg_kwargs):
         graph, lambda bear: bear % 90, "bearing", "bearing_90"
     )
 
-    return plot_by_attribute(graph, 'bearing_90', cmap, **pg_kwargs)
+    return plot_by_attribute(graph, "bearing_90", cmap, **pg_kwargs)
 
 
 def plot_by_attribute(
-        graph, attr, cmap="hsv", edge_linewidth=1, node_alpha=0, **pg_kwargs
+    graph, attr, cmap="hsv", edge_linewidth=1, node_alpha=0, **pg_kwargs
 ):
     """Plot a graph based on an edge attribute and colormap.
 
