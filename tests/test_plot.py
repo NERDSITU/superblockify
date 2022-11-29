@@ -9,8 +9,8 @@ from superblockify import new_edge_attribute_by_function
 from superblockify.plot import paint_streets, plot_by_attribute
 
 config = ConfigParser()
-config.read('config.ini')
-TEST_DATA = config['tests']['test_data_path']
+config.read("config.ini")
+TEST_DATA = config["tests"]["test_data_path"]
 
 
 @pytest.mark.parametrize(
