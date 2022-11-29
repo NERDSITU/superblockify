@@ -61,7 +61,7 @@ def plot_by_attribute(
     edge_color : None, optional
         Do not pass this attribute, as it is set by the bearing direction.
     pg_kwargs
-        keyword arguments to pass to `osmnx.plot_graph`.
+        Keyword arguments to pass to `osmnx.plot_graph`.
 
     Raises
     ------
