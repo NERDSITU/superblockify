@@ -1,6 +1,7 @@
 """Tests for the plot module."""
 from configparser import ConfigParser
 import pytest
+from matplotlib import pyplot as plt
 
 from superblockify import new_edge_attribute_by_function
 from superblockify.plot import paint_streets, plot_by_attribute
@@ -22,6 +23,7 @@ def test_paint_streets(test_city_bearing, e_l, n_a, save):
         save=save,
         filepath=f"{TEST_DATA}output/{city_path[:-8]}.pdf",
     )
+    plt.close()
 
 
 def test_paint_streets_overwrite_ec(test_city_bearing):
@@ -52,6 +54,7 @@ def test_plot_by_attribute(test_city_bearing):
     )
 
     plot_by_attribute(graph, "osmid_0", cmap="rainbow")
+    plt.close()
 
 
 def test_plot_by_attribute_no_attribute(test_city_bearing):
