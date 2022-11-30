@@ -1,15 +1,9 @@
 """Tests for the partitioner module."""
-from configparser import ConfigParser
-
 from matplotlib.pyplot import Figure, Axes
 import pytest
 import networkx as nx
 
 from superblockify.partitioning import BasePartitioner, DummyPartitioner
-
-config = ConfigParser()
-config.read("config.ini")
-TEST_DATA = config["tests"]["test_data_path"]
 
 
 class TestBasePartitioner:
