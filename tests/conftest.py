@@ -1,9 +1,13 @@
 """Module for test fixtures available for all test files"""
 from configparser import ConfigParser
+import inspect
 from os import listdir
 
 import osmnx as ox
 import pytest
+
+from superblockify.partitioning import BasePartitioner
+from superblockify import partitioning
 
 config = ConfigParser()
 config.read("config.ini")
@@ -22,3 +26,15 @@ def test_city_bearing(request):
     return request.param, ox.load_graphml(
         filepath=f"{TEST_DATA}cities/" + request.param
     )
+
+
+@pytest.fixture(
+    params=inspect.getmembers(
+        partitioning,
+        predicate=lambda o: inspect.isclass(o) and issubclass(o, BasePartitioner) and
+                            o is not BasePartitioner
+    )
+)
+def partitioner_class(request):
+    """Fixture for parametrizing all partitioners inheriting from BasePartitioner."""
+    return request.param[1]

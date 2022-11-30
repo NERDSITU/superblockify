@@ -3,7 +3,7 @@ from matplotlib.pyplot import Figure, Axes
 import pytest
 import networkx as nx
 
-from superblockify.partitioning import BasePartitioner, DummyPartitioner
+from superblockify.partitioning import BasePartitioner
 
 
 class TestBasePartitioner:
@@ -29,31 +29,31 @@ class TestBasePartitioner:
     # pylint: enable=abstract-class-instantiated
 
 
-class TestDummyPartitioner:
-    """Tests for the dummy class of BasePartitioner."""
+class TestPartitioners:
+    """Standard tests all classes of BasePartitioner need to suffice."""
 
-    def test_run(self, test_city_bearing):
+    def test_run(self, test_city_bearing, partitioner_class):
         """Test run/partitioning method by design."""
         _, graph = test_city_bearing
-        part = DummyPartitioner(graph)
+        part = partitioner_class(graph)
         part.run()
         assert part.graph is not None
         assert part.attribute_label is not None
         assert part.partition is not None
 
-    def test_plot_partition_graph(self, test_city_bearing):
+    def test_plot_partition_graph(self, test_city_bearing, partitioner_class):
         """Test `plot_partition_graph` by design."""
         _, graph = test_city_bearing
-        part = DummyPartitioner(graph)
+        part = partitioner_class(graph)
         part.run()
         fig, axe = part.plot_partition_graph()
         assert isinstance(fig, Figure)
         assert isinstance(axe, Axes)
 
-    def test_plot_partitions_unpartitioned(self, test_city_bearing):
+    def test_plot_partitions_unpartitioned(self, test_city_bearing, partitioner_class):
         """Test `plot_partition_graph` exception handling."""
         _, graph = test_city_bearing
-        part = DummyPartitioner(graph)
+        part = partitioner_class(graph)
         with pytest.raises(AssertionError):
             part.plot_partition_graph()
         part.run()
