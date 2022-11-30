@@ -8,8 +8,8 @@ import networkx as nx
 from superblockify.partitioning import BasePartitioner, DummyPartitioner
 
 config = ConfigParser()
-config.read('config.ini')
-TEST_DATA = config['tests']['test_data_path']
+config.read("config.ini")
+TEST_DATA = config["tests"]["test_data_path"]
 
 
 class TestBasePartitioner:

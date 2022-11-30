@@ -28,12 +28,9 @@ class BasePartitioner(ABC):
     def run(self):
         """Run partitioning."""
 
-        self.attribute_label = 'example_label'
+        self.attribute_label = "example_label"
         # Define partitions
-        self.partition = [
-            {'name': 'zero', 'value': 0.0},
-            {'name': 'one', 'value': 1.0}
-        ]
+        self.partition = [{"name": "zero", "value": 0.0}, {"name": "one", "value": 1.0}]
 
     def plot_partition_graph(self, **pba_kwargs):
         """Plotting the partition with color on graph.
@@ -59,8 +56,10 @@ class BasePartitioner(ABC):
         """
 
         if self.partition is None:
-            raise AssertionError(f'{self.__class__.__name__} has no partitions, '
-                                 f'run before plotting graph.')
+            raise AssertionError(
+                f"{self.__class__.__name__} has no partitions, "
+                f"run before plotting graph."
+            )
 
         return plot.plot_by_attribute(self.graph, self.attribute_label, **pba_kwargs)
 
@@ -78,7 +77,7 @@ class DummyPartitioner(BasePartitioner):
         """
 
         # The label under which partition attribute is saved in the `self.graph`.
-        self.attribute_label = 'dummy_attribute'
+        self.attribute_label = "dummy_attribute"
 
         # Somehow determining the partition of edges
         # - edges also may not be included in any partition and miss the label
@@ -90,4 +89,4 @@ class DummyPartitioner(BasePartitioner):
         # A List of the existing partitions, the 'value' attribute should be equal to
         # the edge attributes under the instances `attribute_label`, which belong to
         # this partition
-        self.partition = [{'name': str(num), 'value': num} for num in values]
+        self.partition = [{"name": str(num), "value": num} for num in values]
