@@ -11,7 +11,6 @@ class BasePartitioner(ABC):
     def __init__(self, graph):
         """Constructing a BasePartitioner
 
-
         Parameters
         ----------
         graph : networkx.Graph
@@ -58,6 +57,11 @@ class BasePartitioner(ABC):
         if self.partition is None:
             raise AssertionError(
                 f"{self.__class__.__name__} has no partitions, "
+                f"run before plotting graph."
+            )
+        if self.attribute_label is None:
+            raise AssertionError(
+                f"{self.__class__.__name__} has no `attribute_label` yet,"
                 f"run before plotting graph."
             )
 

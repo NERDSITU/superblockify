@@ -55,3 +55,14 @@ class TestDummyPartitioner:
         fig, axe = part.plot_partition_graph()
         assert isinstance(fig, Figure)
         assert isinstance(axe, Axes)
+
+    def test_plot_partitions_unpartitioned(self, test_city_bearing):
+        """Test `plot_partition_graph` exception handling."""
+        _, graph = test_city_bearing
+        part = DummyPartitioner(graph)
+        with pytest.raises(AssertionError):
+            part.plot_partition_graph()
+        part.run()
+        part.attribute_label = None
+        with pytest.raises(AssertionError):
+            part.plot_partition_graph()
