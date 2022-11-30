@@ -20,6 +20,11 @@ def paint_streets(graph, cmap="hsv", **pg_kwargs):
     pg_kwargs
         keyword arguments to pass to `osmnx.plot_graph`.
 
+    Returns
+    -------
+    fig, ax : tuple
+        matplotlib figure, axis
+
     Examples
     --------
     _See example in `scripts/TestingNotebooks/20221122-painting_grids.py`._
@@ -39,7 +44,7 @@ def paint_streets(graph, cmap="hsv", **pg_kwargs):
 
 
 def plot_by_attribute(
-    graph, attr, cmap="hsv", edge_linewidth=1, node_alpha=0, **pg_kwargs
+        graph, attr, cmap="hsv", edge_linewidth=1, node_alpha=0, **pg_kwargs
 ):
     """Plot a graph based on an edge attribute and colormap.
 
@@ -69,6 +74,11 @@ def plot_by_attribute(
         If edge_color was set to anything but None.
     ValueError
         If `edge_linewidth` and `node_size` both <= 0, otherwise the plot will be empty.
+
+    Returns
+    -------
+    fig, ax : tuple
+        matplotlib figure, axis
 
     """
 
