@@ -1,8 +1,5 @@
 """Tests for the plot module."""
 from configparser import ConfigParser
-from os import listdir
-
-import osmnx as ox
 import pytest
 
 from superblockify import new_edge_attribute_by_function
@@ -13,15 +10,11 @@ config.read("config.ini")
 TEST_DATA = config["tests"]["test_data_path"]
 
 
-@pytest.mark.parametrize(
-    "city_path",
-    [city for city in listdir(f"{TEST_DATA}cities/") if city.endswith(".graphml")],
-)
 @pytest.mark.parametrize("e_l,n_a", [(0.5, 0.5), (1, 0)])
 @pytest.mark.parametrize("save", [True, False])
-def test_paint_streets(city_path, e_l, n_a, save):
+def test_paint_streets(test_city_bearing, e_l, n_a, save):
     """Test `paint_streets` by design."""
-    graph = ox.load_graphml(filepath=f"{TEST_DATA}cities/" + city_path)
+    city_path, graph = test_city_bearing
     paint_streets(
         graph,
         edge_linewidth=e_l,
@@ -31,35 +24,23 @@ def test_paint_streets(city_path, e_l, n_a, save):
     )
 
 
-@pytest.mark.parametrize(
-    "city_path",
-    [city for city in listdir(f"{TEST_DATA}cities/") if city.endswith(".graphml")],
-)
-def test_paint_streets_overwrite_ec(city_path):
+def test_paint_streets_overwrite_ec(test_city_bearing):
     """Test `paint_streets` trying to overwrite the edge colors."""
-    graph = ox.load_graphml(filepath=f"{TEST_DATA}cities/" + city_path)
+    _, graph = test_city_bearing
     with pytest.raises(ValueError):
         paint_streets(graph, edge_color="white")
 
 
-@pytest.mark.parametrize(
-    "city_path",
-    [city for city in listdir(f"{TEST_DATA}cities/") if city.endswith(".graphml")],
-)
-def test_paint_streets_empty_plot(city_path):
+def test_paint_streets_empty_plot(test_city_bearing):
     """Test `paint_streets` trying plot empty plot."""
-    graph = ox.load_graphml(filepath=f"{TEST_DATA}cities/" + city_path)
+    _, graph = test_city_bearing
     with pytest.raises(ValueError):
         paint_streets(graph, edge_linewidth=0, node_size=0)
 
 
-@pytest.mark.parametrize(
-    "city_path",
-    [city for city in listdir(f"{TEST_DATA}cities/") if city.endswith(".graphml")],
-)
-def test_plot_by_attribute(city_path):
+def test_plot_by_attribute(test_city_bearing):
     """Test `plot_by_attribute` by design."""
-    graph = ox.load_graphml(filepath=f"{TEST_DATA}cities/" + city_path)
+    _, graph = test_city_bearing
 
     # Use osmid as attribute determining color
     # Some osmid attributes return lists, not ints, just take first element
@@ -73,12 +54,8 @@ def test_plot_by_attribute(city_path):
     plot_by_attribute(graph, "osmid_0", cmap="rainbow")
 
 
-@pytest.mark.parametrize(
-    "city_path",
-    [city for city in listdir(f"{TEST_DATA}cities/") if city.endswith(".graphml")],
-)
-def test_plot_by_attribute_no_attribute(city_path):
+def test_plot_by_attribute_no_attribute(test_city_bearing):
     """Test `plot_by_attribute` with missing attribute."""
-    graph = ox.load_graphml(filepath=f"{TEST_DATA}cities/" + city_path)
+    _, graph = test_city_bearing
     with pytest.raises(ValueError):
         plot_by_attribute(graph, "non_existent_attribute")
