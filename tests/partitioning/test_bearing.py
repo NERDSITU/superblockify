@@ -14,10 +14,11 @@ class TestBearingPartitioner:
         _, graph = test_city_bearing
         part = BearingPartitioner(graph)
         part._BearingPartitioner__bin_bearings(bin_num)
+        assert part._bin_info["num_bins"] == bin_num
         assert len(part._bin_info["bin_edges"]) == bin_num + 1
         assert len(part._bin_info["bin_frequency"]) == bin_num
-        assert part._bin_info["peak_ind"] is not None
-        assert part._bin_info["peak_props"] is not None
+        assert "peak_ind" not in part._bin_info
+        assert "peak_props" not in part._bin_info
 
     @pytest.mark.parametrize("bin_num", [359, 0, -1, -30])
     def test_bin_num_not_positive(self, test_city_bearing, bin_num):
