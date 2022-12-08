@@ -31,8 +31,9 @@ def test_city_bearing(request):
 @pytest.fixture(
     params=inspect.getmembers(
         partitioning,
-        predicate=lambda o: inspect.isclass(o) and issubclass(o, BasePartitioner) and
-                            o is not BasePartitioner
+        predicate=lambda o: inspect.isclass(o)
+        and issubclass(o, BasePartitioner)
+        and o is not BasePartitioner,
     )
 )
 def partitioner_class(request):

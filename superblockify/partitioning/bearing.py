@@ -65,7 +65,7 @@ class BearingPartitioner(BasePartitioner):
             prominence=0.005,
         )
 
-        if len(self._bin_info['peak_ind']) < 1:
+        if len(self._bin_info["peak_ind"]) < 1:
             raise ArithmeticError("No peaks were found.")
 
         if show_analysis_plots:
@@ -79,7 +79,7 @@ class BearingPartitioner(BasePartitioner):
 
         # Write grouping attribute to graph
         self.attribute_label = "bearing_group"
-        group_bearing = nx.get_edge_attributes(self.graph, 'bearing_90')
+        group_bearing = nx.get_edge_attributes(self.graph, "bearing_90")
         for node, bearing in group_bearing.items():
             if np.isnan(bearing):
                 group_bearing[node] = np.nan
@@ -89,11 +89,14 @@ class BearingPartitioner(BasePartitioner):
         nx.set_edge_attributes(self.graph, group_bearing, self.attribute_label)
 
         # Write partiton dict
-        self.partition = [{"name": str(self._inter_vals["boundaries"][i: i + 2]),
-                           "value": center_val}
-                          for (i, center_val) in
-                          enumerate(self._inter_vals["center_values"])
-                          if center_val is not None]
+        self.partition = [
+            {
+                "name": str(self._inter_vals["boundaries"][i : i + 2]),
+                "value": center_val,
+            }
+            for (i, center_val) in enumerate(self._inter_vals["center_values"])
+            if center_val is not None
+        ]
 
     def __bin_bearings(self, num_bins: int):
         """Construct histogram of `self.graph` bearings.
@@ -112,8 +115,10 @@ class BearingPartitioner(BasePartitioner):
         """
 
         if num_bins < 360:
-            raise ValueError(f"The number of bins needs to be greater than 360, "
-                             f"but is {num_bins}.")
+            raise ValueError(
+                f"The number of bins needs to be greater than 360, "
+                f"but is {num_bins}."
+            )
 
         self._bin_info = {"num_bins": num_bins}
 
@@ -122,10 +127,14 @@ class BearingPartitioner(BasePartitioner):
             self.graph, lambda bear: bear % 90, "bearing", "bearing_90"
         )
 
-        bins = np.arange((self._bin_info["num_bins"] * 2) + 1) * 90 / (
-                self._bin_info["num_bins"] * 2)
+        bins = (
+            np.arange((self._bin_info["num_bins"] * 2) + 1)
+            * 90
+            / (self._bin_info["num_bins"] * 2)
+        )
         count, bin_edges = np.histogram(
-            list(nx.get_edge_attributes(self.graph, 'bearing_90').values()), bins=bins)
+            list(nx.get_edge_attributes(self.graph, "bearing_90").values()), bins=bins
+        )
         # move last bin to front, so eg 0.01° and 359.99° will be binned together
         count = np.roll(count, 1)
         bin_counts = count[::2] + count[1::2]
@@ -141,30 +150,38 @@ class BearingPartitioner(BasePartitioner):
         """
         # Make partitioning boundaries out of peak bases
 
-        left_bases1 = self._bin_info["peak_props"]['left_bases']
-        right_bases1 = self._bin_info["peak_props"]['right_bases']
+        left_bases1 = self._bin_info["peak_props"]["left_bases"]
+        right_bases1 = self._bin_info["peak_props"]["right_bases"]
         overlap_groups = self.group_overlapping_intervals(left_bases1, right_bases1)
 
-        self._inter_vals["base_vals"] = [(self._bin_info["bin_edges"][left_bases1[i]],
-                                          self._bin_info["bin_edges"][right_bases1[i]])
-                                         for i in range(len(left_bases1))]
+        self._inter_vals["base_vals"] = [
+            (
+                self._bin_info["bin_edges"][left_bases1[i]],
+                self._bin_info["bin_edges"][right_bases1[i]],
+            )
+            for i in range(len(left_bases1))
+        ]
 
         # split overlapping groups by the unique bases they share
         for group in overlap_groups:
             # unique borders per group
-            borders = np.sort(np.unique([(left_bases1[g], right_bases1[g]) for g in
-                                         group]))
+            borders = np.sort(
+                np.unique([(left_bases1[g], right_bases1[g]) for g in group])
+            )
             for i, group in enumerate(group):
                 self._inter_vals["base_vals"][group] = (
                     self._bin_info["bin_edges"][borders[i]],
-                    self._bin_info["bin_edges"][borders[i + 1]])
+                    self._bin_info["bin_edges"][borders[i + 1]],
+                )
 
         self._inter_vals["base_vals"] = {
-            ab: [self._bin_info["bin_edges"][peak_i] for peak_i in
-                 self._bin_info["peak_ind"] if
-                 ab[0] < self._bin_info["bin_edges"][peak_i]
-                 < ab[1]][0]
-            for ab in self._inter_vals["base_vals"]}
+            ab: [
+                self._bin_info["bin_edges"][peak_i]
+                for peak_i in self._bin_info["peak_ind"]
+                if ab[0] < self._bin_info["bin_edges"][peak_i] < ab[1]
+            ][0]
+            for ab in self._inter_vals["base_vals"]
+        }
 
         # Make boundary and value array
         self._inter_vals["boundaries"] = [0]
@@ -173,11 +190,13 @@ class BearingPartitioner(BasePartitioner):
             if self._inter_vals["boundaries"][-1] == interval[0]:
                 self._inter_vals["boundaries"].append(interval[1])
                 self._inter_vals["center_values"] = self._inter_vals["center_values"][
-                                                    :-1] + [value, None]
+                    :-1
+                ] + [value, None]
             else:
                 self._inter_vals["boundaries"].extend(interval)
                 self._inter_vals["center_values"] = self._inter_vals[
-                                                        "center_values"] + [value, None]
+                    "center_values"
+                ] + [value, None]
         if self._inter_vals["boundaries"][-1] == 90:
             self._inter_vals["center_values"].pop()
         else:
@@ -187,7 +206,8 @@ class BearingPartitioner(BasePartitioner):
     def group_overlapping_intervals(left_bases1, right_bases1):
         """Find groups of overlapping intervals"""
         mask = (left_bases1 < right_bases1[:, None]) & (
-                right_bases1 > left_bases1[:, None])
+            right_bases1 > left_bases1[:, None]
+        )
         # scales badly with n^2; optimizable
         overlaps = np.triu(mask, k=1).nonzero()
         overlap_groups = []
@@ -239,37 +259,54 @@ class BearingPartitioner(BasePartitioner):
         fig, axe = plt.subplots(figsize=(12, 8))
 
         self._inter_vals["max_height"] = max(
-            self._bin_info["peak_props"]['prominences'])
+            self._bin_info["peak_props"]["prominences"]
+        )
         self._inter_vals["colors"] = cm.hsv(
-            self._bin_info["peak_ind"] / self._bin_info["num_bins"])
+            self._bin_info["peak_ind"] / self._bin_info["num_bins"]
+        )
         self._inter_vals["boxes"] = [
-            (self._bin_info["bin_edges"][self._bin_info["peak_props"]['left_bases'][i]],
-             self._bin_info["bin_edges"][
-                 self._bin_info["peak_props"]['right_bases'][i]] -
-             self._bin_info["bin_edges"][self._bin_info["peak_props"]['left_bases'][i]])
-            for i in range(len(self._bin_info["peak_ind"]))]
-        axe.broken_barh(self._inter_vals["boxes"],
-                        (0, self._inter_vals["max_height"] * 0.45), alpha=0.2,
-                        facecolors=self._inter_vals["colors"],
-                        edgecolors=self._inter_vals["colors"]
-                        )
+            (
+                self._bin_info["bin_edges"][
+                    self._bin_info["peak_props"]["left_bases"][i]
+                ],
+                self._bin_info["bin_edges"][
+                    self._bin_info["peak_props"]["right_bases"][i]
+                ]
+                - self._bin_info["bin_edges"][
+                    self._bin_info["peak_props"]["left_bases"][i]
+                ],
+            )
+            for i in range(len(self._bin_info["peak_ind"]))
+        ]
+        axe.broken_barh(
+            self._inter_vals["boxes"],
+            (0, self._inter_vals["max_height"] * 0.45),
+            alpha=0.2,
+            facecolors=self._inter_vals["colors"],
+            edgecolors=self._inter_vals["colors"],
+        )
 
         for i in range(len(self._bin_info["peak_ind"])):
-            axe.broken_barh([self._inter_vals["boxes"][i]],
-                            (
-                                self._inter_vals["max_height"] * 0.5 * (
-                                        1 + i / len(self._bin_info["peak_ind"])),
-                                self._inter_vals["max_height"] / (
-                                        2 * len(self._bin_info["peak_ind"]))),
-                            alpha=0.6,
-                            facecolors=self._inter_vals["colors"][i],
-                            edgecolors=self._inter_vals["colors"][i]
-                            )
+            axe.broken_barh(
+                [self._inter_vals["boxes"][i]],
+                (
+                    self._inter_vals["max_height"]
+                    * 0.5
+                    * (1 + i / len(self._bin_info["peak_ind"])),
+                    self._inter_vals["max_height"]
+                    / (2 * len(self._bin_info["peak_ind"])),
+                ),
+                alpha=0.6,
+                facecolors=self._inter_vals["colors"][i],
+                edgecolors=self._inter_vals["colors"][i],
+            )
 
-        plt.bar(self._bin_info["bin_edges"][:-1], self._bin_info["bin_frequency"],
-                width=90 / self._bin_info["num_bins"],
-                # edgecolor='k'
-                )
+        plt.bar(
+            self._bin_info["bin_edges"][:-1],
+            self._bin_info["bin_frequency"],
+            width=90 / self._bin_info["num_bins"],
+            # edgecolor='k'
+        )
         plt.xticks([0, 15, 30, 45, 60, 75, 90])
         plt.xticks(np.linspace(0, 90, 91), minor=True)
         plt.xlabel(r"Direction ($\degree$)")
@@ -278,14 +315,16 @@ class BearingPartitioner(BasePartitioner):
         plt.scatter(
             [self._bin_info["bin_edges"][i] for i in self._bin_info["peak_ind"]],
             [self._bin_info["bin_frequency"][i] for i in self._bin_info["peak_ind"]],
-            marker='x')
+            marker="x",
+        )
 
         midpoints_idx = np.array(
             (self._bin_info["peak_ind"][1:] + self._bin_info["peak_ind"][:-1]) / 2,
-            dtype=int)
+            dtype=int,
+        )
 
         for i in midpoints_idx:
-            plt.axvline(self._bin_info["bin_edges"][i], color='black', alpha=0.25)
+            plt.axvline(self._bin_info["bin_edges"][i], color="black", alpha=0.25)
 
         plt.show()
         return fig, axe
@@ -308,8 +347,10 @@ class BearingPartitioner(BasePartitioner):
 
         """
 
-        if not all(name in self._inter_vals for name in
-                   ["base_vals", "boundaries", "center_values"]):
+        if not all(
+            name in self._inter_vals
+            for name in ["base_vals", "boundaries", "center_values"]
+        ):
             raise AssertionError(
                 f"{self.__class__.__name__}'s boundaries have not been partitioned "
                 f"yet, run `__make_boundaries` before plotting graph."
@@ -317,42 +358,58 @@ class BearingPartitioner(BasePartitioner):
 
         fig, axe = plt.subplots(figsize=(12, 8))
         for i in range(len(self._bin_info["peak_ind"])):
-            axe.broken_barh([self._inter_vals["boxes"][i]],
-                            (self._inter_vals["max_height"] * 0.5 * (
-                                    i / len(self._bin_info["peak_ind"])),
-                             self._inter_vals["max_height"] / (
-                                     2 * len(self._bin_info["peak_ind"]))),
-                            alpha=0.6,
-                            facecolors=self._inter_vals["colors"][i],
-                            edgecolors=self._inter_vals["colors"][i]
-                            )
-            axe.broken_barh([self._inter_vals["boxes"][i]],
-                            (0, self._inter_vals["max_height"] * 0.5 * (
-                                    i / len(self._bin_info["peak_ind"]))),
-                            alpha=0.1,
-                            facecolors=self._inter_vals["colors"][i],
-                            edgecolors=self._inter_vals["colors"][i]
-                            )
+            axe.broken_barh(
+                [self._inter_vals["boxes"][i]],
+                (
+                    self._inter_vals["max_height"]
+                    * 0.5
+                    * (i / len(self._bin_info["peak_ind"])),
+                    self._inter_vals["max_height"]
+                    / (2 * len(self._bin_info["peak_ind"])),
+                ),
+                alpha=0.6,
+                facecolors=self._inter_vals["colors"][i],
+                edgecolors=self._inter_vals["colors"][i],
+            )
+            axe.broken_barh(
+                [self._inter_vals["boxes"][i]],
+                (
+                    0,
+                    self._inter_vals["max_height"]
+                    * 0.5
+                    * (i / len(self._bin_info["peak_ind"])),
+                ),
+                alpha=0.1,
+                facecolors=self._inter_vals["colors"][i],
+                edgecolors=self._inter_vals["colors"][i],
+            )
         for i, interval in enumerate(self._inter_vals["base_vals"]):
             col = cm.hsv(sum(interval) / 180)
-            axe.broken_barh([(interval[0], interval[1] - interval[0])],
-                            (-self._inter_vals["max_height"] / (
-                                    2 * len(self._bin_info["peak_ind"])),
-                             self._inter_vals["max_height"] / (
-                                     2 * len(self._bin_info["peak_ind"]))),
-                            alpha=0.6,
-                            facecolors=col,
-                            edgecolors=col
-                            )
-            axe.broken_barh([(interval[0], interval[1] - interval[0])],
-                            (-self._inter_vals["max_height"] * (2 + i) / (
-                                    2 * len(self._bin_info["peak_ind"])),
-                             self._inter_vals["max_height"] / (
-                                     2 * len(self._bin_info["peak_ind"]))),
-                            alpha=0.6,
-                            facecolors=col,
-                            edgecolors=col
-                            )
+            axe.broken_barh(
+                [(interval[0], interval[1] - interval[0])],
+                (
+                    -self._inter_vals["max_height"]
+                    / (2 * len(self._bin_info["peak_ind"])),
+                    self._inter_vals["max_height"]
+                    / (2 * len(self._bin_info["peak_ind"])),
+                ),
+                alpha=0.6,
+                facecolors=col,
+                edgecolors=col,
+            )
+            axe.broken_barh(
+                [(interval[0], interval[1] - interval[0])],
+                (
+                    -self._inter_vals["max_height"]
+                    * (2 + i)
+                    / (2 * len(self._bin_info["peak_ind"])),
+                    self._inter_vals["max_height"]
+                    / (2 * len(self._bin_info["peak_ind"])),
+                ),
+                alpha=0.6,
+                facecolors=col,
+                edgecolors=col,
+            )
 
         plt.show()
         return fig, axe
