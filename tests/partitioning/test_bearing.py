@@ -27,4 +27,19 @@ class TestBearingPartitioner:
         part = BearingPartitioner(graph)
         with pytest.raises(ValueError):
             part._BearingPartitioner__bin_bearings(bin_num)
+
     # pylint: enable=protected-access
+
+    def test_plot_peakfinding_missing_peakfinding(self, test_city_bearing):
+        """Test `plot_peakfinding` class method with missing peakfinding."""
+        _, graph = test_city_bearing
+        part = BearingPartitioner(graph)
+        with pytest.raises(AssertionError):
+            part.plot_peakfinding()
+
+    def test_plot_interval_splitting_missing_peakfinding(self, test_city_bearing):
+        """Test `plot_interval_splitting` class method without partitioned bounds."""
+        _, graph = test_city_bearing
+        part = BearingPartitioner(graph)
+        with pytest.raises(AssertionError):
+            part.plot_interval_splitting()

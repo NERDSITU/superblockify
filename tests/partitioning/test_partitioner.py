@@ -45,7 +45,7 @@ class TestPartitioners:
         """Test `plot_partition_graph` by design."""
         _, graph = test_city_bearing
         part = partitioner_class(graph)
-        part.run()
+        part.run(show_analysis_plots=True)
         fig, axe = part.plot_partition_graph()
         assert isinstance(fig, Figure)
         assert isinstance(axe, Axes)
