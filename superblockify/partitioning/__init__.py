@@ -2,3 +2,4 @@
 
 # Import all partitioners for `__api.py`.
 from .partitioner import BasePartitioner, DummyPartitioner
+from .bearing import BearingPartitioner
