@@ -24,8 +24,14 @@ class BasePartitioner(ABC):
         self.attribute_label = None
 
     @abstractmethod
-    def run(self):
-        """Run partitioning."""
+    def run(self, **kwargs):
+        """Run partitioning.
+
+        Parameters
+        ----------
+        show_analysis_plots : bool, optional
+            If True show visualization graphs of the approach, if implemented.
+        """
 
         self.attribute_label = "example_label"
         # Define partitions
@@ -74,7 +80,7 @@ class DummyPartitioner(BasePartitioner):
     Partitions randomly.
     """
 
-    def run(self):
+    def run(self, **kwargs):
         """Run method. Must be overridden.
 
         Assign random partitions to edges.
