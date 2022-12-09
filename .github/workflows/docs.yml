@@ -1,4 +1,4 @@
-name: Generate Docs
+name: Docs
 
 on:
   push:
@@ -33,7 +33,7 @@ jobs:
           conda list
 
       - name: Generating .rst files
-        run: sphinx-apidoc -o docs maths/
+        run: sphinx-apidoc -o docs superblockify/
 
       - name: Generating html
         run: sphinx-build docs public -b dirhtml
