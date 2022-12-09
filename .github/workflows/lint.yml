@@ -21,8 +21,8 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Fix code style issues with Black
-          commit_user_name: ${GITHUB_ACTOR}
-          commit_user_email: ${GITHUB_ACTOR}@users.noreply.github.com
+          commit_user_name: ${{ github.actor }}
+          commit_user_email: ${{ github.actor }}@users.noreply.github.com
 
   run-pylint:
     name: Run Pylint code analyzer
