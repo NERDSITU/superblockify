@@ -23,9 +23,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  generate-docs:
+  generate-deploy-docs:
     name: Generate documentation
     runs-on: ubuntu-latest
+    environment:
+      name: Deploy to github pages
+      url: ${{ steps.deployment.outputs.page_url }}
     defaults:
       run:
         shell: bash -el {0}
@@ -48,24 +51,15 @@ jobs:
 
       - name: Generating .rst files
         run: sphinx-apidoc -o docs superblockify/
-
       - name: Generating html
         run: sphinx-build docs public -b dirhtml
 
-  deploy:
-    environment:
-      name: Deploy to github pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          # Upload entire repository
+          # Upload generated html
           path: 'public/'
       - name: Deploy to GitHub Pages
         id: deployment
