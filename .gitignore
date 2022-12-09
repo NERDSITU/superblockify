@@ -9,6 +9,7 @@ __pycache__/
 # Development
 *.egg-info
 .coverage
+docs/*
 
 # OSMnx cache
 **/cache/
