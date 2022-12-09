@@ -47,8 +47,7 @@ def new_edge_attribute_by_function(
     if not bool(attributes):
         raise ValueError(
             f"Graph with {len(graph)} node(s) has no attributes for "
-            f"the "
-            f"key '{source_attribute}'."
+            f"the key '{source_attribute}'."
         )
 
     if (source_attribute == destination_attribute) and not allow_overwriting:
