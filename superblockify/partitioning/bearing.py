@@ -7,8 +7,8 @@ import numpy as np
 from matplotlib import cm
 from scipy.signal import find_peaks
 
-from superblockify.partitioning import BasePartitioner
 from superblockify import attribute
+from .partitioner import BasePartitioner
 
 
 class BearingPartitioner(BasePartitioner):
@@ -91,7 +91,7 @@ class BearingPartitioner(BasePartitioner):
         # Write partiton dict
         self.partition = [
             {
-                "name": str(self._inter_vals["boundaries"][i : i + 2]),
+                "name": str(self._inter_vals["boundaries"][i: i + 2]),
                 "value": center_val,
             }
             for (i, center_val) in enumerate(self._inter_vals["center_values"])
@@ -128,9 +128,9 @@ class BearingPartitioner(BasePartitioner):
         )
 
         bins = (
-            np.arange((self._bin_info["num_bins"] * 2) + 1)
-            * 90
-            / (self._bin_info["num_bins"] * 2)
+                np.arange((self._bin_info["num_bins"] * 2) + 1)
+                * 90
+                / (self._bin_info["num_bins"] * 2)
         )
         count, bin_edges = np.histogram(
             list(nx.get_edge_attributes(self.graph, "bearing_90").values()), bins=bins
@@ -190,13 +190,13 @@ class BearingPartitioner(BasePartitioner):
             if self._inter_vals["boundaries"][-1] == interval[0]:
                 self._inter_vals["boundaries"].append(interval[1])
                 self._inter_vals["center_values"] = self._inter_vals["center_values"][
-                    :-1
-                ] + [value, None]
+                                                    :-1
+                                                    ] + [value, None]
             else:
                 self._inter_vals["boundaries"].extend(interval)
                 self._inter_vals["center_values"] = self._inter_vals[
-                    "center_values"
-                ] + [value, None]
+                                                        "center_values"
+                                                    ] + [value, None]
         if self._inter_vals["boundaries"][-1] == 90:
             self._inter_vals["center_values"].pop()
         else:
@@ -206,7 +206,7 @@ class BearingPartitioner(BasePartitioner):
     def group_overlapping_intervals(left_bases1, right_bases1):
         """Find groups of overlapping intervals"""
         mask = (left_bases1 < right_bases1[:, None]) & (
-            right_bases1 > left_bases1[:, None]
+                right_bases1 > left_bases1[:, None]
         )
         # scales badly with n^2; optimizable
         overlaps = np.triu(mask, k=1).nonzero()
@@ -348,8 +348,8 @@ class BearingPartitioner(BasePartitioner):
         """
 
         if not all(
-            name in self._inter_vals
-            for name in ["base_vals", "boundaries", "center_values"]
+                name in self._inter_vals
+                for name in ["base_vals", "boundaries", "center_values"]
         ):
             raise AssertionError(
                 f"{self.__class__.__name__}'s boundaries have not been partitioned "
