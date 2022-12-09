@@ -5,8 +5,8 @@ on:
     branches:
       - main
       - 4-sphinx-ci-documentation
-    paths:
-      - 'superblockify/**'
+#    paths:
+#      - 'superblockify/**'
 
 jobs:
   generate-docs:
