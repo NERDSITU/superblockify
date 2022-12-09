@@ -1,0 +1,47 @@
+name: Generate Docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'superblockify/**'
+
+jobs:
+  generate-docs:
+    name: Generate documentation to github pages.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Setup and activate Anaconda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          activate-environment: OSMnxPyrLab
+          environment-file: environment.yml
+
+      - name: Show environment infos
+        run: |
+          conda info
+          conda list
+
+      - name: Generating .rst files
+        run: sphinx-apidoc -o docs maths/
+
+      - name: Generating html
+        run: sphinx-build docs public -b dirhtml
+
+      - name: Deploy to Github Pages
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v3
+        with:
+          target_branch: gh-pages
+          build_dir: public
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
