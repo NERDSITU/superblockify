@@ -3,7 +3,7 @@ name: Test
 on: [push, pull_request]
 
 jobs:
-  run-linters:
+  run-tests:
     name: Run test coverage
     runs-on: ubuntu-latest
     defaults:
