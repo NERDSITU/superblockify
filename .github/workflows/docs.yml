@@ -8,9 +8,23 @@ on:
 #    paths:
 #      - 'superblockify/**'
 
+    # Allows you to run this workflow manually from the Actions tab
+    workflow_dispatch:
+
+  # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+  permissions:
+    contents: read
+    pages: write
+    id-token: write
+
+  # Allow one concurrent deployment
+  concurrency:
+    group: "pages"
+    cancel-in-progress: true
+
 jobs:
   generate-docs:
-    name: Generate documentation to github pages.
+    name: Generate documentation
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -38,11 +52,21 @@ jobs:
       - name: Generating html
         run: sphinx-build docs public -b dirhtml
 
-      - name: Deploy to Github Pages
-        if: success()
-        uses: crazy-max/ghaction-github-pages@v3
+  deploy:
+    environment:
+      name: Deploy to github pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-          target_branch: gh-pages
-          build_dir: public
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Upload entire repository
+          path: 'public/'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
