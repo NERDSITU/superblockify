@@ -56,14 +56,7 @@ class BearingPartitioner(BasePartitioner):
         self.__bin_bearings(num_bins)
 
         # Find peaks
-        self._bin_info["peak_ind"], self._bin_info["peak_props"] = find_peaks(
-            self._bin_info["bin_frequency"],
-            distance=int((0.4) * self._bin_info["num_bins"] / 90),
-            # Required minimal
-            # horizontal distance (>= 1) in samples between
-            # neighbouring peaks.
-            prominence=0.005,
-        )
+        self.__find_peaks()
 
         if len(self._bin_info["peak_ind"]) < 1:
             raise ArithmeticError("No peaks were found.")
@@ -142,6 +135,34 @@ class BearingPartitioner(BasePartitioner):
         self._bin_info["bin_edges"] = bin_edges[range(0, len(bin_edges), 2)]
         # Intensity
         self._bin_info["bin_frequency"] = bin_counts / bin_counts.sum()
+
+    def __find_peaks(self):
+        """Find peaks in the histogram of bearings.
+
+        Writes to peak_ind and peak_values of `_bin_info`.
+        TODO: Find way to automate prominence threshold. Cite reference.
+
+        Raises
+        ------
+        AssertionError
+            If bearing histogram is empty.
+        """
+
+        if self._bin_info is None or not all(
+                name in self._bin_info
+                for name in ["num_bins", "bin_edges", "bin_frequency"]
+        ):
+            raise AssertionError(f"{self.__class__.__name__} has not been binned yet, "
+                                 f"run `__bin_bearings` before finding peaks.")
+
+        self._bin_info["peak_ind"], self._bin_info["peak_props"] = find_peaks(
+            self._bin_info["bin_frequency"],
+            distance=int(0.4 * self._bin_info["num_bins"] / 90),
+            # Required minimal
+            # horizontal distance (>= 1) in samples between
+            # neighbouring peaks.
+            prominence=0.005,
+        )
 
     def __make_boundaries(self):
         """Determine partition boundaries

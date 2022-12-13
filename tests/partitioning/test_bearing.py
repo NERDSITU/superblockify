@@ -28,6 +28,13 @@ class TestBearingPartitioner:
         with pytest.raises(ValueError):
             part._BearingPartitioner__bin_bearings(bin_num)
 
+    def test_find_peaks_missing_binning(self, test_city_bearing):
+        """Test `find_peaks` class method without binning."""
+        _, graph = test_city_bearing
+        part = BearingPartitioner(graph)
+        with pytest.raises(AssertionError):
+            part._BearingPartitioner__find_peaks()
+
     # pylint: enable=protected-access
 
     def test_plot_peakfinding_missing_peakfinding(self, test_city_bearing):
