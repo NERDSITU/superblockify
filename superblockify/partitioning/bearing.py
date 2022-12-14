@@ -24,7 +24,7 @@ class BearingPartitioner(BasePartitioner):
         self._bin_info = None
         self._inter_vals = {}
 
-    def run(self, show_analysis_plots=False, num_bins: int = None, **kwargs):
+    def run(self, show_analysis_plots=False, **kwargs):
         """Group by prominent bearing directions.
 
         Procedure to determine the graphs partitions based on the edges bearings.
@@ -34,27 +34,31 @@ class BearingPartitioner(BasePartitioner):
             4. (optional) Plot found peaks and interval splits.
             5. Write partition attribute edges.
 
+        The number of bins is fixed to 360°, as rules for numbers of bins [1]_ ask
+        for much lower numbers of bins, for common number of edges in a street network
+        (approx. 300 to 60.000 edges), which would produce a too small resolution
+        (Sturges' formula: 10 to 17 bins; Square-root choice: 18 to 245 bins).
+
         Parameters
         ----------
         show_analysis_plots : bool, optional
             If True show visualization graphs of the approach.
-            Peakfinding,
-        num_bins : int >= 360, optional
-            Number of bins to split the bearings into / radial resolution.
 
         Raises
         ------
         ArithmeticError
             If no peaks are being found.
+
+        References
+        ----------
+        .. [1] Wikipedia contributors, "Histogram," Wikipedia, The Free Encyclopedia,
+           https://en.wikipedia.org/w/index.php?title=Histogram&oldid=1113935482
+           (accessed December 14, 2022).
+
         """
 
-        # Determine number of bins if not passed explicitly
-        if not isinstance(num_bins, int):
-            num_edges = len(self.graph.edges.data(data=self.attribute_label))
-            num_bins = num_edges ** (1 / 2) if num_edges ** (1 / 2) > 360 else 360
-
         # Binning
-        self.__bin_bearings(num_bins)
+        self.__bin_bearings(num_bins=360)
 
         # Find peaks
         self.__find_peaks()
@@ -110,7 +114,7 @@ class BearingPartitioner(BasePartitioner):
 
         if num_bins < 360:
             raise ValueError(
-                f"The number of bins needs to be greater than 360, "
+                f"The number of bins needs to be greater or equal than 360, "
                 f"but is {num_bins}."
             )
 
