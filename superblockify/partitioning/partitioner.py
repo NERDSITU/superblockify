@@ -8,7 +8,7 @@ from .. import attribute, plot
 class BasePartitioner(ABC):
     """Parent class for partitioning graphs."""
 
-    def __init__(self, graph, name='unnamed'):
+    def __init__(self, graph, name="unnamed"):
         """Constructing a BasePartitioner
 
         Parameters
