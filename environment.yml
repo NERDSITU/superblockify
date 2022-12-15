@@ -60,7 +60,7 @@ dependencies:
   - exceptiongroup=1.0.4=pyhd8ed1ab_0
   - executing=1.2.0=pyhd8ed1ab_0
   - expat=2.5.0=h27087fc_0
-  - fiona=1.8.22=py310ha325b7b_4
+  - fiona=1.8.22=py310ha325b7b_5
   - flit-core=3.8.0=pyhd8ed1ab_0
   - folium=0.14.0=pyhd8ed1ab_0
   - font-ttf-dejavu-sans-mono=2.37=hab24e00_0
@@ -183,7 +183,7 @@ dependencies:
   - numpy=1.23.5=py310h53a5b5f_0
   - openjpeg=2.5.0=h7d73246_1
   - openssl=3.0.7=h0b41bf4_1
-  - osmnx=1.2.2=pyhd8ed1ab_0
+  - osmnx=1.2.3=pyhd8ed1ab_0
   - packaging=22.0=pyhd8ed1ab_0
   - pandas=1.5.2=py310h769672d_0
   - pandoc=2.19.2=h32600fe_1
@@ -239,7 +239,7 @@ dependencies:
   - scipy=1.9.3=py310hdfbd76f_2
   - send2trash=1.8.0=pyhd8ed1ab_0
   - setuptools=65.5.1=pyhd8ed1ab_0
-  - shapely=2.0.0=py310h8b84c32_0
+  - shapely=1.8.5=py310h5b266fc_2
   - six=1.16.0=pyh6c4a22f_0
   - snappy=1.1.9=hbd366e4_2
   - sniffio=1.3.0=pyhd8ed1ab_0
