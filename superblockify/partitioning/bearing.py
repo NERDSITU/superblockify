@@ -171,6 +171,12 @@ class BearingPartitioner(BasePartitioner):
             prominence=0.005,
         )
 
+        # Add general info about histogram: mean, std, min, max
+        self._bin_info["mean"] = np.mean(self._bin_info["bin_frequency"])
+        self._bin_info["std"] = np.std(self._bin_info["bin_frequency"])
+        self._bin_info["min"] = np.min(self._bin_info["bin_frequency"])
+        self._bin_info["max"] = np.max(self._bin_info["bin_frequency"])
+
     def __make_boundaries(self):
         """Determine partition boundaries
 
@@ -286,6 +292,10 @@ class BearingPartitioner(BasePartitioner):
                 "bin_frequency",
                 "peak_ind",
                 "peak_props",
+                "mean",
+                "std",
+                "min",
+                "max",
             ]
         ):
             raise AssertionError(
@@ -342,6 +352,7 @@ class BearingPartitioner(BasePartitioner):
                 facecolors=self._inter_vals["colors"][i],
                 edgecolors=self._inter_vals["colors"][i],
             )
+
         # Draw histogram
         plt.bar(
             self._bin_info["bin_edges"][:-1],
@@ -349,11 +360,30 @@ class BearingPartitioner(BasePartitioner):
             width=90 / self._bin_info["num_bins"],
             # edgecolor='k'
         )
-        plt.xticks([0, 15, 30, 45, 60, 75, 90])
-        plt.xticks(np.linspace(0, 90, 91), minor=True)
-        plt.xlabel(r"Direction ($\degree$)")
-        plt.ylabel("Density")
-        plt.title(f"Bearing histogram of {self.name}")
+
+        # Draw horizontal lines for min, max, mean and std
+        l_min = axe.axhline(
+            self._bin_info["min"], color="k", linestyle="--", linewidth=1
+        )
+        l_max = axe.axhline(
+            self._bin_info["max"], color="k", linestyle="--", linewidth=1
+        )
+        l_mean = axe.axhline(
+            self._bin_info["mean"], color="k", linestyle="--", linewidth=1
+        )
+        l_std_up = axe.axhline(
+            self._bin_info["mean"] + self._bin_info["std"],
+            color="k",
+            linestyle="--",
+            linewidth=1,
+        )
+        axe.axhline(
+            self._bin_info["mean"] - self._bin_info["std"],
+            color="k",
+            linestyle="--",
+            linewidth=1,
+        )
+
         # Mark peaks with x
         plt.scatter(
             [self._bin_info["bin_edges"][i] for i in self._bin_info["peak_ind"]],
@@ -369,6 +399,24 @@ class BearingPartitioner(BasePartitioner):
         # Draw midpoints
         for i in midpoints_idx:
             plt.axvline(self._bin_info["bin_edges"][i], color="black", alpha=0.25)
+
+        # Show custom legend with min, max, mean and std in scientific notation
+        axe.legend(
+            [l_min, l_max, l_mean, l_std_up],
+            [
+                f"Min: {self._bin_info['min']:.2e}",
+                f"Max: {self._bin_info['max']:.2e}",
+                f"Mean: {self._bin_info['mean']:.2e}",
+                f"Std: {self._bin_info['std']:.2e}",
+            ],
+            loc="upper left",
+        )
+
+        plt.xticks([0, 15, 30, 45, 60, 75, 90])
+        plt.xticks(np.linspace(0, 90, 91), minor=True)
+        plt.xlabel(r"Direction ($\degree$)")
+        plt.ylabel("Density")
+        plt.title(f"Bearing histogram of {self.name}")
 
         plt.show()
         return fig, axe
