@@ -11,8 +11,8 @@ class TestBearingPartitioner:
     @pytest.mark.parametrize("bin_num", [360, 500, 563, 900, 5981, 9000])
     def test_bin_bearings(self, test_city_bearing, bin_num):
         """Test `__bin_bearings` class method by design."""
-        _, graph = test_city_bearing
-        part = BearingPartitioner(graph)
+        city_name, graph = test_city_bearing
+        part = BearingPartitioner(graph, name=city_name)
         part._BearingPartitioner__bin_bearings(bin_num)
         assert part._bin_info["num_bins"] == bin_num
         assert len(part._bin_info["bin_edges"]) == bin_num + 1

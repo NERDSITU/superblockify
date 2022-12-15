@@ -34,8 +34,8 @@ class TestPartitioners:
 
     def test_run(self, test_city_bearing, partitioner_class):
         """Test run/partitioning method by design."""
-        _, graph = test_city_bearing
-        part = partitioner_class(graph)
+        city_name, graph = test_city_bearing
+        part = partitioner_class(graph, name=city_name)
         part.run()
         assert part.graph is not None
         assert part.attribute_label is not None
@@ -43,8 +43,8 @@ class TestPartitioners:
 
     def test_plot_partition_graph(self, test_city_bearing, partitioner_class):
         """Test `plot_partition_graph` by design."""
-        _, graph = test_city_bearing
-        part = partitioner_class(graph)
+        city_name, graph = test_city_bearing
+        part = partitioner_class(graph, name=city_name)
         part.run(show_analysis_plots=True)
         fig, axe = part.plot_partition_graph()
         assert isinstance(fig, Figure)
@@ -52,8 +52,8 @@ class TestPartitioners:
 
     def test_plot_partitions_unpartitioned(self, test_city_bearing, partitioner_class):
         """Test `plot_partition_graph` exception handling."""
-        _, graph = test_city_bearing
-        part = partitioner_class(graph)
+        city_name, graph = test_city_bearing
+        part = partitioner_class(graph, name=city_name)
         with pytest.raises(AssertionError):
             part.plot_partition_graph()
         part.run()

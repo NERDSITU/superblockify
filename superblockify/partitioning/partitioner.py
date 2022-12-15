@@ -8,18 +8,21 @@ from .. import attribute, plot
 class BasePartitioner(ABC):
     """Parent class for partitioning graphs."""
 
-    def __init__(self, graph):
+    def __init__(self, graph, name='unnamed'):
         """Constructing a BasePartitioner
 
         Parameters
         ----------
         graph : networkx.Graph
             Input graph
+        name : str, optional
+            Name of the graph's city, default is 'unnamed'.
 
         """
 
         # Set Instance variables
         self.graph = graph
+        self.name = name
         self.partition = None
         self.attribute_label = None
 

@@ -17,9 +17,9 @@ class BearingPartitioner(BasePartitioner):
     Partitions based on the edge bearings.
     """
 
-    def __init__(self, graph):
+    def __init__(self, *args, **kwargs):
         """Construct a BearingPartitioner"""
-        super().__init__(graph)
+        super().__init__(*args, **kwargs)
 
         self._bin_info = None
         self._inter_vals = {}
