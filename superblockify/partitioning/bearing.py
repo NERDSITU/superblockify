@@ -293,14 +293,18 @@ class BearingPartitioner(BasePartitioner):
                 f"run `__bin_bearings` and `__find_peaks` before plotting graph."
             )
 
+        # Setup figure and axis
         fig, axe = plt.subplots(figsize=(12, 8))
 
+        # Max peak height
         self._inter_vals["max_height"] = max(
             self._bin_info["peak_props"]["prominences"]
         )
+        # Color peaks with colormap
         self._inter_vals["colors"] = cm.hsv(
             self._bin_info["peak_ind"] / self._bin_info["num_bins"]
         )
+        # Construct list of peak boxes from left and right bases
         self._inter_vals["boxes"] = [
             (
                 self._bin_info["bin_edges"][
@@ -315,6 +319,7 @@ class BearingPartitioner(BasePartitioner):
             )
             for i in range(len(self._bin_info["peak_ind"]))
         ]
+        # Draw list of overlapping boxes behind lower half histogram
         axe.broken_barh(
             self._inter_vals["boxes"],
             (0, self._inter_vals["max_height"] * 0.45),
@@ -322,7 +327,7 @@ class BearingPartitioner(BasePartitioner):
             facecolors=self._inter_vals["colors"],
             edgecolors=self._inter_vals["colors"],
         )
-
+        # Draw list of non-overlapping boxes behind upper half histogram
         for i in range(len(self._bin_info["peak_ind"])):
             axe.broken_barh(
                 [self._inter_vals["boxes"][i]],
@@ -337,7 +342,7 @@ class BearingPartitioner(BasePartitioner):
                 facecolors=self._inter_vals["colors"][i],
                 edgecolors=self._inter_vals["colors"][i],
             )
-
+        # Draw histogram
         plt.bar(
             self._bin_info["bin_edges"][:-1],
             self._bin_info["bin_frequency"],
@@ -348,18 +353,20 @@ class BearingPartitioner(BasePartitioner):
         plt.xticks(np.linspace(0, 90, 91), minor=True)
         plt.xlabel(r"Direction ($\degree$)")
         plt.ylabel("Density")
-
+        plt.title(f"Bearing histogram of {self.name}")
+        # Mark peaks with x
         plt.scatter(
             [self._bin_info["bin_edges"][i] for i in self._bin_info["peak_ind"]],
             [self._bin_info["bin_frequency"][i] for i in self._bin_info["peak_ind"]],
             marker="x",
         )
 
+        # Calculate midpoints between peaks
         midpoints_idx = np.array(
             (self._bin_info["peak_ind"][1:] + self._bin_info["peak_ind"][:-1]) / 2,
             dtype=int,
         )
-
+        # Draw midpoints
         for i in midpoints_idx:
             plt.axvline(self._bin_info["bin_edges"][i], color="black", alpha=0.25)
 
