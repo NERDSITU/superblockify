@@ -363,23 +363,23 @@ class BearingPartitioner(BasePartitioner):
 
         # Draw horizontal lines for min, max, mean and std
         l_min = axe.axhline(
-            self._bin_info["min"], color="k", linestyle="--", linewidth=1
+            self._bin_info["min"], color="mediumblue", linestyle="--", linewidth=1
         )
         l_max = axe.axhline(
-            self._bin_info["max"], color="k", linestyle="--", linewidth=1
+            self._bin_info["max"], color="crimson", linestyle="--", linewidth=1
         )
         l_mean = axe.axhline(
-            self._bin_info["mean"], color="k", linestyle="--", linewidth=1
+            self._bin_info["mean"], color="k", linestyle="--", linewidth=1.5
         )
         l_std_up = axe.axhline(
             self._bin_info["mean"] + self._bin_info["std"],
-            color="k",
+            color="orange",
             linestyle="--",
             linewidth=1,
         )
         axe.axhline(
             self._bin_info["mean"] - self._bin_info["std"],
-            color="k",
+            color="orange",
             linestyle="--",
             linewidth=1,
         )
