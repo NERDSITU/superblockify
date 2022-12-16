@@ -145,7 +145,11 @@ class BearingPartitioner(BasePartitioner):
         """Find peaks in the histogram of bearings.
 
         Writes to peak_ind and peak_values of `_bin_info`.
-        TODO: Find way to automate prominence threshold. Cite reference.
+
+        `scipy.signal.find_peaks` is used to find the peaks and configured as follows:
+        - height: minimum height of a peak: mean of the histogram
+        - prominence: minimum prominence of a peak: one standard deviation
+        - distance: minimum distance between two peaks: >= 0.4°
 
         Raises
         ------
@@ -162,20 +166,22 @@ class BearingPartitioner(BasePartitioner):
                 f"run `__bin_bearings` before finding peaks."
             )
 
-        self._bin_info["peak_ind"], self._bin_info["peak_props"] = find_peaks(
-            self._bin_info["bin_frequency"],
-            distance=int(0.4 * self._bin_info["num_bins"] / 90),
-            # Required minimal
-            # horizontal distance (>= 1) in samples between
-            # neighbouring peaks.
-            prominence=0.005,
-        )
-
-        # Add general info about histogram: mean, std, min, max
+        # Add general info about histogram: mean, median, std, min, max
         self._bin_info["mean"] = np.mean(self._bin_info["bin_frequency"])
+        self._bin_info["medi"] = np.median(self._bin_info["bin_frequency"])
         self._bin_info["std"] = np.std(self._bin_info["bin_frequency"])
         self._bin_info["min"] = np.min(self._bin_info["bin_frequency"])
         self._bin_info["max"] = np.max(self._bin_info["bin_frequency"])
+
+        self._bin_info["peak_ind"], self._bin_info["peak_props"] = find_peaks(
+            self._bin_info["bin_frequency"],
+            height=self._bin_info["mean"],
+            # Required minimal height of peaks.
+            prominence=self._bin_info["std"],
+            # Required minimal prominence of peaks.
+            distance=int(0.4 * self._bin_info["num_bins"] / 90),
+            # Required minimal horizontal distance (>= 0.4°) between neighbouring peaks.
+        )
 
     def __make_boundaries(self):
         """Determine partition boundaries
@@ -314,6 +320,7 @@ class BearingPartitioner(BasePartitioner):
                 "peak_ind",
                 "peak_props",
                 "mean",
+                "medi",
                 "std",
                 "min",
                 "max",
@@ -382,7 +389,7 @@ class BearingPartitioner(BasePartitioner):
             # edgecolor='k'
         )
 
-        # Draw horizontal lines for min, max, mean and std
+        # Draw horizontal lines for min, max, mean, median and std
         l_min = axe.axhline(
             self._bin_info["min"], color="mediumblue", linestyle="--", linewidth=1
         )
@@ -391,6 +398,9 @@ class BearingPartitioner(BasePartitioner):
         )
         l_mean = axe.axhline(
             self._bin_info["mean"], color="k", linestyle="--", linewidth=1.5
+        )
+        l_median = axe.axhline(
+            self._bin_info["medi"], color="k", linestyle="--", linewidth=1
         )
         l_std_up = axe.axhline(
             self._bin_info["mean"] + self._bin_info["std"],
@@ -421,14 +431,15 @@ class BearingPartitioner(BasePartitioner):
         for i in midpoints_idx:
             plt.axvline(self._bin_info["bin_edges"][i], color="black", alpha=0.25)
 
-        # Show custom legend with min, max, mean and std in scientific notation
+        # Show custom legend with min, max, mean, median and std in scientific notation
         axe.legend(
-            [l_min, l_max, l_mean, l_std_up],
+            [l_min, l_max, l_mean, l_std_up, l_median],
             [
                 f"Min: {self._bin_info['min']:.2e}",
                 f"Max: {self._bin_info['max']:.2e}",
                 f"Mean: {self._bin_info['mean']:.2e}",
-                f"Std: {self._bin_info['std']:.2e}",
+                f"$\\pm$Std: {self._bin_info['std']:.2e}",
+                f"Median: {self._bin_info['medi']:.2e}",
             ],
             loc="upper left",
         )
