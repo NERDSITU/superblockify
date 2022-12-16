@@ -4,11 +4,13 @@ from itertools import chain
 import osmnx as ox
 
 # turn response caching off as this only loads graphs to files
-ox.config(use_cache=False)
+ox.config(use_cache=False, log_console=True)
 
 # General cities/neighborhoods
 places = [
+    ("Barcelona", "Barcelona, Catalonia, Spain"),
     ("Brooklyn", "Brooklyn, New York, United States"),
+    ("Copenhagen", ["Københavns Kommune, Denmark", "Frederiksberg Kommune, Denmark"]),
     ("MissionTown", "团城街道, Xialu, Hubei, China"),
     ("Resistencia", "Resistencia, Chaco, Argentina"),
     ("Scheveningen", "Scheveningen, The Hague, Netherlands"),
