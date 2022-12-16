@@ -238,7 +238,28 @@ class BearingPartitioner(BasePartitioner):
 
     @staticmethod
     def group_overlapping_intervals(left_bases1, right_bases1):
-        """Find groups of overlapping intervals"""
+        """Find groups of overlapping intervals
+
+        Parameters
+        ----------
+        left_bases1 : numpy.array
+            List of left bases of intervals.
+        right_bases1 : numpy.array
+            List of right bases of intervals.
+
+        Returns
+        -------
+        list
+            List of sets of overlapping intervals.
+
+        Examples
+        --------
+        >>> left_bases1 = [0, 0, 1, 3, 4, 9]
+        >>> right_bases1 = [1, 2, 3, 4, 10, 10]
+        >>> group_overlapping_intervals(left_bases1, right_bases1)
+        [{0, 1, 2}, {4, 5}]
+
+        """
         mask = (left_bases1 < right_bases1[:, None]) & (
             right_bases1 > left_bases1[:, None]
         )
