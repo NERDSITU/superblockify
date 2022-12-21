@@ -1,4 +1,7 @@
 """Tests for the partitioner module."""
+from itertools import product
+
+import numpy as np
 import pytest
 
 from superblockify.partitioning import BearingPartitioner
@@ -50,3 +53,85 @@ class TestBearingPartitioner:
         part = BearingPartitioner(graph)
         with pytest.raises(AssertionError):
             part.plot_interval_splitting()
+
+    @pytest.mark.parametrize(
+        "left_bases,right_bases,overlapping_sets",
+        [
+            ([], [], []),
+            ([0], [0], []),
+            ([0, 4.0], [0, 5.0], []),
+            ([-20, 0], [0, 20], []),
+            ([-20.0, 0.0], [0.0, 20.0], []),
+            ([-20.0, 0.0], [0.1, 20.0], [{0, 1}]),
+            ([-20.0, 0.0, -300], [0.1, 20.0, 300], [{0, 1, 2}]),
+            ([-20.0, 0.0, -300, 2000], [0.1, 20.0, 300, 3000], [{0, 1, 2}]),
+            (
+                [-20.0, 0.0, -300, 2000, -1e-20],
+                [0.1, 20.0, 300, 3000, -1e-21],
+                [{0, 1, 2, 4}],
+            ),
+            ([0, 2, 5, 7], [5, 3, 10, 11], [{0, 1}, {2, 3}]),
+            ([5, 7, 0, 2], [10, 11, 5, 3], [{0, 1}, {2, 3}]),
+            ([0, 5, 2, 7], [5, 10, 3, 11], [{0, 2}, {1, 3}]),
+            ([0, 5, 2, 7, 15], [5, 10, 3, 11, 20], [{0, 2}, {1, 3}]),
+            ([0, 5, 2, 7, -4], [5, 10, 3, 11, 1], [{0, 2, 4}, {1, 3}]),
+            ([0, 0, 1, 3, 4, 9], [1, 2, 3, 4, 10, 10], [{0, 1, 2}, {4, 5}]),
+            ([0.0, 0, 1, 3, 4.0, 9], [1, 2.0, 3, 4.0, 10.0, 10], [{0, 1, 2}, {4, 5}]),
+        ],
+    )
+    def test_group_overlapping_intervals(
+        self, left_bases, right_bases, overlapping_sets
+    ):
+        """Test `group_overlapping_intervals` static class method by design."""
+        left_bases, right_bases = np.array(left_bases), np.array(right_bases)
+        assert (
+            BearingPartitioner.group_overlapping_intervals(left_bases, right_bases)
+            == overlapping_sets
+        )
+
+    @pytest.mark.parametrize(
+        "left_bases,right_bases",
+        [
+            (1, 2),
+            (np.array([1]), 2),
+            (1, np.array([2])),
+            (None, np.array([2])),
+            ("str", np.array([2])),
+            (0.0, np.array([2])),
+            ({2}, np.array([2])),
+        ],
+    )
+    def test_group_overlapping_intervals_type_mismatch(self, left_bases, right_bases):
+        """Test `group_overlapping_intervals` static class method for type mismatch."""
+        with pytest.raises(TypeError):
+            BearingPartitioner.group_overlapping_intervals(left_bases, right_bases)
+
+    @pytest.mark.parametrize(
+        "left_bases,right_bases",
+        [
+            ([0, 0, 1, 3, 4], [1, 2, 3, 4, 10, 10]),
+            ([2], []),
+            ([], [2]),
+            ([-60, 3], []),
+            (
+                [-60, 3],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ),
+        ],
+    )
+    def test_group_overlapping_intervals_length_mismatch(self, left_bases, right_bases):
+        """Test `group_overlapping_intervals` static class method
+        for length mismatch.
+        """
+        left_bases, right_bases = np.array(left_bases), np.array(right_bases)
+        with pytest.raises(ValueError):
+            BearingPartitioner.group_overlapping_intervals(left_bases, right_bases)
+
+    @pytest.mark.parametrize("left_right_bases_ndim", list(product(range(6), repeat=2)))
+    def test_group_overlapping_intervals_ndim_mismatch(self, left_right_bases_ndim):
+        """Test `group_overlapping_intervals` static class method for ndim mismatch."""
+        if left_right_bases_ndim != (1, 1):
+            left_bases = np.empty((1,) * left_right_bases_ndim[0])
+            right_bases = np.empty((1,) * left_right_bases_ndim[1])
+            with pytest.raises(TypeError):
+                BearingPartitioner.group_overlapping_intervals(left_bases, right_bases)

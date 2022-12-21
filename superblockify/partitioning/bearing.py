@@ -243,14 +243,14 @@ class BearingPartitioner(BasePartitioner):
             self._inter_vals["boundaries"].append(90)
 
     @staticmethod
-    def group_overlapping_intervals(left_bases1, right_bases1):
+    def group_overlapping_intervals(left_bases, right_bases):
         """Find groups of overlapping intervals
 
         Parameters
         ----------
-        left_bases1 : numpy.array
+        left_bases : numpy.array
             List of left bases of intervals.
-        right_bases1 : numpy.array
+        right_bases : numpy.array
             List of right bases of intervals.
 
         Returns
@@ -258,20 +258,44 @@ class BearingPartitioner(BasePartitioner):
         list
             List of sets of overlapping intervals.
 
+        Raises
+        ------
+        TypeError
+            If `left_bases` or `right_bases1` are not numpy arrays of 1d shape.
+        ValueError
+            If `left_bases` and `right_bases` are not of the same length.
+
         Examples
         --------
-        >>> left_bases1 = [0, 0, 1, 3, 4, 9]
+        >>> left_bases = [0, 0, 1, 3, 4, 9]
         >>> right_bases1 = [1, 2, 3, 4, 10, 10]
-        >>> group_overlapping_intervals(left_bases1, right_bases1)
+        >>> group_overlapping_intervals(left_bases, right_bases)
         [{0, 1, 2}, {4, 5}]
 
         """
-        mask = (left_bases1 < right_bases1[:, None]) & (
-            right_bases1 > left_bases1[:, None]
-        )
+
+        if not all(isinstance(arr, np.ndarray) for arr in [left_bases, right_bases]):
+            raise TypeError(
+                f"Input lists must be 1d numpy arrays, "
+                f"got types {type(left_bases)} and {type(right_bases)}."
+            )
+        if not all(arr.ndim == 1 for arr in [left_bases, right_bases]):
+            raise TypeError(
+                f"Input lists must be of 1d shape, "
+                f"got shapes {left_bases.shape} and {right_bases.shape}."
+            )
+        if len(left_bases) != len(right_bases):
+            raise ValueError(
+                f"Input lists must be of the same length, "
+                f"length of left_bases is {len(left_bases)} and "
+                f"length of right_bases is {len(right_bases)}."
+            )
+
+        mask = (left_bases < right_bases[:, None]) & (right_bases > left_bases[:, None])
         # scales badly with n^2; optimizable
         overlaps = np.triu(mask, k=1).nonzero()
         overlap_groups = []
+        print(overlaps)
         for group_1, group_2 in tuple(zip(*overlaps)):
             if len(overlap_groups) == 0:
                 overlap_groups.append({group_1, group_2})
@@ -289,7 +313,7 @@ class BearingPartitioner(BasePartitioner):
                 if not added:
                     overlap_groups.append({group_1, group_2})
         # # add missing groups that are not overlapping anything - not neccessary
-        # overlap_groups += [{i} for i in range(len(left_bases1)) if i not in
+        # overlap_groups += [{i} for i in range(len(left_bases)) if i not in
         #                    [group for ol_group in overlap_groups
         #                     for group in ol_group]]
         return overlap_groups
