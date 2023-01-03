@@ -212,7 +212,6 @@ class BearingPartitioner(BasePartitioner):
                         "this happens when the data is too coarse."
                     )
 
-
         self._inter_vals["base_vals"] = [
             (
                 self._bin_info["bin_edges"][left_bases[i]],
