@@ -187,26 +187,45 @@ class BearingPartitioner(BasePartitioner):
         """Determine partition boundaries
 
         Determine boundaries based on the binned data's peaks.
+
+        Raises
+        ------
+        ValueError
+            If left and right bases have identical intervals. Not supported.
         """
         # Make partitioning boundaries out of peak bases
 
-        left_bases1 = self._bin_info["peak_props"]["left_bases"]
-        right_bases1 = self._bin_info["peak_props"]["right_bases"]
-        overlap_groups = self.group_overlapping_intervals(left_bases1, right_bases1)
+        left_bases = self._bin_info["peak_props"]["left_bases"]
+        right_bases = self._bin_info["peak_props"]["right_bases"]
+        overlap_groups = self.group_overlapping_intervals(left_bases, right_bases)
+
+        # Check if there are identical bases in left_bases and right_bases
+        # If so, consolidate them into one interval and peak
+        for i, _ in enumerate(left_bases):
+            for j, _ in enumerate(left_bases):
+                if i == j:
+                    continue
+                if left_bases[i] == left_bases[j] and right_bases[i] == right_bases[j]:
+                    raise ValueError(
+                        "Identical bases found, boundary finding failed. "
+                        "Please choose data with a higher bearing resolution, "
+                        "this happens when the data is too coarse."
+                    )
+
 
         self._inter_vals["base_vals"] = [
             (
-                self._bin_info["bin_edges"][left_bases1[i]],
-                self._bin_info["bin_edges"][right_bases1[i]],
+                self._bin_info["bin_edges"][left_bases[i]],
+                self._bin_info["bin_edges"][right_bases[i]],
             )
-            for i in range(len(left_bases1))
+            for i in range(len(left_bases))
         ]
 
         # split overlapping groups by the unique bases they share
         for group in overlap_groups:
             # unique borders per group
             borders = np.sort(
-                np.unique([(left_bases1[g], right_bases1[g]) for g in group])
+                np.unique([(left_bases[g], right_bases[g]) for g in group])
             )
             for i, group in enumerate(group):
                 self._inter_vals["base_vals"][group] = (
@@ -295,7 +314,7 @@ class BearingPartitioner(BasePartitioner):
         # scales badly with n^2; optimizable
         overlaps = np.triu(mask, k=1).nonzero()
         overlap_groups = []
-        print(overlaps)
+
         for group_1, group_2 in tuple(zip(*overlaps)):
             if len(overlap_groups) == 0:
                 overlap_groups.append({group_1, group_2})
@@ -312,6 +331,14 @@ class BearingPartitioner(BasePartitioner):
                         break
                 if not added:
                     overlap_groups.append({group_1, group_2})
+
+        # Merge overlap groups that were split by unique bases
+        for i, group in enumerate(overlap_groups):
+            for j, group2 in enumerate(overlap_groups):
+                if i != j and group & group2:
+                    overlap_groups[i] = group | group2
+                    overlap_groups.pop(j)
+
         # # add missing groups that are not overlapping anything - not neccessary
         # overlap_groups += [{i} for i in range(len(left_bases)) if i not in
         #                    [group for ol_group in overlap_groups
