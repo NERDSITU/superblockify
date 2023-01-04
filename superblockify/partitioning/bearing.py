@@ -1,5 +1,6 @@
 """Approach relating using edge bearings."""
 from bisect import bisect_right
+from typing import List, Set
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -184,7 +185,7 @@ class BearingPartitioner(BasePartitioner):
         )
 
     def __make_boundaries(self):
-        """Determine partition boundaries
+        """Determine partition boundaries.
 
         Determine boundaries based on the binned data's peaks.
 
@@ -262,7 +263,7 @@ class BearingPartitioner(BasePartitioner):
 
     @staticmethod
     def group_overlapping_intervals(left_bases, right_bases):
-        """Find groups of overlapping intervals
+        """Find groups of overlapping intervals.
 
         Parameters
         ----------
@@ -332,17 +333,56 @@ class BearingPartitioner(BasePartitioner):
                     overlap_groups.append({group_1, group_2})
 
         # Merge overlap groups that were split by unique bases
-        for i, group in enumerate(overlap_groups):
-            for j, group2 in enumerate(overlap_groups):
-                if i != j and group & group2:
-                    overlap_groups[i] = group | group2
-                    overlap_groups.pop(j)
+        overlap_groups = BearingPartitioner.merge_sets(overlap_groups)
 
         # # add missing groups that are not overlapping anything - not neccessary
         # overlap_groups += [{i} for i in range(len(left_bases)) if i not in
         #                    [group for ol_group in overlap_groups
         #                     for group in ol_group]]
         return overlap_groups
+
+    @staticmethod
+    def merge_sets(sets: List[Set]) -> List[Set]:
+        """Merge sets that share at least one element.
+
+        Parameters
+        ----------
+        sets : list of sets
+            List of sets to merge.
+
+        Returns
+        -------
+        list of sets
+            List of merged sets.
+
+        Raises
+        ------
+        TypeError
+            If `sets` is not a list of sets.
+
+        Examples
+        --------
+        >>> sets = [{1, 2}, {2, 3}, {4, 5}]
+        >>> merge_sets(sets)
+        [{1, 2, 3}, {4, 5}]
+
+        >>> sets = [{'a', 'b'}, {'m', 3.4}, {'b', 'c'}]
+        >>> merge_sets(sets)
+        [{'a', 'b', 'c'}, {'m', 3.4}]
+
+        """
+
+        if not isinstance(sets, list):
+            raise TypeError(f"Input must be a list, got {type(sets)}.")
+        if not all(isinstance(s, set) for s in sets):
+            raise TypeError(f"Input must be a list of sets, got {type(sets)}.")
+
+        for i, group in enumerate(sets):
+            for j, group2 in enumerate(sets):
+                if i != j and group & group2:
+                    sets[i] = group | group2
+                    sets.pop(j)
+        return sets
 
     def plot_peakfinding(self):
         """Show the histogram and found peaks.
@@ -504,7 +544,7 @@ class BearingPartitioner(BasePartitioner):
         return fig, axe
 
     def plot_interval_splitting(self):
-        """Plot the split up of peak bases into intervals
+        """Plot the split up of peak bases into intervals.
 
         Show how the peaks with their overlapping left and right bases are being
         split up into non overlapping intervals.

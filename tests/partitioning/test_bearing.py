@@ -146,3 +146,42 @@ class TestBearingPartitioner:
             right_bases = np.empty((1,) * left_right_bases_ndim[1])
             with pytest.raises(TypeError):
                 BearingPartitioner.group_overlapping_intervals(left_bases, right_bases)
+
+    @pytest.mark.parametrize(
+        "test_input,test_output",
+        [
+            ([], []),
+            ([{0}], [{0}]),
+            ([{0}, {1}], [{0}, {1}]),
+            ([{0}, {1}, {2}], [{0}, {1}, {2}]),
+            ([{0}, {0}, {2}], [{0}, {2}]),
+            ([{0}, {0}, {0}], [{0}]),
+            ([{0, 1, 2}], [{0, 1, 2}]),
+            ([{0, 1, 2}, {3}], [{0, 1, 2}, {3}]),
+            ([{0, 1, 2}, {3, 4}], [{0, 1, 2}, {3, 4}]),
+            ([{1, 2}, {2, 3}, {4, 5}], [{1, 2, 3}, {4, 5}]),
+            ([{1, 2}, {2, 3}, {4, 5}, {6, 7}], [{1, 2, 3}, {4, 5}, {6, 7}]),
+            ([{1, 2}, {2, 3}, {4, 5}, {1, 2, 3}], [{1, 2, 3}, {4, 5}]),
+        ],
+    )
+    def test_merge_sets(self, test_input, test_output):
+        """Test `merge_sets` static class method by design."""
+        assert BearingPartitioner.merge_sets(test_input) == test_output
+
+    @pytest.mark.parametrize(
+        "test_input",
+        [
+            1,  # not a list
+            None,  # not a list
+            "str",  # not a list
+            0.0,  # not a list
+            ({2}),  # not a list
+            ([1, 2]),  # not a list of sets
+            ([{1, 2}, 2]),  # not a list of sets
+            ([{1, 2}, {2, 3}, {4, 5}, {6, 7}, 8]),  # not a list of sets
+        ],
+    )
+    def test_merge_sets_type_mismatch(self, test_input):
+        """Test `merge_sets` static class method for type mismatch."""
+        with pytest.raises(TypeError):
+            BearingPartitioner.merge_sets(test_input)
