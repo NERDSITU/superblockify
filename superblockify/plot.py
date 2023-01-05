@@ -140,12 +140,12 @@ def plot_by_attribute(
         )
 
     # Choose the color for each edge based on the edge's attribute value,
-    # if `None`, set to transparent.
+    # if `None`, set to gray.
     colormap = plt.get_cmap(cmap)
     e_c = [
         colormap((attr_val - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
         if attr_val is not None
-        else (0, 0, 0, 0)  # transparent
+        else "gray"
         for u, v, k, attr_val in graph.edges(keys=True, data=attr)
     ]
 
