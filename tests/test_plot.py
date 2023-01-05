@@ -1,5 +1,6 @@
 """Tests for the plot module."""
 from configparser import ConfigParser
+
 import pytest
 from matplotlib import pyplot as plt
 
@@ -62,3 +63,25 @@ def test_plot_by_attribute_no_attribute(test_city_bearing):
     _, graph = test_city_bearing
     with pytest.raises(ValueError):
         plot_by_attribute(graph, "non_existent_attribute")
+
+
+@pytest.mark.parametrize(
+    "minmax_val_faulty",
+    [
+        1,
+        1.3,
+        "str",
+        tuple(),
+        (1,),
+        (1, 2, 3),
+        (1, 2, 3, 4),
+        (0, 0),
+        (1, 1),
+        (1, 0),
+    ],
+)
+def test_plot_by_attribute_minmax_val_faulty(test_city_bearing, minmax_val_faulty):
+    """Test `plot_by_attribute` with faulty minmax_val."""
+    _, graph = test_city_bearing
+    with pytest.raises(ValueError):
+        plot_by_attribute(graph, "osmid", minmax_val=minmax_val_faulty)

@@ -13,7 +13,7 @@ class BasePartitioner(ABC):
 
         Parameters
         ----------
-        graph : networkx.Graph
+        graph : networkx.MultiDiGraph
             Input graph
         name : str, optional
             Name of the graph's city, default is 'unnamed'.
@@ -25,6 +25,7 @@ class BasePartitioner(ABC):
         self.name = name
         self.partition = None
         self.attribute_label = None
+        self.attr_value_minmax = None
 
     @abstractmethod
     def run(self, **kwargs):
@@ -74,7 +75,12 @@ class BasePartitioner(ABC):
                 f"run before plotting graph."
             )
 
-        return plot.plot_by_attribute(self.graph, self.attribute_label, **pba_kwargs)
+        return plot.plot_by_attribute(
+            self.graph,
+            self.attribute_label,
+            minmax_val=self.attr_value_minmax,
+            **pba_kwargs,
+        )
 
 
 class DummyPartitioner(BasePartitioner):

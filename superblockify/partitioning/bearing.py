@@ -24,6 +24,7 @@ class BearingPartitioner(BasePartitioner):
 
         self._bin_info = None
         self._inter_vals = {}
+        self.attr_value_minmax = (0, 90)
 
     def run(self, show_analysis_plots=False, **kwargs):
         """Group by prominent bearing directions.
