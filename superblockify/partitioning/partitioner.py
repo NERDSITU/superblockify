@@ -1,8 +1,11 @@
 """BasePartitioner parent and dummy."""
+import logging
 from abc import ABC, abstractmethod
 from random import choice
 
 from .. import attribute, plot
+
+logger = logging.getLogger("superblockify")
 
 
 class BasePartitioner(ABC):
@@ -26,6 +29,15 @@ class BasePartitioner(ABC):
         self.partition = None
         self.attribute_label = None
         self.attr_value_minmax = None
+
+        # Log initialization
+        logger.info(
+            "Initialized %s(%s) with %d nodes and %d edges.",
+            self.name,
+            self.__class__.__name__,
+            len(graph.nodes),
+            len(graph.edges),
+        )
 
     @abstractmethod
     def run(self, **kwargs):
@@ -75,6 +87,12 @@ class BasePartitioner(ABC):
                 f"run before plotting graph."
             )
 
+        # Log plotting
+        logger.info(
+            "Plotting partition graph for %s with attribute %s",
+            self.name,
+            self.attribute_label,
+        )
         return plot.plot_by_attribute(
             self.graph,
             self.attribute_label,
