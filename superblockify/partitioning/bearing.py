@@ -1,4 +1,5 @@
 """Approach relating using edge bearings."""
+import logging
 from bisect import bisect_right
 from typing import List, Set
 
@@ -10,6 +11,8 @@ from scipy.signal import find_peaks
 
 from superblockify import attribute
 from .partitioner import BasePartitioner
+
+logger = logging.getLogger("superblockify")
 
 
 class BearingPartitioner(BasePartitioner):
@@ -190,70 +193,54 @@ class BearingPartitioner(BasePartitioner):
 
         Determine boundaries based on the binned data's peaks.
 
-        Raises
-        ------
-        ValueError
-            If left and right bases have identical intervals. Not supported.
+        Warnings
+        --------
+        If left and right bases have identical intervals.
         """
-        # Make partitioning boundaries out of peak bases
-
-        left_bases = self._bin_info["peak_props"]["left_bases"]
-        right_bases = self._bin_info["peak_props"]["right_bases"]
-        overlap_groups = self.group_overlapping_intervals(left_bases, right_bases)
-
-        # Check if there are identical bases in left_bases and right_bases
-        # If so, consolidate them into one interval and peak
-        for i, _ in enumerate(left_bases):
-            for j, _ in enumerate(left_bases):
-                if i == j:
-                    continue
-                if left_bases[i] == left_bases[j] and right_bases[i] == right_bases[j]:
-                    raise ValueError(
-                        "Identical bases found, boundary finding failed. "
-                        "Please choose data with a higher bearing resolution, "
-                        "this happens when the data is too coarse."
-                    )
-
-        self._inter_vals["base_vals"] = [
-            (
-                self._bin_info["bin_edges"][left_bases[i]],
-                self._bin_info["bin_edges"][right_bases[i]],
+        # Find bases left and right of peak indices
+        # Union of all bases
+        bases = set(self._bin_info["peak_props"]["left_bases"]) | set(
+            self._bin_info["peak_props"]["right_bases"]
+        )
+        # For peak indices, find the closest base to the left and right.
+        # That is for each self._bin_info["peak_ind"] the index with the biggest
+        # value, but smaller than the peak index, and the index with the smallest
+        # value, but bigger than the peak index.
+        logger.debug("Base indices: %s", bases)
+        logger.debug("Peak indices: %s", self._bin_info["peak_ind"])
+        left_right_bases = [
+            (max(b for b in bases if b < p), min(b for b in bases if b > p))
+            for p in self._bin_info["peak_ind"]
+        ]
+        logger.debug("Left and right bases: %s", left_right_bases)
+        # Check if there are identical base pairs in left_right_bases.
+        if len(left_right_bases) != len(set(left_right_bases)):
+            logger.warning(
+                "There are identical base pairs in left_right_bases. "
+                "This means that there are two peaks with identical intervals."
             )
-            for i in range(len(left_bases))
+
+        left_right_bases_values = [
+            (self._bin_info["bin_edges"][l], self._bin_info["bin_edges"][r])
+            for (l, r) in left_right_bases
         ]
 
-        # split overlapping groups by the unique bases they share
-        for group in overlap_groups:
-            # unique borders per group
-            borders = np.sort(
-                np.unique([(left_bases[g], right_bases[g]) for g in group])
-            )
-            for i, group in enumerate(group):
-                self._inter_vals["base_vals"][group] = (
-                    self._bin_info["bin_edges"][borders[i]],
-                    self._bin_info["bin_edges"][borders[i + 1]],
-                )
-
-        self._inter_vals["base_vals"] = {
-            ab: [
-                self._bin_info["bin_edges"][peak_i]
-                for peak_i in self._bin_info["peak_ind"]
-                if ab[0] < self._bin_info["bin_edges"][peak_i] < ab[1]
-            ][0]
-            for ab in self._inter_vals["base_vals"]
-        }
-
-        # Make boundary and value array
+        # Make boundary and value lists
+        # So that for all values in [0, 90[ a center value is defined.
+        # For all intervals without a peak, the center value is `None`.
+        peak_values = [
+            self._bin_info["bin_edges"][p] for p in self._bin_info["peak_ind"]
+        ]
         self._inter_vals["boundaries"] = [0]
         self._inter_vals["center_values"] = [None]
-        for interval, value in self._inter_vals["base_vals"].items():
-            if self._inter_vals["boundaries"][-1] == interval[0]:
-                self._inter_vals["boundaries"].append(interval[1])
+        for (l_val, r_val), value in zip(left_right_bases_values, peak_values):
+            if self._inter_vals["boundaries"][-1] == l_val:
+                self._inter_vals["boundaries"].append(r_val)
                 self._inter_vals["center_values"] = self._inter_vals["center_values"][
                     :-1
                 ] + [value, None]
             else:
-                self._inter_vals["boundaries"].extend(interval)
+                self._inter_vals["boundaries"].extend((l_val, r_val))
                 self._inter_vals["center_values"] = self._inter_vals[
                     "center_values"
                 ] + [value, None]
@@ -261,10 +248,20 @@ class BearingPartitioner(BasePartitioner):
             self._inter_vals["center_values"].pop()
         else:
             self._inter_vals["boundaries"].append(90)
+        # Log the boundaries and center values
+        logger.debug("Boundaries: %s", self._inter_vals["boundaries"])
+        logger.debug("Center values: %s", self._inter_vals["center_values"])
+
+        # For plotting
+        self._inter_vals["base_vals"] = dict(
+            zip(left_right_bases_values, self._bin_info["peak_ind"])
+        )
 
     @staticmethod
     def group_overlapping_intervals(left_bases, right_bases):
         """Find groups of overlapping intervals.
+
+        *Unused at the moment.*
 
         Parameters
         ----------
@@ -478,6 +475,7 @@ class BearingPartitioner(BasePartitioner):
             self._bin_info["bin_frequency"],
             width=90 / self._bin_info["num_bins"],
             # edgecolor='k'
+            alpha=0.8,
         )
 
         # Draw horizontal lines for min, max, mean, median and std
