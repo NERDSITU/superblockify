@@ -64,7 +64,7 @@ def new_edge_attribute_by_function(
             f"`allow_overwriting` to `True` if you want to overwrite these."
         )
 
-    for node, attr in attributes.items():
-        attributes[node] = function(attr)
+    for edge, attr in attributes.items():
+        attributes[edge] = function(attr)
 
     set_edge_attributes(graph, attributes, destination_attribute)
