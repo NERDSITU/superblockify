@@ -68,3 +68,55 @@ def new_edge_attribute_by_function(
         attributes[edge] = function(attr)
 
     set_edge_attributes(graph, attributes, destination_attribute)
+
+
+def get_edge_subgraph_with_attribute_value(graph, attribute_label, attribute_value):
+    """Return subgraph of edges with a given attribute value.
+
+    Parameters
+    ----------
+    graph : networkx.Graph
+        Input graph
+    attribute_label : string
+        Name of an existing node attribute
+    attribute_value : int
+        Value of the attribute to be selected
+
+    Returns
+    -------
+    networkx.Graph
+        Subgraph of edges with the given attribute value
+
+    Raises
+    ------
+    ValueError
+        If the graph has no attributes with the given key.
+    ValueError
+        If the returned subgraph is empty.
+
+    Examples
+    --------
+    >>> G = nx.path_graph(6)
+    >>> nx.set_edge_attributes(G, {edge: {'attr': int(edge[0]/2)} for edge in G.edges})
+    >>> get_edges_with_attribute_value(G, 'attr', 1).edges
+    EdgeView([(2, 3), (3, 4)])
+
+    """
+
+    attributes = get_edge_attributes(graph, attribute_label)
+
+    if not bool(attributes):
+        raise ValueError(
+            f"Graph with {len(graph)} node(s) has no attributes for "
+            f"the key '{attribute_label}'."
+        )
+
+    edges = [edge for edge, attr in attributes.items() if attr == attribute_value]
+
+    if not bool(edges):
+        raise ValueError(
+            f"Graph with {len(graph)} node(s) has no edges with the "
+            f"attribute '{attribute_label}' set to '{attribute_value}'."
+        )
+
+    return graph.edge_subgraph(edges)

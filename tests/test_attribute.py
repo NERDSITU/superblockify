@@ -2,7 +2,10 @@
 import networkx as nx
 import pytest
 
-from superblockify.attribute import new_edge_attribute_by_function
+from superblockify.attribute import (
+    new_edge_attribute_by_function,
+    get_edge_subgraph_with_attribute_value,
+)
 
 
 def __func(var):
@@ -74,3 +77,47 @@ def test_new_edge_attribute_by_function_overwriting_allowed(test_input, graph_le
     assert nx.get_edge_attributes(g_path, "in") == {
         (i, i + 1): expected for i in range(graph_len - 1)
     }
+
+
+@pytest.mark.parametrize("attribute_value", list(range(10)))
+def test_get_edge_subgraph_with_attribute_value(attribute_value):
+    """Test `get_edge_subgraph_with_attribute_value` by design."""
+    g_path = nx.path_graph(21)
+    nx.set_edge_attributes(
+        g_path, {edge: {"attr": int(edge[0] / 2)} for edge in g_path.edges}
+    )
+    # Compare edges
+    assert (
+        get_edge_subgraph_with_attribute_value(g_path, "attr", attribute_value).edges
+        == nx.Graph(
+            [
+                (attribute_value * 2, attribute_value * 2 + 1),
+                (attribute_value * 2 + 1, attribute_value * 2 + 2),
+            ]
+        ).edges
+    )
+
+
+@pytest.mark.parametrize("attribute_label", ["attr", "other", 1, 2.0])
+def test_get_edge_subgraph_with_attribute_value_no_attribute(attribute_label):
+    """Test `get_edge_subgraph_with_attribute_value` when graph has no attribute."""
+    g_path = nx.path_graph(5)
+    with pytest.raises(ValueError):
+        get_edge_subgraph_with_attribute_value(g_path, attribute_label, 0)
+
+
+def test_get_edge_subgraph_with_attribute_value_empty_graph():
+    """Test `get_edge_subgraph_with_attribute_value` when graph is empty."""
+    g_path = nx.path_graph(0)
+    with pytest.raises(ValueError):
+        get_edge_subgraph_with_attribute_value(g_path, "attr", 0)
+
+
+def test_get_edge_subgraph_with_attribute_value_empty_subgraph():
+    """Test `get_edge_subgraph_with_attribute_value` when subgraph is empty."""
+    g_path = nx.path_graph(5)
+    nx.set_edge_attributes(
+        g_path, {edge: {"attr": int(edge[0] / 2)} for edge in g_path.edges}
+    )
+    with pytest.raises(ValueError):
+        get_edge_subgraph_with_attribute_value(g_path, "attr", 10)
