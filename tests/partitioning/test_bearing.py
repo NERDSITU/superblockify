@@ -185,3 +185,124 @@ class TestBearingPartitioner:
         """Test `merge_sets` static class method for type mismatch."""
         with pytest.raises(TypeError):
             BearingPartitioner.merge_sets(test_input)
+
+    # pylint: disable=protected-access
+    @pytest.mark.parametrize(
+        "boundaries_input,center_values_input,boundaries_output,center_values_output",
+        [
+            ([0.0], [], [0.0], []),
+            ([0.0, 1.0], [None], [0.0, 1.0], [None]),
+            ([0.0, 1.0], [0.0], [0.0, 1.0], [0.0]),
+            ([0.0, 1.0], [0.5], [0.0, 1.0], [0.5]),
+            ([0.0, 1.0], [1.0], [0.0, 1.0], [1.0]),
+            ([-3, 1.0], [0.0], [-3, 1.0], [0.0]),
+            ([0.0, 1.0, 2.0], [0.0, 1.0], [0.0, 1.0, 2.0], [0.0, 1.0]),
+            ([0, 1, 2, 3], [0.5, 1.5, 2.5], [0, 1, 2, 3], [0.5, 1.5, 2.5]),
+            ([0, 1, 0, 1], [0.2, None, 0.8], [0, 1], [np.mean([0.2, 0.8])]),
+            ([0, 1, 0, 1], [0.8, None, 0.2], [0, 1], [np.mean([0.8, 0.2])]),
+            ([0, 1, 0, 1], [0.0, None, 0.8], [0, 1], [np.mean([0.0, 0.8])]),
+            ([0, 1, 0, 1], [0.5, None, 0.4], [0, 1], [np.mean([0.5, 0.4])]),
+            (
+                [-1, 0, 1, 0, 1],
+                [-0.5, 0.5, None, 0.4],
+                [-1, 0, 1],
+                [-0.5, np.mean([0.5, 0.4])],
+            ),
+            (
+                [0, 1, 0, 1, 0, 1],
+                [0.2, None, 0.8, None, 0.7],
+                [0, 1],
+                [np.mean([0.2, 0.8, 0.7])],
+            ),
+            (
+                [0, 2, 0, 2, 0, 2, 0, 2],
+                [0.2, None, 0.8, None, 0.7, None, 1.8],
+                [0, 2],
+                [np.mean([0.2, 0.8, 0.7, 1.8])],
+            ),
+            (
+                [0, 1, 0, 1, 0, 1, 3, 4],
+                [0.2, None, 0.8, None, 0.7, 2.0, 3.5],
+                [0, 1, 3, 4],
+                [np.mean([0.2, 0.8, 0.7]), 2.0, 3.5],
+            ),
+            (
+                [0, 1, 0, 1, 0, 1, 3, 4],
+                [0.2, None, 0.8, None, 0.7, None, 3.5],
+                [0, 1, 3, 4],
+                [np.mean([0.2, 0.8, 0.7]), None, 3.5],
+            ),
+            (
+                [0, 1, 0, 1, 0, 1, 3, 4, 3, 4],
+                [0.2, None, 0.8, None, 0.7, 2.0, 3.5, None, 3.6],
+                [0, 1, 3, 4],
+                [np.mean([0.2, 0.8, 0.7]), 2.0, np.mean([3.5, 3.6])],
+            ),
+            (
+                [0, 1, 0, 1, 0, 1, 3, 4, 3, 4],
+                [0.2, None, 0.8, None, 0.7, None, 3.5, None, 3.6],
+                [0, 1, 3, 4],
+                [np.mean([0.2, 0.8, 0.7]), None, np.mean([3.5, 3.6])],
+            ),
+            (
+                [-3, 0, 1, 0, 1, 0, 1, 3, 4, 3, 4],
+                [-1, 0.2, None, 0.8, None, 0.7, None, 3.5, None, 3.6],
+                [-3, 0, 1, 3, 4],
+                [-1, np.mean([0.2, 0.8, 0.7]), None, np.mean([3.5, 3.6])],
+            ),
+        ],
+    )
+    def test_find_and_merge_intervals(
+        self,
+        boundaries_input,
+        center_values_input,
+        boundaries_output,
+        center_values_output,
+    ):
+        """Test `find_and_merge_intervals` static class method by design."""
+        assert BearingPartitioner._BearingPartitioner__find_and_merge_intervals(
+            boundaries_input, center_values_input
+        ) == (boundaries_output, center_values_output)
+
+    # pylint: disable=protected-access
+
+    @pytest.mark.parametrize(
+        "boundaries_input,center_values_input",
+        [
+            (["a"], []),  # not a list of floats
+            (1, [0.0]),  # not a list of floats
+            ([0.0], 1),  # not a list of floats
+            (None, [0.0]),  # not a list of floats
+            ([0, 1, 0, 1], [0.2, None, None]),  # center values cannot be None
+        ],
+    )
+    def test_find_and_merge_intervals_type_mismatch(
+        self, boundaries_input, center_values_input
+    ):
+        """Test `find_and_merge_intervals` static class method for type mismatch."""
+        with pytest.raises(TypeError):
+            BearingPartitioner._BearingPartitioner__find_and_merge_intervals(
+                boundaries_input, center_values_input
+            )
+
+    @pytest.mark.parametrize(
+        "boundaries_input,center_values_input",
+        [
+            ([], []),  # length mismatch
+            ([0.0], [0.0]),  # length mismatch
+            ([0.0, 1.0], [0.0, 1.0]),  # length mismatch
+            ([0.0, 1.0, 2.0], [0.0]),  # length mismatch
+            ([0.0, 1.0, 2.0, 4.0], [0.0, 1.0]),  # length mismatch
+            ([0.0], [0.0, 1.0]),  # length mismatch
+        ],
+    )
+    def test_find_and_merge_intervals_length_mismatch(
+        self, boundaries_input, center_values_input
+    ):
+        """Test `find_and_merge_intervals` static class method for length mismatch."""
+        with pytest.raises(AssertionError):
+            BearingPartitioner._BearingPartitioner__find_and_merge_intervals(
+                boundaries_input, center_values_input
+            )
+
+    # pylint: enable=protected-access
