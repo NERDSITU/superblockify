@@ -60,3 +60,14 @@ class TestPartitioners:
         part.attribute_label = None
         with pytest.raises(AssertionError):
             part.plot_partition_graph()
+
+    def test_make_subgraphs_from_attribute(self, test_city_bearing, partitioner_class):
+        """Test `make_subgraphs_from_attribute` by design."""
+        city_name, graph = test_city_bearing
+        part = partitioner_class(graph, name=city_name)
+        with pytest.raises(AssertionError):
+            part.make_subgraphs_from_attribute()
+        part.run()
+        part.attribute_label = None
+        with pytest.raises(AssertionError):
+            part.make_subgraphs_from_attribute()

@@ -53,6 +53,38 @@ class BasePartitioner(ABC):
         # Define partitions
         self.partition = [{"name": "zero", "value": 0.0}, {"name": "one", "value": 1.0}]
 
+    def make_subgraphs_from_attribute(self):
+        """Make subgraphs from attribute.
+
+        Method for child classes to make subgraphs from the attribute
+        `self.attribute_label`, to analyze (dis-)connected components.
+        For each partition makes a subgraph with the edges that have the
+        attribute value of the partition.
+        Writes them to `self.partition[i]["subgraph"]`.
+
+        Raises
+        ------
+        AssertionError
+            If BasePartitioner has not been runned yet (the partitions are not defined).
+
+        """
+
+        self.__check_has_been_runned()
+
+        # Log making subgraphs
+        logger.info(
+            "Making subgraphs for %s with attribute %s",
+            self.name,
+            self.attribute_label,
+        )
+
+        # Make subgraphs from attribute
+        for part in self.partition:
+            logger.debug("Making subgraph for partition %s", part)
+            part["subgraph"] = attribute.get_edge_subgraph_with_attribute_value(
+                self.graph, self.attribute_label, part["value"]
+            )
+
     def plot_partition_graph(self, **pba_kwargs):
         """Plotting the partition with color on graph.
 
