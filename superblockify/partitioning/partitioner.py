@@ -76,16 +76,7 @@ class BasePartitioner(ABC):
 
         """
 
-        if self.partition is None:
-            raise AssertionError(
-                f"{self.__class__.__name__} has no partitions, "
-                f"run before plotting graph."
-            )
-        if self.attribute_label is None:
-            raise AssertionError(
-                f"{self.__class__.__name__} has no `attribute_label` yet,"
-                f"run before plotting graph."
-            )
+        self.__check_has_been_runned()
 
         # Log plotting
         logger.info(
@@ -99,6 +90,27 @@ class BasePartitioner(ABC):
             minmax_val=self.attr_value_minmax,
             **pba_kwargs,
         )
+
+    def __check_has_been_runned(self):
+        """Check if the partitioner has runned.
+
+        Raises
+        ------
+        AssertionError
+            If BasePartitioner has not been runned yet (the partitions are not defined).
+
+        """
+
+        if self.partition is None:
+            raise AssertionError(
+                f"{self.__class__.__name__} has no partitions, "
+                f"run before plotting graph."
+            )
+        if self.attribute_label is None:
+            raise AssertionError(
+                f"{self.__class__.__name__} has no `attribute_label` yet,"
+                f"run before plotting graph."
+            )
 
 
 class DummyPartitioner(BasePartitioner):
