@@ -1,7 +1,7 @@
 """Tests for the partitioner module."""
-from matplotlib.pyplot import Figure, Axes
-import pytest
 import networkx as nx
+import pytest
+from matplotlib.pyplot import Figure, Axes
 
 from superblockify.partitioning import BasePartitioner
 
