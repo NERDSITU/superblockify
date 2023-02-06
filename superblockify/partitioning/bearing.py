@@ -321,7 +321,7 @@ class BearingPartitioner(BasePartitioner):
                 "float."
             )  # As bool is a subclass of int, exclude bool explicitly.
         if not all(
-            isinstance(c, (int, float, type(None)) and not isinstance(c, bool))
+            isinstance(c, (int, float, type(None))) and not isinstance(c, bool)
             for c in center_values
         ):
             raise TypeError(
