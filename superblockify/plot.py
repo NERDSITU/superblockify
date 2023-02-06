@@ -145,7 +145,7 @@ def plot_by_attribute(
     e_c = [
         colormap((attr_val - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
         if attr_val is not None
-        else (0.5, 0.5, 0.5, 1) # gray
+        else (0.5, 0.5, 0.5, 1)  # gray
         for u, v, k, attr_val in graph.edges(keys=True, data=attr)
     ]
 
