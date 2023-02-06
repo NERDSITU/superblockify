@@ -145,9 +145,16 @@ def plot_by_attribute(
     e_c = [
         colormap((attr_val - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
         if attr_val is not None
-        else "gray"
+        else (0.5, 0.5, 0.5, 1) # gray
         for u, v, k, attr_val in graph.edges(keys=True, data=attr)
     ]
+
+    # Print list of unique colors in the colormap, with a set comprehension
+    logger.debug(
+        "Unique colors in the colormap %s: %s",
+        cmap,
+        {tuple(c) for c in e_c},
+    )
 
     # Plot graph with osmnx's function, pass further attributes
     return ox.plot_graph(
