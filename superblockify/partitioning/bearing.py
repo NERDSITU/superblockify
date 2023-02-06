@@ -107,7 +107,7 @@ class BearingPartitioner(BasePartitioner):
         ]
 
         # Make subgraphs for each partition
-        self.make_subgraphs_from_attribute(split_disconnected=True)
+        self.make_subgraphs_from_attribute()
 
     def __bin_bearings(self, num_bins: int):
         """Construct histogram of `self.graph` bearings.
