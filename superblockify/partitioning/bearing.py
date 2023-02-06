@@ -107,7 +107,7 @@ class BearingPartitioner(BasePartitioner):
         ]
 
         # Make subgraphs for each partition
-        self.make_subgraphs_from_attribute()
+        self.make_subgraphs_from_attribute(split_disconnected=True)
 
     def __bin_bearings(self, num_bins: int):
         """Construct histogram of `self.graph` bearings.
@@ -316,8 +316,14 @@ class BearingPartitioner(BasePartitioner):
         if not isinstance(center_values, list):
             raise TypeError("Center values must be a list.")
         if not all(isinstance(b, (int, float)) for b in boundaries):
-            raise TypeError("The values in boundaries must be of type int and float.")
-        if not all(isinstance(c, (int, float, type(None))) for c in center_values):
+            raise TypeError(
+                "The values in boundaries must be of type int (excluding bool) or "
+                "float."
+            )  # As bool is a subclass of int, exclude bool explicitly.
+        if not all(
+            isinstance(c, (int, float, type(None)) and not isinstance(c, bool))
+            for c in center_values
+        ):
             raise TypeError(
                 "The values in center_values must be of type int, float, and None."
             )
