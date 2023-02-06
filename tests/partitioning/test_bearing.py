@@ -273,7 +273,11 @@ class TestBearingPartitioner:
             (1, [0.0]),  # not a list of floats
             ([0.0], 1),  # not a list of floats
             (None, [0.0]),  # not a list of floats
-            ([0, 1, 0, 1], [0.2, None, None]),  # center values cannot be None
+            ([0, 1, 0, 1], [0.2, None, None]),  # center values being merged cannot be
+            # None
+            ([0, 1, 2, 4], [0.2, 1.3, True]),  # center values must be numeric or None
+            ([0, 1, 2, 4], [0.2, 1.3, "a"]),  # center values must be numeric or None
+            ([0, 1, 0, 1], [0.2, None, True]),  # center values must be numeric or None
         ],
     )
     def test_find_and_merge_intervals_type_mismatch(
