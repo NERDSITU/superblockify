@@ -273,4 +273,6 @@ class DummyPartitioner(BasePartitioner):
         # A List of the existing partitions, the 'value' attribute should be equal to
         # the edge attributes under the instances `attribute_label`, which belong to
         # this partition
-        self.partition = [{"name": str(num), "value": num} for num in values]
+        self.partition = [
+            {"name": str(num), "value": num, "num_edges": num} for num in values
+        ]
