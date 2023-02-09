@@ -71,7 +71,9 @@ def new_edge_attribute_by_function(
 
 
 def get_edge_subgraph_with_attribute_value(graph, attribute_label, attribute_value):
-    """Return subgraph of edges with a given attribute value.
+    """Return subgraph view of edges with a given attribute value.
+    The graph, edge, and node attributes in the returned subgraph view are references to
+    the corresponding attributes in the original graph. The view is read-only.
 
     Parameters
     ----------
