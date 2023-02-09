@@ -73,12 +73,14 @@ class BearingPartitioner(BasePartitioner):
 
         if show_analysis_plots:
             self.plot_peakfinding()
+            plt.show()
 
         # Make boundaries
         self.__make_boundaries()
 
         if show_analysis_plots:
             self.plot_interval_splitting()
+            plt.show()
 
         # Write grouping attribute to graph
         self.attribute_label = "bearing_group"
@@ -680,7 +682,6 @@ class BearingPartitioner(BasePartitioner):
         plt.ylabel("Density")
         plt.title(f"Bearing histogram of {self.name}")
 
-        plt.show()
         return fig, axe
 
     def plot_interval_splitting(self):
@@ -765,5 +766,4 @@ class BearingPartitioner(BasePartitioner):
                 edgecolors=col,
             )
 
-        plt.show()
         return fig, axe
