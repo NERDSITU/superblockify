@@ -89,10 +89,6 @@ def plot_by_attribute(
         If edge_color was set to anything but None.
     ValueError
         If `edge_linewidth` and `node_size` both <= 0, otherwise the plot will be empty.
-    ValueError
-        If `minmax_val` is not a tuple of length 2 or None.
-    ValueError
-        If `minmax_val[0]` is not smaller than `minmax_val[1]`.
 
     Returns
     -------
@@ -116,32 +112,12 @@ def plot_by_attribute(
             f"it should be a tuple of length 2 or None."
         )
 
-    # Make list of edge colors, order is the same as in graph.edges()
-    # Determine min and max values of the attribute
-    logger.debug("Given minmax_val for attribute %s: %s", attr, minmax_val)
-    if minmax_val is None or minmax_val[0] is None or minmax_val[1] is None:
-        # Min and max of the attribute, ignoring `None` values
-        minmax = (
-            amin([v for v in nx.get_edge_attributes(graph, attr).values() if v]),
-            amax([v for v in nx.get_edge_attributes(graph, attr).values() if v]),
-        )
-        if minmax_val is None:
-            minmax_val = minmax
-        elif minmax_val[0] is None:
-            minmax_val = (minmax[0], minmax_val[1])
-        else:
-            minmax_val = (minmax_val[0], minmax[1])
-        logger.debug("Determined minmax_val for attribute %s: %s", attr, minmax_val)
-
-    if minmax_val[0] >= minmax_val[1]:
-        raise ValueError(
-            f"The `minmax_val` attribute is {minmax_val}, "
-            f"but the first value must be smaller than the second."
-        )
-
     # Choose the color for each edge based on the edge's attribute value,
     # if `None`, set to gray.
+    minmax_val = determine_minmax_val(graph, minmax_val, attr)
     colormap = plt.get_cmap(cmap)
+
+    # Make list of edge colors, order is the same as in graph.edges()
     e_c = [
         colormap((attr_val - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
         if attr_val is not None
@@ -164,3 +140,53 @@ def plot_by_attribute(
         edge_linewidth=edge_linewidth,
         **pg_kwargs,
     )
+
+
+def determine_minmax_val(graph, minmax_val, attr):
+    """Determine the min and max values of an attribute in a graph.
+
+    This function is used to determine the min and max values of an attribute.
+    If `minmax_val` is None, the min and max values of the attribute in the graph
+    are used. If `minmax_val` is a tuple of length 2, the values are used as
+    min and max values. If `minmax_val` is a tuple of length 2, but the first
+    value is larger than the second, a ValueError is raised.
+    If only one value in the tuple is given, the other value is set accordingly.
+
+    Parameters
+    ----------
+    graph : networkx.MultiDiGraph
+        Input graph
+    minmax_val : tuple, None
+        Tuple of (min, max) values of the attribute to be plotted or None
+    attr : string
+        Graph's attribute to select min and max values by
+
+    Raises
+    ------
+    ValueError
+        If `minmax_val` is not a tuple of length 2 or None.
+    ValueError
+        If `minmax_val[0]` is not smaller than `minmax_val[1]`.
+
+    """
+    # Determine min and max values of the attribute
+    logger.debug("Given minmax_val for attribute %s: %s", attr, minmax_val)
+    if minmax_val is None or minmax_val[0] is None or minmax_val[1] is None:
+        # Min and max of the attribute, ignoring `None` values
+        minmax = (
+            amin([v for v in nx.get_edge_attributes(graph, attr).values() if v]),
+            amax([v for v in nx.get_edge_attributes(graph, attr).values() if v]),
+        )
+        if minmax_val is None:
+            minmax_val = minmax
+        elif minmax_val[0] is None:
+            minmax_val = (minmax[0], minmax_val[1])
+        else:
+            minmax_val = (minmax_val[0], minmax[1])
+        logger.debug("Determined minmax_val for attribute %s: %s", attr, minmax_val)
+    if minmax_val[0] >= minmax_val[1]:
+        raise ValueError(
+            f"The `minmax_val` attribute is {minmax_val}, "
+            f"but the first value must be smaller than the second."
+        )
+    return minmax_val
