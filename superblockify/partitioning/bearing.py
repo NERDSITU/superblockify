@@ -83,7 +83,7 @@ class BearingPartitioner(BasePartitioner):
         # Write grouping attribute to graph
         self.attribute_label = "bearing_group"
         group_bearing = nx.get_edge_attributes(self.graph, "bearing_90")
-        logger.debug("Writing attribute 'bearing_group' to graph. %s", group_bearing)
+        logger.debug("Writing attribute 'bearing_group' to graph.")
         for edge, bearing in group_bearing.items():
             if np.isnan(bearing):
                 group_bearing[edge] = np.nan
@@ -91,10 +91,6 @@ class BearingPartitioner(BasePartitioner):
                 i = bisect_right(self._inter_vals["boundaries"], bearing)
                 group_bearing[edge] = self._inter_vals["center_values"][i - 1]
         nx.set_edge_attributes(self.graph, group_bearing, self.attribute_label)
-
-        logger.debug(
-            "Graphs attribute by label %s.", self.graph.edges.data(self.attribute_label)
-        )
 
         # Write partiton dict
         self.partition = [
