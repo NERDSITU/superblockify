@@ -149,7 +149,7 @@ class BasePartitioner(ABC):
 
         Returns
         -------
-        fig, ax : tuple
+        fig, axe : tuple
             matplotlib figure, axis
 
         Raises
@@ -172,6 +172,58 @@ class BasePartitioner(ABC):
             self.attribute_label,
             minmax_val=self.attr_value_minmax,
             **pba_kwargs,
+        )
+
+    def plot_subgraph_component_size(self, **pcs_kwargs):
+        """Plot the size of the subgraph components of the partitions.
+
+        Scatter plot of the size of the subgraph components of each partition type.
+
+        Parameters
+        ----------
+        pcs_kwargs
+            Keyword arguments to pass to `superblockify.plot.plot_component_size`.
+
+        Returns
+        -------
+        fig, axe : tuple
+            matplotlib figure, axis
+
+        Raises
+        ------
+        AssertionError
+            If BasePartitioner has not been runned yet (the partitions are not defined).
+
+        """
+
+        self.__check_has_been_runned()
+
+        # Find number of edges in each component for each partition
+        num_edges = []
+        component_values = []
+
+        # If subgraphs were split, use components
+        if self.components:
+            logger.debug("Using components for plotting.")
+            for comp in self.components:
+                num_edges.append(comp["num_edges"])
+                component_values.append(comp["value"])
+        # Else use partitions
+        else:
+            logger.debug("Using partitions for plotting.")
+            for part in self.partition:
+                num_edges.append(part["num_edges"])
+                component_values.append(part["value"])
+
+        # Plot
+        return plot.plot_component_size(
+            graph=self.graph,
+            attr=self.attribute_label,
+            num_edges=num_edges,
+            component_values=component_values,
+            title=self.name,
+            minmax_val=self.attr_value_minmax,
+            **pcs_kwargs,
         )
 
     def __check_has_been_runned(self):

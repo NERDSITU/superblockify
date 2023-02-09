@@ -3,6 +3,7 @@ import logging
 
 import networkx as nx
 import osmnx as ox
+from matplotlib import patches
 from matplotlib import pyplot as plt
 from numpy import amin, amax
 
@@ -57,7 +58,7 @@ def plot_by_attribute(
     node_alpha=0,
     minmax_val=None,
     **pg_kwargs,
-):  # noqa: too-many-arguments
+):  # pylint: disable=too-many-arguments
     """Plot a graph based on an edge attribute and colormap.
 
     Color will be chosen based on the specified edge attribute passed to a colormap.
@@ -92,7 +93,7 @@ def plot_by_attribute(
 
     Returns
     -------
-    fig, ax : tuple
+    fig, axe : tuple
         matplotlib figure, axis
 
     """
@@ -140,6 +141,9 @@ def plot_by_attribute(
         edge_linewidth=edge_linewidth,
         **pg_kwargs,
     )
+
+
+# pylint: enable=too-many-arguments
 
 
 def determine_minmax_val(graph, minmax_val, attr):
@@ -190,3 +194,118 @@ def determine_minmax_val(graph, minmax_val, attr):
             f"but the first value must be smaller than the second."
         )
     return minmax_val
+
+
+# Ignore too-many-arguments, as we want to pass all arguments to the function
+def plot_component_size(
+    graph,
+    attr,
+    num_edges,
+    component_values,
+    title=None,
+    cmap="hsv",
+    minmax_val=None,
+    num_component_log_scale=True,
+    show_legend=None,
+    **kwargs,
+):  # pylint: disable=too-many-arguments
+    """Plot the distribution of component sizes for each partition value.
+
+    x-axis: values of the partition
+    y-axis: number of edges in the component
+    color: value of the partition
+
+    Parameters
+    ----------
+    graph : networkx.MultiDiGraph
+        Input graph
+    attr : string
+        Graph's attribute to select colormap min and max values by
+        if `minmax_val` is incomplete
+    num_edges : list
+        Number of edges in each component
+    component_values : list
+        Value of the partition for each component
+    title : str, optional
+        Title of the plot
+    cmap : string, optional
+        Name of a matplotlib colormap
+    minmax_val : tuple, optional
+        Tuple of (min, max) values of the attribute to be plotted
+        (default: min and max of attr)
+    num_component_log_scale : bool, optional
+        If True, the y-axis is plotted on a log scale
+    show_legend : bool, optional
+        If True, the legend is shown. If None, the legend is shown if the unique
+        values of the partition are less than 23.
+    kwargs
+        Keyword arguments to pass to `matplotlib.pyplot.plot`.
+
+    Returns
+    -------
+    fig, axe : tuple
+        matplotlib figure, axis
+    """
+
+    fig, axe = plt.subplots()
+
+    # Choose color of each value
+    minmax_val = determine_minmax_val(graph, minmax_val, attr)
+    colormap = plt.get_cmap(cmap)
+
+    # Plot
+    logger.debug("Plotting component/partition sizes for %s.", title)
+    # Labelling
+    axe.set_xlabel(attr)
+    axe.set_ylabel("Number of edges")
+    if title is not None:
+        axe.set_title(f"Component size of {title}")
+
+    # Scaling and grid
+    if num_component_log_scale:
+        axe.set_yscale("log")
+    axe.grid(True)
+    plt.xticks([0, 15, 30, 45, 60, 75, 90])
+
+    # Make legend with unique colors
+    sorted_unique_values = sorted(set(component_values))
+
+    # Show legend if `show_legend` is True, not when it is False,
+    # and if it is None, only if the number of unique values is less than 23
+    if show_legend or (show_legend is None and len(sorted_unique_values) < 23):
+        sorted_unique_colors = [
+            colormap((v - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
+            for v in sorted_unique_values
+        ]
+        # Place legend on the outside right without cutting off the plot
+        axe.legend(
+            handles=[
+                patches.Patch(
+                    color=sorted_unique_colors[i], label=sorted_unique_values[i]
+                )
+                for i in range(len(sorted_unique_values))
+            ],
+            fontsize="small",
+            bbox_to_anchor=(1.05, 1),
+            loc="upper left",
+            borderaxespad=0.0,
+        )
+        plt.tight_layout()
+
+    # Scatter plot
+    axe.scatter(
+        component_values,
+        num_edges,
+        c=[
+            colormap((v - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
+            for v in component_values
+        ],
+        alpha=0.5,
+        zorder=2,
+        **kwargs,
+    )
+
+    return fig, axe
+
+
+# pylint: enable=too-many-arguments
