@@ -3,6 +3,8 @@ import logging
 from abc import ABC, abstractmethod
 from random import choice
 
+import networkx as nx
+
 from .. import attribute, plot
 
 logger = logging.getLogger("superblockify")
@@ -27,6 +29,7 @@ class BasePartitioner(ABC):
         self.graph = graph
         self.name = name
         self.partition = None
+        self.components = None
         self.attribute_label = None
         self.attr_value_minmax = None
 
@@ -53,6 +56,86 @@ class BasePartitioner(ABC):
         # Define partitions
         self.partition = [{"name": "zero", "value": 0.0}, {"name": "one", "value": 1.0}]
 
+    def make_subgraphs_from_attribute(self, split_disconnected=False):
+        """Make component subgraphs from attribute.
+
+        Method for child classes to make subgraphs from the attribute
+        `self.attribute_label`, to analyze (dis-)connected components.
+        For each partition makes a subgraph with the edges that have the
+        attribute value of the partition.
+        Writes them to `self.component[i]["subgraph"]` with the name of the
+        partition+`_component_`+`j`. Where `j` is the index of the component.
+
+        Parameters
+        ----------
+        split_disconnected : bool, optional
+            If True, split the disconnected components into separate subgraphs.
+
+        Raises
+        ------
+        AssertionError
+            If BasePartitioner has not been runned yet (the partitions are not defined).
+
+        """
+
+        self.__check_has_been_runned()
+
+        # Log making subgraphs
+        logger.info(
+            "Making subgraphs for %s with attribute %s",
+            self.name,
+            self.attribute_label,
+        )
+
+        found_disconnected = False
+        num_partitions = len(self.partition)
+
+        # Make component subgraphs from attribute
+        for part in self.partition:
+            logger.debug("Making subgraph for partition %s", part)
+            part["subgraph"] = attribute.get_edge_subgraph_with_attribute_value(
+                self.graph, self.attribute_label, part["value"]
+            )
+            part["num_edges"] = len(part["subgraph"].edges)
+
+        if split_disconnected:
+            self.components = []
+
+        for part in self.partition:
+            # Split disconnected components
+            connected_components = nx.weakly_connected_components(part["subgraph"])
+            # Make list of generator of connected components
+            connected_components = list(connected_components)
+            logger.debug(
+                "Partition %s has %d conn. comp. In total %d nodes and %d edges.",
+                part["name"],
+                len(list(connected_components)),
+                len(part["subgraph"].nodes),
+                len(part["subgraph"].edges),
+            )
+            if split_disconnected:
+                found_disconnected = True
+                # Add partitions for each connected component
+                for i, component in enumerate(connected_components):
+                    self.components.append(
+                        {
+                            "name": f"{part['name']}_component_{i}",
+                            "value": part["value"],
+                            "subgraph": self.graph.subgraph(component),
+                            "num_edges": len(self.graph.subgraph(component).edges),
+                        }
+                    )
+
+        # Log status about disconnected components
+        found_disconnected = (
+            f"Found disconnected components in %s, splitting them. "
+            f"There are {num_partitions} partitions, "
+            f"and {len(self.partition)} components."
+            if found_disconnected
+            else "No disconnected components found in %s, nothing to split."
+        )
+        logger.debug(found_disconnected, self.name)
+
     def plot_partition_graph(self, **pba_kwargs):
         """Plotting the partition with color on graph.
 
@@ -66,8 +149,85 @@ class BasePartitioner(ABC):
 
         Returns
         -------
-        fig, ax : tuple
+        fig, axe : tuple
             matplotlib figure, axis
+
+        Raises
+        ------
+        AssertionError
+            If BasePartitioner has not been runned yet (the partitions are not defined).
+
+        """
+
+        self.__check_has_been_runned()
+
+        # Log plotting
+        logger.info(
+            "Plotting partition graph for %s with attribute %s",
+            self.name,
+            self.attribute_label,
+        )
+        return plot.plot_by_attribute(
+            self.graph,
+            self.attribute_label,
+            minmax_val=self.attr_value_minmax,
+            **pba_kwargs,
+        )
+
+    def plot_subgraph_component_size(self, **pcs_kwargs):
+        """Plot the size of the subgraph components of the partitions.
+
+        Scatter plot of the size of the subgraph components of each partition type.
+
+        Parameters
+        ----------
+        pcs_kwargs
+            Keyword arguments to pass to `superblockify.plot.plot_component_size`.
+
+        Returns
+        -------
+        fig, axe : tuple
+            matplotlib figure, axis
+
+        Raises
+        ------
+        AssertionError
+            If BasePartitioner has not been runned yet (the partitions are not defined).
+
+        """
+
+        self.__check_has_been_runned()
+
+        # Find number of edges in each component for each partition
+        num_edges = []
+        component_values = []
+
+        # If subgraphs were split, use components
+        if self.components:
+            logger.debug("Using components for plotting.")
+            for comp in self.components:
+                num_edges.append(comp["num_edges"])
+                component_values.append(comp["value"])
+        # Else use partitions
+        else:
+            logger.debug("Using partitions for plotting.")
+            for part in self.partition:
+                num_edges.append(part["num_edges"])
+                component_values.append(part["value"])
+
+        # Plot
+        return plot.plot_component_size(
+            graph=self.graph,
+            attr=self.attribute_label,
+            num_edges=num_edges,
+            component_values=component_values,
+            title=self.name,
+            minmax_val=self.attr_value_minmax,
+            **pcs_kwargs,
+        )
+
+    def __check_has_been_runned(self):
+        """Check if the partitioner has runned.
 
         Raises
         ------
@@ -86,19 +246,6 @@ class BasePartitioner(ABC):
                 f"{self.__class__.__name__} has no `attribute_label` yet,"
                 f"run before plotting graph."
             )
-
-        # Log plotting
-        logger.info(
-            "Plotting partition graph for %s with attribute %s",
-            self.name,
-            self.attribute_label,
-        )
-        return plot.plot_by_attribute(
-            self.graph,
-            self.attribute_label,
-            minmax_val=self.attr_value_minmax,
-            **pba_kwargs,
-        )
 
 
 class DummyPartitioner(BasePartitioner):
@@ -126,4 +273,6 @@ class DummyPartitioner(BasePartitioner):
         # A List of the existing partitions, the 'value' attribute should be equal to
         # the edge attributes under the instances `attribute_label`, which belong to
         # this partition
-        self.partition = [{"name": str(num), "value": num} for num in values]
+        self.partition = [
+            {"name": str(num), "value": num, "num_edges": num} for num in values
+        ]

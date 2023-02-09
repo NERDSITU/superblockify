@@ -1,7 +1,8 @@
 """Tests for the partitioner module."""
-from matplotlib.pyplot import Figure, Axes
-import pytest
 import networkx as nx
+import pytest
+from matplotlib import pyplot as plt
+from matplotlib.pyplot import Figure, Axes
 
 from superblockify.partitioning import BasePartitioner
 
@@ -60,3 +61,28 @@ class TestPartitioners:
         part.attribute_label = None
         with pytest.raises(AssertionError):
             part.plot_partition_graph()
+
+    def test_make_subgraphs_from_attribute(self, test_city_bearing, partitioner_class):
+        """Test `make_subgraphs_from_attribute` by design."""
+        city_name, graph = test_city_bearing
+        part = partitioner_class(graph, name=city_name)
+        with pytest.raises(AssertionError):
+            part.make_subgraphs_from_attribute()
+        part.run()
+        part.attribute_label = None
+        with pytest.raises(AssertionError):
+            part.make_subgraphs_from_attribute()
+
+    def test_plot_subgraph_component_size(self, test_city_bearing, partitioner_class):
+        """Test `plot_subgraph_component_size` by design."""
+        city_name, graph = test_city_bearing
+        part = partitioner_class(graph, name=city_name)
+        with pytest.raises(AssertionError):
+            part.plot_subgraph_component_size()
+        part.run()
+        fig, _ = part.plot_subgraph_component_size()
+        fig.show()
+        part.components = None
+        fig, _ = part.plot_subgraph_component_size()
+        fig.show()
+        plt.close()

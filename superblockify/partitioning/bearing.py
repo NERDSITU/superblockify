@@ -73,22 +73,25 @@ class BearingPartitioner(BasePartitioner):
 
         if show_analysis_plots:
             self.plot_peakfinding()
+            plt.show()
 
         # Make boundaries
         self.__make_boundaries()
 
         if show_analysis_plots:
             self.plot_interval_splitting()
+            plt.show()
 
         # Write grouping attribute to graph
         self.attribute_label = "bearing_group"
         group_bearing = nx.get_edge_attributes(self.graph, "bearing_90")
-        for node, bearing in group_bearing.items():
+        logger.debug("Writing attribute 'bearing_group' to graph.")
+        for edge, bearing in group_bearing.items():
             if np.isnan(bearing):
-                group_bearing[node] = np.nan
+                group_bearing[edge] = np.nan
             else:
                 i = bisect_right(self._inter_vals["boundaries"], bearing)
-                group_bearing[node] = self._inter_vals["center_values"][i - 1]
+                group_bearing[edge] = self._inter_vals["center_values"][i - 1]
         nx.set_edge_attributes(self.graph, group_bearing, self.attribute_label)
 
         # Write partiton dict
@@ -100,6 +103,13 @@ class BearingPartitioner(BasePartitioner):
             for (i, center_val) in enumerate(self._inter_vals["center_values"])
             if center_val is not None
         ]
+
+        # Make subgraphs for each partition
+        self.make_subgraphs_from_attribute(split_disconnected=True)
+
+        if show_analysis_plots:
+            self.plot_subgraph_component_size()
+            plt.show()
 
     def __bin_bearings(self, num_bins: int):
         """Construct histogram of `self.graph` bearings.
@@ -248,6 +258,15 @@ class BearingPartitioner(BasePartitioner):
             self._inter_vals["center_values"].pop()
         else:
             self._inter_vals["boundaries"].append(90)
+
+        # Find and merge repeated/overlaying intervals.
+        (
+            self._inter_vals["boundaries"],
+            self._inter_vals["center_values"],
+        ) = self.__find_and_merge_intervals(
+            self._inter_vals["boundaries"], self._inter_vals["center_values"]
+        )
+
         # Log the boundaries and center values
         logger.debug("Boundaries: %s", self._inter_vals["boundaries"])
         logger.debug("Center values: %s", self._inter_vals["center_values"])
@@ -256,6 +275,134 @@ class BearingPartitioner(BasePartitioner):
         self._inter_vals["base_vals"] = dict(
             zip(left_right_bases_values, self._bin_info["peak_ind"])
         )
+
+    @staticmethod
+    def __find_and_merge_intervals(boundaries, center_values):
+        """Find and merge duplicate intervals.
+
+        Find repeated intervals where boundaries violate strict monotone increasing
+        order and have the same start and end value. In the center values for each
+        repeated interval there is the center value and a `None` value. The `None`
+        values are removed and the repeated intervals are merged, by taking the
+        arithmetic mean of their center values.
+
+        Parameters
+        ----------
+        boundaries : list of float or int
+            List of boundaries of intervals.
+        center_values : list of float or int or None
+            List of center values of intervals. If there is no center value, `None`.
+
+        Returns
+        -------
+        list of float or int
+            List of boundaries of intervals.
+        list of float or int or None
+            List of center values of intervals. If there is no center value, `None`.
+
+        Raises
+        ------
+        AssertionError
+            If the length of `boundaries` is not one more than the length of
+            `center_values`.
+        TypeError
+            If `boundaries` is not a numerical list.
+        TypeError
+            If `center_values` is not a list filled with numerical values or `None`.
+            For repeated intervals the center values cannot be `None`.
+        """
+
+        # Type check
+        if not isinstance(boundaries, list):
+            raise TypeError("Boundaries must be a list.")
+        if not isinstance(center_values, list):
+            raise TypeError("Center values must be a list.")
+        if not all(isinstance(b, (int, float)) for b in boundaries):
+            raise TypeError(
+                "The values in boundaries must be of type int (excluding bool) or "
+                "float."
+            )  # As bool is a subclass of int, exclude bool explicitly.
+        if not all(
+            isinstance(c, (int, float, type(None))) and not isinstance(c, bool)
+            for c in center_values
+        ):
+            raise TypeError(
+                "The values in center_values must be of type int, float, and None."
+            )
+
+        # Length check
+        if len(boundaries) != len(center_values) + 1:
+            raise AssertionError(
+                "The length of `boundaries` is not one more than the length of "
+                "`center_values`."
+            )
+
+        # Find indices of repeated intervals and their center values
+        # If two consecutive boundary pairs are equal, the interval is repeated.
+        indices = {
+            i: {
+                "boundaries": [boundaries[i], boundaries[i + 1]],
+                "center_values": center_values[i],
+            }
+            for i in range(len(boundaries) - 1)
+            if boundaries[i : i + 2] == boundaries[i + 2 : i + 4]
+            or boundaries[i : i + 2] == boundaries[i - 2 : i]
+        }
+
+        # Merge the repeated intervals by unioning their boundaries and taking the
+        # arithmetic mean of their center values.
+        unique_boundaries = np.unique(
+            [indices[i]["boundaries"] for i in indices], axis=0
+        ).tolist()
+        repeating_intervals = [
+            {
+                "interval": interval,
+                "indices": [i for i in indices if indices[i]["boundaries"] == interval],
+            }
+            for interval in unique_boundaries
+        ]
+        # Add the center values to the repeating intervals
+        for interval in repeating_intervals:
+            interval["center_values"] = [center_values[i] for i in interval["indices"]]
+
+        # Throw an error if there are intervals with where numerical and None values
+        # are mixed.
+        for interval in repeating_intervals:
+            if any(c is None for c in interval["center_values"]) and any(
+                c is not None for c in interval["center_values"]
+            ):
+                raise TypeError(
+                    "The center values of intervals cannot be mixed with None values."
+                )
+
+        # Drop repeating intervals with center values all None
+        repeating_intervals = [
+            interval
+            for interval in repeating_intervals
+            if any(c is not None for c in interval["center_values"])
+        ]
+
+        # Sort repeating intervals by indices, descending
+        repeating_intervals = sorted(
+            repeating_intervals, key=lambda x: x["indices"][0], reverse=True
+        )
+
+        # From high to low, replace the boundaries and center values of the repeating
+        # intervals with the arithmetic mean of their center values. Also remove the
+        # None values.
+        for interval in repeating_intervals:
+            boundaries = (
+                boundaries[: interval["indices"][0]]
+                + interval["interval"]
+                + boundaries[interval["indices"][-1] + 2 :]
+            )
+            center_values = (
+                center_values[: interval["indices"][0]]
+                + [np.mean(interval["center_values"])]
+                + center_values[interval["indices"][-1] + 1 :]
+            )
+
+        return boundaries, center_values
 
     @staticmethod
     def group_overlapping_intervals(left_bases, right_bases):
@@ -539,7 +686,6 @@ class BearingPartitioner(BasePartitioner):
         plt.ylabel("Density")
         plt.title(f"Bearing histogram of {self.name}")
 
-        plt.show()
         return fig, axe
 
     def plot_interval_splitting(self):
@@ -624,5 +770,4 @@ class BearingPartitioner(BasePartitioner):
                 edgecolors=col,
             )
 
-        plt.show()
         return fig, axe
