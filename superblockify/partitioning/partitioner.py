@@ -56,6 +56,50 @@ class BasePartitioner(ABC):
         # Define partitions
         self.partition = [{"name": "zero", "value": 0.0}, {"name": "one", "value": 1.0}]
 
+    def calculate_metrics(self):
+        """Calculate metrics for the partitioning.
+
+        Calculates the metrics for the partitioning and writes them to the
+        metrics dictionary. It includes the network metrics for the partitioned graph.
+
+        There are different network measures
+        - d_E(i, j): Euclidean
+        - d_S(i, j): Shortest path on full graph
+        - d_N(i, j): Shortest path with ban through LTNs
+
+        We define several types of combinations of these metrics:
+        (i, j are nodes in the graph)
+
+        The network metrics are the following:
+
+        - Coverage (fraction of network covered by a partition):
+          C = sum(1 if i in partition else 0) / len(graph.nodes)
+
+        - Components (number of connected components):
+          C = len(graph.components)
+
+        - Average path length:
+            - A(E) = mean(d_E(i, j)) where i <> j
+            - A(S) = mean(d_S(i, j)) where i <> j
+            - A(N) = mean(d_N(i, j)) where i <> j
+
+        - Directness:
+            - D(E, S) = mean(d_E(i, j) / d_S(i, j)) where i <> j
+            - D(E, N) = mean(d_E(i, j) / d_N(i, j)) where i <> j
+            - D(S, N) = mean(d_S(i, j) / d_N(i, j)) where i <> j
+
+        - Global efficiency:
+            - G(i; S/E) = sum(1/d_S(i, j)) / sum(1/d_E(i, j)) where for each sum i <> j
+            - G(i; N/E) = sum(1/d_N(i, j)) / sum(1/d_E(i, j)) where for each sum i <> j
+            - G(i; N/S) = sum(1/d_N(i, j)) / sum(1/d_S(i, j)) where for each sum i <> j
+
+        - Local efficiency:
+            - L(S/E) = sum(G(i; S/E)) / N where i = 1..N
+            - L(N/E) = sum(G(i; N/E)) / N where i = 1..N
+            - L(N/S) = sum(G(i; N/S)) / N where i = 1..N
+
+        """
+
     def make_subgraphs_from_attribute(self, split_disconnected=False):
         """Make component subgraphs from attribute.
 
