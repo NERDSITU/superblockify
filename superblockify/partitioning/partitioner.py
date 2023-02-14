@@ -5,7 +5,7 @@ from random import choice
 
 import networkx as nx
 
-from .. import attribute, plot
+from .. import attribute, plot, metrics
 
 logger = logging.getLogger("superblockify")
 
@@ -32,6 +32,7 @@ class BasePartitioner(ABC):
         self.components = None
         self.attribute_label = None
         self.attr_value_minmax = None
+        self.metric = metrics.Metric()
 
         # Log initialization
         logger.info(
@@ -99,6 +100,11 @@ class BasePartitioner(ABC):
             - L(N/S) = sum(G(i; N/S)) / N where i = 1..N
 
         """
+
+        # Log calculating metrics
+        logger.debug("Calculating metrics for %s", self.name)
+        self.metric.calculate_all(self)
+        logger.debug("Metrics for %s: %s", self.name, self.metric)
 
     def make_subgraphs_from_attribute(self, split_disconnected=False):
         """Make component subgraphs from attribute.
