@@ -49,9 +49,9 @@ def extract_attributes(graph, edge_attributes, node_attributes):
 
     excess_attributes = all_attributes - edge_attributes
     # Delete all excess attributes
-    for n1, n2, d in graph.edges(data=True):
+    for _, _, attr_dict in graph.edges(data=True):
         for att in excess_attributes:
-            d.pop(att, None)
+            attr_dict.pop(att, None)
 
     # Get all unique node attributes
     all_attributes = set(
@@ -60,45 +60,46 @@ def extract_attributes(graph, edge_attributes, node_attributes):
 
     excess_attributes = all_attributes - node_attributes
     # Delete all excess attributes
-    for n, d in graph.nodes(data=True):
+    for _, attr_dict in graph.nodes(data=True):
         for att in excess_attributes:
-            d.pop(att, None)
+            attr_dict.pop(att, None)
 
     return graph
 
 
 if __name__ == "__main__":
     for place in places_bearing:
-        graph = ox.graph_from_place(place[1], network_type="drive")
+        test_graph = ox.graph_from_place(place[1], network_type="drive")
 
-        graph = extract_attributes(
-            graph,
+        test_graph = extract_attributes(
+            test_graph,
             edge_attributes={"geometry", "osmid"},
             node_attributes={"y", "x", "osmid"},
         )
 
         # Add edge bearings - the precision >1 is important for binning
-        graph = ox.add_edge_bearings(graph, precision=2)
+        test_graph = ox.add_edge_bearings(test_graph, precision=2)
 
         ox.io.save_graphml(
-            graph, filepath=f"./tests/test_data/cities" f"/{place[0]}_bearing.graphml"
+            test_graph,
+            filepath=f"./tests/test_data/cities" f"/{place[0]}_bearing.graphml",
         )
 
     for place in places_bearing_length:
-        graph = ox.graph_from_place(place[1], network_type="drive")
+        test_graph = ox.graph_from_place(place[1], network_type="drive")
 
-        graph = ox.distance.add_edge_lengths(graph)
+        test_graph = ox.distance.add_edge_lengths(test_graph)
 
-        graph = extract_attributes(
-            graph,
+        test_graph = extract_attributes(
+            test_graph,
             edge_attributes={"geometry", "osmid", "length"},
             node_attributes={"y", "x", "osmid"},
         )
 
         # Add edge bearings - the precision >1 is important for binning
-        graph = ox.add_edge_bearings(graph, precision=2)
+        test_graph = ox.add_edge_bearings(test_graph, precision=2)
 
         ox.io.save_graphml(
-            graph,
+            test_graph,
             filepath=f"./tests/test_data/cities" f"/{place[0]}_bearing_length.graphml",
         )
