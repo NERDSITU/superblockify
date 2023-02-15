@@ -1,5 +1,9 @@
 """Metric object for the superblockify package."""
 import logging
+from datetime import timedelta
+from time import time
+
+from networkx import floyd_warshall_numpy
 
 logger = logging.getLogger("superblockify")
 
@@ -47,6 +51,8 @@ class Metric:
         self.global_efficiency = {"SE": None, "NE": None, "NS": None}
         self.local_efficiency = {"SE": None, "NE": None, "NS": None}
 
+        self.distance_matrix = None
+
     def __str__(self):
         """Return a string representation of the metric object.
 
@@ -78,4 +84,31 @@ class Metric:
         return f"{self.__class__.__name__}({self.__str__()})"
 
     def calculate_all(self, partitioner):
-        """Calculate all metrics for the partitioning."""
+        """Calculate all metrics for the partitioning.
+
+        `self.distance_matrix` is used to save the distances for the metrics and should
+        is set to None after calculating the metrics.
+
+        Parameters
+        ----------
+        partitioner : Partitioner
+            The partitioner object to calculate the metrics for
+        save_distances : bool, optional
+            Whether to save the distances for the metrics, by default True
+            If there are too many nodes, this can take a lot of memory, but saves
+            time when calculating the distances for the metrics again.
+
+        """
+
+        # Calculate all-pairs shortest path lengths with the Floyd-Warshall algorithm
+        # On the full graph (S)
+        start_time = time()
+        floyd_warshall = floyd_warshall_numpy(partitioner.graph, weight="length")
+        logger.debug(
+            "Calculated all-pairs shortest path lengths with the Floyd-Warshall "
+            "algorithm on the full graph (S) in %s",
+            timedelta(seconds=time() - start_time),
+        )
+        # On the partitioning graph (N)
+
+        self.distance_matrix = {"S": floyd_warshall}
