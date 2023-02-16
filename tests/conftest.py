@@ -18,10 +18,10 @@ TEST_DATA = config["tests"]["test_data_path"]
     params=[
         city
         for city in listdir(f"{TEST_DATA}cities/")
-        if city.endswith("_bearing.graphml")
+        if city.endswith(".graphml")
     ]
 )
-def test_city_bearing(request):
+def test_city_all(request):
     """Fixture for loading and parametrizing all cities with bearing test_data."""
     return request.param, ox.load_graphml(
         filepath=f"{TEST_DATA}cities/" + request.param
@@ -32,10 +32,10 @@ def test_city_bearing(request):
     params=[
         city
         for city in listdir(f"{TEST_DATA}cities/")
-        if city.endswith("_bearing_length.graphml")
+        if city.endswith("_small.graphml")
     ]
 )
-def test_city_bearing_length(request):
+def test_city_small(request):
     """Fixture for loading and parametrizing all cities with bearing and length
     test_data."""
     return request.param, ox.load_graphml(

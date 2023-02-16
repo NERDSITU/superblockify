@@ -7,16 +7,14 @@ import osmnx as ox
 ox.config(use_cache=False, log_console=True)
 
 # General cities/neighborhoods
-places_bearing = [
+places_general = [
     ("Barcelona", "Barcelona, Catalonia, Spain"),
     ("Brooklyn", "Brooklyn, New York, United States"),
     ("Copenhagen", ["Københavns Kommune, Denmark", "Frederiksberg Kommune, Denmark"]),
-    ("MissionTown", "团城街道, Xialu, Hubei, China"),
     ("Resistencia", "Resistencia, Chaco, Argentina"),
-    ("Scheveningen", "Scheveningen, The Hague, Netherlands"),
 ]
 
-places_bearing_length = [
+places_small = [
     ("Adliswil", "Adliswil, Bezirk Horgen, Zürich, Switzerland"),
     ("Liechtenstein", "Liechtenstein, Europe"),
     ("MissionTown", "团城街道, Xialu, Hubei, China"),
@@ -68,24 +66,7 @@ def extract_attributes(graph, edge_attributes, node_attributes):
 
 
 if __name__ == "__main__":
-    for place in places_bearing:
-        test_graph = ox.graph_from_place(place[1], network_type="drive")
-
-        test_graph = extract_attributes(
-            test_graph,
-            edge_attributes={"geometry", "osmid"},
-            node_attributes={"y", "x", "osmid"},
-        )
-
-        # Add edge bearings - the precision >1 is important for binning
-        test_graph = ox.add_edge_bearings(test_graph, precision=2)
-
-        ox.io.save_graphml(
-            test_graph,
-            filepath=f"./tests/test_data/cities" f"/{place[0]}_bearing.graphml",
-        )
-
-    for place in places_bearing_length:
+    for place in places_small + places_general:
         test_graph = ox.graph_from_place(place[1], network_type="drive")
 
         test_graph = ox.distance.add_edge_lengths(test_graph)
@@ -101,5 +82,7 @@ if __name__ == "__main__":
 
         ox.io.save_graphml(
             test_graph,
-            filepath=f"./tests/test_data/cities" f"/{place[0]}_bearing_length.graphml",
+            filepath=f"./tests/test_data/cities/{place[0]}_"
+            + ("general" if place in places_general else "small")
+            + ".graphml",
         )

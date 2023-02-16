@@ -14,9 +14,9 @@ TEST_DATA = config["tests"]["test_data_path"]
 
 @pytest.mark.parametrize("e_l,n_a", [(0.5, 0.5), (1, 0)])
 @pytest.mark.parametrize("save", [True, False])
-def test_paint_streets(test_city_bearing, e_l, n_a, save):
+def test_paint_streets(test_city_all, e_l, n_a, save):
     """Test `paint_streets` by design."""
-    city_path, graph = test_city_bearing
+    city_path, graph = test_city_all
     paint_streets(
         graph,
         edge_linewidth=e_l,
@@ -27,23 +27,23 @@ def test_paint_streets(test_city_bearing, e_l, n_a, save):
     plt.close()
 
 
-def test_paint_streets_overwrite_ec(test_city_bearing):
+def test_paint_streets_overwrite_ec(test_city_all):
     """Test `paint_streets` trying to overwrite the edge colors."""
-    _, graph = test_city_bearing
+    _, graph = test_city_all
     with pytest.raises(ValueError):
         paint_streets(graph, edge_color="white")
 
 
-def test_paint_streets_empty_plot(test_city_bearing):
+def test_paint_streets_empty_plot(test_city_all):
     """Test `paint_streets` trying plot empty plot."""
-    _, graph = test_city_bearing
+    _, graph = test_city_all
     with pytest.raises(ValueError):
         paint_streets(graph, edge_linewidth=0, node_size=0)
 
 
-def test_plot_by_attribute(test_city_bearing):
+def test_plot_by_attribute(test_city_all):
     """Test `plot_by_attribute` by design."""
-    _, graph = test_city_bearing
+    _, graph = test_city_all
 
     # Use osmid as attribute determining color
     # Some osmid attributes return lists, not ints, just take first element
@@ -58,9 +58,9 @@ def test_plot_by_attribute(test_city_bearing):
     plt.close()
 
 
-def test_plot_by_attribute_no_attribute(test_city_bearing):
+def test_plot_by_attribute_no_attribute(test_city_all):
     """Test `plot_by_attribute` with missing attribute."""
-    _, graph = test_city_bearing
+    _, graph = test_city_all
     with pytest.raises(ValueError):
         plot_by_attribute(graph, "non_existent_attribute")
 
@@ -80,8 +80,8 @@ def test_plot_by_attribute_no_attribute(test_city_bearing):
         (1, 0),
     ],
 )
-def test_plot_by_attribute_minmax_val_faulty(test_city_bearing, minmax_val_faulty):
+def test_plot_by_attribute_minmax_val_faulty(test_city_all, minmax_val_faulty):
     """Test `plot_by_attribute` with faulty minmax_val."""
-    _, graph = test_city_bearing
+    _, graph = test_city_all
     with pytest.raises(ValueError):
         plot_by_attribute(graph, "osmid", minmax_val=minmax_val_faulty)

@@ -44,9 +44,9 @@ class TestMetric:
             "avg_path_length: S: 4, N: 11; )"
         )
 
-    def test_calculate_all(self, test_city_bearing_length, partitioner_class):
+    def test_calculate_all(self, test_city_small, partitioner_class):
         """Test the calculate_all method."""
-        city_name, graph = test_city_bearing_length
+        city_name, graph = test_city_small
         part = partitioner_class(graph, name=city_name)
         part.run()
         part.calculate_metrics()
