@@ -106,7 +106,7 @@ class BasePartitioner(ABC):
         self.metric.calculate_all(self)
         logger.debug("Metrics for %s: %s", self.name, self.metric)
 
-    def make_subgraphs_from_attribute(self, split_disconnected=False):
+    def make_subgraphs_from_attribute(self, split_disconnected=False, min_edge_count=0):
         """Make component subgraphs from attribute.
 
         Method for child classes to make subgraphs from the attribute
@@ -120,6 +120,10 @@ class BasePartitioner(ABC):
         ----------
         split_disconnected : bool, optional
             If True, split the disconnected components into separate subgraphs.
+            Default is False.
+        min_edge_count : int, optional
+            If split_disconnected is True, minimal size of a component to be
+            considered as a separate subgraph. Default is 0.
 
         Raises
         ------
@@ -173,6 +177,8 @@ class BasePartitioner(ABC):
                             "value": part["value"],
                             "subgraph": self.graph.subgraph(component),
                             "num_edges": len(self.graph.subgraph(component).edges),
+                            "ignore": len(self.graph.subgraph(component).edges)
+                                      < min_edge_count,
                         }
                     )
 
@@ -251,6 +257,7 @@ class BasePartitioner(ABC):
         # Find number of edges in each component for each partition
         num_edges = []
         component_values = []
+        ignore = []
 
         # If subgraphs were split, use components
         if self.components:
@@ -258,12 +265,14 @@ class BasePartitioner(ABC):
             for comp in self.components:
                 num_edges.append(comp["num_edges"])
                 component_values.append(comp["value"])
+                ignore.append(comp["ignore"])
         # Else use partitions
         else:
             logger.debug("Using partitions for plotting.")
             for part in self.partition:
                 num_edges.append(part["num_edges"])
                 component_values.append(part["value"])
+                ignore = None
 
         # Plot
         return plot.plot_component_size(
@@ -271,6 +280,7 @@ class BasePartitioner(ABC):
             attr=self.attribute_label,
             num_edges=num_edges,
             component_values=component_values,
+            ignore=ignore,
             title=self.name,
             minmax_val=self.attr_value_minmax,
             **pcs_kwargs,

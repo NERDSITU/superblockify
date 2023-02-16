@@ -105,7 +105,7 @@ class BearingPartitioner(BasePartitioner):
         ]
 
         # Make subgraphs for each partition
-        self.make_subgraphs_from_attribute(split_disconnected=True)
+        self.make_subgraphs_from_attribute(split_disconnected=True, min_edge_count=5)
 
         if show_analysis_plots:
             self.plot_subgraph_component_size()

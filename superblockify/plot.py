@@ -202,13 +202,14 @@ def plot_component_size(
     attr,
     num_edges,
     component_values,
+    ignore=None,
     title=None,
     cmap="hsv",
     minmax_val=None,
     num_component_log_scale=True,
     show_legend=None,
     **kwargs,
-):  # pylint: disable=too-many-arguments
+):  # pylint: disable=too-many-arguments, too-many-locals
     """Plot the distribution of component sizes for each partition value.
 
     x-axis: values of the partition
@@ -226,6 +227,8 @@ def plot_component_size(
         Number of edges in each component
     component_values : list
         Value of the partition for each component
+    ignore : list, optional
+        List of values to ignore, plot in gray. If None, no values are ignored.
     title : str, optional
         Title of the plot
     cmap : string, optional
@@ -298,6 +301,13 @@ def plot_component_size(
         num_edges,
         c=[
             colormap((v - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
+            if i is False
+            else "gray"
+            for v, i in zip(component_values, ignore)
+        ]
+        if ignore is not None
+        else [
+            colormap((v - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
             for v in component_values
         ],
         alpha=0.5,
@@ -308,4 +318,4 @@ def plot_component_size(
     return fig, axe
 
 
-# pylint: enable=too-many-arguments
+# pylint: enable=too-many-arguments, too-many-locals
