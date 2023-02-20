@@ -51,6 +51,16 @@ class TestPartitioners:
         assert isinstance(fig, Figure)
         assert isinstance(axe, Axes)
 
+    def test_plot_component_graph(self, test_city_all, partitioner_class):
+        """Test `plot_component_graph` by design."""
+        city_name, graph = test_city_all
+        part = partitioner_class(graph, name=city_name)
+        part.run(show_analysis_plots=False)
+        if part.components is not None:
+            fig, axe = part.plot_component_graph()
+            assert isinstance(fig, Figure)
+            assert isinstance(axe, Axes)
+
     def test_plot_partitions_unpartitioned(self, test_city_all, partitioner_class):
         """Test `plot_partition_graph` exception handling."""
         city_name, graph = test_city_all

@@ -47,12 +47,15 @@ def paint_streets(graph, cmap="hsv", **pg_kwargs):
         graph, lambda bear: bear % 90, "bearing", "bearing_90"
     )
 
-    return plot_by_attribute(graph, "bearing_90", cmap, **pg_kwargs)
+    return plot_by_attribute(
+        graph, "bearing_90", attr_types="numerical", cmap=cmap, **pg_kwargs
+    )
 
 
 def plot_by_attribute(
     graph,
     attr,
+    attr_types="numerical",
     cmap="hsv",
     edge_linewidth=1,
     node_alpha=0,
@@ -70,6 +73,8 @@ def plot_by_attribute(
         Input graph
     attr : string
         Graph's attribute to select colors by
+    attr_types : string, optional
+        Type of the attribute to be plotted, can be 'numerical' or 'categorical'
     cmap : string, optional
         Name of a matplotlib colormap
     edge_linewidth : float, optional
@@ -105,26 +110,16 @@ def plot_by_attribute(
             f"bearings and colormap."
         )
 
-    if minmax_val is not None and (
-        not isinstance(minmax_val, tuple) or len(minmax_val) != 2
-    ):
-        raise ValueError(
-            f"The `minmax_val` attribute was set to {minmax_val}, "
-            f"it should be a tuple of length 2 or None."
-        )
-
     # Choose the color for each edge based on the edge's attribute value,
     # if `None`, set to gray.
-    minmax_val = determine_minmax_val(graph, minmax_val, attr)
     colormap = plt.get_cmap(cmap)
 
     # Make list of edge colors, order is the same as in graph.edges()
-    e_c = [
-        colormap((attr_val - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
-        if attr_val is not None
-        else (0.5, 0.5, 0.5, 1)  # gray
-        for u, v, k, attr_val in graph.edges(keys=True, data=attr)
-    ]
+    e_c = list(
+        make_edge_color_list(
+            graph, attr, colormap, attr_types=attr_types, minmax_val=minmax_val
+        )
+    )
 
     # Print list of unique colors in the colormap, with a set comprehension
     logger.debug(
@@ -143,7 +138,96 @@ def plot_by_attribute(
     )
 
 
-# pylint: enable=too-many-arguments
+def make_edge_color_list(
+    graph,
+    attr,
+    cmap,
+    attr_types="numerical",
+    minmax_val=None,
+    none_color=(0.5, 0.5, 0.5, 1),
+):  # pylint: disable=too-many-arguments
+    """Make a list of edge colors based on an edge attribute and colormap.
+
+    Color will be chosen based on the specified edge attribute passed to a colormap.
+
+    Parameters
+    ----------
+    graph : networkx.MultiDiGraph
+        Input graph
+    attr : string
+        Graph's attribute to select colors by
+    attr_types : string, optional
+        Type of the attribute to be plotted, can be 'numerical' or 'categorical'
+    cmap : matplotlib.colors.Colormap
+        Colormap to use for the plot
+    minmax_val : tuple, optional
+        If `attr_types` is 'numerical', tuple of (min, max) values of the attribute
+        to be plotted (default: min and max of attr)
+    none_color : tuple, optional
+        Color to use for edges with `None` attribute value
+
+    Raises
+    ------
+    ValueError
+        If `attr_types` is not 'numerical' or 'categorical'
+    ValueError
+        If `attr_types` is 'categorical' and `minmax_val` is not None
+
+    Returns
+    -------
+    list
+        List of edge colors, order is the same as in graph.edges()
+
+    """
+
+    if attr_types == "categorical" and minmax_val is not None:
+        raise ValueError(
+            f"The `minmax_val` attribute was set to {minmax_val}, "
+            f"it should be None."
+        )
+
+    if attr_types == "numerical":
+        minmax_val = determine_minmax_val(graph, minmax_val, attr)
+        return [
+            cmap((attr_val - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
+            if attr_val is not None
+            else none_color
+            for u, v, k, attr_val in graph.edges(keys=True, data=attr)
+        ]
+    if attr_types == "categorical":
+        # Enumerate through the unique values of the attribute
+        # and assign a color to each value, `None` will be assigned to `none_color`.
+        unique_vals = set(
+            attr_val for u, v, k, attr_val in graph.edges(keys=True, data=attr)
+        )
+
+        # To sort the values, remove None from the set, sort the values,
+        # and add None back to the set.
+        unique_vals.discard(None)
+        unique_vals = list(unique_vals)
+        try:
+            unique_vals = sorted(unique_vals)
+        except TypeError:
+            # If the values are not sortable, just leave them as they are.
+            logger.debug(
+                "The values of the attribute %s are not sortable, "
+                "the order of the colors in the colormap will be random.",
+                attr,
+            )
+        finally:
+            unique_vals.append(None)
+
+        return [
+            cmap(unique_vals.index(attr_val) / (len(unique_vals) - 1))
+            if attr_val is not None
+            else none_color
+            for u, v, k, attr_val in graph.edges(keys=True, data=attr)
+        ]
+    # If attr_types is not 'numerical' or 'categorical', raise an error
+    raise ValueError(
+        f"The `attr_types` attribute was set to {attr_types}, "
+        f"it should be 'numerical' or 'categorical'."
+    )
 
 
 def determine_minmax_val(graph, minmax_val, attr):
@@ -173,6 +257,15 @@ def determine_minmax_val(graph, minmax_val, attr):
         If `minmax_val[0]` is not smaller than `minmax_val[1]`.
 
     """
+
+    if minmax_val is not None and (
+        not isinstance(minmax_val, tuple) or len(minmax_val) != 2
+    ):
+        raise ValueError(
+            f"The `minmax_val` attribute was set to {minmax_val}, "
+            f"it should be a tuple of length 2 or None."
+        )
+
     # Determine min and max values of the attribute
     logger.debug("Given minmax_val for attribute %s: %s", attr, minmax_val)
     if minmax_val is None or minmax_val[0] is None or minmax_val[1] is None:
@@ -320,6 +413,3 @@ def plot_component_size(
     )
 
     return fig, axe
-
-
-# pylint: enable=too-many-arguments, too-many-locals

@@ -5,7 +5,7 @@ import pytest
 from matplotlib import pyplot as plt
 
 from superblockify import new_edge_attribute_by_function
-from superblockify.plot import paint_streets, plot_by_attribute
+from superblockify.plot import paint_streets, plot_by_attribute, make_edge_color_list
 
 config = ConfigParser()
 config.read("config.ini")
@@ -85,3 +85,35 @@ def test_plot_by_attribute_minmax_val_faulty(test_city_all, minmax_val_faulty):
     _, graph = test_city_all
     with pytest.raises(ValueError):
         plot_by_attribute(graph, "osmid", minmax_val=minmax_val_faulty)
+
+
+def test_make_edge_color_list(test_city_all):
+    """Test `make_edge_color_list` by design."""
+    _, graph = test_city_all
+    colormap = plt.get_cmap("rainbow")
+    edge_color_list = list(
+        make_edge_color_list(graph, "bearing", cmap=colormap, attr_types="numerical")
+    )
+    assert len(edge_color_list) == len(graph.edges)
+    assert isinstance(edge_color_list[0], tuple)
+    assert len(edge_color_list[0]) == 4
+
+
+@pytest.mark.parametrize(
+    "attr_type,minmax",
+    [
+        ("ff", (0.5, 1.0)),  # attr_type not in ["numerical", "categorical"]
+        ("categorical", 0),  # minmax not None
+        ("numerical", (0.5, 1.0, 1.5)),  # minmax not two-element tuple or None
+        ("numerical", (1.5)),  # minmax not two-element tuple or None
+        ("numerical", True),  # minmax not two-element tuple or None
+    ],
+)
+def test_make_edge_color_list_faulty_attr_type(test_city_all, attr_type, minmax):
+    """Test `make_edge_color_list` with faulty attr_type."""
+    _, graph = test_city_all
+    colormap = plt.get_cmap("rainbow")
+    with pytest.raises((ValueError, TypeError)):
+        make_edge_color_list(
+            graph, "bearing", cmap=colormap, attr_types=attr_type, minmax_val=minmax
+        )

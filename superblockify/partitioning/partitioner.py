@@ -254,7 +254,8 @@ class BasePartitioner(ABC):
         if self.components is None:
             raise AssertionError(
                 f"Components have not been defined for {self.name}. "
-                f"Run `make_subgraphs_from_attribute` first."
+                f"Run `make_subgraphs_from_attribute` with `split_disconnected` "
+                f"set to True."
             )
 
         # Log overwriting attributes
@@ -277,7 +278,7 @@ class BasePartitioner(ABC):
         """Plotting the partition with color on graph.
 
         Plots the partitioned graph, just like `plot.paint_streets` but that the
-        partitions have a uniform color.
+        *partitions* have a uniform color.
 
         Parameters
         ----------
@@ -308,6 +309,64 @@ class BasePartitioner(ABC):
             self.graph,
             self.attribute_label,
             minmax_val=self.attr_value_minmax,
+            **pba_kwargs,
+        )
+
+    def plot_component_graph(self, **pba_kwargs):
+        """Plotting the components with color on graph.
+
+        Plots the graph with the components, just like `plot.paint_streets` but that
+        the *components* have a uniform color.
+
+        Parameters
+        ----------
+        pba_kwargs
+            Keyword arguments to pass to `superblockify.plot_by_attribute`.
+
+        Returns
+        -------
+        fig, axe : tuple
+            matplotlib figure, axis
+
+        Raises
+        ------
+        AssertionError
+            If BasePartitioner has not been runned yet (the partitions are not defined).
+        AssertionError
+            If `self.components` is not defined (the subgraphs have not been split
+            into components).
+
+        """
+
+        self.__check_has_been_runned()
+
+        if self.components is None:
+            raise AssertionError(
+                f"Components have not been defined for {self.name}. "
+                f"Run `make_subgraphs_from_attribute` with `split_disconnected` "
+                f"set to True."
+            )
+
+        # Log plotting
+        logger.info(
+            "Plotting component graph for %s with attribute %s",
+            self.name,
+            self.attribute_label,
+        )
+        # Bake component labels into graph
+        for component in self.components:
+            if not component["ignore"]:
+                nx.set_edge_attributes(
+                    component["subgraph"],
+                    component["name"],
+                    "component_name",
+                )
+        return plot.plot_by_attribute(
+            self.graph,
+            attr="component_name",
+            attr_types="categorical",
+            cmap="prism",
+            minmax_val=None,
             **pba_kwargs,
         )
 
