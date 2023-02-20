@@ -211,6 +211,68 @@ class BasePartitioner(ABC):
         )
         logger.debug(found_disconnected, self.name)
 
+        if split_disconnected:
+            self.overwrite_attributes_of_ignored_components(
+                attribute_name=self.attribute_label, attribute_value=None
+            )
+
+    def overwrite_attributes_of_ignored_components(
+        self, attribute_name, attribute_value=None
+    ):
+        """Overwrite attributes of ignored components.
+
+        Method for child classes to overwrite the subgraph's edge attributes
+        of ignored components. Overwrites the attribute `attribute_name` with
+        `attribute_value` for all components that have the attribute `ignore` set to
+        True.
+        This is useful for example to overwrite the `self.attribute_label` attribute
+        with `None` to make the subgraph invisible in the network plot
+        (`self.plot_partition_graph()`).
+
+        Also it will affect `self.graph`, as the component's subgraph is a view of the
+        original graph.
+
+        Parameters
+        ----------
+        attribute_name : str
+            Name of the attribute to overwrite.
+        attribute_value : str, optional
+            Value to overwrite the attribute with. Default is None.
+
+        Raises
+        ------
+        AssertionError
+            If BasePartitioner has not been runned yet (the partitions are not defined).
+        AssertionError
+            If `self.components` is not defined (the subgraphs have not been split
+            into components).
+
+        """
+
+        self.__check_has_been_runned()
+
+        if self.components is None:
+            raise AssertionError(
+                f"Components have not been defined for {self.name}. "
+                f"Run `make_subgraphs_from_attribute` first."
+            )
+
+        # Log overwriting attributes
+        logger.info(
+            "Overwriting attributes of ignored components for attribute %s "
+            "with value %s",
+            attribute_name,
+            attribute_value,
+        )
+
+        # Overwrite attributes of ignored components
+        if self.components:
+            for component in self.components:
+                if component["ignore"]:
+                    nx.set_edge_attributes(
+                        component["subgraph"], attribute_value, attribute_name
+                    )
+
     def plot_partition_graph(self, **pba_kwargs):
         """Plotting the partition with color on graph.
 

@@ -102,3 +102,16 @@ class TestPartitioners:
         part.run()
         with pytest.raises(ValueError):
             part.plot_subgraph_component_size(invalid_measure)
+
+    def test_overwrite_attributes_of_ignored_components_unpartitioned(
+        self, test_city_small, partitioner_class
+    ):
+        """Test `overwrite_attributes_of_ignored_components` exception handling."""
+        city_name, graph = test_city_small
+        part = partitioner_class(graph, name=city_name)
+        part.run()
+        part.components = None
+        with pytest.raises(AssertionError):
+            part.overwrite_attributes_of_ignored_components(
+                attribute_name=part.attribute_label
+            )
