@@ -16,9 +16,7 @@ TEST_DATA = config["tests"]["test_data_path"]
 
 @pytest.fixture(
     params=[
-        city
-        for city in listdir(f"{TEST_DATA}cities/")
-        if city.endswith(".graphml")
+        city for city in listdir(f"{TEST_DATA}cities/") if city.endswith(".graphml")
     ]
 )
 def test_city_all(request):
