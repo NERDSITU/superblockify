@@ -200,8 +200,9 @@ def determine_minmax_val(graph, minmax_val, attr):
 def plot_component_size(
     graph,
     attr,
-    num_edges,
+    component_size,
     component_values,
+    size_measure_label,
     ignore=None,
     title=None,
     cmap="hsv",
@@ -213,7 +214,7 @@ def plot_component_size(
     """Plot the distribution of component sizes for each partition value.
 
     x-axis: values of the partition
-    y-axis: number of edges in the component
+    y-axis: size of the component (e.g. number of edges, nodes or length)
     color: value of the partition
 
     Parameters
@@ -223,10 +224,13 @@ def plot_component_size(
     attr : string
         Graph's attribute to select colormap min and max values by
         if `minmax_val` is incomplete
-    num_edges : list
+    component_size : list
         Number of edges in each component
     component_values : list
         Value of the partition for each component
+    size_measure_label : str
+        Label of the size measure (e.g. "Number of edges", "Number of nodes",
+        "Length [m]")
     ignore : list, optional
         List of values to ignore, plot in gray. If None, no values are ignored.
     title : str, optional
@@ -260,7 +264,7 @@ def plot_component_size(
     logger.debug("Plotting component/partition sizes for %s.", title)
     # Labelling
     axe.set_xlabel(attr)
-    axe.set_ylabel("Number of edges")
+    axe.set_ylabel(size_measure_label)
     if title is not None:
         axe.set_title(f"Component size of {title}")
 
@@ -298,7 +302,7 @@ def plot_component_size(
     # Scatter plot
     axe.scatter(
         component_values,
-        num_edges,
+        component_size,
         c=[
             colormap((v - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
             if i is False

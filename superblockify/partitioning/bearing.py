@@ -105,10 +105,12 @@ class BearingPartitioner(BasePartitioner):
         ]
 
         # Make subgraphs for each partition
-        self.make_subgraphs_from_attribute(split_disconnected=True, min_edge_count=5)
+        self.make_subgraphs_from_attribute(
+            split_disconnected=True, min_edge_count=5, min_length=400
+        )
 
         if show_analysis_plots:
-            self.plot_subgraph_component_size()
+            self.plot_subgraph_component_size("length")
             plt.show()
 
     def __bin_bearings(self, num_bins: int):

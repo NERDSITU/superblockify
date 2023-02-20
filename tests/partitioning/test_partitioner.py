@@ -78,11 +78,27 @@ class TestPartitioners:
         city_name, graph = test_city_all
         part = partitioner_class(graph, name=city_name)
         with pytest.raises(AssertionError):
-            part.plot_subgraph_component_size()
+            part.plot_subgraph_component_size("nodes")
         part.run()
-        fig, _ = part.plot_subgraph_component_size()
+        fig, _ = part.plot_subgraph_component_size("nodes")
+        fig, _ = part.plot_subgraph_component_size("edges")
+        fig, _ = part.plot_subgraph_component_size("length")
         fig.show()
         part.components = None
-        fig, _ = part.plot_subgraph_component_size()
+        fig, _ = part.plot_subgraph_component_size("nodes")
         fig.show()
         plt.close()
+
+    @pytest.mark.parametrize(
+        "invalid_measure",
+        ["", "invalid", "node", None, 10, 1.0, True, False],
+    )
+    def test_plot_subgraph_component_size_invalid_measure(
+        self, test_city_small, partitioner_class, invalid_measure
+    ):
+        """Test `plot_subgraph_component_size` with unavailable measure."""
+        city_name, graph = test_city_small
+        part = partitioner_class(graph, name=city_name)
+        part.run()
+        with pytest.raises(ValueError):
+            part.plot_subgraph_component_size(invalid_measure)

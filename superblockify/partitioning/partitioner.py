@@ -106,7 +106,9 @@ class BasePartitioner(ABC):
         self.metric.calculate_all(self)
         logger.debug("Metrics for %s: %s", self.name, self.metric)
 
-    def make_subgraphs_from_attribute(self, split_disconnected=False, min_edge_count=0):
+    def make_subgraphs_from_attribute(
+        self, split_disconnected=False, min_edge_count=0, min_length=0
+    ):
         """Make component subgraphs from attribute.
 
         Method for child classes to make subgraphs from the attribute
@@ -124,6 +126,9 @@ class BasePartitioner(ABC):
         min_edge_count : int, optional
             If split_disconnected is True, minimal size of a component to be
             considered as a separate subgraph. Default is 0.
+        min_length : int, optional
+            If split_disconnected is True, minimal length (in meters) of a component to
+            be considered as a separate subgraph. Default is 0.
 
         Raises
         ------
@@ -151,6 +156,10 @@ class BasePartitioner(ABC):
                 self.graph, self.attribute_label, part["value"]
             )
             part["num_edges"] = len(part["subgraph"].edges)
+            part["num_nodes"] = len(part["subgraph"].nodes)
+            part["length_total"] = sum(
+                d["length"] for u, v, d in part["subgraph"].edges(data=True)
+            )
 
         if split_disconnected:
             self.components = []
@@ -177,9 +186,19 @@ class BasePartitioner(ABC):
                             "value": part["value"],
                             "subgraph": self.graph.subgraph(component),
                             "num_edges": len(self.graph.subgraph(component).edges),
-                            "ignore": len(self.graph.subgraph(component).edges)
-                                      < min_edge_count,
+                            "num_nodes": len(self.graph.subgraph(component).nodes),
+                            "length_total": sum(
+                                d["length"]
+                                for u, v, d in self.graph.subgraph(component).edges(
+                                    data=True
+                                )
+                            ),
                         }
+                    )
+                    # Add 'ignore' attribute, based on min_edge_count and min_length
+                    self.components[-1]["ignore"] = (
+                        self.components[-1]["num_edges"] < min_edge_count
+                        or self.components[-1]["length_total"] < min_length
                     )
 
         # Log status about disconnected components
@@ -230,13 +249,15 @@ class BasePartitioner(ABC):
             **pba_kwargs,
         )
 
-    def plot_subgraph_component_size(self, **pcs_kwargs):
+    def plot_subgraph_component_size(self, measure, **pcs_kwargs):
         """Plot the size of the subgraph components of the partitions.
 
         Scatter plot of the size of the subgraph components of each partition type.
 
         Parameters
         ----------
+        measure : str, optional
+            Way to measure component size. Can be 'edges', 'length' or 'nodes'.
         pcs_kwargs
             Keyword arguments to pass to `superblockify.plot.plot_component_size`.
 
@@ -249,13 +270,22 @@ class BasePartitioner(ABC):
         ------
         AssertionError
             If BasePartitioner has not been runned yet (the partitions are not defined).
+        ValueError
+            If measure is not 'edges', 'length' or 'nodes'.
 
         """
 
         self.__check_has_been_runned()
 
+        if measure not in ["edges", "length", "nodes"]:
+            raise ValueError(
+                f"Measure '{measure}' is not supported, "
+                f"use 'edges', 'length' or 'nodes'."
+            )
+
         # Find number of edges in each component for each partition
-        num_edges = []
+        key_name = "length_total" if measure == "length" else f"num_{measure}"
+        component_size = []
         component_values = []
         ignore = []
 
@@ -263,14 +293,14 @@ class BasePartitioner(ABC):
         if self.components:
             logger.debug("Using components for plotting.")
             for comp in self.components:
-                num_edges.append(comp["num_edges"])
+                component_size.append(comp[key_name])
                 component_values.append(comp["value"])
                 ignore.append(comp["ignore"])
         # Else use partitions
         else:
             logger.debug("Using partitions for plotting.")
             for part in self.partition:
-                num_edges.append(part["num_edges"])
+                component_size.append(part[key_name])
                 component_values.append(part["value"])
                 ignore = None
 
@@ -278,8 +308,9 @@ class BasePartitioner(ABC):
         return plot.plot_component_size(
             graph=self.graph,
             attr=self.attribute_label,
-            num_edges=num_edges,
+            component_size=component_size,
             component_values=component_values,
+            size_measure_label=f"Component size ({measure})",
             ignore=ignore,
             title=self.name,
             minmax_val=self.attr_value_minmax,
@@ -334,5 +365,12 @@ class DummyPartitioner(BasePartitioner):
         # the edge attributes under the instances `attribute_label`, which belong to
         # this partition
         self.partition = [
-            {"name": str(num), "value": num, "num_edges": num} for num in values
+            {
+                "name": str(num),
+                "value": num,
+                "num_edges": num,
+                "num_nodes": num,
+                "length_total": num,
+            }
+            for num in values
         ]
