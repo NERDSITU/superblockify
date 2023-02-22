@@ -136,12 +136,6 @@ class Metric:
         Compressed Sparse Row format is a sparse matrix format that is efficient for
         arithmetic operations. [2]_
 
-        Reasons why Dijkstra might not terminate:
-        - Negative edge weights
-        - Graph is not connected
-        - Graph is not strongly connected
-
-
         Parameters
         ----------
         graph : networkx.Graph
@@ -183,8 +177,10 @@ class Metric:
             graph_matrix, directed=True, return_predecessors=False, unweighted=False
         )
         logger.debug(
-            "All-pairs shortest path lengths with `scipy.sparse.csgraph.shortest_path` "
-            "in %s.",
+            "All-pairs shortest path lengths for graph with %s nodes and %s edges "
+            "calculated in %s.",
+            graph.number_of_nodes(),
+            graph.number_of_edges(),
             timedelta(seconds=time() - start_time),
         )
         return dist_full_graph
