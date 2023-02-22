@@ -26,7 +26,12 @@ by executing (`environmentSetupVersionless.sh`)
 conda create -n OSMnxPyrLab -c conda-forge osmnx pyrosm jupyterlab
 conda activate OSMnxPyrLab
 conda install -c conda-forge jupyterlab_code_formatter blackd isort pylint pytest coverage sphinx sphinx_rtd_theme
+pip install scipy==1.10.1
 ```
+
+_(as scipy==1.10.1 is not yet available on conda-forge, but fixes needed issue
+https://github.com/scipy/scipy/pull/17800, remove when availabe on conda-forge, check
+https://anaconda.org/conda-forge/scipy)_
 
 which does not have explicit versions, but might resolve dependency issues.
 
