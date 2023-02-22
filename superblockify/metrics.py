@@ -3,13 +3,14 @@ import logging
 from datetime import timedelta
 from time import time
 
-from networkx import floyd_warshall_numpy
+from networkx import to_scipy_sparse_array
+from scipy.sparse.csgraph import dijkstra
 
 logger = logging.getLogger("superblockify")
 
 
 class Metric:
-    """Metric object to beused with partitioners.
+    """Metric object to be used with partitioners.
 
     A metric object is used to calculate the quality of a partitioning.
     It holds the information on several network metrics, which can be read,
@@ -93,22 +94,97 @@ class Metric:
         ----------
         partitioner : Partitioner
             The partitioner object to calculate the metrics for
-        save_distances : bool, optional
-            Whether to save the distances for the metrics, by default True
-            If there are too many nodes, this can take a lot of memory, but saves
-            time when calculating the distances for the metrics again.
 
         """
 
-        # Calculate all-pairs shortest path lengths with the Floyd-Warshall algorithm
         # On the full graph (S)
-        start_time = time()
-        floyd_warshall = floyd_warshall_numpy(partitioner.graph, weight="length")
-        logger.debug(
-            "Calculated all-pairs shortest path lengths with the Floyd-Warshall "
-            "algorithm on the full graph (S) in %s",
-            timedelta(seconds=time() - start_time),
+        dist_full_graph = self.calculate_distance_matrix(
+            partitioner.graph, weight="length"
         )
+
         # On the partitioning graph (N)
 
-        self.distance_matrix = {"S": floyd_warshall}
+        self.distance_matrix = {"S": dist_full_graph}
+
+    def calculate_distance_matrix(self, graph, weight=None):
+        """Calculate the distance matrix for the partitioning.
+
+        Use cythonized scipy.sparse.csgraph functions to calculate the distance matrix.
+
+        Generally Dijkstra's algorithm with a Fibonacci heap is used. It's approximate
+        computational cost is ``O[N(N*k + N*log(N))]`` where ``N`` is the number of
+        nodes and ``k`` is the average number of edges per node. We use this,
+        because our graphs are usually sparse. For dense graphs, the Floyd-Warshall
+        algorithm can be implemented with ``O[N^3]`` computational cost. [1]_
+
+        Runtime comparison:
+        - Scheveningen, NL (N = 1002, E = 2329):
+            - Dijkstra: 172ms
+            - Floyd-Warshall: 193ms
+        - Liechtenstein, LI (N = 1797, E = 4197):
+            - Dijkstra: 498ms
+            - Floyd-Warshall: 917ms
+        - Copenhagen, DK (N = 7806, E = 19565):
+            - Dijkstra: 14.65s
+            - Floyd-Warshall: 182.03s
+        - Barcelona, ES (N = 8812, E = 16441):
+            - Dijkstra: 18.21s
+            - Floyd-Warshall: 134.69s
+        (simple, one-time execution)
+
+        The input graph will be converted to a scipy sparse matrix in CSR format.
+        Compressed Sparse Row format is a sparse matrix format that is efficient for
+        arithmetic operations. [2]_
+
+        Reasons why Dijkstra might not terminate:
+        - Negative edge weights
+        - Graph is not connected
+        - Graph is not strongly connected
+
+
+        Parameters
+        ----------
+        graph : networkx.Graph
+            The graph to calculate the distance matrix for
+        weight : str, optional
+            The edge attribute to use as weight. If None, all edge weights are 1.
+
+        Raises
+        ------
+        ValueError
+            If the graph has negative edge weights.
+
+        Returns
+        -------
+        dist_matrix : ndarray
+            The distance matrix for the partitioning. dist_matrix[i, j] is the shortest
+            path length from node i to node j.
+
+        References
+        ----------
+        .. [1] SciPy 1.10.0 Reference Guide, scipy.sparse.csgraph.shortest_path
+           https://docs.scipy.org/doc/scipy-1.10.0/reference/generated/scipy.sparse.csgraph.shortest_path.html
+           (accessed February 21, 2023)
+        .. [2] SciPy 1.10.0 Reference Guide, scipy.sparse.csr_matrix
+           https://docs.scipy.org/doc/scipy-1.10.0/reference/generated/scipy.sparse.csr_matrix.html
+           (accessed February 21, 2023)
+
+        """
+
+        if weight is not None and any(graph.edges.data(weight, default=0)) < 0:
+            # For this case Johnson's algorithm could be used, but none of our graphs
+            # should have negative edge weights.
+            raise ValueError("Graph has negative edge weights.")
+
+        # First get N x N array of distances representing the input graph.
+        graph_matrix = to_scipy_sparse_array(graph, weight=weight, format="csr")
+        start_time = time()
+        dist_full_graph = dijkstra(
+            graph_matrix, directed=True, return_predecessors=False, unweighted=False
+        )
+        logger.debug(
+            "All-pairs shortest path lengths with `scipy.sparse.csgraph.shortest_path` "
+            "in %s.",
+            timedelta(seconds=time() - start_time),
+        )
+        return dist_full_graph

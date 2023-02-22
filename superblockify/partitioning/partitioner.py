@@ -103,7 +103,7 @@ class BasePartitioner(ABC):
 
         # Log calculating metrics
         logger.debug("Calculating metrics for %s", self.name)
-        self.metric.calculate_all(self)
+        self.metric.calculate_all(partitioner=self)
         logger.debug("Metrics for %s: %s", self.name, self.metric)
 
     def make_subgraphs_from_attribute(
