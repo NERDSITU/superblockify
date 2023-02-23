@@ -98,7 +98,7 @@ class Metric:
 
         Parameters
         ----------
-        partitioner : Partitioner
+        partitioner : BasePartitioner
             The partitioner object to calculate the metrics for
 
         """
@@ -117,8 +117,15 @@ class Metric:
         )
 
         # On the partitioning graph (N)
+        dist_partitioning_graph = self.calculate_partitioning_distance_matrix(
+            partitioner, weight="length", node_order=node_list
+        )
 
-        self.distance_matrix = {"E": dist_euclidean, "S": dist_full_graph}
+        self.distance_matrix = {
+            "E": dist_euclidean,
+            "S": dist_full_graph,
+            "N": dist_partitioning_graph,
+        }
 
     def calculate_distance_matrix(
         self, graph, weight=None, node_order=None, plot_distributions=False
@@ -395,3 +402,39 @@ class Metric:
             )
 
         return dist_matrix
+
+    def calculate_partitioning_distance_matrix(
+        self, partitioner, weight=None, node_order=None, plot_distributions=False
+    ):
+        """Calculate the distance matrix for the partitioning.
+
+        This is the pairwise distance between all pairs of nodes, where the shortest
+        paths are only allowed to traverse edges in the start and goal partitions and
+        unpartitioned edges.
+        For this, for each combination of start and goal partitions, the shortest
+        paths are calculated using `calculate_distance_matrix()`, as well as for the
+        unpartitioned edges.
+        Finally, a big distance matrix is constructed, where the distances for the
+        edges in the start and goal partitions are taken from the distance matrix for
+        the corresponding partition, and the distances for the unpartitioned edges are
+        taken from the distance matrix for the unpartitioned edges.
+
+        Parameters
+        ----------
+        partitioner : BasePartitioner
+            The partitioner to calculate the distance matrix for
+        weight : str, optional
+            The edge attribute to use as weight. If None, all edges have weight 1.
+        node_order : list, optional
+            The order of the nodes in the distance matrix. If None, the ordering is
+            produced by graph.nodes().
+        plot_distributions : bool, optional
+            If True, plot the distributions of the euclidean distances and coordinates.
+
+        Returns
+        -------
+        dist_matrix : ndarray
+            The distance matrix for the partitioning. dist_matrix[i, j] is the distance
+            between node i and node j for the given rules of the partitioning.
+
+        """
