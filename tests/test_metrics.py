@@ -1,4 +1,6 @@
 """Tests for the metrics module."""
+import pytest
+
 from superblockify.metrics import Metric
 
 
@@ -45,8 +47,26 @@ class TestMetric:
         )
 
     def test_calculate_all(self, test_city_small, partitioner_class):
-        """Test the calculate_all method."""
+        """Test the calculate_all method for full metrics."""
         city_name, graph = test_city_small
         part = partitioner_class(graph, name=city_name)
         part.run()
         part.calculate_metrics()
+
+    @pytest.mark.parametrize("weight", ["length", None])
+    def test_calculate_distance_matrix(self, test_city_small, weight):
+        """Test calculating all pairwise distances for the full graphs with timeout."""
+        _, graph = test_city_small
+        metric = Metric()
+        metric.calculate_distance_matrix(graph, weight=weight)
+
+    def test_calculate_distance_matrix_negative_weight(self, test_city_small):
+        """Test calculating all pairwise distances for the full graphs with negative
+        weights.
+        """
+        _, graph = test_city_small
+        # Change the first edge length to -1
+        graph.edges[list(graph.edges)[0]]["length"] = -1
+        metric = Metric()
+        with pytest.raises(ValueError):
+            metric.calculate_distance_matrix(graph, weight="length")

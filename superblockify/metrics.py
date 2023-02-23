@@ -165,7 +165,9 @@ class Metric:
 
         """
 
-        if weight is not None and any(graph.edges.data(weight, default=0)) < 0:
+        if weight is not None and any(
+            w < 0 for (u, v, w) in graph.edges.data(weight, default=0)
+        ):
             # For this case Johnson's algorithm could be used, but none of our graphs
             # should have negative edge weights.
             raise ValueError("Graph has negative edge weights.")
