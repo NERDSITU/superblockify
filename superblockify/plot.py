@@ -413,3 +413,42 @@ def plot_component_size(
     )
 
     return fig, axe
+
+
+def plot_distance_distributions(
+    dist_matrix, dist_title, coords, coord_title, labels, distance_unit="km"
+):  # pylint: disable=too-many-arguments
+    """Plot the distributions of the euclidean distances and coordinates.
+
+    Parameters
+    ----------
+    dist_matrix : ndarray
+        The distance matrix for the partitioning. dist_matrix[i, j] is the euclidean
+        distance between node i and node j.
+    dist_title : str
+        The title of the histogram of the euclidean distances.
+    coords : tuple
+        The coordinates of the nodes. coords[0] is the x-coordinates, coords[1] is
+        the y-coordinates. Can be either angular or euclidean coordinates.
+    coord_title : str
+        The title of the scatter plot of the coordinates.
+    labels : tuple
+        The labels of the coordinates. labels[0] is the label of the x-coordinate,
+        labels[1] is the label of the y-coordinate.
+    distance_unit : str, optional
+
+    """
+    _, axe = plt.subplots(1, 2, figsize=(10, 5))
+    # Plot distribution of distances
+    axe[0].hist(dist_matrix.flatten() / 1000, bins=100)
+    axe[0].set_title(dist_title)
+    axe[0].set_xlabel(f"Distance [{distance_unit}]")
+    axe[0].set_ylabel("Count")
+    # Plot scatter plot of lat/lon, aspect ratio should be 1:1
+    axe[1].set_aspect("equal")
+    axe[1].scatter(coords[0], coords[1], alpha=0.5, s=1)
+    axe[1].set_title(coord_title)
+    axe[1].set_xlabel(labels[0])
+    axe[1].set_ylabel(labels[1])
+    plt.tight_layout()
+    plt.show()

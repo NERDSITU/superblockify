@@ -3,10 +3,16 @@ import logging
 from datetime import timedelta
 from time import time
 
+import numpy as np
 from networkx import to_scipy_sparse_array
+from osmnx.projection import is_projected
 from scipy.sparse.csgraph import dijkstra
 
+from superblockify.plot import plot_distance_distributions
+
 logger = logging.getLogger("superblockify")
+
+_AVG_EARTH_RADIUS_M = 6.3781e6  # in meters, arXiv:1510.07674 [astro-ph.SR]
 
 
 class Metric:
@@ -97,6 +103,14 @@ class Metric:
 
         """
 
+        # Get node list for fixed order
+        node_list = list(partitioner.graph.nodes())
+
+        # Euclidean distances (E)
+        dist_euclidean = self.calculate_euclidean_distance_matrix_projected(
+            partitioner.graph, node_order=node_list
+        )
+
         # On the full graph (S)
         dist_full_graph = self.calculate_distance_matrix(
             partitioner.graph, weight="length", node_order=node_list
@@ -104,9 +118,11 @@ class Metric:
 
         # On the partitioning graph (N)
 
-        self.distance_matrix = {"S": dist_full_graph}
+        self.distance_matrix = {"E": dist_euclidean, "S": dist_full_graph}
 
-    def calculate_distance_matrix(self, graph, weight=None, node_order=None):
+    def calculate_distance_matrix(
+        self, graph, weight=None, node_order=None, plot_distributions=False
+    ):
         """Calculate the distance matrix for the partitioning.
 
         Use cythonized scipy.sparse.csgraph functions to calculate the distance matrix.
@@ -145,6 +161,9 @@ class Metric:
         node_order : list, optional
             The order of the nodes in the distance matrix. If None, the ordering is
             produced by graph.nodes().
+        plot_distributions : bool, optional
+            If True, a histogram of the distribution of the shortest path lengths is
+            plotted.
 
         Raises
         ------
@@ -190,4 +209,189 @@ class Metric:
             graph.number_of_edges(),
             timedelta(seconds=time() - start_time),
         )
+        if plot_distributions:
+            if node_order is None:
+                node_order = graph.nodes()
+            # Where `dist_full_graph` is inf, replace with 0
+            plot_distance_distributions(
+                dist_full_graph[dist_full_graph != np.inf],
+                dist_title="Distribution of shortest path lengths on full graph",
+                coords=(
+                    [graph.nodes[node]["x"] for node in node_order],
+                    [graph.nodes[node]["y"] for node in node_order],
+                ),
+                coord_title="Coordinates of nodes",
+                labels=("x", "y"),
+                distance_unit="hops"
+                if weight is None
+                else "km"
+                if weight == "length"
+                else weight,
+            )
+
         return dist_full_graph
+
+    def calculate_euclidean_distance_matrix_projected(
+        self, graph, node_order=None, plot_distributions=False
+    ):
+        """Calculate the euclidean distances between all nodes in the graph.
+
+        Uses the x and y coordinates of the nodes of a projected graph. The coordinates
+        are in meters.
+
+        Parameters
+        ----------
+        graph : networkx.Graph
+            The graph to calculate the distance matrix for. The graph should be
+            projected.
+        node_order : list, optional
+            The order of the nodes in the distance matrix. If None, the ordering is
+            produced by graph.nodes().
+        plot_distributions : bool, optional
+            If True, plot the distributions of the euclidean distances and coordinates.
+            Sanity check for the coordinate values.
+
+        Returns
+        -------
+        dist_matrix : ndarray
+            The distance matrix for the partitioning. dist_matrix[i, j] is the euclidean
+            distance between node i and node j.
+
+        Raises
+        ------
+        ValueError
+            If the graph is not projected.
+
+        """
+
+        # Find CRS from graph's metadata
+        if "crs" not in graph.graph or not is_projected(graph.graph["crs"]):
+            raise ValueError("Graph is not projected.")
+
+        # Get the node order
+        if node_order is None:
+            node_order = list(graph.nodes())
+
+        # Get the coordinates of the nodes
+        x_coord = np.array([graph.nodes[node]["x"] for node in node_order])
+        y_coord = np.array([graph.nodes[node]["y"] for node in node_order])
+
+        # Check that all values are float or int and not inf or nan
+        if not np.issubdtype(x_coord.dtype, np.number) or not np.issubdtype(
+            y_coord.dtype, np.number
+        ):
+            raise ValueError("Graph has non-numeric coordinates.")
+        if np.any(np.isinf(x_coord)) or np.any(np.isinf(y_coord)):
+            raise ValueError("Graph has infinite coordinates.")
+
+        # Calculate the euclidean distances between all nodes
+        dist_matrix = np.sqrt(
+            np.square(x_coord[:, np.newaxis] - x_coord[np.newaxis, :])
+            + np.square(y_coord[:, np.newaxis] - y_coord[np.newaxis, :])
+        )
+
+        if plot_distributions:
+            plot_distance_distributions(
+                dist_matrix,
+                dist_title="Distribution of euclidean distances",
+                coords=(x_coord, y_coord),
+                coord_title="Scatter plot of projected coordinates",
+                labels=("x", "y"),
+            )
+
+        return dist_matrix
+
+    def calculate_euclidean_distance_matrix_haversine(
+        self, graph, node_order=None, plot_distributions=False
+    ):
+        """Calculate the euclidean distances between all nodes in the graph.
+
+        Uses the **Haversine formula** to calculate the distances between all nodes in
+        the graph. The coordinates are in degrees.
+
+        Parameters
+        ----------
+        graph : networkx.Graph
+            The graph to calculate the distance matrix for
+        node_order : list, optional
+            The order of the nodes in the distance matrix. If None, the ordering is
+            produced by graph.nodes().
+        plot_distributions : bool, optional
+            If True, plot the distributions of the euclidean distances and coordinates.
+            Sanity check for the coordinate values.
+
+        Returns
+        -------
+        dist_matrix : ndarray
+            The distance matrix for the partitioning. dist_matrix[i, j] is the euclidean
+            distance between node i and node j.
+
+        Raises
+        ------
+        ValueError
+            If coordinates are not numeric or not in the range [-90, 90] for latitude
+            and [-180, 180] for longitude.
+
+        """
+
+        if node_order is None:
+            node_order = list(graph.nodes())
+
+        start_time = time()
+
+        # Calculate the euclidean distances between all nodes
+        # Do vectorized calculation for all nodes
+        lat = np.array([graph.nodes[node]["lat"] for node in node_order])
+        lon = np.array([graph.nodes[node]["lon"] for node in node_order])
+
+        # Check that all values are float or int and proper lat/lon values
+        if not np.issubdtype(lat.dtype, np.number) or not np.issubdtype(
+            lon.dtype, np.number
+        ):
+            raise ValueError("Latitude and longitude values must be numeric.")
+        if np.any(lat > 90) or np.any(lat < -90):
+            raise ValueError("Latitude values are not in the range [-90, 90].")
+        if np.any(lon > 180) or np.any(lon < -180):
+            raise ValueError("Longitude values are not in the range [-180, 180].")
+
+        node1_lat = np.expand_dims(lat, axis=0)
+        node1_lon = np.expand_dims(lon, axis=0)
+        node2_lat = np.expand_dims(lat, axis=1)
+        node2_lon = np.expand_dims(lon, axis=1)
+
+        # Calculate haversine distance,
+        # see https://en.wikipedia.org/wiki/Haversine_formula
+        # and https://github.com/mapado/haversine/blob/master/haversine/haversine.py
+        lat = node2_lat - node1_lat
+        lon = node2_lon - node1_lon
+        hav = (
+            np.sin(lat / 2) ** 2
+            + np.cos(node1_lat) * np.cos(node2_lat) * np.sin(lon / 2) ** 2
+        )
+        dist_matrix = 2 * _AVG_EARTH_RADIUS_M * np.arcsin(np.sqrt(hav))
+        logger.debug(
+            "Euclidean distances for graph with %s nodes and %s edges "
+            "calculated in %s. "
+            "Min/max lat/lon values: %s, %s, %s, %s; Difference: %s, %s",
+            graph.number_of_nodes(),
+            graph.number_of_edges(),
+            timedelta(seconds=time() - start_time),
+            np.min(node1_lat),
+            np.max(node1_lat),
+            np.min(node1_lon),
+            np.max(node1_lon),
+            np.max(node1_lat) - np.min(node1_lat),
+            np.max(node1_lon) - np.min(node1_lon),
+        )
+
+        if plot_distributions:
+            # Plot distribution of distances and scatter plot of lat/lon
+            plot_distance_distributions(
+                dist_matrix,
+                dist_title="Distribution of euclidean distances",
+                coords=(node1_lon, node1_lat),
+                coord_title="Scatter plot of lat/lon",
+                labels=("Longitude", "Latitude"),
+            )
+
+        return dist_matrix

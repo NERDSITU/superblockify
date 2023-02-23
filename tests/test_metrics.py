@@ -1,5 +1,7 @@
 """Tests for the metrics module."""
+import matplotlib.pyplot as plt
 import pytest
+from numpy import inf
 
 from superblockify.metrics import Metric
 
@@ -58,11 +60,12 @@ class TestMetric:
         """Test calculating all pairwise distances for the full graphs."""
         _, graph = test_city_small
         metric = Metric()
-        metric.calculate_distance_matrix(graph, weight=weight)
+        metric.calculate_distance_matrix(graph, weight=weight, plot_distributions=True)
         # With node ordering
         metric.calculate_distance_matrix(
-            graph, node_order=list(graph.nodes)
+            graph, node_order=list(graph.nodes), plot_distributions=True
         )
+        plt.close("all")
 
     def test_calculate_distance_matrix_negative_weight(self, test_city_small):
         """Test calculating all pairwise distances for the full graphs with negative
@@ -74,3 +77,105 @@ class TestMetric:
         metric = Metric()
         with pytest.raises(ValueError):
             metric.calculate_distance_matrix(graph, weight="length")
+
+    def test_calculate_euclidean_distance_matrix_projected(self, test_city_all):
+        """Test calculating all pairwise euclidean distances for the full graphs.
+        Projected."""
+        _, graph = test_city_all
+        metric = Metric()
+        metric.calculate_euclidean_distance_matrix_projected(
+            graph, plot_distributions=True
+        )
+        # With node ordering
+        metric.calculate_euclidean_distance_matrix_projected(
+            graph, node_order=list(graph.nodes), plot_distributions=True
+        )
+        plt.close("all")
+
+    @pytest.mark.parametrize(
+        "key,value",
+        [
+            ("x", None),
+            ("y", None),
+            ("x", "a"),
+            ("y", "a"),
+            ("x", inf),
+            ("y", inf),
+            ("x", -inf),
+            ("y", -inf),
+        ],
+    )
+    def test_calculate_euclidean_distance_matrix_projected_faulty_coords(
+        self, test_city_small, key, value
+    ):
+        """Test calculating all pairwise euclidean distances for the full graphs
+        with missing coordinates. Projected.
+        """
+        _, graph = test_city_small
+        # Change key attribute of first node
+        graph.nodes[list(graph.nodes)[0]][key] = value
+        metric = Metric()
+        with pytest.raises(ValueError):
+            metric.calculate_euclidean_distance_matrix_projected(graph)
+
+    def test_calculate_euclidean_distance_matrix_projected_unprojected_graph(
+        self, test_city_small
+    ):
+        """Test `calculate_euclidean_distance_matrix_projected` exception handling
+        unprojected graph."""
+        _, graph = test_city_small
+        metric = Metric()
+
+        # Pseudo-unproject graph
+        graph.graph["crs"] = "epsg:4326"
+        with pytest.raises(ValueError):
+            metric.calculate_euclidean_distance_matrix_projected(graph)
+
+        # Delete crs attribute
+        graph.graph.pop("crs")
+        with pytest.raises(ValueError):
+            metric.calculate_euclidean_distance_matrix_projected(graph)
+
+    def test_calculate_euclidean_distance_matrix_haversine(self, test_city_small):
+        """Test calculating all pairwise euclidean distances for the full graphs.
+        Haversine."""
+        _, graph = test_city_small
+        metric = Metric()
+        metric.calculate_euclidean_distance_matrix_haversine(
+            graph, plot_distributions=True
+        )
+        # With node ordering
+        metric.calculate_euclidean_distance_matrix_haversine(
+            graph, node_order=list(graph.nodes), plot_distributions=True
+        )
+        plt.close("all")
+
+    @pytest.mark.parametrize(
+        "key,value",
+        [
+            ("lat", None),
+            ("lon", None),
+            ("lat", "a"),
+            ("lon", "a"),
+            ("lat", -90.1),
+            ("lon", -180.1),
+            ("lat", 90.1),
+            ("lon", 180.1),
+            ("lat", inf),
+            ("lon", inf),
+            ("lat", -inf),
+            ("lon", -inf),
+        ],
+    )
+    def test_calculate_euclidean_distance_matrix_haversine_faulty_coords(
+        self, test_city_small, key, value
+    ):
+        """Test calculating all pairwise euclidean distances for the full graphs
+        with missing coordinates. Haversine.
+        """
+        _, graph = test_city_small
+        # Change key attribute of first node
+        graph.nodes[list(graph.nodes)[0]][key] = value
+        metric = Metric()
+        with pytest.raises(ValueError):
+            metric.calculate_euclidean_distance_matrix_haversine(graph)
