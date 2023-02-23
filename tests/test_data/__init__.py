@@ -80,6 +80,8 @@ if __name__ == "__main__":
         # Add edge bearings - the precision >1 is important for binning
         test_graph = ox.add_edge_bearings(test_graph, precision=2)
 
+        test_graph = ox.project_graph(test_graph)
+
         ox.io.save_graphml(
             test_graph,
             filepath=f"./tests/test_data/cities/{place[0]}_"
