@@ -99,14 +99,14 @@ class Metric:
 
         # On the full graph (S)
         dist_full_graph = self.calculate_distance_matrix(
-            partitioner.graph, weight="length"
+            partitioner.graph, weight="length", node_order=node_list
         )
 
         # On the partitioning graph (N)
 
         self.distance_matrix = {"S": dist_full_graph}
 
-    def calculate_distance_matrix(self, graph, weight=None):
+    def calculate_distance_matrix(self, graph, weight=None, node_order=None):
         """Calculate the distance matrix for the partitioning.
 
         Use cythonized scipy.sparse.csgraph functions to calculate the distance matrix.
@@ -142,6 +142,9 @@ class Metric:
             The graph to calculate the distance matrix for
         weight : str, optional
             The edge attribute to use as weight. If None, all edge weights are 1.
+        node_order : list, optional
+            The order of the nodes in the distance matrix. If None, the ordering is
+            produced by graph.nodes().
 
         Raises
         ------
@@ -173,7 +176,9 @@ class Metric:
             raise ValueError("Graph has negative edge weights.")
 
         # First get N x N array of distances representing the input graph.
-        graph_matrix = to_scipy_sparse_array(graph, weight=weight, format="csr")
+        graph_matrix = to_scipy_sparse_array(
+            graph, weight=weight, format="csr", nodelist=node_order
+        )
         start_time = time()
         dist_full_graph = dijkstra(
             graph_matrix, directed=True, return_predecessors=False, unweighted=False

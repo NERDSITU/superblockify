@@ -55,10 +55,14 @@ class TestMetric:
 
     @pytest.mark.parametrize("weight", ["length", None])
     def test_calculate_distance_matrix(self, test_city_small, weight):
-        """Test calculating all pairwise distances for the full graphs with timeout."""
+        """Test calculating all pairwise distances for the full graphs."""
         _, graph = test_city_small
         metric = Metric()
         metric.calculate_distance_matrix(graph, weight=weight)
+        # With node ordering
+        metric.calculate_distance_matrix(
+            graph, node_order=list(graph.nodes)
+        )
 
     def test_calculate_distance_matrix_negative_weight(self, test_city_small):
         """Test calculating all pairwise distances for the full graphs with negative
