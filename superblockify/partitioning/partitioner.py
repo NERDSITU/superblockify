@@ -205,7 +205,10 @@ class BasePartitioner(ABC):
         found_disconnected = (
             f"Found disconnected components in %s, splitting them. "
             f"There are {num_partitions} partitions, "
-            f"and {len(self.partition)} components."
+            f"and {len(self.partition)} components. "
+            f"Thereof are {len([c for c in self.components if not c['ignore']])} "
+            f"components with more than {min_edge_count} edges and "
+            f"more than {min_length} meters."
             if found_disconnected
             else "No disconnected components found in %s, nothing to split."
         )
