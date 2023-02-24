@@ -133,11 +133,11 @@ class BasePartitioner(ABC):
         Raises
         ------
         AssertionError
-            If BasePartitioner has not been runned yet (the partitions are not defined).
+            If BasePartitioner has not been run yet (the partitions are not defined).
 
         """
 
-        self.__check_has_been_runned()
+        self.__check_has_been_run()
 
         # Log making subgraphs
         logger.info(
@@ -245,14 +245,14 @@ class BasePartitioner(ABC):
         Raises
         ------
         AssertionError
-            If BasePartitioner has not been runned yet (the partitions are not defined).
+            If BasePartitioner has not been run yet (the partitions are not defined).
         AssertionError
             If `self.components` is not defined (the subgraphs have not been split
             into components).
 
         """
 
-        self.__check_has_been_runned()
+        self.__check_has_been_run()
 
         if self.components is None:
             raise AssertionError(
@@ -296,11 +296,11 @@ class BasePartitioner(ABC):
         Raises
         ------
         AssertionError
-            If BasePartitioner has not been runned yet (the partitions are not defined).
+            If BasePartitioner has not been run yet (the partitions are not defined).
 
         """
 
-        self.__check_has_been_runned()
+        self.__check_has_been_run()
 
         # Log plotting
         logger.info(
@@ -334,14 +334,14 @@ class BasePartitioner(ABC):
         Raises
         ------
         AssertionError
-            If BasePartitioner has not been runned yet (the partitions are not defined).
+            If BasePartitioner has not been run yet (the partitions are not defined).
         AssertionError
             If `self.components` is not defined (the subgraphs have not been split
             into components).
 
         """
 
-        self.__check_has_been_runned()
+        self.__check_has_been_run()
 
         if self.components is None:
             raise AssertionError(
@@ -393,13 +393,13 @@ class BasePartitioner(ABC):
         Raises
         ------
         AssertionError
-            If BasePartitioner has not been runned yet (the partitions are not defined).
+            If BasePartitioner has not been run yet (the partitions are not defined).
         ValueError
             If measure is not 'edges', 'length' or 'nodes'.
 
         """
 
-        self.__check_has_been_runned()
+        self.__check_has_been_run()
 
         if measure not in ["edges", "length", "nodes"]:
             raise ValueError(
@@ -441,13 +441,13 @@ class BasePartitioner(ABC):
             **pcs_kwargs,
         )
 
-    def __check_has_been_runned(self):
-        """Check if the partitioner has runned.
+    def __check_has_been_run(self):
+        """Check if the partitioner has ran.
 
         Raises
         ------
         AssertionError
-            If BasePartitioner has not been runned yet (the partitions are not defined).
+            If BasePartitioner has not been run yet (the partitions are not defined).
 
         """
 
