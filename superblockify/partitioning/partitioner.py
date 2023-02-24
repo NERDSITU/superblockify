@@ -28,7 +28,7 @@ class BasePartitioner(ABC):
         # Set Instance variables
         self.graph = graph
         self.name = name
-        self.partition = None
+        self.partitions = None
         self.components = None
         self.attribute_label = None
         self.attr_value_minmax = None
@@ -55,7 +55,10 @@ class BasePartitioner(ABC):
 
         self.attribute_label = "example_label"
         # Define partitions
-        self.partition = [{"name": "zero", "value": 0.0}, {"name": "one", "value": 1.0}]
+        self.partitions = [
+            {"name": "zero", "value": 0.0},
+            {"name": "one", "value": 1.0},
+        ]
 
     def calculate_metrics(self):
         """Calculate metrics for the partitioning.
@@ -147,11 +150,11 @@ class BasePartitioner(ABC):
         )
 
         found_disconnected = False
-        num_partitions = len(self.partition)
+        num_partitions = len(self.partitions)
 
         # Make component subgraphs from attribute
-        for part in self.partition:
-            logger.debug("Making subgraph for partition %s", part)
+        for part in self.partitions:
+            logger.debug("Making subgraph for partitions %s", part)
             part["subgraph"] = attribute.get_edge_subgraph_with_attribute_value(
                 self.graph, self.attribute_label, part["value"]
             )
@@ -164,7 +167,7 @@ class BasePartitioner(ABC):
         if split_disconnected:
             self.components = []
 
-        for part in self.partition:
+        for part in self.partitions:
             # Split disconnected components
             connected_components = nx.weakly_connected_components(part["subgraph"])
             # Make list of generator of connected components
@@ -205,7 +208,7 @@ class BasePartitioner(ABC):
         found_disconnected = (
             f"Found disconnected components in %s, splitting them. "
             f"There are {num_partitions} partitions, "
-            f"and {len(self.partition)} components. "
+            f"and {len(self.partitions)} components. "
             f"Thereof are {len([c for c in self.components if not c['ignore']])} "
             f"components with more than {min_edge_count} edges and "
             f"more than {min_length} meters."
@@ -278,7 +281,7 @@ class BasePartitioner(ABC):
                     )
 
     def plot_partition_graph(self, **pba_kwargs):
-        """Plotting the partition with color on graph.
+        """Plotting the partitions with color on graph.
 
         Plots the partitioned graph, just like `plot.paint_streets` but that the
         *partitions* have a uniform color.
@@ -304,7 +307,7 @@ class BasePartitioner(ABC):
 
         # Log plotting
         logger.info(
-            "Plotting partition graph for %s with attribute %s",
+            "Plotting partitions graph for %s with attribute %s",
             self.name,
             self.attribute_label,
         )
@@ -423,7 +426,7 @@ class BasePartitioner(ABC):
         # Else use partitions
         else:
             logger.debug("Using partitions for plotting.")
-            for part in self.partition:
+            for part in self.partitions:
                 component_size.append(part[key_name])
                 component_values.append(part["value"])
                 ignore = None
@@ -451,7 +454,7 @@ class BasePartitioner(ABC):
 
         """
 
-        if self.partition is None:
+        if self.partitions is None:
             raise AssertionError(
                 f"{self.__class__.__name__} has no partitions, "
                 f"run before plotting graph."
@@ -475,7 +478,7 @@ class DummyPartitioner(BasePartitioner):
         Assign random partitions to edges.
         """
 
-        # The label under which partition attribute is saved in the `self.graph`.
+        # The label under which the partition attribute is saved in the `self.graph`.
         self.attribute_label = "dummy_attribute"
 
         # Somehow determining the partition of edges
@@ -488,7 +491,7 @@ class DummyPartitioner(BasePartitioner):
         # A List of the existing partitions, the 'value' attribute should be equal to
         # the edge attributes under the instances `attribute_label`, which belong to
         # this partition
-        self.partition = [
+        self.partitions = [
             {
                 "name": str(num),
                 "value": num,

@@ -40,7 +40,7 @@ class TestPartitioners:
         part.run()
         assert part.graph is not None
         assert part.attribute_label is not None
-        assert part.partition is not None
+        assert part.partitions is not None
 
     def test_plot_partition_graph(self, test_city_all, partitioner_class):
         """Test `plot_partition_graph` by design."""

@@ -101,7 +101,7 @@ class BearingPartitioner(BasePartitioner):
         nx.set_edge_attributes(self.graph, group_bearing, self.attribute_label)
 
         # Write partiton dict
-        self.partition = [
+        self.partitions = [
             {
                 "name": str(self._inter_vals["boundaries"][i : i + 2]),
                 "value": center_val,
@@ -110,7 +110,7 @@ class BearingPartitioner(BasePartitioner):
             if center_val is not None
         ]
 
-        # Make subgraphs for each partition
+        # Make subgraphs for each partitions
         self.make_subgraphs_from_attribute(
             split_disconnected=True,
             min_edge_count=min_edge_count,
