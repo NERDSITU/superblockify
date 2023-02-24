@@ -50,6 +50,7 @@ class TestPartitioners:
         fig, axe = part.plot_partition_graph()
         assert isinstance(fig, Figure)
         assert isinstance(axe, Axes)
+        plt.close("all")
 
     def test_plot_component_graph(self, test_city_all, partitioner_class):
         """Test `plot_component_graph` by design."""
@@ -60,6 +61,7 @@ class TestPartitioners:
             fig, axe = part.plot_component_graph()
             assert isinstance(fig, Figure)
             assert isinstance(axe, Axes)
+            plt.close("all")
 
     def test_plot_partitions_unpartitioned(self, test_city_all, partitioner_class):
         """Test `plot_partition_graph` exception handling."""
@@ -97,7 +99,7 @@ class TestPartitioners:
         part.components = None
         fig, _ = part.plot_subgraph_component_size("nodes")
         fig.show()
-        plt.close()
+        plt.close("all")
 
     @pytest.mark.parametrize(
         "invalid_measure",
