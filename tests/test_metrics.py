@@ -281,6 +281,7 @@ class TestMetric:
     def test__has_pairwise_overlap(self, lists, expected):
         """Test `_has_pairwise_overlap` by design."""
         # Check if ndarrays are equal
+        # pylint: disable=protected-access
         assert np.array_equal(Metric._has_pairwise_overlap(lists), expected)
 
     @pytest.mark.parametrize(
@@ -305,4 +306,5 @@ class TestMetric:
     def test__has_pairwise_overlap_exception(self, lists):
         """Test `_has_pairwise_overlap` exception handling."""
         with pytest.raises(ValueError):
+            # pylint: disable=protected-access
             Metric._has_pairwise_overlap(lists)

@@ -422,7 +422,7 @@ class Metric:
         num_workers=None,
         plot_distributions=False,
         check_overlap=False,
-    ):  # pylint: disable=too-many-variables
+    ):  # pylint: disable=too-many-locals
         """Calculate the distance matrix for the partitioning.
 
         This is the pairwise distance between all pairs of nodes, where the shortest
@@ -447,7 +447,7 @@ class Metric:
             produced by graph.nodes().
         num_workers : int, optional
             The maximal number of workers used to process distance matrices. If None,
-            min(32, cpu_count() - 4) is used.
+            the number of workers is set to min(32, cpu_count() // 2).
             Choose this number carefully, as it can lead to memory errors if too high,
             if the graph has partitions. In this case another partitioner approach
             might yield better results.
@@ -473,7 +473,8 @@ class Metric:
             node_order = list(partitioner.graph.nodes())
 
         if num_workers is None:
-            num_workers = min(32, cpu_count() - 4)
+            num_workers = min(32, cpu_count() // 2)
+            logger.debug("No number of workers specified, using %s.", num_workers)
 
         start_time = time()
 

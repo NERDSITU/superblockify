@@ -27,7 +27,6 @@ class TestBasePartitioner:
             empty_graph = nx.empty_graph()
             ChildPartitioner(empty_graph)
 
-    # pylint: enable=abstract-class-instantiated
 
 
 class TestPartitioners:

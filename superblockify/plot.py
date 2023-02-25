@@ -61,7 +61,7 @@ def plot_by_attribute(
     node_alpha=0,
     minmax_val=None,
     **pg_kwargs,
-):  # pylint: disable=too-many-arguments
+):
     """Plot a graph based on an edge attribute and colormap.
 
     Color will be chosen based on the specified edge attribute passed to a colormap.
@@ -145,7 +145,7 @@ def make_edge_color_list(
     attr_types="numerical",
     minmax_val=None,
     none_color=(0.5, 0.5, 0.5, 1),
-):  # pylint: disable=too-many-arguments
+):
     """Make a list of edge colors based on an edge attribute and colormap.
 
     Color will be chosen based on the specified edge attribute passed to a colormap.
@@ -289,7 +289,6 @@ def determine_minmax_val(graph, minmax_val, attr):
     return minmax_val
 
 
-# Ignore too-many-arguments, as we want to pass all arguments to the function
 def plot_component_size(
     graph,
     attr,
@@ -303,7 +302,7 @@ def plot_component_size(
     num_component_log_scale=True,
     show_legend=None,
     **kwargs,
-):  # pylint: disable=too-many-arguments, too-many-locals
+):  # pylint: disable=too-many-locals
     """Plot the distribution of component sizes for each partition value.
 
     x-axis: values of the partition
@@ -417,7 +416,7 @@ def plot_component_size(
 
 def plot_distance_distributions(
     dist_matrix, dist_title, coords, coord_title, labels, distance_unit="km"
-):  # pylint: disable=too-many-arguments
+):
     """Plot the distributions of the euclidean distances and coordinates.
 
     Parameters
