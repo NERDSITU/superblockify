@@ -45,7 +45,7 @@ dependencies:
   - colorama=0.4.6=pyhd8ed1ab_0
   - comm=0.1.2=pyhd8ed1ab_0
   - contourpy=1.0.7=py310hdf3cbec_0
-  - coverage=7.1.0=py310h1fa729e_0
+  - coverage=7.2.0=py310h1fa729e_0
   - cryptography=39.0.1=py310h34c0648_0
   - curl=7.88.1=hdc1c0ab_0
   - cycler=0.11.0=pyhd8ed1ab_0
@@ -227,7 +227,7 @@ dependencies:
   - python=3.10.9=he550d4f_0_cpython
   - python-dateutil=2.8.2=pyhd8ed1ab_0
   - python-fastjsonschema=2.16.2=pyhd8ed1ab_0
-  - python-json-logger=2.0.6=pyhd8ed1ab_0
+  - python-json-logger=2.0.7=pyhd8ed1ab_0
   - python-rapidjson=1.9=py310hd8f1fbe_1
   - python_abi=3.10=3_cp310
   - pytz=2022.7.1=pyhd8ed1ab_0
@@ -240,8 +240,9 @@ dependencies:
   - rfc3986-validator=0.1.1=pyh9f0ad1d_0
   - rtree=1.0.1=py310hbdcdc62_1
   - scikit-learn=1.2.1=py310h209a8ca_0
+  - scipy=1.10.1=py310h8deb116_0
   - send2trash=1.8.0=pyhd8ed1ab_0
-  - setuptools=67.3.3=pyhd8ed1ab_0
+  - setuptools=67.4.0=pyhd8ed1ab_0
   - shapely=2.0.1=py310h8b84c32_0
   - six=1.16.0=pyh6c4a22f_0
   - snappy=1.1.9=hbd366e4_2
@@ -268,6 +269,7 @@ dependencies:
   - tomli=2.0.1=pyhd8ed1ab_0
   - tomlkit=0.11.6=pyha770c72_0
   - tornado=6.2=py310h5764c6d_1
+  - tqdm=4.64.1=pyhd8ed1ab_0
   - traitlets=5.9.0=pyhd8ed1ab_0
   - typing=3.10.0.0=pyhd8ed1ab_0
   - typing-extensions=4.4.0=hd8ed1ab_0
@@ -298,9 +300,6 @@ dependencies:
   - yaml=0.2.5=h7f98852_2
   - yarl=1.8.2=py310h5764c6d_0
   - zeromq=4.3.4=h9c3ff4c_1
-  - zipp=3.14.0=pyhd8ed1ab_0
+  - zipp=3.15.0=pyhd8ed1ab_0
   - zlib=1.2.13=h166bdaf_4
   - zstd=1.5.2=h3eb15da_6
-  - pip:
-      - scipy==1.10.1
-prefix: /home/carlsonb/miniconda3/envs/OSMnxPyrLab
