@@ -28,7 +28,6 @@ class TestBasePartitioner:
             ChildPartitioner(empty_graph)
 
 
-
 class TestPartitioners:
     """Standard tests all classes of BasePartitioner need to suffice."""
 
