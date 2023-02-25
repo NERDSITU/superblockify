@@ -280,6 +280,62 @@ class BasePartitioner(ABC):
                         component["subgraph"], attribute_value, attribute_name
                     )
 
+    def get_partition_nodes(self):
+        """Get the nodes of the partitioned graph.
+
+        Returns list of dict with name of partition and list of nodes in partition.
+        If partitions were split up into components with `make_subgraphs_from_attribute`
+        with `split_disconnected` set to True, the nodes of the components are returned.
+
+        Per default, nodes are considered to be inside a partition if they are in the
+        subgraph of the partition and have a degree of at least 2. Also, `ignored`
+        components are left out.
+
+        Method can be overwritten by child classes to change the definition of
+        which nodes are considered to be inside a partition.
+
+        Returns
+        -------
+        list of dict
+            List of dict with `name` of partition, `subgraph` of partition and set of
+            `nodes` in partition.
+
+        Raises
+        ------
+        AssertionError
+            If BasePartitioner has not been run yet (the partitions are not defined).
+
+        """
+
+        self.__check_has_been_run()
+
+        # List of partitions /unignored components
+        # Only take `name` and `subgraph` from the components
+        if self.components:
+            partitions = [
+                {"name": comp["name"], "subgraph": comp["subgraph"]}
+                for comp in self.components
+                if not comp["ignore"]
+            ]
+        else:
+            partitions = [
+                {"name": part["name"], "subgraph": part["subgraph"]}
+                for part in self.partitions
+            ]
+
+        # Add list of nodes "inside" each partitions
+        #  - nodes that have at least a degree of 2
+        #  - from these the distances are calculated
+        #  - the nodes not in any partitions are considered as the unpartitioned nodes
+        for part in partitions:
+            part["nodes"] = {
+                node
+                for node in part["subgraph"].nodes()
+                if part["subgraph"].degree(node) >= 2
+            }
+
+        return partitions
+
     def plot_partition_graph(self, **pba_kwargs):
         """Plotting the partitions with color on graph.
 
@@ -495,6 +551,9 @@ class DummyPartitioner(BasePartitioner):
             {
                 "name": str(num),
                 "value": num,
+                "subgraph": attribute.get_edge_subgraph_with_attribute_value(
+                    self.graph, self.attribute_label, num
+                ),
                 "num_edges": num,
                 "num_nodes": num,
                 "length_total": num,

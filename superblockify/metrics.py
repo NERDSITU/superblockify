@@ -1,12 +1,15 @@
 """Metric object for the superblockify package."""
 import logging
 from datetime import timedelta
+from itertools import combinations_with_replacement, repeat
+from multiprocessing import cpu_count
 from time import time
 
 import numpy as np
 from networkx import to_scipy_sparse_array
 from osmnx.projection import is_projected
 from scipy.sparse.csgraph import dijkstra
+from tqdm.contrib.concurrent import process_map
 
 from superblockify.plot import plot_distance_distributions
 
@@ -47,6 +50,43 @@ class Metric:
         {"SE": float, "NE": float, "NS": float}
 
     """
+
+    def calculate_all(self, partitioner):
+        """Calculate all metrics for the partitioning.
+
+        `self.distance_matrix` is used to save the distances for the metrics and should
+        is set to None after calculating the metrics.
+
+        Parameters
+        ----------
+        partitioner : BasePartitioner
+            The partitioner object to calculate the metrics for
+
+        """
+
+        # Get node list for fixed order
+        node_list = list(partitioner.graph.nodes())
+
+        # Euclidean distances (E)
+        dist_euclidean = self.calculate_euclidean_distance_matrix_projected(
+            partitioner.graph, node_order=node_list
+        )
+
+        # On the full graph (S)
+        dist_full_graph = self.calculate_distance_matrix(
+            partitioner.graph, weight="length", node_order=node_list
+        )
+
+        # On the partitioning graph (N)
+        dist_partitioning_graph = self.calculate_partitioning_distance_matrix(
+            partitioner, weight="length", node_order=node_list
+        )
+
+        self.distance_matrix = {
+            "E": dist_euclidean,
+            "S": dist_full_graph,
+            "N": dist_partitioning_graph,
+        }
 
     def __init__(self):
         """Construct a metric object."""
@@ -90,45 +130,13 @@ class Metric:
         """
         return f"{self.__class__.__name__}({self.__str__()})"
 
-    def calculate_all(self, partitioner):
-        """Calculate all metrics for the partitioning.
-
-        `self.distance_matrix` is used to save the distances for the metrics and should
-        is set to None after calculating the metrics.
-
-        Parameters
-        ----------
-        partitioner : BasePartitioner
-            The partitioner object to calculate the metrics for
-
-        """
-
-        # Get node list for fixed order
-        node_list = list(partitioner.graph.nodes())
-
-        # Euclidean distances (E)
-        dist_euclidean = self.calculate_euclidean_distance_matrix_projected(
-            partitioner.graph, node_order=node_list
-        )
-
-        # On the full graph (S)
-        dist_full_graph = self.calculate_distance_matrix(
-            partitioner.graph, weight="length", node_order=node_list
-        )
-
-        # On the partitioning graph (N)
-        dist_partitioning_graph = self.calculate_partitioning_distance_matrix(
-            partitioner, weight="length", node_order=node_list
-        )
-
-        self.distance_matrix = {
-            "E": dist_euclidean,
-            "S": dist_full_graph,
-            "N": dist_partitioning_graph,
-        }
-
     def calculate_distance_matrix(
-        self, graph, weight=None, node_order=None, plot_distributions=False
+        self,
+        graph,
+        weight=None,
+        node_order=None,
+        plot_distributions=False,
+        log_debug=True,
     ):
         """Calculate the distance matrix for the partitioning.
 
@@ -171,6 +179,8 @@ class Metric:
         plot_distributions : bool, optional
             If True, a histogram of the distribution of the shortest path lengths is
             plotted.
+        log_debug : bool, optional
+            If True, log runtime and graph information at debug level.
 
         Raises
         ------
@@ -209,13 +219,14 @@ class Metric:
         dist_full_graph = dijkstra(
             graph_matrix, directed=True, return_predecessors=False, unweighted=False
         )
-        logger.debug(
-            "All-pairs shortest path lengths for graph with %s nodes and %s edges "
-            "calculated in %s.",
-            graph.number_of_nodes(),
-            graph.number_of_edges(),
-            timedelta(seconds=time() - start_time),
-        )
+        if log_debug:
+            logger.debug(
+                "All-pairs shortest path lengths for graph with %s nodes and %s edges "
+                "calculated in %s.",
+                graph.number_of_nodes(),
+                graph.number_of_edges(),
+                timedelta(seconds=time() - start_time),
+            )
         if plot_distributions:
             if node_order is None:
                 node_order = graph.nodes()
@@ -404,8 +415,14 @@ class Metric:
         return dist_matrix
 
     def calculate_partitioning_distance_matrix(
-        self, partitioner, weight=None, node_order=None, plot_distributions=False
-    ):
+        self,
+        partitioner,
+        weight=None,
+        node_order=None,
+        num_workers=None,
+        plot_distributions=False,
+        check_overlap=False,
+    ):  # pylint: disable=too-many-variables
         """Calculate the distance matrix for the partitioning.
 
         This is the pairwise distance between all pairs of nodes, where the shortest
@@ -428,8 +445,22 @@ class Metric:
         node_order : list, optional
             The order of the nodes in the distance matrix. If None, the ordering is
             produced by graph.nodes().
+        num_workers : int, optional
+            The maximal number of workers used to process distance matrices. If None,
+            min(32, cpu_count() - 4) is used.
+            Choose this number carefully, as it can lead to memory errors if too high,
+            if the graph has partitions. In this case another partitioner approach
+            might yield better results.
         plot_distributions : bool, optional
             If True, plot the distributions of the euclidean distances and coordinates.
+        check_overlap : bool, optional
+            If True, check that the partitions do not overlap node-wise.
+
+        Raises
+        ------
+        ValueError
+            If the partitions overlap node-wise. For nodes considered to be in the
+            partition, see `BasePartitioner.get_partition_nodes()`.
 
         Returns
         -------
@@ -438,3 +469,224 @@ class Metric:
             between node i and node j for the given rules of the partitioning.
 
         """
+        if node_order is None:
+            node_order = list(partitioner.graph.nodes())
+
+        if num_workers is None:
+            num_workers = min(32, cpu_count() - 4)
+
+        start_time = time()
+
+        partitions = partitioner.get_partition_nodes()
+
+        # Check that none of the partitions overlap by checking that the intersection
+        # of the nodes in each partition is empty.
+        if check_overlap:
+            pairwise_overlap = self._has_pairwise_overlap(
+                [list(part["nodes"]) for part in partitions]
+            )
+            # Check if any element in the pairwise overlap matrix is True, except the
+            # diagonal
+            if np.any(pairwise_overlap[np.triu_indices_from(pairwise_overlap, k=1)]):
+                raise ValueError(
+                    "The partitions overlap node-wise. This is not allowed."
+                )
+
+        # Get unpartitioned nodes
+        # as partitioner.graph.nodes() - all nodes in partitions
+        unpartitioned_nodes = set(partitioner.graph.nodes()) - set(
+            node for part in partitions for node in part["nodes"]
+        )
+
+        # For every pair of partitions (ordering irrelevant, including combining with
+        # itself), calculate the distance matrix for the edges in
+        # the partitions.
+        # These are saved in a dictionary, where the keys are tuples of the partition
+        # indices.
+        # The distance matrix for the unpartitioned edges is calculated separately.
+        logger.debug(
+            "Calculating distance matrices for %s partitions, ergo %d combinations, "
+            "with %d workers.",
+            len(partitions),
+            len(partitions) * (len(partitions) + 1) / 2 + 1,
+            num_workers,
+        )
+
+        partition_pairs = list(
+            combinations_with_replacement(
+                enumerate((part["name"], part["nodes"]) for part in partitions), 2
+            )
+        )
+
+        # Prepare node pair orders and subgraphs for each partition pair while
+        # checking for duplicate nodes
+        pair_node_orders = []
+        for (idx1, (name1, nodes1)), (idx2, (name2, nodes2)) in partition_pairs:
+            if idx1 != idx2:
+                pair_node_orders.append(
+                    list(set(list(nodes1) + list(nodes2) + list(unpartitioned_nodes)))
+                )
+            else:
+                pair_node_orders.append(list(nodes1) + list(unpartitioned_nodes))
+            # Check for duplicate nodes
+            if len(pair_node_orders[-1]) != len(set(pair_node_orders[-1])):
+                raise ValueError(
+                    f"Duplicate nodes in the partitions {name1} and {name2}."
+                )
+        pair_subgraphs = [
+            partitioner.graph.subgraph(nodes).copy() for nodes in pair_node_orders
+        ]
+
+        # Parallelized calculation with `process_map`
+        results = process_map(
+            self.calculate_distance_matrix,
+            pair_subgraphs,
+            repeat(weight, len(partition_pairs)),
+            pair_node_orders,
+            repeat(False, len(partition_pairs)),
+            repeat(False, len(partition_pairs)),
+            max_workers=num_workers,
+        )
+
+        # Construct the distance matrix for the partitioning
+        dist_matrix = np.full(
+            (len(node_order), len(node_order)), np.inf, dtype=np.float64
+        )
+        for part_combo_dist_matrix, pair_node_order in zip(results, pair_node_orders):
+            # Get the indices of the nodes in the distance matrix
+            node_indices = [node_order.index(node) for node in pair_node_order]
+            # Fill the distance matrix with the distances for the nodes in this pair
+            dist_matrix[np.ix_(node_indices, node_indices)] = part_combo_dist_matrix
+
+        # Fill in the distance matrix for the unpartitioned edges
+        dist_matrix[
+            np.ix_(
+                [node_order.index(n) for n in unpartitioned_nodes],
+                [node_order.index(n) for n in unpartitioned_nodes],
+            )
+        ] = self.calculate_distance_matrix(
+            partitioner.graph.subgraph(unpartitioned_nodes),
+            weight=weight,
+            node_order=unpartitioned_nodes,
+            log_debug=False,
+        )
+
+        logger.debug(
+            "Calculated distance matrices for all %d combinations of partitions in %s "
+            "seconds.",
+            len(partitions) * (len(partitions) + 1) / 2 + 1,
+            time() - start_time,
+        )
+
+        if plot_distributions:
+            # Where `dist_full_graph` is inf, replace with 0
+            plot_distance_distributions(
+                dist_matrix[dist_matrix != np.inf],
+                dist_title="Distribution of shortest path distances for the "
+                "partitioning",
+                coords=(
+                    [partitioner.graph.nodes[node]["x"] for node in node_order],
+                    [partitioner.graph.nodes[node]["y"] for node in node_order],
+                ),
+                coord_title="Coordinates of nodes",
+                labels=("x", "y"),
+                distance_unit="hops"
+                if weight is None
+                else "km"
+                if weight == "length"
+                else weight,
+            )
+
+        return dist_matrix
+
+    def _calculate_pair_distance_matrix(self, graph, pair_node_order, weight):
+        """Helper function to parallelize `calculate_partitioning_distance_matrix`.
+
+        Parameters
+        ----------
+        graph : networkx.Graph
+            The graph to calculate the distance matrix for, filtered to only include
+            the nodes in `pair` and `unpartitioned_nodes`.
+        pair : tuple
+            A tuple of the form ((idx1, (name1, nodes1)), (idx2, (name2, nodes2))) where
+            idx1 and idx2 are the indices of the partitions, name1 and name2 are the
+            names of the partitions, and nodes1 and nodes2 are the nodes in the
+            partitions.
+        unpartitioned_nodes : set
+            The nodes that are not in any partition.
+        weight : str or None
+            The edge attribute to use as the weight for the distance matrix. If None,
+            the distance matrix is calculated using the number of hops between nodes.
+
+        Returns
+        -------
+        tuple : (ndarray, list)
+            A tuple of the distance matrix for the pair of partitions and the node
+            order used to calculate the distance matrix.
+
+        """
+        # Make a working graph with only the edges in the partitions and
+        # unpartitioned edges and calculate the distance matrix
+        part_combo_dist_matrix = self.calculate_distance_matrix(
+            graph,
+            weight=weight,
+            node_order=pair_node_order,
+            log_debug=False,
+        )
+
+        return part_combo_dist_matrix
+
+    @staticmethod
+    def _has_pairwise_overlap(lists):
+        """Return a boolean array indicating overlap between pairs of lists.
+
+        Uses numpy arrays and vector broadcasting to speed up the calculation.
+        For short lists using set operations is faster.
+
+        Parameters
+        ----------
+        lists : list of lists
+            The lists to check for pairwise overlap. Lists can be of different length.
+
+        Raises
+        ------
+        ValueError
+            If lists is not a list of lists.
+        ValueError
+            If lists is empty.
+
+        Returns
+        -------
+        has_overlap : ndarray
+            A boolean array indicating whether there is overlap between each pair of
+            lists. has_overlap[i, j] is True if there is overlap between list i and
+            list j, and False otherwise.
+
+        """
+        if not isinstance(lists, list) or not all(
+            isinstance(lst, list) for lst in lists
+        ):
+            raise ValueError("The input must be a list of lists.")
+        if not lists:
+            raise ValueError("The input must not be the empty list.")
+
+        # Convert lists to sets
+        sets = [set(lst) for lst in lists]
+
+        # Compute the pairwise intersection of the sets
+        intersections = np.zeros((len(sets), len(sets)), dtype=np.int32)
+        for i, _ in enumerate(sets):
+            for j, _ in enumerate(sets):
+                intersections[i, j] = len(sets[i] & sets[j])
+                intersections[j, i] = intersections[i, j]
+
+        # Compute the pairwise union of the sets
+        unions = np.array([len(s) for s in sets]).reshape(-1, 1) + len(lists) - 1
+
+        # Compute whether there is overlap between each pair of sets
+        has_overlap = intersections > 0
+        overlaps = intersections / unions
+        np.fill_diagonal(overlaps, 0)
+        has_overlap |= overlaps > 0
+
+        return has_overlap

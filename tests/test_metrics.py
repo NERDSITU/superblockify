@@ -1,5 +1,6 @@
 """Tests for the metrics module."""
 import matplotlib.pyplot as plt
+import numpy as np
 import pytest
 from numpy import inf
 
@@ -179,3 +180,129 @@ class TestMetric:
         metric = Metric()
         with pytest.raises(ValueError):
             metric.calculate_euclidean_distance_matrix_haversine(graph)
+
+    @pytest.mark.xfail(
+        reason="Partitioners might still produce partitions with " "overlapping nodes."
+    )
+    def test_calculate_partitioning_distance_matrix(
+        self, test_city_small, partitioner_class
+    ):
+        """Test calculating distances for partitioned graph by design."""
+        city_name, graph = test_city_small
+        part = partitioner_class(graph, name=city_name)
+        part.run()
+        metric = Metric()
+        metric.calculate_partitioning_distance_matrix(
+            part, plot_distributions=True, check_overlap=True
+        )
+        # With node ordering
+        metric.calculate_partitioning_distance_matrix(
+            part,
+            node_order=list(graph.nodes),
+            plot_distributions=True,
+            check_overlap=True,
+        )
+        plt.close("all")
+
+    def test_calculate_partitioning_distance_matrix_partitions_overlap(
+        self, test_city_small, partitioner_class
+    ):
+        """Test calculating distances for partitioned graph with overlapping
+        partitions."""
+        city_name, graph = test_city_small
+        part = partitioner_class(graph, name=city_name)
+        part.run()
+        # Duplicate partitions /component
+        if part.components is not None:
+            part.components += part.components
+        else:
+            part.partitions += part.partitions
+
+        metric = Metric()
+        with pytest.raises(ValueError):
+            metric.calculate_partitioning_distance_matrix(part, check_overlap=True)
+
+    @pytest.mark.parametrize(
+        "lists,expected",
+        [
+            ([[]], np.array([[False]])),
+            ([[1]], np.array([[True]])),
+            ([[1, 2], [3, 4]], np.array([[True, False], [False, True]])),
+            ([[1], [1]], np.array([[True, True], [True, True]])),
+            ([[], []], np.array([[False, False], [False, False]])),
+            (
+                [[1, 2], [3, 4], [5, 6]],
+                np.array(
+                    [[True, False, False], [False, True, False], [False, False, True]]
+                ),
+            ),
+            (
+                [[1], [1], [2]],
+                np.array(
+                    [[True, True, False], [True, True, False], [False, False, True]]
+                ),
+            ),
+            (
+                [[1, 2], [3, 4], [5, 6], [1]],
+                np.array(
+                    [
+                        [True, False, False, True],
+                        [False, True, False, False],
+                        [False, False, True, False],
+                        [True, False, False, True],
+                    ]
+                ),
+            ),
+            # long list, range
+            (
+                [list(range(1000)), list(range(1000))],
+                np.array([[True, True], [True, True]]),
+            ),
+            (
+                [list(range(1000)), list(range(1000, 2000))],
+                np.array([[True, False], [False, True]]),
+            ),
+            (
+                [
+                    list(range(int(1e5))),
+                    list(range(int(1e5), int(2e5))),
+                    list(range(int(1.8e5), int(3e5))),
+                ],
+                np.array(
+                    [
+                        [True, False, False],
+                        [False, True, True],
+                        [False, True, True],
+                    ],
+                ),
+            ),
+        ],
+    )
+    def test__has_pairwise_overlap(self, lists, expected):
+        """Test `_has_pairwise_overlap` by design."""
+        # Check if ndarrays are equal
+        assert np.array_equal(Metric._has_pairwise_overlap(lists), expected)
+
+    @pytest.mark.parametrize(
+        "lists",
+        [
+            [],
+            False,
+            True,
+            1,
+            1.0,
+            "a",
+            None,
+            np.array([]),
+            np.array([[]]),
+            np.array([1]),
+            [1],
+            [1, 2],
+            [[1, 2], [3, 4], [5, 6], 1],
+            [[1, 2], [3, 4], [5, 6], "a"],
+        ],
+    )
+    def test__has_pairwise_overlap_exception(self, lists):
+        """Test `_has_pairwise_overlap` exception handling."""
+        with pytest.raises(ValueError):
+            Metric._has_pairwise_overlap(lists)
