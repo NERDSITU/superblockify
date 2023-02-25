@@ -117,3 +117,14 @@ def test_make_edge_color_list_faulty_attr_type(test_city_all, attr_type, minmax)
         make_edge_color_list(
             graph, "bearing", cmap=colormap, attr_types=attr_type, minmax_val=minmax
         )
+
+
+def test_make_edge_color_list_attr_unsortable(test_city_all):
+    """Test `make_edge_color_list` with unsortable attribute."""
+    _, graph = test_city_all
+    colormap = plt.get_cmap("rainbow")
+    # Set first edge with to a number, second one to a string, third one to a list
+    node = list(graph.edges(data=True))[0]
+    graph[node[0]][node[1]][0]["bearing"] = "str"
+
+    make_edge_color_list(graph, "bearing", cmap=colormap, attr_types="categorical")
