@@ -7,44 +7,84 @@ import osmnx as ox
 ox.config(use_cache=False, log_console=True)
 
 # General cities/neighborhoods
-places = [
+places_general = [
     ("Barcelona", "Barcelona, Catalonia, Spain"),
     ("Brooklyn", "Brooklyn, New York, United States"),
     ("Copenhagen", ["Københavns Kommune, Denmark", "Frederiksberg Kommune, Denmark"]),
-    ("MissionTown", "团城街道, Xialu, Hubei, China"),
     ("Resistencia", "Resistencia, Chaco, Argentina"),
+]
+
+places_small = [
+    ("Adliswil", "Adliswil, Bezirk Horgen, Zürich, Switzerland"),
+    ("Liechtenstein", "Liechtenstein, Europe"),
+    ("MissionTown", "团城街道, Xialu, Hubei, China"),
     ("Scheveningen", "Scheveningen, The Hague, Netherlands"),
 ]
 
+
+def extract_attributes(graph, edge_attributes, node_attributes):
+    """Extract only the specified attributes from a graph.
+
+    Parameters
+    ----------
+    graph : networkx.MultiDiGraph
+        The graph to extract attributes from.
+    edge_attributes : set
+        The edge attributes to keep.
+    node_attributes : set
+        The node attributes to keep.
+
+    Returns
+    -------
+    networkx.MultiDiGraph
+        The graph with only the specified attributes.
+    """
+
+    # Get all unique edge attributes
+    all_attributes = set(
+        chain.from_iterable(d.keys() for *_, d in graph.edges(data=True))
+    )
+
+    excess_attributes = all_attributes - edge_attributes
+    # Delete all excess attributes
+    for _, _, attr_dict in graph.edges(data=True):
+        for att in excess_attributes:
+            attr_dict.pop(att, None)
+
+    # Get all unique node attributes
+    all_attributes = set(
+        chain.from_iterable(d.keys() for *_, d in graph.nodes(data=True))
+    )
+
+    excess_attributes = all_attributes - node_attributes
+    # Delete all excess attributes
+    for _, attr_dict in graph.nodes(data=True):
+        for att in excess_attributes:
+            attr_dict.pop(att, None)
+
+    return graph
+
+
 if __name__ == "__main__":
-    for place in places:
-        graph = ox.graph_from_place(place[1], network_type="drive")
+    for place in places_small + places_general:
+        test_graph = ox.graph_from_place(place[1], network_type="drive")
 
-        # Get all unique edge attributes
-        all_attributes = set(
-            chain.from_iterable(d.keys() for *_, d in graph.edges(data=True))
-        )
-        keep_attributes = {"geometry", "osmid"}  # only keep these
-        excess_attributes = all_attributes - keep_attributes
-        # Delete all excess attributes
-        for n1, n2, d in graph.edges(data=True):
-            for att in excess_attributes:
-                d.pop(att, None)
+        test_graph = ox.distance.add_edge_lengths(test_graph)
 
-        # Get all unique node attributes
-        all_attributes = set(
-            chain.from_iterable(d.keys() for *_, d in graph.nodes(data=True))
+        test_graph = extract_attributes(
+            test_graph,
+            edge_attributes={"geometry", "osmid", "length"},
+            node_attributes={"y", "x", "osmid"},
         )
-        keep_attributes = {"y", "x", "osmid"}  # only keep these
-        excess_attributes = all_attributes - keep_attributes
-        # Delete all excess attributes
-        for n, d in graph.nodes(data=True):
-            for att in excess_attributes:
-                d.pop(att, None)
 
         # Add edge bearings - the precision >1 is important for binning
-        graph = ox.add_edge_bearings(graph, precision=2)
+        test_graph = ox.add_edge_bearings(test_graph, precision=2)
+
+        test_graph = ox.project_graph(test_graph)
 
         ox.io.save_graphml(
-            graph, filepath=f"./tests/test_data/cities" f"/{place[0]}_bearing.graphml"
+            test_graph,
+            filepath=f"./tests/test_data/cities/{place[0]}_"
+            + ("general" if place in places_general else "small")
+            + ".graphml",
         )

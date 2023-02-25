@@ -1,0 +1,12 @@
+osmnx
+pyrosm
+jupyterlab
+jupyterlab_code_formatter
+blackd
+isort
+pylint
+pytest
+coverage
+sphinx
+sphinx_rtd_theme
+tqdm

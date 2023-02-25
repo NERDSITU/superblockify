@@ -20,15 +20,16 @@ conda env create --file=environment.yml
 
 This initializes a conda environment by the name `OSMnxPyrLab`, which can be
 activated using `OSMnxPyrLab`. Alternatively a versionless setup can be done
-by executing (`environmentSetupVersionless.sh`)
+by executing (`environmentSetupVersionless.sh` in the working directory)
 
 ```bash
-conda create -n OSMnxPyrLab -c conda-forge osmnx pyrosm jupyterlab
+conda create -n OSMnxPyrLab -c conda-forge --file requirements.txt
 conda activate OSMnxPyrLab
-conda install -c conda-forge jupyterlab_code_formatter blackd isort pylint pytest coverage sphinx sphinx_rtd_theme
+conda env export > environment.yml
 ```
 
-which does not have explicit versions, but might resolve dependency issues.
+which does not have explicit versions, but might resolve dependency issues. Using
+`git diff environment.yml` the changes can be inspected.
 
 ## Logging
 

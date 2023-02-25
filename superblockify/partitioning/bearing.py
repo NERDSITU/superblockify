@@ -29,7 +29,9 @@ class BearingPartitioner(BasePartitioner):
         self._inter_vals = {}
         self.attr_value_minmax = (0, 90)
 
-    def run(self, show_analysis_plots=False, **kwargs):
+    def run(
+        self, show_analysis_plots=False, min_length=1500, min_edge_count=5, **kwargs
+    ):
         """Group by prominent bearing directions.
 
         Procedure to determine the graphs partitions based on the edges bearings.
@@ -48,6 +50,10 @@ class BearingPartitioner(BasePartitioner):
         ----------
         show_analysis_plots : bool, optional
             If True show visualization graphs of the approach.
+        min_length : float, optional
+            Minimum component length in meters to be considered for partitioning.
+        min_edge_count : int, optional
+            Minimum component edge count to be considered for partitioning.
 
         Raises
         ------
@@ -95,7 +101,7 @@ class BearingPartitioner(BasePartitioner):
         nx.set_edge_attributes(self.graph, group_bearing, self.attribute_label)
 
         # Write partiton dict
-        self.partition = [
+        self.partitions = [
             {
                 "name": str(self._inter_vals["boundaries"][i : i + 2]),
                 "value": center_val,
@@ -104,11 +110,15 @@ class BearingPartitioner(BasePartitioner):
             if center_val is not None
         ]
 
-        # Make subgraphs for each partition
-        self.make_subgraphs_from_attribute(split_disconnected=True)
+        # Make subgraphs for each partitions
+        self.make_subgraphs_from_attribute(
+            split_disconnected=True,
+            min_edge_count=min_edge_count,
+            min_length=min_length,
+        )
 
         if show_analysis_plots:
-            self.plot_subgraph_component_size()
+            self.plot_subgraph_component_size("length")
             plt.show()
 
     def __bin_bearings(self, num_bins: int):
