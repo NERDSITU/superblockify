@@ -61,6 +61,17 @@ class TestPartitioners:
             assert isinstance(axe, Axes)
             plt.close("all")
 
+    def test_plot_partition_graph_unpartitioned(self, test_city_all, partitioner_class):
+        """Test `plot_partition_graph` exception handling."""
+        city_name, graph = test_city_all
+        part = partitioner_class(graph, name=city_name)
+        with pytest.raises(AssertionError):
+            part.plot_partition_graph()
+        part.run()
+        part.attribute_label = None
+        with pytest.raises(AssertionError):
+            part.plot_partition_graph()
+
     def test_plot_partitions_unpartitioned(self, test_city_all, partitioner_class):
         """Test `plot_partition_graph` exception handling."""
         city_name, graph = test_city_all
