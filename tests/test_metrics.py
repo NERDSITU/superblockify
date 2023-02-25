@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+from networkx import strongly_connected_components
 from numpy import inf
 
 from superblockify.metrics import Metric
@@ -221,6 +222,23 @@ class TestMetric:
         metric = Metric()
         with pytest.raises(ValueError):
             metric.calculate_partitioning_distance_matrix(part, check_overlap=True)
+
+    @pytest.mark.parametrize("weight", [None, "length"])
+    def test__calculate_pair_distance_matrix(self, test_city_small, weight):
+        """Test calculating a distance matrix for a graph.
+        Test on largest strongly connected component.
+        """
+        # pylint: disable=protected-access
+        _, graph = test_city_small
+        metric = Metric()
+        largest_strongly_connected_component = graph.subgraph(
+            max(strongly_connected_components(graph), key=len)
+        )
+        metric._calculate_pair_distance_matrix(
+            largest_strongly_connected_component,
+            pair_node_order=list(largest_strongly_connected_component.nodes),
+            weight=weight,
+        )
 
     @pytest.mark.parametrize(
         "lists,expected",

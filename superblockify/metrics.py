@@ -522,7 +522,7 @@ class Metric:
         # Prepare node pair orders and subgraphs for each partition pair while
         # checking for duplicate nodes
         pair_node_orders = []
-        for (idx1, (name1, nodes1)), (idx2, (name2, nodes2)) in partition_pairs:
+        for (idx1, (_, nodes1)), (idx2, (_, nodes2)) in partition_pairs:
             if idx1 != idx2:
                 pair_node_orders.append(
                     list(set(list(nodes1) + list(nodes2) + list(unpartitioned_nodes)))
@@ -603,13 +603,8 @@ class Metric:
         graph : networkx.Graph
             The graph to calculate the distance matrix for, filtered to only include
             the nodes in `pair` and `unpartitioned_nodes`.
-        pair : tuple
-            A tuple of the form ((idx1, (name1, nodes1)), (idx2, (name2, nodes2))) where
-            idx1 and idx2 are the indices of the partitions, name1 and name2 are the
-            names of the partitions, and nodes1 and nodes2 are the nodes in the
-            partitions.
-        unpartitioned_nodes : set
-            The nodes that are not in any partition.
+        pair_node_order : list
+            The node order to use for the distance matrix.
         weight : str or None
             The edge attribute to use as the weight for the distance matrix. If None,
             the distance matrix is calculated using the number of hops between nodes.
