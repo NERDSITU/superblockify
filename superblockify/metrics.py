@@ -529,11 +529,6 @@ class Metric:
                 )
             else:
                 pair_node_orders.append(list(nodes1) + list(unpartitioned_nodes))
-            # Check for duplicate nodes
-            if len(pair_node_orders[-1]) != len(set(pair_node_orders[-1])):
-                raise ValueError(
-                    f"Duplicate nodes in the partitions {name1} and {name2}."
-                )
         pair_subgraphs = [
             partitioner.graph.subgraph(nodes).copy() for nodes in pair_node_orders
         ]
