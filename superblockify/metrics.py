@@ -250,11 +250,11 @@ class Metric:
                 ),
                 coord_title="Coordinates of nodes",
                 labels=("x", "y"),
-                distance_unit="hops"
+                distance_unit="khops"
                 if weight is None
                 else "km"
                 if weight == "length"
-                else weight,
+                else f"k{weight}",
             )
 
         return dist_full_graph
