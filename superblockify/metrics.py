@@ -55,7 +55,9 @@ class Metric:
 
     # pylint: disable=too-many-instance-attributes
 
-    def calculate_all(self, partitioner, weight="length", num_workers=None):
+    def calculate_all(
+        self, partitioner, weight="length", num_workers=None, show_analysis_plots=False
+    ):
         """Calculate all metrics for the partitioning.
 
         `self.distance_matrix` is used to save the distances for the metrics and should
