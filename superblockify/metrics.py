@@ -97,6 +97,56 @@ class Metric:
             "N": dist_partitioning_graph,
         }
 
+        self.calculate_all_measure_sums()
+
+    def calculate_all_measure_sums(self):
+        """Based on the distance matrix, calculate the network measures.
+
+        Calculate the directness, global and local efficiency for each network measure.
+
+        """
+
+        # Directness
+        for key in self.directness:
+            self.directness[key] = self.calculate_directness(key[0], key[1])
+            print(f"Directness {key}: {self.directness[key]}")
+
+    def calculate_directness(self, measure1, measure2):
+        """Calculate the directness for the given network measures.
+
+        The directness in the mean of the ratios between the distances of the two
+        network measures.
+
+        If any of the distances is 0 or infinite, it is ignored in the calculation.
+        We use flattening as it preserves the order of the distances and makes the
+        calculation faster.
+
+        Parameters
+        ----------
+        measure1 : str
+            The first network measure
+        measure2 : str
+            The second network measure
+
+        Returns
+        -------
+        float
+            The directness of the network measures
+        """
+
+        # Get the distance matrix for the two network measures
+        dist1 = self.distance_matrix[measure1].flatten()
+        dist2 = self.distance_matrix[measure2].flatten()
+
+        # Drop the pairs of distances where at least one is 0 or infinite
+        mask = np.logical_and(dist1 != 0, dist2 != 0)
+        mask = np.logical_and(mask, np.isfinite(dist1), np.isfinite(dist2))
+        dist1 = dist1[mask]
+        dist2 = dist2[mask]
+
+        # Calculate the directness as the mean of the ratios
+        return np.mean(dist1 / dist2)
+
     def __init__(self):
         """Construct a metric object."""
 
