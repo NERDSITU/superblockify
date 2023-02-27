@@ -136,3 +136,11 @@ class TestPartitioners:
             part.overwrite_attributes_of_ignored_components(
                 attribute_name=part.attribute_label
             )
+
+    def test_get_sorted_node_list(self, test_city_all, partitioner_class):
+        """Test `get_sorted_node_list` by design."""
+        city_name, graph = test_city_all
+        part = partitioner_class(graph, name=city_name)
+        part.run()
+        sorted_nodes = part.get_sorted_node_list()
+        assert len(sorted_nodes) == len(graph.nodes)

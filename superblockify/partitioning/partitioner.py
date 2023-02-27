@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from random import choice
 
 import networkx as nx
+from matplotlib import pyplot as plt
 
 from .. import attribute, plot, metrics
 
@@ -60,7 +61,7 @@ class BasePartitioner(ABC):
             {"name": "one", "value": 1.0},
         ]
 
-    def calculate_metrics(self):
+    def calculate_metrics(self, show_analysis_plots=False):
         """Calculate metrics for the partitioning.
 
         Calculates the metrics for the partitioning and writes them to the
@@ -102,12 +103,24 @@ class BasePartitioner(ABC):
             - L(N/E) = sum(G(i; N/E)) / N where i = 1..N
             - L(N/S) = sum(G(i; N/S)) / N where i = 1..N
 
+        Parameters
+        ----------
+        show_analysis_plots : bool, optional
+            If True show visualization graphs of the approach. If False only print
+            into console. Default is False.
+
         """
 
         # Log calculating metrics
         logger.debug("Calculating metrics for %s", self.name)
         self.metric.calculate_all(partitioner=self)
-        logger.debug("Metrics for %s: %s", self.name, self.metric)
+        if show_analysis_plots:
+            self.metric.plot_distance_matrices(
+                name=f"{self.name} - {self.__class__.__name__}"
+            )
+            plt.show()
+        else:
+            logger.debug("Metrics for %s: %s", self.name, self.metric)
 
     def make_subgraphs_from_attribute(
         self, split_disconnected=False, min_edge_count=0, min_length=0
@@ -335,6 +348,33 @@ class BasePartitioner(ABC):
             }
 
         return partitions
+
+    def get_sorted_node_list(self):
+        """Get sorted list of nodes.
+
+        Sorted after the name of the partition, followed by the unpartitioned nodes.
+        Uses `get_partition_nodes` to return a list of nodes.
+
+        Returns
+        -------
+        list of nodes
+            List of nodes sorted after the name of the partition, followed by the
+            unpartitioned nodes.
+        """
+
+        # Get node list for fixed order - sorted by partition name
+        node_list = self.get_partition_nodes()
+        # node_list is list of dicts, which all have a "name" and "nodes" key
+
+        # Make one long list out of all the nodes, sorted by partition name
+        node_list = sorted(node_list, key=lambda x: x["name"])
+        node_list = [node for partition in node_list for node in partition["nodes"]]
+        # Throw out duplicates, started from the back
+        node_list = list(dict.fromkeys(node_list[::-1]))[::-1]
+        # Add nodes that are not in a partition, only the key of nodes is needed
+        node_list += [node for node in self.graph.nodes if node not in node_list]
+
+        return node_list
 
     def plot_partition_graph(self, **pba_kwargs):
         """Plotting the partitions with color on graph.

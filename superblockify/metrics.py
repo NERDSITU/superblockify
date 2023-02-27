@@ -6,6 +6,7 @@ from multiprocessing import cpu_count
 from time import time
 
 import numpy as np
+from matplotlib import pyplot as plt
 from networkx import to_scipy_sparse_array
 from osmnx.projection import is_projected
 from scipy.sparse.csgraph import dijkstra
@@ -50,8 +51,9 @@ class Metric:
         {"SE": float, "NE": float, "NS": float}
 
     """
+    # pylint: disable=too-many-instance-attributes
 
-    def calculate_all(self, partitioner):
+    def calculate_all(self, partitioner, weight="length", num_workers=None):
         """Calculate all metrics for the partitioning.
 
         `self.distance_matrix` is used to save the distances for the metrics and should
@@ -61,11 +63,18 @@ class Metric:
         ----------
         partitioner : BasePartitioner
             The partitioner object to calculate the metrics for
+        weight : str, optional
+            The edge attribute to use as weight, by default "length", if None count hops
+        num_workers : int, optional
+            The number of workers to use for multiprocessing. If None, use
+            min(32, os.cpu_count() + 4), by default None
 
         """
 
-        # Get node list for fixed order
-        node_list = list(partitioner.graph.nodes())
+        # Set weight attribute
+        self.weight = weight
+
+        node_list = partitioner.get_sorted_node_list()
 
         # Euclidean distances (E)
         dist_euclidean = self.calculate_euclidean_distance_matrix_projected(
@@ -79,7 +88,7 @@ class Metric:
 
         # On the partitioning graph (N)
         dist_partitioning_graph = self.calculate_partitioning_distance_matrix(
-            partitioner, weight="length", node_order=node_list
+            partitioner, weight="length", node_order=node_list, num_workers=num_workers
         )
 
         self.distance_matrix = {
@@ -99,6 +108,7 @@ class Metric:
         self.local_efficiency = {"SE": None, "NE": None, "NS": None}
 
         self.distance_matrix = None
+        self.weight = None
 
     def __str__(self):
         """Return a string representation of the metric object.
@@ -626,6 +636,68 @@ class Metric:
         )
 
         return part_combo_dist_matrix
+
+    def plot_distance_matrices(self, name=None):
+        """Show the distance matrices for the network measures.
+
+        Plots all available distance matrices in a single figure.
+
+        Parameters
+        ----------
+        name : str
+            The name to put into the title of the plot.
+
+        Returns
+        -------
+        fig, axes : matplotlib.figure.Figure, matplotlib.axes.Axes
+            The figure and axes of the plot.
+
+        Raises
+        ------
+        ValueError
+            If no distance matrices are available.
+        """
+
+        if self.distance_matrix is None:
+            raise ValueError("No distance matrices available.")
+
+        # Make figure with the fitting amount of subplots
+        fig, axes = plt.subplots(
+            1, len(self.distance_matrix), figsize=(len(self.distance_matrix) * 5, 5)
+        )
+        # Find maximal, non-inf value for the colorbar
+        max_val = max(
+            np.max(value[value != np.inf]) for value in self.distance_matrix.values()
+        )
+        dist_im = None
+        # Subplots with shared colorbar, title, and y-axis label
+        for axe, (key, value) in zip(axes, self.distance_matrix.items()):
+            dist_im = axe.imshow(value, vmin=0, vmax=max_val)
+            axe.set_title(f"$d_{key}(i, j)$")
+            axe.set_xlabel("Node $j$")
+            axe.set_aspect("equal")
+        # Share y-axis
+        axes[0].set_ylabel("Node $i$")
+        for axe in axes[1:]:
+            axe.get_shared_y_axes().join(axes[0], axe)
+        # Plot colorbar on the right side of the figure
+        fig.colorbar(dist_im, ax=axes, fraction=0.046, pad=0.04)
+        # Label colorbar
+        unit = (
+            "khops"
+            if self.weight is None
+            else "km"
+            if self.weight == "length"
+            else f"k{self.weight}"
+        )
+        dist_im.set_label(f"Distance [{unit}]")
+        # Title above all subplots
+        fig.suptitle(
+            f"Distance matrices for the network measures "
+            f"{'(' + name + ')' if name else ''}"
+        )
+
+        return fig, axes
 
     @staticmethod
     def _has_pairwise_overlap(lists):
