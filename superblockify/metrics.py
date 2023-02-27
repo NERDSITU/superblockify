@@ -172,12 +172,17 @@ class Metric:
 
         Notes
         -----
-        .. math:: E_{\text{glob},S/E}=\frac{\sum_{i \neq j} \frac{1}{d_S(i, j)}}{\sum_{i \neq j} \frac{1}{d_E(i, j)}}
+        .. math::
+
+             E_{\text{glob},S/E}=\frac{\sum_{i \neq j}\frac{1}{d_S(i, j)}}
+             {\sum_{i \neq j} \frac{1}{d_E(i, j)}}
+
         The function calls `_network_measures_filtered_flattened` with the swapped
         order of the network measures, because this will return a cached result if
         another type of network measure was calculated before.
-        """  # pylint: disable=argument-out-of-order
+        """
 
+        # pylint: disable=arguments-out-of-order
         dist2, dist1 = self._network_measures_filtered_flattened(measure2, measure1)
 
         # Calculate the global efficiency as the ratio between the sums of the inverses
