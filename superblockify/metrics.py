@@ -1,6 +1,7 @@
 """Metric object for the superblockify package."""
 import logging
 from datetime import timedelta
+from functools import lru_cache
 from itertools import combinations_with_replacement, repeat
 from multiprocessing import cpu_count
 from time import time
@@ -51,6 +52,7 @@ class Metric:
         {"SE": float, "NE": float, "NS": float}
 
     """
+
     # pylint: disable=too-many-instance-attributes
 
     def calculate_all(self, partitioner, weight="length", num_workers=None):
@@ -109,17 +111,22 @@ class Metric:
         # Directness
         for key in self.directness:
             self.directness[key] = self.calculate_directness(key[0], key[1])
-            print(f"Directness {key}: {self.directness[key]}")
+            logger.debug("Directness %s: %s", key, self.directness[key])
+
+        # Global efficiency
+        for key in self.global_efficiency:
+            self.global_efficiency[key] = self.calculate_global_efficiency(
+                key[0], key[1]
+            )
+            logger.debug("Global efficiency %s: %s", key, self.global_efficiency[key])
 
     def calculate_directness(self, measure1, measure2):
-        """Calculate the directness for the given network measures.
+        r"""Calculate the directness for the given network measures.
 
         The directness in the mean of the ratios between the distances of the two
         network measures.
 
         If any of the distances is 0 or infinite, it is ignored in the calculation.
-        We use flattening as it preserves the order of the distances and makes the
-        calculation faster.
 
         Parameters
         ----------
@@ -132,11 +139,85 @@ class Metric:
         -------
         float
             The directness of the network measures
+
+        Notes
+        -----
+        .. math:: D_{E/S}=\left\langle\frac{d_E(i, j)}{d_S(i, j)}\right\rangle_{i\neq j}
+        """
+
+        dist1, dist2 = self._network_measures_filtered_flattened(measure1, measure2)
+
+        # Calculate the directness as the mean of the ratios
+        return np.mean(dist1 / dist2)
+
+    def calculate_global_efficiency(self, measure1, measure2):
+        r"""Calculate the global efficiency for the given network measures.
+
+        The global efficiency is the ratio between the sums of the inverses of the
+        distances of the two network measures.
+
+        If any of the distances is 0 or infinite, it is ignored in the calculation.
+
+        Parameters
+        ----------
+        measure1 : str
+            The first network measure
+        measure2 : str
+            The second network measure
+
+        Returns
+        -------
+        float
+            The global efficiency of the network measures
+
+        Notes
+        -----
+        .. math:: E_{\text{glob},S/E}=\frac{\sum_{i \neq j} \frac{1}{d_S(i, j)}}{\sum_{i \neq j} \frac{1}{d_E(i, j)}}
+        The function calls `_network_measures_filtered_flattened` with the swapped
+        order of the network measures, because this will return a cached result if
+        another type of network measure was calculated before.
+        """  # pylint: disable=argument-out-of-order
+
+        dist2, dist1 = self._network_measures_filtered_flattened(measure2, measure1)
+
+        # Calculate the global efficiency as the ratio between the sums of the inverses
+        return np.sum(1 / dist1) / np.sum(1 / dist2)
+
+    @lru_cache(maxsize=6)
+    def _network_measures_filtered_flattened(self, measure1, measure2):
+        """Return the two network measures filtered and flattened.
+
+        The diagonal is set to 0 and the matrix is flattened. We use flattening as it
+        preserves the order of the distances and makes the calculation faster.
+
+        Parameters
+        ----------
+        measure1 : str
+            The first network measure
+        measure2 : str
+            The second network measure
+
+        Returns
+        -------
+        1d ndarray
+            The first network measure
+        1d ndarray
+            The second network measure
+
+        Notes
+        -----
+        Cache the results for the different combinations of network measures.
         """
 
         # Get the distance matrix for the two network measures
-        dist1 = self.distance_matrix[measure1].flatten()
-        dist2 = self.distance_matrix[measure2].flatten()
+        dist1 = self.distance_matrix[measure1]
+        dist2 = self.distance_matrix[measure2]
+        # Set the diagonal to 0 so that it is not included in the calculation
+        np.fill_diagonal(dist1, 0)
+        np.fill_diagonal(dist2, 0)
+        # Flatten the distance matrices
+        dist1 = dist1.flatten()
+        dist2 = dist2.flatten()
 
         # Drop the pairs of distances where at least one is 0 or infinite
         mask = np.logical_and(dist1 != 0, dist2 != 0)
@@ -144,8 +225,7 @@ class Metric:
         dist1 = dist1[mask]
         dist2 = dist2[mask]
 
-        # Calculate the directness as the mean of the ratios
-        return np.mean(dist1 / dist2)
+        return dist1, dist2
 
     def __init__(self):
         """Construct a metric object."""
