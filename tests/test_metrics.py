@@ -55,7 +55,14 @@ class TestMetric:
         city_name, graph = test_city_small
         part = partitioner_class(graph, name=city_name)
         part.run()
-        part.calculate_metrics()
+        part.calculate_metrics(show_analysis_plots=True)
+        plt.close("all")
+
+    def test_plot_distance_matrices_uncalculated(self):
+        """Test plotting distance matrices when they have not been calculated."""
+        metric = Metric()
+        with pytest.raises(ValueError):
+            metric.plot_distance_matrices()
 
     @pytest.mark.parametrize("weight", ["length", None])
     def test_calculate_distance_matrix(self, test_city_small, weight):
