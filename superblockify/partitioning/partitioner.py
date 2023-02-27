@@ -113,7 +113,9 @@ class BasePartitioner(ABC):
 
         # Log calculating metrics
         logger.debug("Calculating metrics for %s", self.name)
-        self.metric.calculate_all(partitioner=self)
+        self.metric.calculate_all(
+            partitioner=self, show_analysis_plots=show_analysis_plots
+        )
         if show_analysis_plots:
             self.metric.plot_distance_matrices(
                 name=f"{self.name} - {self.__class__.__name__}"

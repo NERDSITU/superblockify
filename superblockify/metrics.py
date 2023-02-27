@@ -80,17 +80,26 @@ class Metric:
 
         # Euclidean distances (E)
         dist_euclidean = self.calculate_euclidean_distance_matrix_projected(
-            partitioner.graph, node_order=node_list
+            partitioner.graph,
+            node_order=node_list,
+            plot_distributions=show_analysis_plots,
         )
 
         # On the full graph (S)
         dist_full_graph = self.calculate_distance_matrix(
-            partitioner.graph, weight="length", node_order=node_list
+            partitioner.graph,
+            weight="length",
+            node_order=node_list,
+            plot_distributions=show_analysis_plots,
         )
 
         # On the partitioning graph (N)
         dist_partitioning_graph = self.calculate_partitioning_distance_matrix(
-            partitioner, weight="length", node_order=node_list, num_workers=num_workers
+            partitioner,
+            weight="length",
+            node_order=node_list,
+            num_workers=num_workers,
+            plot_distributions=show_analysis_plots,
         )
 
         self.distance_matrix = {
@@ -104,7 +113,8 @@ class Metric:
     def calculate_all_measure_sums(self):
         """Based on the distance matrix, calculate the network measures.
 
-        Calculate the directness, global and local efficiency for each network measure.
+        Calculate the directness, global and local efficiency for each network measure
+        and write them to the corresponding attributes.
 
         """
 
