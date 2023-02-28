@@ -451,3 +451,58 @@ def plot_distance_distributions(
     axe[1].set_ylabel(labels[1])
     plt.tight_layout()
     plt.show()
+
+
+def plot_road_type_for(graph, included_types, name, **plt_kwargs):
+    """Plot the distribution of road types for the given graph.
+
+    Find possible road types from the graph's edges, or at
+    https://wiki.openstreetmap.org/wiki/Key:highway.
+
+    Parameters
+    ----------
+    graph : networkx.MultiDiGraph
+        Input graph
+    included_types : list
+        List of osm highway keys to be highlighted, all other edges have another color
+    name : str
+        Title of the plot
+    plt_kwargs
+        Keyword arguments to pass to `matplotlib.pyplot.plot`.
+
+    Returns
+    -------
+    fig, axe : tuple
+        matplotlib figure, axis
+    """
+
+    # Write to 'searched_road_type' attribute 1 if edge is in included_types,
+    # 0 otherwise
+    # graph.edges[edge]["highway"] could be list or string
+    for edge in graph.edges:
+        if (
+            isinstance(graph.edges[edge]["highway"], list)
+            and any(
+                road_type in included_types
+                for road_type in graph.edges[edge]["highway"]
+            )
+        ) or (
+            isinstance(graph.edges[edge]["highway"], str)
+            and graph.edges[edge]["highway"] in included_types
+        ):
+            graph.edges[edge]["residential"] = 1
+        else:
+            graph.edges[edge]["residential"] = 0
+
+    # Plot
+    logger.debug("Plotting residential/other edges for %s.", name)
+
+    # Use plot_by_attribute to plot the distribution of residential edges
+    return plot_by_attribute(
+        graph,
+        "residential",
+        attr_types="numerical",
+        cmap="cool",
+        minmax_val=(0, 1),
+        **plt_kwargs,
+    )

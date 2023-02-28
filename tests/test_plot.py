@@ -5,7 +5,12 @@ import pytest
 from matplotlib import pyplot as plt
 
 from superblockify import new_edge_attribute_by_function
-from superblockify.plot import paint_streets, plot_by_attribute, make_edge_color_list
+from superblockify.plot import (
+    paint_streets,
+    plot_by_attribute,
+    make_edge_color_list,
+    plot_road_type_for,
+)
 
 config = ConfigParser()
 config.read("config.ini")
@@ -128,3 +133,29 @@ def test_make_edge_color_list_attr_unsortable(test_city_all):
     graph[node[0]][node[1]][0]["bearing"] = "str"
 
     make_edge_color_list(graph, "bearing", cmap=colormap, attr_types="categorical")
+
+
+@pytest.mark.parametrize(
+    "road_types",
+    [
+        ["residential"],
+        ["residential", "unclassified"],
+        [
+            "motorway",
+            "trunk",
+            "primary",
+            "secondary",
+            "tertiary",
+            "motorway_link",
+            "trunk_link",
+            "primary_link",
+            "secondary_link",
+            "tertiary_link",
+        ],
+    ],
+)
+def test_plot_road_type_for(test_city_all, road_types):
+    """Test `plot_road_type_for` by design."""
+    city_name, graph = test_city_all
+    plot_road_type_for(graph, included_types=road_types, name=city_name)
+    plt.close()
