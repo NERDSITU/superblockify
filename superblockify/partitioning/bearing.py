@@ -29,13 +29,22 @@ class BearingPartitioner(BasePartitioner):
         self._inter_vals = {}
         self.attr_value_minmax = (0, 90)
 
+        self.residential_graph = self.graph.copy()
+        self.residential_graph.remove_edges_from(
+            [
+                (u, v)
+                for u, v, d in self.residential_graph.edges(data=True)
+                if d["highway"] != "residential" or "residential" not in d["highway"]
+            ]
+        )
+
     def run(
         self, show_analysis_plots=False, min_length=1500, min_edge_count=5, **kwargs
     ):
         """Group by prominent bearing directions.
 
         Procedure to determine the graphs partitions based on the edges bearings.
-            1. Bin bearings.
+            1. Bin bearings. Only on residential edges.
             2. Find peaks.
             3. Determine boundaries/intervals corresponding to a partition.
             4. (optional) Plot found peaks and interval splits.
@@ -90,7 +99,7 @@ class BearingPartitioner(BasePartitioner):
 
         # Write grouping attribute to graph
         self.attribute_label = "bearing_group"
-        group_bearing = nx.get_edge_attributes(self.graph, "bearing_90")
+        group_bearing = nx.get_edge_attributes(self.residential_graph, "bearing_90")
         logger.debug("Writing attribute 'bearing_group' to graph.")
         for edge, bearing in group_bearing.items():
             if np.isnan(bearing):
@@ -147,7 +156,7 @@ class BearingPartitioner(BasePartitioner):
 
         # Write attribute where bearings are baked down modulo 90 degrees.
         attribute.new_edge_attribute_by_function(
-            self.graph, lambda bear: bear % 90, "bearing", "bearing_90"
+            self.residential_graph, lambda bear: bear % 90, "bearing", "bearing_90"
         )
 
         bins = (
@@ -156,7 +165,8 @@ class BearingPartitioner(BasePartitioner):
             / (self._bin_info["num_bins"] * 2)
         )
         count, bin_edges = np.histogram(
-            list(nx.get_edge_attributes(self.graph, "bearing_90").values()), bins=bins
+            list(nx.get_edge_attributes(self.residential_graph, "bearing_90").values()),
+            bins=bins,
         )
         # move last bin to front, so eg 0.01° and 359.99° will be binned together
         count = np.roll(count, 1)
