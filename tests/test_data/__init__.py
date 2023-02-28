@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
         test_graph = extract_attributes(
             test_graph,
-            edge_attributes={"geometry", "osmid", "length"},
+            edge_attributes={"geometry", "osmid", "length", "highway"},
             node_attributes={"y", "x", "osmid"},
         )
 
