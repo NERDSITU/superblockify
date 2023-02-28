@@ -121,8 +121,8 @@ class BasePartitioner(ABC):
                 name=f"{self.name} - {self.__class__.__name__}"
             )
             plt.show()
-        else:
-            logger.debug("Metrics for %s: %s", self.name, self.metric)
+
+        logger.debug("Metrics for %s: %s", self.name, self.metric)
 
     def make_subgraphs_from_attribute(
         self, split_disconnected=False, min_edge_count=0, min_length=0
