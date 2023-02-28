@@ -61,7 +61,7 @@ class BasePartitioner(ABC):
             {"name": "one", "value": 1.0},
         ]
 
-    def calculate_metrics(self, show_analysis_plots=False):
+    def calculate_metrics(self, show_analysis_plots=False, num_workers=None):
         """Calculate metrics for the partitioning.
 
         Calculates the metrics for the partitioning and writes them to the
@@ -108,13 +108,18 @@ class BasePartitioner(ABC):
         show_analysis_plots : bool, optional
             If True show visualization graphs of the approach. If False only print
             into console. Default is False.
+        num_workers : int, optional
+            Number of workers to use for parallel processing. Default is None, which
+            uses min(32, os.cpu_count() + 4) workers.
 
         """
 
         # Log calculating metrics
         logger.debug("Calculating metrics for %s", self.name)
         self.metric.calculate_all(
-            partitioner=self, show_analysis_plots=show_analysis_plots
+            partitioner=self,
+            show_analysis_plots=show_analysis_plots,
+            num_workers=num_workers,
         )
         if show_analysis_plots:
             self.metric.plot_distance_matrices(
