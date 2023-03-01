@@ -5,6 +5,7 @@ from random import choice
 
 import networkx as nx
 from matplotlib import pyplot as plt
+from numpy import linspace
 
 from .. import attribute, plot, metrics
 
@@ -479,7 +480,7 @@ class BasePartitioner(ABC):
             **pba_kwargs,
         )
 
-    def plot_subgraph_component_size(self, measure, **pcs_kwargs):
+    def plot_subgraph_component_size(self, measure, xticks=None, **pcs_kwargs):
         """Plot the size of the subgraph components of the partitions.
 
         Scatter plot of the size of the subgraph components of each partition type.
@@ -534,6 +535,9 @@ class BasePartitioner(ABC):
                 component_values.append(part["value"])
                 ignore = None
 
+        if xticks is None:
+            xticks = list(linspace(*self.attr_value_minmax, 7))
+
         # Plot
         return plot.plot_component_size(
             graph=self.graph,
@@ -544,6 +548,7 @@ class BasePartitioner(ABC):
             ignore=ignore,
             title=self.name,
             minmax_val=self.attr_value_minmax,
+            xticks=xticks,
             **pcs_kwargs,
         )
 
