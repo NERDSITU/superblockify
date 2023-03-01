@@ -190,7 +190,7 @@ class TestMetric:
             metric.calculate_euclidean_distance_matrix_haversine(graph)
 
     @pytest.mark.xfail(
-        reason="Partitioners might still produce partitions with " "overlapping nodes."
+        reason="Partitioners might still produce partitions with overlapping nodes."
     )
     def test_calculate_partitioning_distance_matrix(
         self, test_city_small, partitioner_class
