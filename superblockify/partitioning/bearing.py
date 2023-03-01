@@ -129,6 +129,8 @@ class BearingPartitioner(BasePartitioner):
         if show_analysis_plots:
             self.plot_subgraph_component_size("length")
             plt.show()
+            self.plot_partition_graph()
+            plt.show()
 
     def __bin_bearings(self, num_bins: int):
         """Construct histogram of `self.graph` bearings.
