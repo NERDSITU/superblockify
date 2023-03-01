@@ -2,6 +2,7 @@
 import inspect
 from configparser import ConfigParser
 from os import listdir
+from os.path import getsize
 
 import osmnx as ox
 import pytest
@@ -15,9 +16,14 @@ TEST_DATA = config["tests"]["test_data_path"]
 
 
 @pytest.fixture(
-    params=[
-        city for city in listdir(f"{TEST_DATA}cities/") if city.endswith(".graphml")
-    ]
+    params=sorted(
+        [
+            city
+            for city in listdir(f"{TEST_DATA}cities/")
+            if city.endswith(".graphml")
+        ],
+        key=lambda city: getsize(f"{TEST_DATA}cities/" + city),
+    )
 )
 def test_city_all(request):
     """Fixture for loading and parametrizing all cities with bearing test_data."""
