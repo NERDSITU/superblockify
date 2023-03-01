@@ -301,6 +301,7 @@ def plot_component_size(
     minmax_val=None,
     num_component_log_scale=True,
     show_legend=None,
+    xticks=None,
     **kwargs,
 ):  # pylint: disable=too-many-locals
     """Plot the distribution of component sizes for each partition value.
@@ -337,6 +338,8 @@ def plot_component_size(
     show_legend : bool, optional
         If True, the legend is shown. If None, the legend is shown if the unique
         values of the partition are less than 23.
+    xticks : list, optional
+        List of xticks
     kwargs
         Keyword arguments to pass to `matplotlib.pyplot.plot`.
 
@@ -364,7 +367,7 @@ def plot_component_size(
     if num_component_log_scale:
         axe.set_yscale("log")
     axe.grid(True)
-    plt.xticks([0, 15, 30, 45, 60, 75, 90])
+    plt.xticks(xticks)
 
     # Make legend with unique colors
     sorted_unique_values = sorted(set(component_values))
