@@ -6,10 +6,11 @@ from os import path, makedirs
 from random import choice
 
 import networkx as nx
-from matplotlib import pyplot as plt
+import osmnx as ox
 from numpy import linspace
 
 from .. import attribute, plot, metrics
+from ..utils import load_graph_from_place
 
 logger = logging.getLogger("superblockify")
 
@@ -19,9 +20,32 @@ GRAPH_DIR = config["general"]["graph_dir"]
 
 
 class BasePartitioner(ABC):
-    """Parent class for partitioning graphs."""
+    """Parent class for partitioning graphs.
 
-    def __init__(self, graph, name="unnamed"):
+    Notes
+    -----
+    This class is an abstract base class and should not be instantiated directly.
+
+    Examples
+    --------
+    >>> from superblockify.partitioning import DummyPartitioner
+    >>> import osmnx as ox
+    >>> name, search_str = "Resistencia", "Resistencia, Chaco, Argentina"
+    >>> graph = ox.graph_from_place(search_str, network_type="drive")
+    >>> part = DummyPartitioner(graph)
+    >>> part.run(make_plots=True)
+
+    >>> from superblockify.partitioning import DummyPartitioner
+    >>> import osmnx as ox
+    >>> part = DummyPartitioner(
+    ...     name="Resistencia", search_str="Resistencia, Chaco, Argentina"
+    ... )
+    >>> part.run()
+    >>> part.calculate_metrics(make_plots=True, num_workers=6)
+
+    """
+
+    def __init__(self, graph=None, name="unnamed", search_str=None, reload_graph=False):
         """Constructing a BasePartitioner
 
         Parameters
@@ -30,11 +54,43 @@ class BasePartitioner(ABC):
             Input graph
         name : str, optional
             Name of the graph's city, default is 'unnamed'.
+        search_str : str or list of str, optional
+            Search string for OSMnx to download a graph, default is None. Only used if
+            graph is None. If there can be found a graph at
+            graph_dir/name/name.graphml it will be loaded instead. Otherwise,
+            it will be downloaded from OSMnx and saved there.
+        reload_graph : bool, optional
+            If True, reload the graph from OSMnx, even if a graph with the name
+            `name.graphml` is found in the working directory. Default is False.
+
+        Raises
+        ------
+        ValueError
+            If neither graph nor search_str are provided.
+        ValueError
+            If name is not a string or empty.
+
+        Notes
+        -----
+        `graph_dir` is set in the `config.ini` file.
 
         """
 
+        if not isinstance(name, str) or name == "":
+            raise ValueError("Name must be a non-empty string.")
+
         # Set Instance variables
-        self.graph = graph
+        if graph is None:
+            if search_str is None:
+                raise ValueError("Either graph or search_str must be provided.")
+            self.graph = self.load_or_find_graph(name, search_str, reload_graph)
+        else:
+            self.graph = graph
+            # Make folder for graph output
+            graph_dir = path.join(GRAPH_DIR, name)
+            if not path.exists(graph_dir):
+                makedirs(graph_dir)
+
         self.name = name
         self.partitions = None
         self.components = None
@@ -47,8 +103,8 @@ class BasePartitioner(ABC):
             "Initialized %s(%s) with %d nodes and %d edges.",
             self.name,
             self.__class__.__name__,
-            len(graph.nodes),
-            len(graph.edges),
+            len(self.graph.nodes),
+            len(self.graph.edges),
         )
 
     @abstractmethod
@@ -608,6 +664,50 @@ class BasePartitioner(ABC):
 
         # Save
         fig.savefig(filename, **sa_kwargs)
+
+    def load_or_find_graph(self, name, search_str, reload_graph=False):
+        """Load or find graph if it exists.
+
+        If graph graph_dir/name/name.graphml exists, load it. Else, find it using
+        `search_str` and save it to graph_dir/name/name.graphml.
+
+        Parameters
+        ----------
+        name : str
+            Name of the graph. Can be the name of the place and also be descriptive.
+            Will be used for naming files and plot titles.
+        search_str : str or list of str
+            String to search for in OSM. Can be a list of strings to combine multiple
+            search terms. Use nominatim to find the right search string.
+        reload_graph : bool, optional
+            If True, reload the graph even if it already exists.
+
+        Returns
+        -------
+        graph : networkx.MultiDiGraph
+            Graph.
+
+        Notes
+        -----
+        `graph_dir` is set in the `config.ini` file.
+        """
+
+        # Check if graph already exists
+        graph_path = path.join(GRAPH_DIR, name, name + ".graphml")
+        if path.exists(graph_path) and not reload_graph:
+            logger.debug("Loading graph from %s", graph_path)
+            graph = ox.load_graphml(graph_path)
+        else:
+            logger.debug("Finding graph with search string %s", search_str)
+            graph = load_graph_from_place(
+                save_as=graph_path,
+                search_string=search_str,
+                network_type="drive",
+                simplify=True,
+            )
+            logger.debug("Saving graph to %s", graph_path)
+            ox.save_graphml(graph, graph_path)
+        return graph
 
 
 class DummyPartitioner(BasePartitioner):
