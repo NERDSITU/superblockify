@@ -853,6 +853,7 @@ class DummyPartitioner(BasePartitioner):
         # Somehow determining the partition of edges
         # - edges also may not be included in any partition and miss the label
         values = list(range(3))
+        self.attr_value_minmax = (min(values), max(values))
         attribute.new_edge_attribute_by_function(
             self.graph, lambda bear: choice(values), "osmid", self.attribute_label
         )
