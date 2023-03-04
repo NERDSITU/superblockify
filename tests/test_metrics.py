@@ -53,9 +53,9 @@ class TestMetric:
     def test_calculate_all(self, test_city_small, partitioner_class):
         """Test the calculate_all method for full metrics."""
         city_name, graph = test_city_small
-        part = partitioner_class(graph, name=city_name)
+        part = partitioner_class(name=city_name, graph=graph)
         part.run()
-        part.calculate_metrics(show_analysis_plots=True)
+        part.calculate_metrics(make_plots=True)
         plt.close("all")
 
     def test_plot_distance_matrices_uncalculated(self):
@@ -197,11 +197,11 @@ class TestMetric:
     ):
         """Test calculating distances for partitioned graph by design."""
         city_name, graph = test_city_small
-        part = partitioner_class(graph, name=city_name)
+        part = partitioner_class(name=city_name, graph=graph)
         part.run()
         metric = Metric()
         metric.calculate_partitioning_distance_matrix(
-            part, plot_distributions=True, check_overlap=True
+            part, plot_distributions=True, check_overlap=True, num_workers=4
         )
         # With node ordering
         metric.calculate_partitioning_distance_matrix(
@@ -209,6 +209,7 @@ class TestMetric:
             node_order=list(graph.nodes),
             plot_distributions=True,
             check_overlap=True,
+            num_workers=4,
         )
         plt.close("all")
 
@@ -218,7 +219,7 @@ class TestMetric:
         """Test calculating distances for partitioned graph with overlapping
         partitions."""
         city_name, graph = test_city_small
-        part = partitioner_class(graph, name=city_name)
+        part = partitioner_class(name=city_name, graph=graph)
         part.run()
         # Duplicate partitions /component
         if part.components is not None:
@@ -333,3 +334,22 @@ class TestMetric:
         with pytest.raises(ValueError):
             # pylint: disable=protected-access
             Metric._has_pairwise_overlap(lists)
+
+    def test_saving_and_loading(
+        self,
+        partitioner_class,
+        _teardown_test_graph_io,
+    ):
+        """Test saving and loading of metrics."""
+        # Prepare
+        part = partitioner_class(
+            name="Adliswil_tmp",
+            search_str="Adliswil, Bezirk Horgen, Zürich, Switzerland",
+        )
+        part.run()
+        # Save
+        part.save(save_metrics=True, save_graph_copy=False)
+        # Load
+        metric = Metric.load(part.name)
+        # Check if metrics are equal
+        assert part.metric == metric

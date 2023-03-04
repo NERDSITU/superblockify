@@ -1,9 +1,12 @@
 """Metric object for the superblockify package."""
 import logging
+import pickle
+from configparser import ConfigParser
 from datetime import timedelta
 from functools import lru_cache
 from itertools import combinations_with_replacement, repeat
 from multiprocessing import cpu_count
+from os import path
 from time import time
 
 import numpy as np
@@ -16,6 +19,10 @@ from tqdm.contrib.concurrent import process_map
 from superblockify.plot import plot_distance_distributions
 
 logger = logging.getLogger("superblockify")
+
+config = ConfigParser()
+config.read("config.ini")
+RESULTS_DIR = config["general"]["results_dir"]
 
 _AVG_EARTH_RADIUS_M = 6.3781e6  # in meters, arXiv:1510.07674 [astro-ph.SR]
 
@@ -286,6 +293,14 @@ class Metric:
         Additional to the __str__ method, it also returns the class name.
         """
         return f"{self.__class__.__name__}({self.__str__()})"
+
+    def __eq__(self, other):
+        """Return True if the two objects are equal.
+
+        Tests the equality of the attributes of the objects.
+        Used in input-output tests.
+        """
+        return self.__dict__ == other.__dict__
 
     def calculate_distance_matrix(
         self,
@@ -900,3 +915,47 @@ class Metric:
         has_overlap |= overlaps > 0
 
         return has_overlap
+
+    def save(self, name):
+        """Save the metric to a file.
+
+        Will be saved as a pickle file at RESULTS_DIR/name.metrics.
+
+        Parameters
+        ----------
+        name : str
+            The name of the file to save the metric to.
+
+        """
+
+        metrics_path = path.join(RESULTS_DIR, name, name + ".metrics")
+        # Check if metrics already exist
+        if path.exists(metrics_path):
+            logger.debug("Metrics already exist, overwriting %s", metrics_path)
+        else:
+            logger.debug("Saving metrics to %s", metrics_path)
+        with open(metrics_path, "wb") as file:
+            pickle.dump(self, file)
+
+    @classmethod
+    def load(cls, name):
+        """Load a partitioning from a file.
+
+        Parameters
+        ----------
+        path : str
+            The path to the file to load the partitioning from.
+
+        Returns
+        -------
+        partitioning : Partitioning
+            The loaded partitioning.
+
+        """
+
+        metrics_path = path.join(RESULTS_DIR, name, name + ".metrics")
+        logger.debug("Loading metrics from %s", metrics_path)
+        with open(metrics_path, "rb") as file:
+            metrics = pickle.load(file)
+
+        return metrics
