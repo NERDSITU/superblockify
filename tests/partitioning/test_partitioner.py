@@ -154,3 +154,63 @@ class TestPartitioners:
         part.run()
         sorted_nodes = part.get_sorted_node_list()
         assert len(sorted_nodes) == len(graph.nodes)
+
+    @pytest.mark.parametrize(
+        "graph,name,search_str,reload_graph",
+        [
+            (
+                load_graphml(path.join(TEST_DATA, "cities", "Adliswil_small.graphml")),
+                "Adliswil_tmp",
+                "Adliswil",
+                False,
+            ),
+            (
+                None,
+                "Adliswil_tmp",
+                "Adliswil, Bezirk Horgen, Zürich, Switzerland",
+                False,
+            ),
+            (
+                None,
+                "Adliswil_tmp",
+                "Adliswil, Bezirk Horgen, Zürich, Switzerland",
+                True,
+            ),
+        ],
+    )
+    def test_graph_loading_and_finding(
+        self,
+        partitioner_class,
+        graph,
+        name,
+        search_str,
+        reload_graph,
+        _teardown_graph_loading_and_finding,
+    ):
+        """Test loading and finding of graph files.
+        Initialization of partitioner class and `self.load_or_find_graph`."""
+        part = partitioner_class(graph, name, search_str, reload_graph)
+        assert part.graph is not None
+        assert part.name is not None
+
+    @pytest.mark.parametrize(
+        "graph,name,search_str",
+        [
+            (None, None, None),
+            (None, "Adliswil", None),
+            (None, None, "Adliswil, Bezirk Horgen, Zürich, Switzerland"),
+        ],
+    )
+    def test_graph_loading_and_finding_invalid(
+        self, partitioner_class, graph, name, search_str
+    ):
+        """Test loading and finding of graph files with invalid input."""
+        with pytest.raises(ValueError):
+            partitioner_class(graph, name, search_str)
+
+
+@pytest.fixture(scope="class")
+def _teardown_graph_loading_and_finding():
+    """Delete Adliswil_tmp folder in graph_dir."""
+    yield None
+    rmtree(path.join(GRAPH_DIR, "Adliswil_tmp"))
