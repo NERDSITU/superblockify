@@ -46,20 +46,23 @@ class BasePartitioner(ABC):
 
     """
 
-    def __init__(self, graph=None, name="unnamed", search_str=None, reload_graph=False):
+    def __init__(self, name="unnamed", search_str=None, graph=None, reload_graph=False):
         """Constructing a BasePartitioner
 
         Parameters
         ----------
-        graph : networkx.MultiDiGraph
-            Input graph
         name : str, optional
-            Name of the graph's city, default is 'unnamed'.
+            Name of the graph's city. As first priority, the graph will be looked up
+            under GRAPH_DIR/name.graphml. If it is not found, it will be downloaded
+            from OSMnx using the `search_str`. Default is "unnamed".
+            Also used as folder name for results.
         search_str : str or list of str, optional
             Search string for OSMnx to download a graph, default is None. Only used if
-            graph is None. If there can be found a graph at
-            GRAPH_DIR/name.graphml it will be loaded instead. Otherwise,
-            it will be downloaded from OSMnx and saved there.
+            no graph is found under GRAPH_DIR/name.graphml.
+            For composite cities, a list of search strings can be provided.
+        graph : networkx.MultiDiGraph, optional
+            Graph to partition. Used if no graph is found under GRAPH_DIR/name.graphml
+            and `search_str` is None. Default is None.
         reload_graph : bool, optional
             If True, reload the graph from OSMnx, even if a graph with the name
             `name.graphml` is found in the working directory. Default is False.
@@ -70,6 +73,8 @@ class BasePartitioner(ABC):
             If neither graph nor search_str are provided.
         ValueError
             If name is not a string or empty.
+        KeyError
+            If search_str is an empty list.
 
         Notes
         -----
@@ -80,18 +85,23 @@ class BasePartitioner(ABC):
         if not isinstance(name, str) or name == "":
             raise ValueError("Name must be a non-empty string.")
 
-        # Set Instance variables
-        if graph is None:
-            if search_str is None:
-                raise ValueError("Either graph or search_str must be provided.")
+        # First check weather a graph is found under GRAPH_DIR/name.graphml
+        graph_path = path.join(GRAPH_DIR, f"{name}.graphml")
+        if path.exists(graph_path):
             self.graph = self.load_or_find_graph(name, search_str, reload_graph)
-        else:
+        elif search_str is not None:
+            self.graph = self.load_or_find_graph(name, search_str)
+        elif graph is not None:
             self.graph = graph
-            # Make folder for graph output
-            result_dir = path.join(RESULTS_DIR, name)
-            if not path.exists(result_dir):
-                makedirs(result_dir)
+        else:
+            raise ValueError("Either graph or search_str must be provided.")
 
+        # Create results directory
+        self.results_dir = path.join(RESULTS_DIR, name)
+        if not path.exists(self.results_dir):
+            makedirs(self.results_dir)
+
+        # Set Instance variables
         self.name = name
         self.partitions = None
         self.components = None

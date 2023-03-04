@@ -157,24 +157,24 @@ class TestPartitioners:
         assert len(sorted_nodes) == len(graph.nodes)
 
     @pytest.mark.parametrize(
-        "graph,name,search_str,reload_graph",
+        "name,search_str,graph,reload_graph",
         [
             (
+                "Adliswil_tmp",
+                None,
                 load_graphml(path.join(TEST_DATA, "cities", "Adliswil_small.graphml")),
-                "Adliswil_tmp",
-                "Adliswil",
                 False,
             ),
             (
-                None,
                 "Adliswil_tmp",
                 "Adliswil, Bezirk Horgen, Zürich, Switzerland",
+                None,
                 False,
             ),
             (
-                None,
                 "Adliswil_tmp",
                 "Adliswil, Bezirk Horgen, Zürich, Switzerland",
+                None,
                 True,
             ),
         ],
@@ -182,32 +182,41 @@ class TestPartitioners:
     def test_graph_loading_and_finding(
         self,
         partitioner_class,
-        graph,
         name,
         search_str,
+        graph,
         reload_graph,
         _teardown_graph_loading_and_finding,
     ):
         """Test loading and finding of graph files.
         Initialization of partitioner class and `self.load_or_find_graph`."""
-        part = partitioner_class(graph, name, search_str, reload_graph)
+        part = partitioner_class(name, search_str, graph, reload_graph)
         assert part.graph is not None
         assert part.name is not None
 
     @pytest.mark.parametrize(
-        "graph,name,search_str",
+        "name,search_str,graph",
         [
             (None, None, None),
-            (None, "Adliswil", None),
-            (None, None, "Adliswil, Bezirk Horgen, Zürich, Switzerland"),
+            ("Adliswil", None, None),
+            (None, "Adliswil, Bezirk Horgen, Zürich, Switzerland", None),
+            ("", "Adliswil, Bezirk Horgen, Zürich, Switzerland", None),
+            ("", None, None),
+            ("Adliswil", "", None),
+            ("Adliswil", [], None),
+            ("Adliswil", [""], None),
         ],
     )
     def test_graph_loading_and_finding_invalid(
-        self, partitioner_class, graph, name, search_str
+        self, partitioner_class, name, search_str, graph
     ):
         """Test loading and finding of graph files with invalid input."""
-        with pytest.raises(ValueError):
-            partitioner_class(graph, name, search_str)
+        if search_str == list():
+            with pytest.raises(KeyError):
+                partitioner_class(name, search_str, graph)
+        else:
+            with pytest.raises(ValueError):
+                partitioner_class(name, search_str, graph)
 
 
 @pytest.fixture(scope="class")
