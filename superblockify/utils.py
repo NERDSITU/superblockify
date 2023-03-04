@@ -106,13 +106,13 @@ def compare_components_and_partitions(list1, list2):
     """
     if len(list1) != len(list2):
         return False
-    for i in range(len(list1)):
-        if list1[i].keys() != list2[i].keys():
+    for element1, element2 in zip(list1, list2):
+        if element1.keys() != element2.keys():
             return False
-        for key in list1[i].keys():
-            if all(isinstance(x, Graph) for x in [list1[i][key], list2[i][key]]):
-                if not graphs_equal(list1[i][key], list2[i][key]):
+        for key in element1.keys():
+            if all(isinstance(x, Graph) for x in [element1[key], element2[key]]):
+                if not graphs_equal(element1[key], element2[key]):
                     return False
-            elif list1[i][key] != list2[i][key]:
+            elif element1[key] != element2[key]:
                 return False
     return True

@@ -211,7 +211,7 @@ class TestPartitioners:
         self, partitioner_class, name, search_str, graph
     ):
         """Test loading and finding of graph files with invalid input."""
-        if search_str == list():
+        if search_str == []:
             with pytest.raises(KeyError):
                 partitioner_class(name, search_str, graph)
         else:

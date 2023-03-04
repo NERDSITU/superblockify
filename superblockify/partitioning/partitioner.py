@@ -47,6 +47,8 @@ class BasePartitioner(ABC):
 
     """
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, name="unnamed", search_str=None, graph=None, reload_graph=False):
         """Constructing a BasePartitioner
 
