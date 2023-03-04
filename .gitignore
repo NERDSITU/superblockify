@@ -18,5 +18,5 @@ docs/*
 .ipynb_checkpoints
 
 # outputs - add manually
-results/*
+data/*
 tests/test_data/output/*
