@@ -1,6 +1,8 @@
 """BasePartitioner parent and dummy."""
 import logging
 from abc import ABC, abstractmethod
+from configparser import ConfigParser
+from os import path, makedirs
 from random import choice
 
 import networkx as nx
@@ -10,6 +12,10 @@ from numpy import linspace
 from .. import attribute, plot, metrics
 
 logger = logging.getLogger("superblockify")
+
+config = ConfigParser()
+config.read("config.ini")
+GRAPH_DIR = config["general"]["graph_dir"]
 
 
 class BasePartitioner(ABC):
@@ -46,13 +52,14 @@ class BasePartitioner(ABC):
         )
 
     @abstractmethod
-    def run(self, **kwargs):
+    def run(self, make_plots=False, **kwargs):
         """Run partitioning.
 
         Parameters
         ----------
-        show_analysis_plots : bool, optional
-            If True show visualization graphs of the approach, if implemented.
+        make_plots : bool, optional
+            If True, make plots of the partitioning and save them to
+            graph_dir/self.name/figures. Default is False.
         """
 
         self.attribute_label = "example_label"
@@ -62,7 +69,7 @@ class BasePartitioner(ABC):
             {"name": "one", "value": 1.0},
         ]
 
-    def calculate_metrics(self, show_analysis_plots=False, num_workers=None):
+    def calculate_metrics(self, make_plots=False, num_workers=None):
         """Calculate metrics for the partitioning.
 
         Calculates the metrics for the partitioning and writes them to the
@@ -106,7 +113,7 @@ class BasePartitioner(ABC):
 
         Parameters
         ----------
-        show_analysis_plots : bool, optional
+        make_plots : bool, optional
             If True show visualization graphs of the approach. If False only print
             into console. Default is False.
         num_workers : int, optional
@@ -119,14 +126,14 @@ class BasePartitioner(ABC):
         logger.debug("Calculating metrics for %s", self.name)
         self.metric.calculate_all(
             partitioner=self,
-            show_analysis_plots=show_analysis_plots,
+            make_plots=make_plots,
             num_workers=num_workers,
         )
-        if show_analysis_plots:
-            self.metric.plot_distance_matrices(
+        if make_plots:
+            fig, _ = self.metric.plot_distance_matrices(
                 name=f"{self.name} - {self.__class__.__name__}"
             )
-            plt.show()
+            self.save_plot(fig, f"{self.name}_distance_matrices.pdf")
 
         logger.debug("Metrics for %s: %s", self.name, self.metric)
 
@@ -573,6 +580,35 @@ class BasePartitioner(ABC):
                 f"run before plotting graph."
             )
 
+    def save_plot(self, fig, filename, **sa_kwargs):
+        """Save the plot `fig` to file.
+
+        Saved in the graph_dir/self.name/.
+
+        Parameters
+        ----------
+        fig : matplotlib.figure.Figure
+            Figure to save.
+        filename : str
+            Filename to save to.
+        sa_kwargs
+            Keyword arguments to pass to `matplotlib.pyplot.savefig`.
+
+        Notes
+        -----
+        `graph_dir` is set in the `config.ini` file.
+        """
+
+        # Log saving
+        logger.debug(
+            "Saving plot (%s) to %s",
+            fig.axes[0].get_title(),
+            path.join(GRAPH_DIR, self.name, filename),
+        )
+
+        # Save
+        fig.savefig(filename, **sa_kwargs)
+
 
 class DummyPartitioner(BasePartitioner):
     """Dummy partitioner.
@@ -580,7 +616,7 @@ class DummyPartitioner(BasePartitioner):
     Partitions randomly.
     """
 
-    def run(self, **kwargs):
+    def run(self, make_plots=False, **kwargs):
         """Run method. Must be overridden.
 
         Assign random partitions to edges.

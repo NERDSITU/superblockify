@@ -56,7 +56,7 @@ class Metric:
     # pylint: disable=too-many-instance-attributes
 
     def calculate_all(
-        self, partitioner, weight="length", num_workers=None, show_analysis_plots=False
+        self, partitioner, weight="length", num_workers=None, make_plots=False
     ):
         """Calculate all metrics for the partitioning.
 
@@ -84,7 +84,7 @@ class Metric:
         dist_euclidean = self.calculate_euclidean_distance_matrix_projected(
             partitioner.graph,
             node_order=node_list,
-            plot_distributions=show_analysis_plots,
+            plot_distributions=make_plots,
         )
 
         # On the full graph (S)
@@ -92,7 +92,7 @@ class Metric:
             partitioner.graph,
             weight="length",
             node_order=node_list,
-            plot_distributions=show_analysis_plots,
+            plot_distributions=make_plots,
         )
 
         # On the partitioning graph (N)
@@ -101,7 +101,7 @@ class Metric:
             weight="length",
             node_order=node_list,
             num_workers=num_workers,
-            plot_distributions=show_analysis_plots,
+            plot_distributions=make_plots,
         )
 
         self.distance_matrix = {

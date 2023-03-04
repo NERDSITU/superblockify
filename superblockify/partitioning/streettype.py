@@ -32,7 +32,7 @@ class ResidentialPartitioner(BasePartitioner):
         super().__init__(*args, **kwargs)
 
     def run(
-        self, show_analysis_plots=False, min_edge_count=5, min_length=400, **kwargs
+        self, make_plots=False, min_edge_count=5, min_length=400, **kwargs
     ):
         """Group by street type and remove small components.
 
@@ -40,8 +40,9 @@ class ResidentialPartitioner(BasePartitioner):
 
         Parameters
         ----------
-        show_analysis_plots : bool, optional
-            Whether to show plots of the partitioning analysis, by default False
+        make_plots : bool, optional
+            Whether to show and save plots of the partitioning analysis, by default
+            False
         min_edge_count : int, optional
             Minimum number of edges in a component to be considered, by default 5
         min_length : int, optional
@@ -101,8 +102,9 @@ class ResidentialPartitioner(BasePartitioner):
                 }
             )
 
-        if show_analysis_plots:
-            self.plot_partition_graph()
+        if make_plots:
+            fig, _ = self.plot_partition_graph()
+            self.save_plot(fig, f"{self.name}_partition_graph.pdf")
             plt.show()
 
         self.components = self.partitions
@@ -118,10 +120,12 @@ class ResidentialPartitioner(BasePartitioner):
             len([c for c in self.components if not c["ignore"]]),
         )
 
-        if show_analysis_plots:
-            self.plot_subgraph_component_size("length")
+        if make_plots:
+            fig, _ = self.plot_subgraph_component_size("length")
+            self.save_plot(fig, f"{self.name}_subgraph_component_size.pdf")
             plt.show()
 
-        if show_analysis_plots:
-            self.plot_component_graph()
+        if make_plots:
+            fig, _ = self.plot_component_graph()
+            self.save_plot(fig, f"{self.name}_component_graph.pdf")
             plt.show()
