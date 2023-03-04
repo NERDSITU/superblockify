@@ -725,6 +725,115 @@ class BasePartitioner(ABC):
             ox.save_graphml(graph, graph_path)
         return graph
 
+    # IO methods
+    def save(self, save_metrics=True, save_graph_copy=False):
+        """Save the partitioner.
+
+        Pickle the partitioner and save it to file. Metric object and graph can also be
+        saved.
+
+        Parameters
+        ----------
+        save_metrics : bool, optional
+            If True, save the metrics to a file.
+        save_graph_copy : bool, optional
+            If True, save the graph to a file. In the case the partitioner was
+            initialized with a name and/or search string, the underlying graph is
+            at GRAPH_DIR/name.graphml already. Only use this if you want to save a
+            copy of the graph that has been modified by the partitioner.
+            This is necessary for later plotting partitions, but not for component
+            plots.
+
+        Notes
+        -----
+        `graph_dir` is set in the `config.ini` file.
+        """
+
+        # Save graph
+        if save_graph_copy:
+            graph_path = path.join(RESULTS_DIR, self.name, self.name + ".graphml")
+            logger.debug("Saving graph copy to %s", graph_path)
+            ox.save_graphml(self.graph, filepath=graph_path)
+
+        # Save metrics
+        if save_metrics:
+            self.metric.save(self.name)
+
+        # Save partitioner, with self.graph = None
+        partitioner_path = path.join(RESULTS_DIR, self.name, self.name + ".partitioner")
+        # Check if partitioner already exists
+        if path.exists(partitioner_path):
+            logger.debug("Partitioner already exists, overwriting %s", partitioner_path)
+        else:
+            logger.debug("Saving partitioner to %s", partitioner_path)
+        with open(partitioner_path, "wb") as file:
+            # Remove graph from partitioner
+            graph = self.graph
+            # Convert subgraph views to MultiDiGraphs for pickling, if they exist
+            if self.partitions is not None:
+                for i, partition in enumerate(self.partitions):
+                    self.partitions[i]["subgraph"] = nx.MultiDiGraph(
+                        partition["subgraph"]
+                    )
+            if self.components is not None:
+                for i, component in enumerate(self.components):
+                    self.components[i]["subgraph"] = nx.MultiDiGraph(
+                        component["subgraph"]
+                    )
+            self.graph = None
+            pickle.dump(self, file)
+            # Restore graph
+            self.graph = graph
+
+    @classmethod
+    def load(cls, name):
+        """Load a partitioner.
+
+        Parameters
+        ----------
+        name : str
+            Name of the partitioner. This is the name of the folder in which the
+            partitioner is saved. Also, the name of the graph and the metrics.
+
+        Returns
+        -------
+        partitioner : BasePartitioner
+            Partitioner.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the partitioner cannot be found.
+
+        Notes
+        -----
+        The directories RESULTS_DIR and GRAPH_DIR are set in the `config.ini` file.
+
+        """
+
+        # Load partitioner
+        partitioner_path = path.join(RESULTS_DIR, name, name + ".partitioner")
+        logger.debug("Loading partitioner from %s", partitioner_path)
+        with open(partitioner_path, "rb") as file:
+            partitioner = pickle.load(file)
+
+        # Load graph - if possible from RESULTS_DIR, else from GRAPH_DIR
+        graph_path = path.join(RESULTS_DIR, name, name + ".graphml")
+        if path.exists(graph_path):
+            logger.debug("Loading graph from %s", graph_path)
+            partitioner.graph = ox.load_graphml(graph_path)
+        else:
+            graph_path = path.join(GRAPH_DIR, name + ".graphml")
+            if path.exists(graph_path):
+                logger.debug("Loading graph from %s", graph_path)
+                partitioner.graph = ox.load_graphml(graph_path)
+            else:
+                logger.debug("Graph not found in %s, keeping empty", graph_path)
+
+        # Metrics are still included in the partitioner, so no need to load them
+
+        return partitioner
+
 
 class DummyPartitioner(BasePartitioner):
     """Dummy partitioner.

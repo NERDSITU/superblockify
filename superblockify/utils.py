@@ -3,6 +3,8 @@
 from itertools import chain
 
 import osmnx as ox
+from networkx import Graph
+from networkx.utils import graphs_equal
 
 
 def extract_attributes(graph, edge_attributes, node_attributes):
@@ -81,3 +83,36 @@ def load_graph_from_place(save_as, search_string, **gfp_kwargs):
     graph = ox.project_graph(graph)
     ox.save_graphml(graph, filepath=save_as)
     return graph
+
+
+def compare_components_and_partitions(list1, list2):
+    """Compare two lists of dictionaries.
+
+    The lists are equal if they have the same length and the dictionaries in
+    the lists are equal. If a value of a dictionary is a networkx.Graph, it
+    compares the graphs with networkx.graph_equal().
+
+    Parameters
+    ----------
+    list1 : list of dict
+        The first list of dictionaries to compare.
+    list2 : list of dict
+        The second list of dictionaries to compare.
+
+    Returns
+    -------
+    bool
+        True if the lists are equal, False otherwise.
+    """
+    if len(list1) != len(list2):
+        return False
+    for i in range(len(list1)):
+        if list1[i].keys() != list2[i].keys():
+            return False
+        for key in list1[i].keys():
+            if all(isinstance(x, Graph) for x in [list1[i][key], list2[i][key]]):
+                if not graphs_equal(list1[i][key], list2[i][key]):
+                    return False
+            elif list1[i][key] != list2[i][key]:
+                return False
+    return True

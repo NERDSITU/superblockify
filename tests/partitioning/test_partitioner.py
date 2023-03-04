@@ -1,7 +1,6 @@
 """Tests for the partitioner module."""
 from configparser import ConfigParser
 from os import path, remove
-from shutil import rmtree
 
 import networkx as nx
 import pytest
@@ -10,6 +9,7 @@ from matplotlib.pyplot import Figure, Axes
 from osmnx import load_graphml
 
 from superblockify.partitioning import BasePartitioner
+from superblockify.utils import compare_components_and_partitions
 
 config = ConfigParser()
 config.read("config.ini")
@@ -186,7 +186,7 @@ class TestPartitioners:
         search_str,
         graph,
         reload_graph,
-        _teardown_graph_loading_and_finding,
+        _teardown_test_graph_io,
     ):
         """Test loading and finding of graph files.
         Initialization of partitioner class and `self.load_or_find_graph`."""
@@ -218,14 +218,63 @@ class TestPartitioners:
             with pytest.raises(ValueError):
                 partitioner_class(name, search_str, graph)
 
+    @pytest.mark.parametrize(
+        "save_metrics,save_graph_copy,delete_before_load",
+        [(False, False, False), (True, True, False), (False, False, True)],
+    )
+    def test_saving_and_loading(
+        self,
+        partitioner_class,
+        save_metrics,
+        save_graph_copy,
+        delete_before_load,
+        _teardown_test_graph_io,
+    ):
+        """Test saving and loading of partitioner."""
+        # Prepare
+        part = partitioner_class(
+            name="Adliswil_tmp_save_load",
+            search_str="Adliswil, Bezirk Horgen, Zürich, Switzerland",
+        )
+        part.run()
 
-@pytest.fixture(scope="class")
-def _teardown_graph_loading_and_finding():
-    """Delete Adliswil_tmp.graphml file and directory."""
-    yield None
-    test_graph = path.join(GRAPH_DIR, "Adliswil_tmp.graphml")
-    if path.exists(test_graph):
-        remove(test_graph)
-    results_dir = path.join(RESULTS_DIR, "Adliswil_tmp")
-    if path.exists(results_dir):
-        rmtree(results_dir)
+        # Save
+        part.save(save_metrics, save_graph_copy)
+        if delete_before_load:
+            # Delete graph at GRAPH_DIR/Adliswil_tmp_save_load.graphml
+            remove(path.join(GRAPH_DIR, "Adliswil_tmp_save_load.graphml"))
+
+        # Load
+        part_loaded = partitioner_class.load(part.name)
+        # Check if all instance keys are equal
+        assert part.__dict__.keys() == part_loaded.__dict__.keys()
+        # Check if all instance attributes are equal (except graph if deleted)
+        for attr in part.__dict__:
+            if attr == "graph" and delete_before_load:
+                continue
+            if isinstance(getattr(part, attr), nx.Graph):
+                # For the graph only check equality of the nodes and edges, not the
+                # node and edge attributes as the modifications are not saved.
+                assert (
+                    getattr(part, attr).nodes == getattr(part_loaded, attr).nodes
+                    and getattr(part, attr).edges == getattr(part_loaded, attr).edges
+                )
+            elif (
+                attr in ["components", "partitions"] and getattr(part, attr) is not None
+            ):
+                assert compare_components_and_partitions(
+                    getattr(part, attr), getattr(part_loaded, attr)
+                )
+            elif all(
+                isinstance(elem, dict)
+                for elem in [getattr(part, attr), getattr(part_loaded, attr)]
+            ):
+                # Compare two dicts only by their keys
+                assert getattr(part, attr).keys() == getattr(part_loaded, attr).keys()
+            else:
+                assert getattr(part, attr) == getattr(part_loaded, attr)
+
+    def test_load_file_not_found(self, partitioner_class):
+        """Test loading of partitioner with file not found."""
+        with pytest.raises(FileNotFoundError):
+            partitioner_class.load("file_not_found")
