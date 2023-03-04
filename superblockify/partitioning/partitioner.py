@@ -553,6 +553,9 @@ class BasePartitioner(ABC):
         ----------
         measure : str, optional
             Way to measure component size. Can be 'edges', 'length' or 'nodes'.
+        xticks : list of numbers or strings, optional
+            List of xticks to use. If None, the xticks are seven evely spaced numbers
+            between the self.attr_value_minmax.
         pcs_kwargs
             Keyword arguments to pass to `superblockify.plot.plot_component_size`.
 
