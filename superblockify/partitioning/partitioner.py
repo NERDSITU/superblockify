@@ -17,6 +17,7 @@ logger = logging.getLogger("superblockify")
 config = ConfigParser()
 config.read("config.ini")
 GRAPH_DIR = config["general"]["graph_dir"]
+RESULTS_DIR = config["general"]["results_dir"]
 
 
 class BasePartitioner(ABC):
@@ -57,7 +58,7 @@ class BasePartitioner(ABC):
         search_str : str or list of str, optional
             Search string for OSMnx to download a graph, default is None. Only used if
             graph is None. If there can be found a graph at
-            graph_dir/name/name.graphml it will be loaded instead. Otherwise,
+            GRAPH_DIR/name.graphml it will be loaded instead. Otherwise,
             it will be downloaded from OSMnx and saved there.
         reload_graph : bool, optional
             If True, reload the graph from OSMnx, even if a graph with the name
@@ -72,7 +73,7 @@ class BasePartitioner(ABC):
 
         Notes
         -----
-        `graph_dir` is set in the `config.ini` file.
+        GRAPH_DIR is set in the `config.ini` file.
 
         """
 
@@ -87,9 +88,9 @@ class BasePartitioner(ABC):
         else:
             self.graph = graph
             # Make folder for graph output
-            graph_dir = path.join(GRAPH_DIR, name)
-            if not path.exists(graph_dir):
-                makedirs(graph_dir)
+            result_dir = path.join(RESULTS_DIR, name)
+            if not path.exists(result_dir):
+                makedirs(result_dir)
 
         self.name = name
         self.partitions = None
@@ -115,7 +116,7 @@ class BasePartitioner(ABC):
         ----------
         make_plots : bool, optional
             If True, make plots of the partitioning and save them to
-            graph_dir/self.name/figures. Default is False.
+            RESULTS_DIR/self.name/figures. Default is False.
         """
 
         self.attribute_label = "example_label"
@@ -639,7 +640,7 @@ class BasePartitioner(ABC):
     def save_plot(self, fig, filename, **sa_kwargs):
         """Save the plot `fig` to file.
 
-        Saved in the graph_dir/self.name/.
+        Saved in the RESULTS_DIR/self.name/filename.
 
         Parameters
         ----------
@@ -652,14 +653,15 @@ class BasePartitioner(ABC):
 
         Notes
         -----
-        `graph_dir` is set in the `config.ini` file.
+        RESULTS_DIR is set in the `config.ini` file.
         """
 
+        filename = path.join(RESULTS_DIR, self.name, filename)
         # Log saving
         logger.debug(
             "Saving plot (%s) to %s",
             fig.axes[0].get_title(),
-            path.join(GRAPH_DIR, self.name, filename),
+            filename,
         )
 
         # Save
@@ -668,8 +670,8 @@ class BasePartitioner(ABC):
     def load_or_find_graph(self, name, search_str, reload_graph=False):
         """Load or find graph if it exists.
 
-        If graph graph_dir/name/name.graphml exists, load it. Else, find it using
-        `search_str` and save it to graph_dir/name/name.graphml.
+        If graph GRAPH_DIR/name.graphml exists, load it. Else, find it using
+        `search_str` and save it to GRAPH_DIR/name.graphml.
 
         Parameters
         ----------
@@ -689,11 +691,11 @@ class BasePartitioner(ABC):
 
         Notes
         -----
-        `graph_dir` is set in the `config.ini` file.
+        GRAPH_DIR is set in the `config.ini` file.
         """
 
         # Check if graph already exists
-        graph_path = path.join(GRAPH_DIR, name, name + ".graphml")
+        graph_path = path.join(GRAPH_DIR, name + ".graphml")
         if path.exists(graph_path) and not reload_graph:
             logger.debug("Loading graph from %s", graph_path)
             graph = ox.load_graphml(graph_path)

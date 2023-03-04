@@ -1,6 +1,6 @@
 """Tests for the partitioner module."""
 from configparser import ConfigParser
-from os import path
+from os import path, remove
 from shutil import rmtree
 
 import networkx as nx
@@ -15,6 +15,7 @@ config = ConfigParser()
 config.read("config.ini")
 TEST_DATA = config["tests"]["test_data_path"]
 GRAPH_DIR = config["general"]["graph_dir"]
+RESULTS_DIR = config["general"]["results_dir"]
 
 
 class TestBasePartitioner:
@@ -211,6 +212,11 @@ class TestPartitioners:
 
 @pytest.fixture(scope="class")
 def _teardown_graph_loading_and_finding():
-    """Delete Adliswil_tmp folder in graph_dir."""
+    """Delete Adliswil_tmp.graphml file and directory."""
     yield None
-    rmtree(path.join(GRAPH_DIR, "Adliswil_tmp"))
+    test_graph = path.join(GRAPH_DIR, "Adliswil_tmp.graphml")
+    if path.exists(test_graph):
+        remove(test_graph)
+    results_dir = path.join(RESULTS_DIR, "Adliswil_tmp")
+    if path.exists(results_dir):
+        rmtree(results_dir)
