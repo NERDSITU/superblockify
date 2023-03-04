@@ -1,5 +1,6 @@
 """BasePartitioner parent and dummy."""
 import logging
+import pickle
 from abc import ABC, abstractmethod
 from configparser import ConfigParser
 from os import path, makedirs
@@ -33,7 +34,7 @@ class BasePartitioner(ABC):
     >>> import osmnx as ox
     >>> name, search_str = "Resistencia", "Resistencia, Chaco, Argentina"
     >>> graph = ox.graph_from_place(search_str, network_type="drive")
-    >>> part = DummyPartitioner(graph)
+    >>> part = DummyPartitioner(graph=graph, name=name)
     >>> part.run(make_plots=True)
 
     >>> from superblockify.partitioning import DummyPartitioner

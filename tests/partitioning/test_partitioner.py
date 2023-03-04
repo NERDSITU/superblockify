@@ -45,7 +45,7 @@ class TestPartitioners:
     def test_run(self, test_city_all, partitioner_class):
         """Test run/partitioning method by design."""
         city_name, graph = test_city_all
-        part = partitioner_class(graph, name=city_name)
+        part = partitioner_class(name=city_name, graph=graph)
         part.run()
         assert part.graph is not None
         assert part.attribute_label is not None
@@ -54,7 +54,7 @@ class TestPartitioners:
     def test_plot_partition_graph(self, test_city_all, partitioner_class):
         """Test `plot_partition_graph` by design."""
         city_name, graph = test_city_all
-        part = partitioner_class(graph, name=city_name)
+        part = partitioner_class(name=city_name, graph=graph)
         part.run(show_analysis_plots=True)
         fig, axe = part.plot_partition_graph()
         assert isinstance(fig, Figure)
@@ -64,7 +64,7 @@ class TestPartitioners:
     def test_plot_component_graph(self, test_city_all, partitioner_class):
         """Test `plot_component_graph` by design."""
         city_name, graph = test_city_all
-        part = partitioner_class(graph, name=city_name)
+        part = partitioner_class(name=city_name, graph=graph)
         part.run(show_analysis_plots=False)
         if part.components is not None:
             fig, axe = part.plot_component_graph()
@@ -75,7 +75,7 @@ class TestPartitioners:
     def test_plot_partition_graph_unpartitioned(self, test_city_all, partitioner_class):
         """Test `plot_partition_graph` exception handling."""
         city_name, graph = test_city_all
-        part = partitioner_class(graph, name=city_name)
+        part = partitioner_class(name=city_name, graph=graph)
         with pytest.raises(AssertionError):
             part.plot_partition_graph()
         part.run()
@@ -86,7 +86,7 @@ class TestPartitioners:
     def test_plot_partitions_unpartitioned(self, test_city_all, partitioner_class):
         """Test `plot_partition_graph` exception handling."""
         city_name, graph = test_city_all
-        part = partitioner_class(graph, name=city_name)
+        part = partitioner_class(name=city_name, graph=graph)
         with pytest.raises(AssertionError):
             part.plot_partition_graph()
         part.run()
@@ -97,7 +97,7 @@ class TestPartitioners:
     def test_make_subgraphs_from_attribute(self, test_city_all, partitioner_class):
         """Test `make_subgraphs_from_attribute` by design."""
         city_name, graph = test_city_all
-        part = partitioner_class(graph, name=city_name)
+        part = partitioner_class(name=city_name, graph=graph)
         with pytest.raises(AssertionError):
             part.make_subgraphs_from_attribute()
         part.run()
@@ -108,7 +108,7 @@ class TestPartitioners:
     def test_plot_subgraph_component_size(self, test_city_all, partitioner_class):
         """Test `plot_subgraph_component_size` by design."""
         city_name, graph = test_city_all
-        part = partitioner_class(graph, name=city_name)
+        part = partitioner_class(name=city_name, graph=graph)
         with pytest.raises(AssertionError):
             part.plot_subgraph_component_size("nodes")
         part.run()
@@ -130,7 +130,7 @@ class TestPartitioners:
     ):
         """Test `plot_subgraph_component_size` with unavailable measure."""
         city_name, graph = test_city_small
-        part = partitioner_class(graph, name=city_name)
+        part = partitioner_class(name=city_name, graph=graph)
         part.run()
         with pytest.raises(ValueError):
             part.plot_subgraph_component_size(invalid_measure)
@@ -140,7 +140,7 @@ class TestPartitioners:
     ):
         """Test `overwrite_attributes_of_ignored_components` exception handling."""
         city_name, graph = test_city_small
-        part = partitioner_class(graph, name=city_name)
+        part = partitioner_class(name=city_name, graph=graph)
         part.run()
         part.components = None
         with pytest.raises(AssertionError):
@@ -151,7 +151,7 @@ class TestPartitioners:
     def test_get_sorted_node_list(self, test_city_all, partitioner_class):
         """Test `get_sorted_node_list` by design."""
         city_name, graph = test_city_all
-        part = partitioner_class(graph, name=city_name)
+        part = partitioner_class(name=city_name, graph=graph)
         part.run()
         sorted_nodes = part.get_sorted_node_list()
         assert len(sorted_nodes) == len(graph.nodes)
