@@ -39,7 +39,7 @@ class BearingPartitioner(BasePartitioner):
         )
 
     def run(
-        self, show_analysis_plots=False, min_length=1500, min_edge_count=5, **kwargs
+        self, make_plots=False, min_length=1500, min_edge_count=5, **kwargs
     ):
         """Group by prominent bearing directions.
 
@@ -57,7 +57,7 @@ class BearingPartitioner(BasePartitioner):
 
         Parameters
         ----------
-        show_analysis_plots : bool, optional
+        make_plots : bool, optional
             If True show visualization graphs of the approach.
         min_length : float, optional
             Minimum component length in meters to be considered for partitioning.
@@ -86,15 +86,17 @@ class BearingPartitioner(BasePartitioner):
         if len(self._bin_info["peak_ind"]) < 1:
             raise ArithmeticError("No peaks were found.")
 
-        if show_analysis_plots:
-            self.plot_peakfinding()
+        if make_plots:
+            fig, _ = self.plot_peakfinding()
+            self.save_plot(fig, f"{self.name}_peakfinding.pdf")
             plt.show()
 
         # Make boundaries
         self.__make_boundaries()
 
-        if show_analysis_plots:
-            self.plot_interval_splitting()
+        if make_plots:
+            fig, _ = self.plot_interval_splitting()
+            self.save_plot(fig, f"{self.name}_interval_splitting.pdf")
             plt.show()
 
         # Write grouping attribute to graph
@@ -126,10 +128,12 @@ class BearingPartitioner(BasePartitioner):
             min_length=min_length,
         )
 
-        if show_analysis_plots:
-            self.plot_subgraph_component_size("length")
+        if make_plots:
+            fig, _ = self.plot_subgraph_component_size("length")
+            self.save_plot(fig, f"{self.name}_subgraph_component_size.pdf")
             plt.show()
-            self.plot_partition_graph()
+            fig, _ = self.plot_partition_graph()
+            self.save_plot(fig, f"{self.name}_partition_graph.pdf")
             plt.show()
 
     def __bin_bearings(self, num_bins: int):
