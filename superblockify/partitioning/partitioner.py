@@ -819,6 +819,8 @@ class BasePartitioner(ABC):
         with open(partitioner_path, "rb") as file:
             partitioner = pickle.load(file)
 
+        # Metrics are still included in the partitioner, so no need to load them
+
         # Load graph - if possible from RESULTS_DIR, else from GRAPH_DIR
         graph_path = path.join(RESULTS_DIR, name, name + ".graphml")
         if path.exists(graph_path):
@@ -831,8 +833,23 @@ class BasePartitioner(ABC):
                 partitioner.graph = ox.load_graphml(graph_path)
             else:
                 logger.debug("Graph not found in %s, keeping empty", graph_path)
+                return partitioner
+        # Only if self.graph is not None, not if it could not be loaded.
+        # Graphs of self.components need to be converted to be subgraphs of self.graph.
+        if partitioner.components is not None:
+            for i, component in enumerate(partitioner.components):
+                if "subgraph" in component:
+                    partitioner.components[i][
+                        "subgraph"
+                    ] = partitioner.graph.edge_subgraph(component["subgraph"].edges)
 
-        # Metrics are still included in the partitioner, so no need to load them
+        # Graphs of self.partitions need to be converted to be subgraphs of self.graph.
+        if partitioner.partitions is not None:
+            for i, partition in enumerate(partitioner.partitions):
+                if "subgraph" in partition:
+                    partitioner.partitions[i][
+                        "subgraph"
+                    ] = partitioner.graph.edge_subgraph(partition["subgraph"].edges)
 
         return partitioner
 

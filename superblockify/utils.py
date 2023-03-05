@@ -3,8 +3,7 @@
 from itertools import chain
 
 import osmnx as ox
-from networkx import Graph
-from networkx.utils import graphs_equal
+from networkx import Graph, is_isomorphic
 
 
 def extract_attributes(graph, edge_attributes, node_attributes):
@@ -111,7 +110,8 @@ def compare_components_and_partitions(list1, list2):
             return False
         for key in element1.keys():
             if all(isinstance(x, Graph) for x in [element1[key], element2[key]]):
-                if not graphs_equal(element1[key], element2[key]):
+                # Check if Graphs are isomorphic, as the attributes might differ
+                if not is_isomorphic(element1[key], element2[key]):
                     return False
             elif element1[key] != element2[key]:
                 return False
