@@ -12,7 +12,7 @@ def test_load_graph_from_place():
     """Test that the load_graph_from_place function works."""
 
     graph = load_graph_from_place(
-        f"{TEST_DATA}/cities/Adliswil_small.graphml",
+        f"{TEST_DATA}/cities/Adliswil.graphml",
         "Adliswil, Bezirk Horgen, Zürich, Switzerland",
         network_type="drive",
     )

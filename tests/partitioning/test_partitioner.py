@@ -182,7 +182,7 @@ class TestPartitioners:
                 "Adliswil_tmp_name",
                 "Adliswil_tmp",
                 None,
-                load_graphml(path.join(TEST_DATA, "cities", "Adliswil_small.graphml")),
+                load_graphml(path.join(TEST_DATA, "cities", "Adliswil.graphml")),
                 False,
             ),
             (
