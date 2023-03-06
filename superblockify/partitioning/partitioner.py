@@ -207,7 +207,7 @@ class BasePartitioner(ABC):
         """
 
         # Log calculating metrics
-        logger.debug("Calculating metrics for %s", self.name)
+        logger.info("Calculating metrics for %s", self.name)
         self.metric.calculate_all(
             partitioner=self,
             make_plots=make_plots,
