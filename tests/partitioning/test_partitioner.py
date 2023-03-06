@@ -15,7 +15,6 @@ config = ConfigParser()
 config.read("config.ini")
 TEST_DATA = config["tests"]["test_data_path"]
 GRAPH_DIR = config["general"]["graph_dir"]
-RESULTS_DIR = config["general"]["results_dir"]
 
 
 class TestBasePartitioner:
@@ -45,7 +44,9 @@ class TestPartitioners:
     def test_run(self, test_city_all, partitioner_class):
         """Test run/partitioning method by design."""
         city_name, graph = test_city_all
-        part = partitioner_class(name=city_name, graph=graph)
+        part = partitioner_class(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         part.run()
         assert part.graph is not None
         assert part.attribute_label is not None
@@ -54,7 +55,9 @@ class TestPartitioners:
     def test_plot_partition_graph(self, test_city_all, partitioner_class):
         """Test `plot_partition_graph` by design."""
         city_name, graph = test_city_all
-        part = partitioner_class(name=city_name, graph=graph)
+        part = partitioner_class(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         part.run(show_analysis_plots=True)
         fig, axe = part.plot_partition_graph()
         assert isinstance(fig, Figure)
@@ -64,7 +67,9 @@ class TestPartitioners:
     def test_plot_component_graph(self, test_city_all, partitioner_class):
         """Test `plot_component_graph` by design."""
         city_name, graph = test_city_all
-        part = partitioner_class(name=city_name, graph=graph)
+        part = partitioner_class(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         part.run(show_analysis_plots=False)
         if part.components is not None:
             fig, axe = part.plot_component_graph()
@@ -75,7 +80,9 @@ class TestPartitioners:
     def test_plot_partition_graph_unpartitioned(self, test_city_all, partitioner_class):
         """Test `plot_partition_graph` exception handling."""
         city_name, graph = test_city_all
-        part = partitioner_class(name=city_name, graph=graph)
+        part = partitioner_class(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         with pytest.raises(AssertionError):
             part.plot_partition_graph()
         part.run()
@@ -86,7 +93,9 @@ class TestPartitioners:
     def test_plot_partitions_unpartitioned(self, test_city_all, partitioner_class):
         """Test `plot_partition_graph` exception handling."""
         city_name, graph = test_city_all
-        part = partitioner_class(name=city_name, graph=graph)
+        part = partitioner_class(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         with pytest.raises(AssertionError):
             part.plot_partition_graph()
         part.run()
@@ -97,7 +106,9 @@ class TestPartitioners:
     def test_make_subgraphs_from_attribute(self, test_city_all, partitioner_class):
         """Test `make_subgraphs_from_attribute` by design."""
         city_name, graph = test_city_all
-        part = partitioner_class(name=city_name, graph=graph)
+        part = partitioner_class(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         with pytest.raises(AssertionError):
             part.make_subgraphs_from_attribute()
         part.run()
@@ -108,7 +119,9 @@ class TestPartitioners:
     def test_plot_subgraph_component_size(self, test_city_all, partitioner_class):
         """Test `plot_subgraph_component_size` by design."""
         city_name, graph = test_city_all
-        part = partitioner_class(name=city_name, graph=graph)
+        part = partitioner_class(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         with pytest.raises(AssertionError):
             part.plot_subgraph_component_size("nodes")
         part.run()
@@ -130,7 +143,9 @@ class TestPartitioners:
     ):
         """Test `plot_subgraph_component_size` with unavailable measure."""
         city_name, graph = test_city_small
-        part = partitioner_class(name=city_name, graph=graph)
+        part = partitioner_class(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         part.run()
         with pytest.raises(ValueError):
             part.plot_subgraph_component_size(invalid_measure)
@@ -140,7 +155,9 @@ class TestPartitioners:
     ):
         """Test `overwrite_attributes_of_ignored_components` exception handling."""
         city_name, graph = test_city_small
-        part = partitioner_class(name=city_name, graph=graph)
+        part = partitioner_class(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         part.run()
         part.components = None
         with pytest.raises(AssertionError):
@@ -151,27 +168,32 @@ class TestPartitioners:
     def test_get_sorted_node_list(self, test_city_all, partitioner_class):
         """Test `get_sorted_node_list` by design."""
         city_name, graph = test_city_all
-        part = partitioner_class(name=city_name, graph=graph)
+        part = partitioner_class(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         part.run()
         sorted_nodes = part.get_sorted_node_list()
         assert len(sorted_nodes) == len(graph.nodes)
 
     @pytest.mark.parametrize(
-        "name,search_str,graph,reload_graph",
+        "name,city_name,search_str,graph,reload_graph",
         [
             (
+                "Adliswil_tmp_name",
                 "Adliswil_tmp",
                 None,
                 load_graphml(path.join(TEST_DATA, "cities", "Adliswil_small.graphml")),
                 False,
             ),
             (
+                "Adliswil_tmp_name",
                 "Adliswil_tmp",
                 "Adliswil, Bezirk Horgen, Zürich, Switzerland",
                 None,
                 False,
             ),
             (
+                "Adliswil_tmp_name",
                 "Adliswil_tmp",
                 "Adliswil, Bezirk Horgen, Zürich, Switzerland",
                 None,
@@ -183,6 +205,7 @@ class TestPartitioners:
         self,
         partitioner_class,
         name,
+        city_name,
         search_str,
         graph,
         reload_graph,
@@ -190,33 +213,42 @@ class TestPartitioners:
     ):
         """Test loading and finding of graph files.
         Initialization of partitioner class and `self.load_or_find_graph`."""
-        part = partitioner_class(name, search_str, graph, reload_graph)
+        part = partitioner_class(name, city_name, search_str, graph, reload_graph)
         assert part.graph is not None
         assert part.name is not None
 
     @pytest.mark.parametrize(
-        "name,search_str,graph",
+        "name,city_name,search_str,graph",
         [
-            (None, None, None),
-            ("Adliswil", None, None),
-            (None, "Adliswil, Bezirk Horgen, Zürich, Switzerland", None),
-            ("", "Adliswil, Bezirk Horgen, Zürich, Switzerland", None),
-            ("", None, None),
-            ("Adliswil", "", None),
-            ("Adliswil", [], None),
-            ("Adliswil", [""], None),
+            (None, None, None, None),
+            ("Adliswil_name", None, None, None),
+            ("Adliswil_name", "Adliswil", None, None),
+            (None, None, "Adliswil, Bezirk Horgen, Zürich, Switzerland", None),
+            (None, "Adliswil", "Adliswil, Bezirk Horgen, Zürich, Switzerland", None),
+            ("", "Adliswil", "Adliswil, Bezirk Horgen, Zürich, Switzerland", None),
+            ("", "Adliswil", None, None),
+            (
+                "Adliswil_name",
+                None,
+                "Adliswil, Bezirk Horgen, Zürich, Switzerland",
+                None,
+            ),
+            ("Adliswil_name", "", "Adliswil, Bezirk Horgen, Zürich, Switzerland", None),
+            ("Adliswil_name", "Adliswil", "", None),
+            ("Adliswil_name", "Adliswil", [], None),
+            ("Adliswil_name", "Adliswil", [""], None),
         ],
     )
     def test_graph_loading_and_finding_invalid(
-        self, partitioner_class, name, search_str, graph
+        self, partitioner_class, name, city_name, search_str, graph
     ):
         """Test loading and finding of graph files with invalid input."""
         if search_str == []:
             with pytest.raises(KeyError):
-                partitioner_class(name, search_str, graph)
+                partitioner_class(name, city_name, search_str, graph)
         else:
             with pytest.raises(ValueError):
-                partitioner_class(name, search_str, graph)
+                partitioner_class(name, city_name, search_str, graph)
 
     @pytest.mark.parametrize(
         "save_metrics,save_graph_copy,delete_before_load",
@@ -233,7 +265,8 @@ class TestPartitioners:
         """Test saving and loading of partitioner."""
         # Prepare
         part = partitioner_class(
-            name="Adliswil_tmp_save_load",
+            name="Adliswil_tmp_save_load_name",
+            city_name="Adliswil_tmp_save_load",
             search_str="Adliswil, Bezirk Horgen, Zürich, Switzerland",
         )
         part.run()

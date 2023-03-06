@@ -71,6 +71,16 @@ def _teardown_test_graph_io():
         test_graph = path.join(GRAPH_DIR, city + ".graphml")
         if path.exists(test_graph):
             remove(test_graph)
-        results_dir = path.join(RESULTS_DIR, city)
+        results_dir = path.join(RESULTS_DIR, city + "_name")
         if path.exists(results_dir):
             rmtree(results_dir)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _teardown_test_folders():
+    """Delete all test data folders."""
+    yield None
+    # Delete all folders in RESULTS_DIR that end with _test
+    for folder in listdir(RESULTS_DIR):
+        if folder.endswith("_test"):
+            rmtree(path.join(RESULTS_DIR, folder))

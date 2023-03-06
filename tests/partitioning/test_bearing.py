@@ -15,7 +15,9 @@ class TestBearingPartitioner:
     def test_bin_bearings(self, test_city_all, bin_num):
         """Test `__bin_bearings` class method by design."""
         city_name, graph = test_city_all
-        part = BearingPartitioner(name=city_name, graph=graph)
+        part = BearingPartitioner(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         part._BearingPartitioner__bin_bearings(bin_num)
         assert part._bin_info["num_bins"] == bin_num
         assert len(part._bin_info["bin_edges"]) == bin_num + 1
@@ -27,14 +29,18 @@ class TestBearingPartitioner:
     def test_bin_num_not_positive(self, test_city_all, bin_num):
         """Test `__bin_bearings` class method for invalid `bin_nums`."""
         city_name, graph = test_city_all
-        part = BearingPartitioner(name=city_name, graph=graph)
+        part = BearingPartitioner(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         with pytest.raises(ValueError):
             part._BearingPartitioner__bin_bearings(bin_num)
 
     def test_find_peaks_missing_binning(self, test_city_all):
         """Test `find_peaks` class method without binning."""
         city_name, graph = test_city_all
-        part = BearingPartitioner(name=city_name, graph=graph)
+        part = BearingPartitioner(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         with pytest.raises(AssertionError):
             part._BearingPartitioner__find_peaks()
 
@@ -43,14 +49,18 @@ class TestBearingPartitioner:
     def test_plot_peakfinding_missing_peakfinding(self, test_city_all):
         """Test `plot_peakfinding` class method with missing peakfinding."""
         city_name, graph = test_city_all
-        part = BearingPartitioner(name=city_name, graph=graph)
+        part = BearingPartitioner(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         with pytest.raises(AssertionError):
             part.plot_peakfinding()
 
     def test_plot_interval_splitting_missing_peakfinding(self, test_city_all):
         """Test `plot_interval_splitting` class method without partitioned bounds."""
         city_name, graph = test_city_all
-        part = BearingPartitioner(name=city_name, graph=graph)
+        part = BearingPartitioner(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         with pytest.raises(AssertionError):
             part.plot_interval_splitting()
 

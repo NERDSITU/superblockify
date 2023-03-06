@@ -49,19 +49,28 @@ class BasePartitioner(ABC):
 
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, name="unnamed", search_str=None, graph=None, reload_graph=False):
+    def __init__(
+        self,
+        name="unnamed",
+        city_name=None,
+        search_str=None,
+        graph=None,
+        reload_graph=False,
+    ):
         """Constructing a BasePartitioner
 
         Parameters
         ----------
         name : str, optional
-            Name of the graph's city. As first priority, the graph will be looked up
-            under GRAPH_DIR/name.graphml. If it is not found, it will be downloaded
-            from OSMnx using the `search_str`. Default is "unnamed".
-            Also used as folder name for results.
+            Name of the graph's city. Will be used as folder name for results and
+            plot titles. Default is "unnamed".
+        city_name : str
+            Name of the city, for looking up the graph. If graph is not found,
+            it will be downloaded from OSMnx using the `search_str`. Default is None.
+            Used so multiple `Partitioner` don't need to download the same city graph.
         search_str : str or list of str, optional
             Search string for OSMnx to download a graph, default is None. Only used if
-            no graph is found under GRAPH_DIR/name.graphml.
+            no graph is found under GRAPH_DIR/city_name.graphml.
             For composite cities, a list of search strings can be provided.
         graph : networkx.MultiDiGraph, optional
             Graph to partition. Used if no graph is found under GRAPH_DIR/name.graphml
@@ -76,6 +85,8 @@ class BasePartitioner(ABC):
             If neither graph nor search_str are provided.
         ValueError
             If name is not a string or empty.
+        ValueError
+            If city_name is not a string or empty.
         KeyError
             If search_str is an empty list.
 
@@ -87,13 +98,15 @@ class BasePartitioner(ABC):
 
         if not isinstance(name, str) or name == "":
             raise ValueError("Name must be a non-empty string.")
+        if not isinstance(city_name, str) or city_name == "":
+            raise ValueError("City name must be a non-empty string.")
 
-        # First check weather a graph is found under GRAPH_DIR/name.graphml
-        graph_path = path.join(GRAPH_DIR, f"{name}.graphml")
+        # First check weather a graph is found under GRAPH_DIR/city_name.graphml
+        graph_path = path.join(GRAPH_DIR, f"{city_name}.graphml")
         if path.exists(graph_path):
-            self.graph = self.load_or_find_graph(name, search_str, reload_graph)
+            self.graph = self.load_or_find_graph(city_name, search_str, reload_graph)
         elif search_str is not None:
-            self.graph = self.load_or_find_graph(name, search_str)
+            self.graph = self.load_or_find_graph(city_name, search_str)
         elif graph is not None:
             self.graph = graph
         else:
@@ -106,6 +119,7 @@ class BasePartitioner(ABC):
 
         # Set Instance variables
         self.name = name
+        self.city_name = city_name
         self.partitions = None
         self.components = None
         self.attribute_label = None
@@ -129,7 +143,7 @@ class BasePartitioner(ABC):
         ----------
         make_plots : bool, optional
             If True, make plots of the partitioning and save them to
-            RESULTS_DIR/self.name/figures. Default is False.
+            self.results_dir/figures. Default is False.
         """
 
         self.attribute_label = "example_label"
@@ -656,7 +670,7 @@ class BasePartitioner(ABC):
     def save_plot(self, fig, filename, **sa_kwargs):
         """Save the plot `fig` to file.
 
-        Saved in the RESULTS_DIR/self.name/filename.
+        Saved in the self.results_dir/filename.
 
         Parameters
         ----------
@@ -666,13 +680,9 @@ class BasePartitioner(ABC):
             Filename to save to.
         sa_kwargs
             Keyword arguments to pass to `matplotlib.pyplot.savefig`.
-
-        Notes
-        -----
-        RESULTS_DIR is set in the `config.ini` file.
         """
 
-        filename = path.join(RESULTS_DIR, self.name, filename)
+        filename = path.join(self.results_dir, filename)
         # Log saving
         logger.debug(
             "Saving plot (%s) to %s",
@@ -683,7 +693,7 @@ class BasePartitioner(ABC):
         # Save
         fig.savefig(filename, **sa_kwargs)
 
-    def load_or_find_graph(self, name, search_str, reload_graph=False):
+    def load_or_find_graph(self, city_name, search_str, reload_graph=False):
         """Load or find graph if it exists.
 
         If graph GRAPH_DIR/name.graphml exists, load it. Else, find it using
@@ -691,9 +701,9 @@ class BasePartitioner(ABC):
 
         Parameters
         ----------
-        name : str
+        city_name : str
             Name of the graph. Can be the name of the place and also be descriptive.
-            Will be used for naming files and plot titles.
+            Not to confuse with the name of an instance of the class.
         search_str : str or list of str
             String to search for in OSM. Can be a list of strings to combine multiple
             search terms. Use nominatim to find the right search string.
@@ -711,7 +721,7 @@ class BasePartitioner(ABC):
         """
 
         # Check if graph already exists
-        graph_path = path.join(GRAPH_DIR, name + ".graphml")
+        graph_path = path.join(GRAPH_DIR, city_name + ".graphml")
         if path.exists(graph_path) and not reload_graph:
             logger.debug("Loading graph from %s", graph_path)
             graph = ox.load_graphml(graph_path)
@@ -753,7 +763,7 @@ class BasePartitioner(ABC):
 
         # Save graph
         if save_graph_copy:
-            graph_path = path.join(RESULTS_DIR, self.name, self.name + ".graphml")
+            graph_path = path.join(self.results_dir, self.name + ".graphml")
             logger.debug("Saving graph copy to %s", graph_path)
             ox.save_graphml(self.graph, filepath=graph_path)
 
@@ -762,7 +772,7 @@ class BasePartitioner(ABC):
             self.metric.save(self.name)
 
         # Save partitioner, with self.graph = None
-        partitioner_path = path.join(RESULTS_DIR, self.name, self.name + ".partitioner")
+        partitioner_path = path.join(self.results_dir, self.name + ".partitioner")
         # Check if partitioner already exists
         if path.exists(partitioner_path):
             logger.debug("Partitioner already exists, overwriting %s", partitioner_path)
@@ -827,7 +837,7 @@ class BasePartitioner(ABC):
             logger.debug("Loading graph from %s", graph_path)
             partitioner.graph = ox.load_graphml(graph_path)
         else:
-            graph_path = path.join(GRAPH_DIR, name + ".graphml")
+            graph_path = path.join(GRAPH_DIR, partitioner.city_name + ".graphml")
             if path.exists(graph_path):
                 logger.debug("Loading graph from %s", graph_path)
                 partitioner.graph = ox.load_graphml(graph_path)

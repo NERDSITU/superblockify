@@ -53,7 +53,9 @@ class TestMetric:
     def test_calculate_all(self, test_city_small, partitioner_class):
         """Test the calculate_all method for full metrics."""
         city_name, graph = test_city_small
-        part = partitioner_class(name=city_name, graph=graph)
+        part = partitioner_class(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         part.run()
         part.calculate_metrics(make_plots=True)
         plt.close("all")
@@ -219,7 +221,9 @@ class TestMetric:
         """Test calculating distances for partitioned graph with overlapping
         partitions."""
         city_name, graph = test_city_small
-        part = partitioner_class(name=city_name, graph=graph)
+        part = partitioner_class(
+            name=city_name + "_test", city_name=city_name, graph=graph
+        )
         part.run()
         # Duplicate partitions /component
         if part.components is not None:
@@ -343,7 +347,8 @@ class TestMetric:
         """Test saving and loading of metrics."""
         # Prepare
         part = partitioner_class(
-            name="Adliswil_tmp",
+            name="Adliswil_tmp_name",
+            city_name="Adliswil_tmp",
             search_str="Adliswil, Bezirk Horgen, Zürich, Switzerland",
         )
         part.run()
