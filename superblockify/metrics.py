@@ -74,7 +74,9 @@ class Metric:
         self.distance_matrix = None
         self.weight = None
 
-    def calculate_all(self, partitioner, weight="length", make_plots=False):
+    def calculate_all(
+        self, partitioner, weight="length", num_workers=None, make_plots=False
+    ):
         """Calculate all metrics for the partitioning.
 
         `self.distance_matrix` is used to save the distances for the metrics and should
@@ -89,8 +91,12 @@ class Metric:
         num_workers : int, optional
             The number of workers to use for multiprocessing. If None, use
             min(32, os.cpu_count() + 4), by default None
+        make_plots : bool, optional
+            Whether to make plots of the distributions of the distances for each
+            network measure, by default False
 
         """
+        # pylint: disable=unused-argument
 
         # Set weight attribute
         self.weight = weight
