@@ -38,9 +38,7 @@ class BearingPartitioner(BasePartitioner):
             ]
         )
 
-    def run(
-        self, make_plots=False, min_length=1500, min_edge_count=5, **kwargs
-    ):
+    def run(self, make_plots=False, min_length=1500, min_edge_count=5, **kwargs):
         """Group by prominent bearing directions.
 
         Procedure to determine the graphs partitions based on the edges bearings.

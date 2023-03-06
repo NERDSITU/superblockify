@@ -31,9 +31,7 @@ class ResidentialPartitioner(BasePartitioner):
         """Construct a new ResidentialPartitioner."""
         super().__init__(*args, **kwargs)
 
-    def run(
-        self, make_plots=False, min_edge_count=5, min_length=400, **kwargs
-    ):
+    def run(self, make_plots=False, min_edge_count=5, min_length=400, **kwargs):
         """Group by street type and remove small components.
 
         Construct subgraphs for nodes that only contain residential edges around them.
