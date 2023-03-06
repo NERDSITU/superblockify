@@ -3,7 +3,6 @@ import logging
 import pickle
 from configparser import ConfigParser
 from datetime import timedelta
-from functools import lru_cache
 from itertools import combinations_with_replacement, repeat
 from multiprocessing import cpu_count
 from os import path
@@ -119,6 +118,9 @@ class Metric:
 
         self.calculate_all_measure_sums()
 
+        # self.coverage = self.calculate_coverage(partitioner)
+        # logger.debug("Coverage: %s", self.coverage)
+
     def calculate_all_measure_sums(self):
         """Based on the distance matrix, calculate the network measures.
 
@@ -138,6 +140,11 @@ class Metric:
                 key[0], key[1]
             )
             logger.debug("Global efficiency %s: %s", key, self.global_efficiency[key])
+
+        # # Local efficiency
+        # for key in self.local_efficiency:
+        #     self.local_efficiency[key] = self.calculate_local_efficiency(key[0], key[1])
+        #     logger.debug("Local efficiency %s: %s", key, self.local_efficiency[key])
 
     def calculate_directness(self, measure1, measure2):
         r"""Calculate the directness for the given network measures.
@@ -195,19 +202,13 @@ class Metric:
 
              E_{\text{glob},S/E}=\frac{\sum_{i \neq j}\frac{1}{d_S(i, j)}}
              {\sum_{i \neq j} \frac{1}{d_E(i, j)}}
-
-        The function calls `_network_measures_filtered_flattened` with the swapped
-        order of the network measures, because this will return a cached result if
-        another type of network measure was calculated before.
         """
 
-        # pylint: disable=arguments-out-of-order
-        dist2, dist1 = self._network_measures_filtered_flattened(measure2, measure1)
+        dist1, dist2 = self._network_measures_filtered_flattened(measure1, measure2)
 
         # Calculate the global efficiency as the ratio between the sums of the inverses
         return np.sum(1 / dist1) / np.sum(1 / dist2)
 
-    @lru_cache(maxsize=6)
     def _network_measures_filtered_flattened(self, measure1, measure2):
         """Return the two network measures filtered and flattened.
 
@@ -227,10 +228,6 @@ class Metric:
             The first network measure
         1d ndarray
             The second network measure
-
-        Notes
-        -----
-        Cache the results for the different combinations of network measures.
         """
 
         # Get the distance matrix for the two network measures
@@ -251,18 +248,76 @@ class Metric:
 
         return dist1, dist2
 
-    def __init__(self):
-        """Construct a metric object."""
+    def calculate_local_efficiency(self, measure1, measure2):
+        r"""Calculate the local efficiency for the given network measures.
 
-        self.coverage = None
-        self.num_components = None
-        self.avg_path_length = {"E": None, "S": None, "N": None}
-        self.directness = {"ES": None, "EN": None, "SN": None}
-        self.global_efficiency = {"SE": None, "NE": None, "NS": None}
-        self.local_efficiency = {"SE": None, "NE": None, "NS": None}
+        The local efficiency is like the average of the global efficiency for each
+        node. It is the mean of the ratios between the sums of the inverses of the
+        distances of the two network measures for each node.
 
-        self.distance_matrix = None
-        self.weight = None
+        Parameters
+        ----------
+        measure1 : str
+            The first network measure
+        measure2 : str
+            The second network measure
+
+        Returns
+        -------
+        float
+            The local efficiency of the network measures
+
+        Notes
+        -----
+        .. math::
+
+            E_{\mathrm{loc},S/E}=\frac{1}{N} \sum_{i=1}^{N} E_{\mathrm{glob},S/E}(i)
+
+        """
+
+        # Get the distance matrix for the two network measures
+        dist1 = self.distance_matrix[measure1]
+        dist2 = self.distance_matrix[measure2]
+
+        # Mask the diagonal, 0 and infinite values
+        mask = np.logical_and(dist1 != 0, dist2 != 0)
+        mask = np.logical_and(mask, np.isfinite(dist1), np.isfinite(dist2))
+        np.fill_diagonal(mask, False)
+        dist1 = np.ma.masked_array(dist1, mask=mask)
+        dist2 = np.ma.masked_array(dist2, mask=mask)
+
+        # Calculate the global efficiency for each row
+        efficiency = np.sum(1 / dist1, axis=1) / np.sum(1 / dist2, axis=1)
+
+        # Calculate the local efficiency as the mean of the global efficiencies
+        return np.sum(efficiency) / np.sum(~mask)
+
+    def calculate_coverage(self, partitioner):
+        """Calculate the coverage of the partitioner.
+
+        Calculates the coverage of the partitions weighted by the edge attribute
+        self.weight. The coverage is the sum of the weights of the edges between
+
+
+        Parameters
+        ----------
+        partitioner : Partitioner
+            The partitioner to calculate the coverage for
+
+        Other Parameters
+        ----------------
+        weight : str
+            The edge attribute to use as weight. It is passed saved in self.weight.
+        """
+
+        subgraph_edges = [
+            part["subgraph"].edges(data=True)
+            for part in partitioner.get_partition_nodes()
+        ]
+
+        return sum(d[self.weight] for u, v, d in subgraph_edges) / sum(
+            [d[self.weight] for u, v, d in partitioner.graph.edges(data=True)]
+        )
 
     def __str__(self):
         """Return a string representation of the metric object.
@@ -593,7 +648,7 @@ class Metric:
         node_order=None,
         num_workers=None,
         plot_distributions=False,
-        check_overlap=False,
+        check_overlap=True,
     ):  # pylint: disable=too-many-locals
         """Calculate the distance matrix for the partitioning.
 
