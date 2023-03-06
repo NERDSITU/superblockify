@@ -1,5 +1,6 @@
 """Module for test fixtures available for all test files"""
 import inspect
+from ast import literal_eval
 from configparser import ConfigParser
 from os import listdir, path, remove
 from os.path import getsize
@@ -16,6 +17,7 @@ config.read("config.ini")
 TEST_DATA = config["tests"]["test_data_path"]
 GRAPH_DIR = config["general"]["graph_dir"]
 RESULTS_DIR = config["general"]["results_dir"]
+PLACES_SMALL = literal_eval(config["tests"]["places_small"])
 
 
 @pytest.fixture(
@@ -26,7 +28,8 @@ RESULTS_DIR = config["general"]["results_dir"]
 )
 def test_city_all(request):
     """Fixture for loading and parametrizing all cities with bearing test_data."""
-    return request.param, ox.load_graphml(
+    # return request.param without .graphml
+    return request.param[:-8], ox.load_graphml(
         filepath=f"{TEST_DATA}cities/" + request.param
     )
 
@@ -35,13 +38,13 @@ def test_city_all(request):
     params=[
         city
         for city in listdir(f"{TEST_DATA}cities/")
-        if city.endswith("_small.graphml")
+        if city in [city[0] + ".graphml" for city in PLACES_SMALL]
     ]
 )
 def test_city_small(request):
     """Fixture for loading and parametrizing all cities with bearing and length
     test_data."""
-    return request.param, ox.load_graphml(
+    return request.param[:-8], ox.load_graphml(
         filepath=f"{TEST_DATA}cities/" + request.param
     )
 
