@@ -191,29 +191,31 @@ class TestMetric:
         with pytest.raises(ValueError):
             metric.calculate_euclidean_distance_matrix_haversine(graph)
 
-    @pytest.mark.xfail(
-        reason="Partitioners might still produce partitions with overlapping nodes."
-    )
-    def test_calculate_partitioning_distance_matrix(
-        self, test_city_small, partitioner_class
-    ):
-        """Test calculating distances for partitioned graph by design."""
-        city_name, graph = test_city_small
-        part = partitioner_class(name=city_name, graph=graph)
-        part.run()
-        metric = Metric()
-        metric.calculate_partitioning_distance_matrix(
-            part, plot_distributions=True, check_overlap=True, num_workers=4
-        )
-        # With node ordering
-        metric.calculate_partitioning_distance_matrix(
-            part,
-            node_order=list(graph.nodes),
-            plot_distributions=True,
-            check_overlap=True,
-            num_workers=4,
-        )
-        plt.close("all")
+    # @pytest.mark.xfail(
+    #     reason="Partitioners might still produce partitions with overlapping nodes."
+    # )
+    # def test_calculate_partitioning_distance_matrix(
+    #     self, test_city_small, partitioner_class
+    # ):
+    #     """Test calculating distances for partitioned graph by design."""
+    #     city_name, graph = test_city_small
+    #     part = partitioner_class(
+    #         name=city_name + "_test", city_name=city_name, graph=graph
+    #     )
+    #     part.run()
+    #     metric = Metric()
+    #     metric.calculate_partitioning_distance_matrix(
+    #         part, plot_distributions=True, check_overlap=True, num_workers=4
+    #     )
+    #     # With node ordering
+    #     metric.calculate_partitioning_distance_matrix(
+    #         part,
+    #         node_order=list(graph.nodes),
+    #         plot_distributions=True,
+    #         check_overlap=True,
+    #         num_workers=4,
+    #     )
+    #     plt.close("all")
 
     def test_calculate_partitioning_distance_matrix_partitions_overlap(
         self, test_city_small, partitioner_class

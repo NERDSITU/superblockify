@@ -61,9 +61,20 @@ class Metric:
 
     # pylint: disable=too-many-instance-attributes
 
-    def calculate_all(
-        self, partitioner, weight="length", num_workers=None, make_plots=False
-    ):
+    def __init__(self):
+        """Construct a metric object."""
+
+        self.coverage = None
+        self.num_components = None
+        self.avg_path_length = {"E": None, "S": None, "N": None}
+        self.directness = {"ES": None, "EN": None, "SN": None}
+        self.global_efficiency = {"SE": None, "NE": None, "NS": None}
+        self.local_efficiency = {"SE": None, "NE": None, "NS": None}
+
+        self.distance_matrix = None
+        self.weight = None
+
+    def calculate_all(self, partitioner, weight="length", make_plots=False):
         """Calculate all metrics for the partitioning.
 
         `self.distance_matrix` is used to save the distances for the metrics and should
@@ -102,21 +113,21 @@ class Metric:
         )
 
         # On the partitioning graph (N)
-        dist_partitioning_graph = self.calculate_partitioning_distance_matrix(
-            partitioner,
-            weight="length",
-            node_order=node_list,
-            num_workers=num_workers,
-            plot_distributions=make_plots,
-        )
+        # dist_partitioning_graph = self.calculate_partitioning_distance_matrix(
+        #     partitioner,
+        #     weight="length",
+        #     node_order=node_list,
+        #     num_workers=num_workers,
+        #     plot_distributions=make_plots,
+        # )
 
         self.distance_matrix = {
             "E": dist_euclidean,
             "S": dist_full_graph,
-            "N": dist_partitioning_graph,
+            # "N": dist_partitioning_graph,
         }
 
-        self.calculate_all_measure_sums()
+        # self.calculate_all_measure_sums()
 
         # self.coverage = self.calculate_coverage(partitioner)
         # logger.debug("Coverage: %s", self.coverage)
@@ -141,10 +152,10 @@ class Metric:
             )
             logger.debug("Global efficiency %s: %s", key, self.global_efficiency[key])
 
-        # # Local efficiency
-        # for key in self.local_efficiency:
-        #     self.local_efficiency[key] = self.calculate_local_efficiency(key[0], key[1])
-        #     logger.debug("Local efficiency %s: %s", key, self.local_efficiency[key])
+    # # Local efficiency
+    # for key in self.local_efficiency:
+    #     self.local_efficiency[key] = self.calculate_local_efficiency(key[0], key[1])
+    #     logger.debug("Local efficiency %s: %s", key, self.local_efficiency[key])
 
     def calculate_directness(self, measure1, measure2):
         r"""Calculate the directness for the given network measures.
@@ -316,7 +327,7 @@ class Metric:
         ]
 
         return sum(d[self.weight] for u, v, d in subgraph_edges) / sum(
-            [d[self.weight] for u, v, d in partitioner.graph.edges(data=True)]
+            d[self.weight] for u, v, d in partitioner.graph.edges(data=True)
         )
 
     def __str__(self):
