@@ -4,7 +4,7 @@ import pickle
 from configparser import ConfigParser
 from datetime import timedelta
 from itertools import combinations_with_replacement, repeat
-from multiprocessing import cpu_count
+from multiprocessing import cpu_count, Pool
 from os import path
 from time import time
 
@@ -13,7 +13,7 @@ from matplotlib import pyplot as plt
 from networkx import to_scipy_sparse_array
 from osmnx.projection import is_projected
 from scipy.sparse.csgraph import dijkstra
-from tqdm.contrib.concurrent import process_map
+from tqdm import tqdm
 
 from superblockify.plot import plot_distance_distributions
 
@@ -75,7 +75,12 @@ class Metric:
         self.weight = None
 
     def calculate_all(
-        self, partitioner, weight="length", num_workers=None, make_plots=False
+        self,
+        partitioner,
+        weight="length",
+        num_workers=None,
+        chunk_size=20,
+        make_plots=False,
     ):
         """Calculate all metrics for the partitioning.
 
@@ -91,6 +96,8 @@ class Metric:
         num_workers : int, optional
             The number of workers to use for multiprocessing. If None, use
             min(32, os.cpu_count() + 4), by default None
+        chunk_size : int, optional
+            The chunk size to use for multiprocessing, by default 20
         make_plots : bool, optional
             Whether to make plots of the distributions of the distances for each
             network measure, by default False
@@ -664,6 +671,7 @@ class Metric:
         weight=None,
         node_order=None,
         num_workers=None,
+        chunk_size=40,
         plot_distributions=False,
         check_overlap=True,
     ):  # pylint: disable=too-many-locals
@@ -695,6 +703,9 @@ class Metric:
             Choose this number carefully, as it can lead to memory errors if too high,
             if the graph has partitions. In this case another partitioner approach
             might yield better results.
+        chunk_size : int, optional
+            The chunk-size to use for the multiprocessing pool. This is the number of
+            partitions for which the distance matrix is calculated in one go (thread).
         plot_distributions : bool, optional
             If True, plot the distributions of the euclidean distances and coordinates.
         check_overlap : bool, optional
@@ -751,10 +762,11 @@ class Metric:
         # The distance matrix for the unpartitioned edges is calculated separately.
         logger.debug(
             "Calculating distance matrices for %s partitions, ergo %d combinations, "
-            "with %d workers.",
+            "with %d workers and chunk-size %d.",
             len(partitions),
             len(partitions) * (len(partitions) + 1) / 2 + 1,
             num_workers,
+            chunk_size,
         )
 
         partition_pairs = list(
@@ -773,20 +785,35 @@ class Metric:
                 )
             else:
                 pair_node_orders.append(list(nodes1) + list(unpartitioned_nodes))
-        pair_subgraphs = [
-            partitioner.graph.subgraph(nodes).copy() for nodes in pair_node_orders
-        ]
 
-        # Parallelized calculation with `process_map`
-        results = process_map(
-            self.calculate_distance_matrix,
-            pair_subgraphs,
-            repeat(weight, len(partition_pairs)),
-            pair_node_orders,
-            repeat(False, len(partition_pairs)),
-            repeat(False, len(partition_pairs)),
-            max_workers=num_workers,
+        logger.debug("Preparing graph matrices for multiprocessing.")
+
+        graph_matrices = (
+            to_scipy_sparse_array(
+                partitioner.graph.subgraph(nodes),
+                weight=weight,
+                format="csr",
+                nodelist=nodes,
+            )
+            for nodes in pair_node_orders
         )
+
+        logger.debug("Starting imap.")
+
+        # Parallelized calculation with `p.imap_unordered`
+        with Pool(processes=num_workers) as p:
+            results = list(
+                tqdm(
+                    p.imap(
+                        dijkstra_param,
+                        graph_matrices,
+                        chunksize=chunk_size,
+                    ),
+                    desc="Calculating distance matrices",
+                    total=len(partition_pairs),
+                )
+            )
+
 
         # Construct the distance matrix for the partitioning
         dist_matrix = np.full(
@@ -1031,3 +1058,12 @@ class Metric:
             metrics = pickle.load(file)
 
         return metrics
+
+
+def dijkstra_param(graph_matrix):
+    return dijkstra(
+        graph_matrix,
+        directed=True,
+        return_predecessors=False,
+        unweighted=False,
+    )
