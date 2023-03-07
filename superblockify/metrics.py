@@ -814,7 +814,6 @@ class Metric:
                 )
             )
 
-
         # Construct the distance matrix for the partitioning
         dist_matrix = np.full(
             (len(node_order), len(node_order)), np.inf, dtype=np.float64
