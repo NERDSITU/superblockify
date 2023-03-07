@@ -122,6 +122,7 @@ class BasePartitioner(ABC):
         self.city_name = city_name
         self.partitions = None
         self.components = None
+        self.drivable = None
         self.attribute_label = None
         self.attr_value_minmax = None
         self.metric = metrics.Metric()
@@ -867,6 +868,12 @@ class BasePartitioner(ABC):
                     partitioner.partitions[i][
                         "subgraph"
                     ] = partitioner.graph.edge_subgraph(partition["subgraph"].edges)
+
+        # Convert self.drivable to subgraph of self.graph.
+        if partitioner.drivable is not None:
+            partitioner.drivable = partitioner.graph.edge_subgraph(
+                partitioner.drivable.edges
+            )
 
         return partitioner
 
