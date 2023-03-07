@@ -154,7 +154,7 @@ class BasePartitioner(ABC):
             {"name": "one", "value": 1.0},
         ]
 
-    def calculate_metrics(self, make_plots=False, num_workers=None, chunk_size=None):
+    def calculate_metrics(self, make_plots=False, num_workers=None, chunk_size=1):
         """Calculate metrics for the partitioning.
 
         Calculates the metrics for the partitioning and writes them to the
@@ -205,8 +205,8 @@ class BasePartitioner(ABC):
             Number of workers to use for parallel processing. Default is None, which
             uses min(32, os.cpu_count() + 4) workers.
         chunk_size : int, optional
-            Size of chunks to split the graph into for parallel processing. None
-            defaults to 20 all shortest paths calculations per worker.
+            Size of chunks to split the graph into for parallel processing. Default is
+            1, which means no chunking. A chunking over 3 seems to not be beneficial.
 
         """
 

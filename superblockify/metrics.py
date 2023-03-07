@@ -671,7 +671,7 @@ class Metric:
         weight=None,
         node_order=None,
         num_workers=None,
-        chunk_size=40,
+        chunk_size=1,
         plot_distributions=False,
         check_overlap=True,
     ):  # pylint: disable=too-many-locals
@@ -706,6 +706,8 @@ class Metric:
         chunk_size : int, optional
             The chunk-size to use for the multiprocessing pool. This is the number of
             partitions for which the distance matrix is calculated in one go (thread).
+            Keep this low if the graph is big or has many partitions. We suggest to
+            keep this at 1.
         plot_distributions : bool, optional
             If True, plot the distributions of the euclidean distances and coordinates.
         check_overlap : bool, optional
@@ -801,10 +803,10 @@ class Metric:
         logger.debug("Starting imap.")
 
         # Parallelized calculation with `p.imap_unordered`
-        with Pool(processes=num_workers) as p:
+        with Pool(processes=num_workers) as pool:
             results = list(
                 tqdm(
-                    p.imap(
+                    pool.imap(
                         dijkstra_param,
                         graph_matrices,
                         chunksize=chunk_size,
@@ -813,7 +815,6 @@ class Metric:
                     total=len(partition_pairs),
                 )
             )
-
 
         # Construct the distance matrix for the partitioning
         dist_matrix = np.full(
@@ -1061,6 +1062,11 @@ class Metric:
 
 
 def dijkstra_param(graph_matrix):
+    """Wrapper for the dijkstra function.
+
+    Fixes keyword arguments for the dijkstra function.
+    """
+
     return dijkstra(
         graph_matrix,
         directed=True,
