@@ -223,6 +223,14 @@ class BasePartitioner(ABC):
                 name=f"{self.name} - {self.__class__.__name__}"
             )
             self.save_plot(fig, f"{self.name}_distance_matrices.pdf")
+            fig.show()
+            fig, _ = self.metric.plot_distance_matrices_pairwise_relative_difference(
+                name=f"{self.name} - {self.__class__.__name__}"
+            )
+            self.save_plot(
+                fig, f"{self.name}_distance_matrices_pairwise_relative_difference.pdf"
+            )
+            fig.show()
 
         logger.debug("Metrics for %s: %s", self.name, self.metric)
 

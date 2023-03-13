@@ -3,7 +3,7 @@ import logging
 import pickle
 from configparser import ConfigParser
 from datetime import timedelta
-from itertools import combinations_with_replacement
+from itertools import combinations_with_replacement, product
 from multiprocessing import cpu_count, Pool
 from os import path
 from time import time
@@ -956,6 +956,140 @@ class Metric:
         # Title above all subplots
         fig.suptitle(
             f"Distance matrices for the network measures "
+            f"{'(' + name + ')' if name else ''}"
+        )
+
+        return fig, axes
+
+    def plot_distance_matrices_pairwise_relative_difference(self, name=None):
+        """Show the pairwise relative difference between the distance matrices.
+
+        Plots the pairwise relative difference between the distance matrices in a
+        single figure. Only plots the lower triangle of the distance matrices.
+        On the diagonal the distance matrices are plotted as in
+        `plot_distance_matrices`.
+
+        Parameters
+        ----------
+        name : str
+            The name to put into the title of the plot.
+
+        Returns
+        -------
+        fig, axes : matplotlib.figure.Figure, matplotlib.axes.Axes
+            The figure and axes of the plot.
+
+        Raises
+        ------
+        ValueError
+            If no distance matrices are available.
+        """  # pylint: disable=too-many-locals
+
+        if self.distance_matrix is None:
+            raise ValueError("No distance matrices available.")
+
+        # Make figure with the fitting amount of subplots
+        # We need len(self.distance_matrix)^2 subplots, but we only plot the lower
+        # triangle, the rest will be empty. On the diagonal we plot the distance
+        # matrices.
+        fig, axes = plt.subplots(
+            len(self.distance_matrix),
+            len(self.distance_matrix),
+            figsize=(len(self.distance_matrix) * 5, len(self.distance_matrix) * 5),
+        )
+        # Find maximal, non-inf value for the colorbar for the diagonal
+        max_val = max(
+            np.max(value[value != np.inf]) for value in self.distance_matrix.values()
+        )
+        # Calculate the pairwise relative difference between the distance matrices
+        # save the relative difference and the minimal value for the colorbar regarding
+        # the absolute value
+        rel_diff = {}
+        min_val = 0
+        # For the lower triangle
+        for i, (key_i, value_i) in enumerate(self.distance_matrix.items()):
+            for j, (key_j, value_j) in enumerate(self.distance_matrix.items()):
+                # Only plot the lower triangle
+                if j < i:
+                    continue
+                # Calculate the pairwise relative difference
+                # Use np.inf if either value is np.inf or if the denominator is 0
+                rel_diff[key_i, key_j] = np.where(
+                    (value_i == np.inf)
+                    | (value_j == np.inf)
+                    | (value_j == 0)
+                    | (value_i == 0),
+                    np.inf,
+                    (value_i - value_j) / value_j,
+                )
+                # Find the minimal value for the colorbar
+                min_val = min(min_val, np.min(rel_diff[key_i, key_j]))
+
+        # Plot distance matrices on diagonal axes and relative difference on the
+        # lower triangle axes
+        # Iterate over all combinations of keys, for the upper triangle make the axes
+        # invisible
+        # Only write labels on the left and bottom axes
+        for i, (key_i, key_j) in enumerate(product(self.distance_matrix, repeat=2)):
+            axe = axes[i // len(self.distance_matrix), i % len(self.distance_matrix)]
+
+            # Make the upper triangle axes invisible
+            if i // len(self.distance_matrix) < i % len(self.distance_matrix):
+                axe.set_visible(False)
+            # On the diagonal plot the distance matrices
+            elif i // len(self.distance_matrix) == i % len(self.distance_matrix):
+                # Use colormap viridis for the distance matrices
+                dist_im = axe.imshow(
+                    self.distance_matrix[key_i], vmin=0, vmax=max_val, cmap="viridis"
+                )
+                axe.set_title(f"$d_{key_i}(i, j)$")
+                axe.set_aspect("equal")
+            # On the lower triangle plot the pairwise relative difference
+            else:
+                # The relative differences are all negative, the colormap will go from
+                # min_val to 0, a fitting colormap is RdYlGn
+                diff_im = axe.imshow(
+                    rel_diff[key_j, key_i],
+                    vmin=min_val,
+                    vmax=0,
+                    cmap="RdYlGn"
+                )
+                axe.set_title(
+                    f"$\\frac{{d_{{{key_j}}}(i, j) - "
+                    f"d_{{{key_i}}}(i, j)}}{{d_{{{key_i}}}(i, j)}}$"
+                )
+                axe.set_xlabel("Node $j$")
+                axe.set_ylabel("Node $i$")
+                axe.set_aspect("equal")
+            # Only write labels on the left and bottom axes
+            if i // len(self.distance_matrix) != len(self.distance_matrix) - 1:
+                axe.set_xticklabels([])
+            if i % len(self.distance_matrix) != 0:
+                axe.set_yticklabels([])
+        # Set the labels for all x and y axes
+        for axe in axes[-1, :]:
+            axe.set_xlabel("Node $j$")
+        for axe in axes[:, 0]:
+            axe.set_ylabel("Node $i$")
+
+
+        # Plot the two colorbars on the right side of the figure
+        # Colorbar for the diagonal
+        fig.colorbar(dist_im, ax=axes, fraction=0.046, pad=0.04)
+        # Colorbar for the lower triangle
+        fig.colorbar(diff_im, ax=axes, fraction=0.046, pad=0.04)
+        # Label colorbar
+        unit = (
+            "khops"
+            if self.weight is None
+            else "km"
+            if self.weight == "length"
+            else f"k{self.weight}"
+        )
+        dist_im.set_label(f"Distance [{unit}]")
+        # Title above all subplots
+        fig.suptitle(
+            f"Pairwise relative difference between the distance matrices "
             f"{'(' + name + ')' if name else ''}"
         )
 
