@@ -456,7 +456,8 @@ class BasePartitioner(ABC):
     def get_sorted_node_list(self):
         """Get sorted list of nodes.
 
-        Sorted after the name of the partition, followed by the unpartitioned nodes.
+        Sorted after the amount of nodes in the partition, followed by the
+        unpartitioned nodes.
         Uses `get_partition_nodes` to return a list of nodes.
 
         Returns
@@ -470,8 +471,10 @@ class BasePartitioner(ABC):
         node_list = self.get_partition_nodes()
         # node_list is list of dicts, which all have a "name" and "nodes" key
 
-        # Make one long list out of all the nodes, sorted by partition name
-        node_list = sorted(node_list, key=lambda x: x["name"])
+        # Make one long list out of all the nodes,
+        # sorted by number of nodes in "subgraph"
+        # node_list = sorted(node_list, key=lambda x: x["name"])
+        node_list = sorted(node_list, key=lambda x: len(x["nodes"]), reverse=True)
         node_list = [node for partition in node_list for node in partition["nodes"]]
         # Throw out duplicates, started from the back
         node_list = list(dict.fromkeys(node_list[::-1]))[::-1]
