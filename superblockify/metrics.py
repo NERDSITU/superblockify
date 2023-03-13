@@ -3,7 +3,7 @@ import logging
 import pickle
 from configparser import ConfigParser
 from datetime import timedelta
-from itertools import combinations_with_replacement, repeat
+from itertools import combinations_with_replacement
 from multiprocessing import cpu_count, Pool
 from os import path
 from time import time
