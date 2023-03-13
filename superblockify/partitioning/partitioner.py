@@ -698,6 +698,22 @@ class BasePartitioner(ABC):
             filename,
         )
 
+        # Check if al axes are compatible with tight_layout
+        # if there are more than one axes
+        if len(fig.axes) > 1:
+            for axe in fig.axes:
+                # Also axe.get_subplotspec() might be None
+                if axe.get_subplotspec() is None:
+                    logger.debug(
+                        "Not using tight_layout because one of the axes "
+                        "has no subplotspec."
+                    )
+                    break
+            else:
+                fig.tight_layout()
+        else:
+            fig.tight_layout()
+
         # Save
         fig.savefig(filename, **sa_kwargs)
 
