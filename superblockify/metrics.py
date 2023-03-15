@@ -1106,7 +1106,7 @@ class Metric:
         for i, (key_i, value_i) in enumerate(self.distance_matrix.items()):
             for j, (key_j, value_j) in enumerate(self.distance_matrix.items()):
                 # Only plot the lower triangle
-                if j < i:
+                if j <= i:
                     continue
                 # Calculate the pairwise relative difference
                 # Use np.inf if either value is np.inf or if the denominator is 0
@@ -1145,10 +1145,7 @@ class Metric:
                 # The relative differences are all negative, the colormap will go from
                 # min_val to 0, a fitting colormap is RdYlGn
                 diff_im = axe.imshow(
-                    rel_diff[key_j, key_i],
-                    vmin=min_val,
-                    vmax=0,
-                    cmap="RdYlGn"
+                    rel_diff[key_j, key_i], vmin=min_val, vmax=0, cmap="RdYlGn"
                 )
                 axe.set_title(
                     f"$\\frac{{d_{{{key_j}}}(i, j) - "
@@ -1167,7 +1164,6 @@ class Metric:
             axe.set_xlabel("Node $j$")
         for axe in axes[:, 0]:
             axe.set_ylabel("Node $i$")
-
 
         # Plot the two colorbars on the right side of the figure
         # Colorbar for the diagonal
