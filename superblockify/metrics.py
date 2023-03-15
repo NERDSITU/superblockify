@@ -141,7 +141,7 @@ class Metric:
             "N": dist_partitioning_graph,
         }
 
-        # self.calculate_all_measure_sums()
+        self.calculate_all_measure_sums()
 
         # self.coverage = self.calculate_coverage(partitioner)
         # logger.debug("Coverage: %s", self.coverage)
@@ -166,10 +166,10 @@ class Metric:
             )
             logger.debug("Global efficiency %s: %s", key, self.global_efficiency[key])
 
-    # # Local efficiency
-    # for key in self.local_efficiency:
-    #     self.local_efficiency[key] = self.calculate_local_efficiency(key[0], key[1])
-    #     logger.debug("Local efficiency %s: %s", key, self.local_efficiency[key])
+        # # Local efficiency
+        # for key in self.local_efficiency:
+        #     self.local_efficiency[key] = self.calculate_local_efficiency(key[0], key[1])
+        #     logger.debug("Local efficiency %s: %s", key, self.local_efficiency[key])
 
     def calculate_directness(self, measure1, measure2):
         r"""Calculate the directness for the given network measures.
@@ -308,13 +308,27 @@ class Metric:
         mask = np.logical_and(dist1 != 0, dist2 != 0)
         mask = np.logical_and(mask, np.isfinite(dist1), np.isfinite(dist2))
         np.fill_diagonal(mask, False)
-        dist1 = np.ma.masked_array(dist1, mask=mask)
-        dist2 = np.ma.masked_array(dist2, mask=mask)
+        # Filter distances using the mask
+        # dist1 = np.ma.masked_array(dist1, mask=mask)
+        # dist2 = np.ma.masked_array(dist2, mask=mask)
+        # Another way
+        # dist1 = dist1[mask]
+        # dist2 = dist2[mask]
+        # Another way
+        dist1 = np.where(mask, dist1, np.inf)
+        dist2 = np.where(mask, dist2, np.inf)
+        # Is this correct? We get efficiencies below 1%.
 
         # Calculate the global efficiency for each row
         efficiency = np.sum(1 / dist1, axis=1) / np.sum(1 / dist2, axis=1)
 
         # Calculate the local efficiency as the mean of the global efficiencies
+        print(np.sum(efficiency))
+        print(np.sum(~mask))
+        # The sum of the efficiency sum is zero.
+        # This is because the mask is not applied correctly.
+        # It should be applied as follows:
+        # np.sum(efficiency) / np.sum(~mask)
         return np.sum(efficiency) / np.sum(~mask)
 
     def calculate_coverage(self, partitioner):
@@ -471,6 +485,10 @@ class Metric:
         dist_full_graph = dijkstra(
             graph_matrix, directed=True, return_predecessors=False, unweighted=False
         )
+
+        # Convert to half-precision to save memory
+        dist_full_graph = dist_full_graph.astype(np.half)
+
         if log_debug:
             logger.debug(
                 "All-pairs shortest path lengths for graph with %s nodes and %s edges "
@@ -559,6 +577,8 @@ class Metric:
             np.square(x_coord[:, np.newaxis] - x_coord[np.newaxis, :])
             + np.square(y_coord[:, np.newaxis] - y_coord[np.newaxis, :])
         )
+        # Convert to half-precision to save memory
+        dist_matrix = dist_matrix.astype(np.half)
 
         if plot_distributions:
             plot_distance_distributions(
@@ -907,10 +927,8 @@ class Metric:
                 )
             )
 
-        # Construct the distance matrix for the partitioning
-        dist_matrix = np.full(
-            (len(node_order), len(node_order)), np.inf, dtype=np.float64
-        )
+        # Construct the distance matrix for the partitioning, half-precision float
+        dist_matrix = np.full((len(node_order), len(node_order)), np.inf, dtype=np.half)
         for part_combo_dist_matrix, from_indices, to_indices in results:
             # Fill the distance matrix with the distances for the nodes in this pair
             for from_index, to_index in zip(from_indices, to_indices):
