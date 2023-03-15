@@ -771,7 +771,7 @@ class BasePartitioner(ABC):
         return graph
 
     # IO methods
-    def save(self, save_metrics=True, save_graph_copy=False):
+    def save(self, save_metrics=False, save_graph_copy=False):
         """Save the partitioner.
 
         Pickle the partitioner and save it to file. Metric object and graph can also be
@@ -780,7 +780,7 @@ class BasePartitioner(ABC):
         Parameters
         ----------
         save_metrics : bool, optional
-            If True, save the metrics to a file.
+            If True, save the metrics to a separate file.
         save_graph_copy : bool, optional
             If True, save the graph to a file. In the case the partitioner was
             initialized with a name and/or search string, the underlying graph is
