@@ -122,7 +122,7 @@ class BasePartitioner(ABC):
         self.city_name = city_name
         self.partitions = None
         self.components = None
-        self.drivable = None
+        self.sparsified = None
         self.attribute_label = None
         self.attr_value_minmax = None
         self.metric = metrics.Metric()
@@ -825,9 +825,9 @@ class BasePartitioner(ABC):
                     self.components[i]["subgraph"] = nx.MultiDiGraph(
                         component["subgraph"]
                     )
-            # Convert self.drivable to MultiDiGraph for pickling
-            if self.drivable is not None:
-                self.drivable = nx.MultiDiGraph(self.drivable)
+            # Convert self.sparsified to MultiDiGraph for pickling
+            if self.sparsified is not None:
+                self.sparsified = nx.MultiDiGraph(self.sparsified)
             self.graph = None
             pickle.dump(self, file)
             # Restore graph
@@ -897,10 +897,10 @@ class BasePartitioner(ABC):
                         "subgraph"
                     ] = partitioner.graph.edge_subgraph(partition["subgraph"].edges)
 
-        # Convert self.drivable to subgraph of self.graph.
-        if partitioner.drivable is not None:
-            partitioner.drivable = partitioner.graph.edge_subgraph(
-                partitioner.drivable.edges
+        # Convert self.sparsified to subgraph of self.graph.
+        if partitioner.sparsified is not None:
+            partitioner.sparsified = partitioner.graph.edge_subgraph(
+                partitioner.sparsified.edges
             )
 
         return partitioner
