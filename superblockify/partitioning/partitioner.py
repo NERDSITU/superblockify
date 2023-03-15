@@ -466,8 +466,8 @@ class BasePartitioner(ABC):
             part["nodes"] = {
                 node
                 for node in part["subgraph"].nodes()
-                if part["subgraph"].degree(node) >= 2 and node not in
-                   self.sparsified.nodes
+                if part["subgraph"].degree(node) >= 2
+                and node not in self.sparsified.nodes
             }
 
         return partitions
