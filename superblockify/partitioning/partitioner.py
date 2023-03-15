@@ -424,6 +424,8 @@ class BasePartitioner(ABC):
         subgraph of the partition and have a degree of at least 2. Also, `ignored`
         components are left out.
 
+        Nodes inside the sparsified graph are not considered to be inside a partition.
+
         Method can be overwritten by child classes to change the definition of
         which nodes are considered to be inside a partition.
 
@@ -464,7 +466,8 @@ class BasePartitioner(ABC):
             part["nodes"] = {
                 node
                 for node in part["subgraph"].nodes()
-                if part["subgraph"].degree(node) >= 2
+                if part["subgraph"].degree(node) >= 2 and node not in
+                   self.sparsified.nodes
             }
 
         return partitions
