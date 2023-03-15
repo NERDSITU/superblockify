@@ -3,7 +3,7 @@ import logging
 import pickle
 from configparser import ConfigParser
 from datetime import timedelta
-from itertools import combinations_with_replacement, product
+from itertools import product, combinations, chain
 from multiprocessing import cpu_count, Pool
 from os import path
 from time import time
@@ -79,7 +79,7 @@ class Metric:
         partitioner,
         weight="length",
         num_workers=None,
-        chunk_size=20,
+        chunk_size=1,
         make_plots=False,
     ):
         """Calculate all metrics for the partitioning.
@@ -97,7 +97,7 @@ class Metric:
             The number of workers to use for multiprocessing. If None, use
             min(32, os.cpu_count() + 4), by default None
         chunk_size : int, optional
-            The chunk size to use for multiprocessing, by default 20
+            The chunk size to use for multiprocessing, by default 1
         make_plots : bool, optional
             Whether to make plots of the distributions of the distances for each
             network measure, by default False
@@ -126,18 +126,19 @@ class Metric:
         )
 
         # On the partitioning graph (N)
-        # dist_partitioning_graph = self.calculate_partitioning_distance_matrix(
-        #     partitioner,
-        #     weight="length",
-        #     node_order=node_list,
-        #     num_workers=num_workers,
-        #     plot_distributions=make_plots,
-        # )
+        dist_partitioning_graph = self.calculate_partitioning_distance_matrix(
+            partitioner,
+            weight="length",
+            node_order=node_list,
+            num_workers=num_workers,
+            chunk_size=chunk_size,
+            plot_distributions=make_plots,
+        )
 
         self.distance_matrix = {
             "E": dist_euclidean,
             "S": dist_full_graph,
-            # "N": dist_partitioning_graph,
+            "N": dist_partitioning_graph,
         }
 
         # self.calculate_all_measure_sums()
@@ -727,7 +728,7 @@ class Metric:
 
         """
         if node_order is None:
-            node_order = list(partitioner.graph.nodes())
+            node_order = list(partitioner.get_sorted_node_list())
 
         if num_workers is None:
             num_workers = min(32, cpu_count() // 2)
@@ -756,63 +757,153 @@ class Metric:
             node for part in partitions for node in part["nodes"]
         )
 
-        # For every pair of partitions (ordering irrelevant, including combining with
-        # itself), calculate the distance matrix for the edges in
-        # the partitions.
-        # These are saved in a dictionary, where the keys are tuples of the partition
-        # indices.
-        # The distance matrix for the unpartitioned edges is calculated separately.
+        # Preparing the combinations for processing. Generator of tuples of the form:
+        # (name, sparse_matrix, node_id_order, from_indices, to_indices)
+        # name: name of the processing combination
+        # sparse_matrix: the sparse matrix to calculate the distances for
+        # node_id_order: the order of the nodes in the sparse matrix which should be
+        #                fully calculated
+        # from_indices: the indices of the dijkstra result to save the distances from
+        # to_indices: the indices of the distance matrix to save the distances to
+        #             (the indices are the indices in the node_id_order)
+        # This is done so not every combination also calculates the distances for the
+        # unpartitioned edges, but only the ones that need it.
+
+        logger.debug("Preparing combinations for processing.")
+
+        # Start <> Goal
+        combs = (
+            (
+                f"{start['name']}<>{goal['name']}",
+                to_scipy_sparse_array(
+                    partitioner.graph,
+                    weight=weight,
+                    format="csr",
+                    nodelist=list(start["nodes"])
+                    + list(goal["nodes"])
+                    + list(unpartitioned_nodes),
+                ),
+                np.arange(len(start["nodes"]) + len(goal["nodes"])),
+                [
+                    np.ix_(
+                        range(len(start["nodes"])),
+                        range(
+                            len(start["nodes"]),
+                            len(start["nodes"]) + len(goal["nodes"]),
+                        ),
+                    ),
+                    np.ix_(
+                        range(
+                            len(start["nodes"]),
+                            len(start["nodes"]) + len(goal["nodes"]),
+                        ),
+                        range(len(start["nodes"])),
+                    ),
+                ],
+                [
+                    np.ix_(
+                        [node_order.index(n) for n in start["nodes"]],
+                        [node_order.index(n) for n in goal["nodes"]],
+                    ),
+                    np.ix_(
+                        [node_order.index(n) for n in goal["nodes"]],
+                        [node_order.index(n) for n in start["nodes"]],
+                    ),
+                ],
+            )
+            for (start, goal) in combinations(partitions, 2)
+        )
+
+        # Start == Goal + Sparsified (unpartitioned edges)
+        combs = chain(
+            combs,
+            (
+                (
+                    f"{part['name']}+Sparsified",
+                    to_scipy_sparse_array(
+                        partitioner.graph,
+                        weight=weight,
+                        format="csr",
+                        nodelist=list(part["nodes"]) + list(unpartitioned_nodes),
+                    ),
+                    np.arange(len(part["nodes"]) + len(unpartitioned_nodes)),
+                    # Index with all items, don't need to split
+                    [
+                        np.ix_(
+                            range(len(part["nodes"]) + len(unpartitioned_nodes)),
+                            range(len(part["nodes"]) + len(unpartitioned_nodes)),
+                        )
+                    ],
+                    [
+                        np.ix_(
+                            [
+                                node_order.index(n)
+                                for n in list(part["nodes"]) + list(unpartitioned_nodes)
+                            ],
+                            [
+                                node_order.index(n)
+                                for n in list(part["nodes"]) + list(unpartitioned_nodes)
+                            ],
+                        ),
+                    ],
+                )
+                for part in partitions
+            ),
+        )
+
+        # Only Sparsified (unpartitioned edges)
+        combs = chain(
+            combs,
+            (
+                (
+                    "unp",
+                    to_scipy_sparse_array(
+                        partitioner.graph,
+                        weight=weight,
+                        format="csr",
+                        nodelist=list(unpartitioned_nodes),
+                    ),
+                    np.arange(len(unpartitioned_nodes)),
+                    # Index with all items, don't need to split
+                    [
+                        np.ix_(
+                            range(len(unpartitioned_nodes)),
+                            range(len(unpartitioned_nodes)),
+                        )
+                    ],
+                    [
+                        np.ix_(
+                            [node_order.index(n) for n in list(unpartitioned_nodes)],
+                            [node_order.index(n) for n in list(unpartitioned_nodes)],
+                        ),
+                    ],
+                ),
+            ),
+        )
+
+        # Calculate the combinations in parallel
+        # We expect comb to be a generator of length binom(n, 2) + n + 1 = (n^2 + n) / 2
+        # + 1
         logger.debug(
-            "Calculating distance matrices for %s partitions, ergo %d combinations, "
+            "Calculating distance matrices for %s partitions, %d combinations, "
             "with %d workers and chunk-size %d.",
             len(partitions),
-            len(partitions) * (len(partitions) + 1) / 2 + 1,
+            (len(partitions) / 2 + 1 / 2) * len(partitions) + 1,
             num_workers,
             chunk_size,
         )
-
-        partition_pairs = list(
-            combinations_with_replacement(
-                enumerate((part["name"], part["nodes"]) for part in partitions), 2
-            )
-        )
-
-        # Prepare node pair orders and subgraphs for each partition pair while
-        # checking for duplicate nodes
-        pair_node_orders = []
-        for (idx1, (_, nodes1)), (idx2, (_, nodes2)) in partition_pairs:
-            if idx1 != idx2:
-                pair_node_orders.append(
-                    list(set(list(nodes1) + list(nodes2) + list(unpartitioned_nodes)))
-                )
-            else:
-                pair_node_orders.append(list(nodes1) + list(unpartitioned_nodes))
-
-        logger.debug("Preparing graph matrices for multiprocessing.")
-
-        graph_matrices = (
-            to_scipy_sparse_array(
-                partitioner.graph.subgraph(nodes),
-                weight=weight,
-                format="csr",
-                nodelist=nodes,
-            )
-            for nodes in pair_node_orders
-        )
-
-        logger.debug("Starting imap.")
-
         # Parallelized calculation with `p.imap_unordered`
         with Pool(processes=num_workers) as pool:
             results = list(
                 tqdm(
-                    pool.imap(
-                        dijkstra_param,
-                        graph_matrices,
+                    pool.imap_unordered(
+                        self.dijkstra_param,
+                        combs,
                         chunksize=chunk_size,
                     ),
                     desc="Calculating distance matrices",
-                    total=len(partition_pairs),
+                    total=(len(partitions) / 2 + 1 / 2) * len(partitions) + 1,
+                    unit_scale=1,
                 )
             )
 
@@ -820,29 +911,14 @@ class Metric:
         dist_matrix = np.full(
             (len(node_order), len(node_order)), np.inf, dtype=np.float64
         )
-        for part_combo_dist_matrix, pair_node_order in zip(results, pair_node_orders):
-            # Get the indices of the nodes in the distance matrix
-            node_indices = [node_order.index(node) for node in pair_node_order]
+        for part_combo_dist_matrix, from_indices, to_indices in results:
             # Fill the distance matrix with the distances for the nodes in this pair
-            dist_matrix[np.ix_(node_indices, node_indices)] = part_combo_dist_matrix
-
-        # Fill in the distance matrix for the unpartitioned edges
-        dist_matrix[
-            np.ix_(
-                [node_order.index(n) for n in unpartitioned_nodes],
-                [node_order.index(n) for n in unpartitioned_nodes],
-            )
-        ] = self.calculate_distance_matrix(
-            partitioner.graph.subgraph(unpartitioned_nodes),
-            weight=weight,
-            node_order=unpartitioned_nodes,
-            log_debug=False,
-        )
+            for from_index, to_index in zip(from_indices, to_indices):
+                dist_matrix[to_index] = part_combo_dist_matrix[from_index]
 
         logger.debug(
-            "Calculated distance matrices for all %d combinations of partitions in %s "
+            "Calculated distance matrices for all combinations of partitions in %s "
             "seconds.",
-            len(partitions) * (len(partitions) + 1) / 2 + 1,
             time() - start_time,
         )
 
@@ -866,6 +942,26 @@ class Metric:
             )
 
         return dist_matrix
+
+    @staticmethod
+    def dijkstra_param(comb):
+        """Wrapper for the dijkstra function.
+
+        Fixes keyword arguments for the dijkstra function.
+        """
+        _, sparse_matrix, node_id_order, from_indices, to_indices = comb
+
+        return (
+            dijkstra(
+                sparse_matrix,
+                directed=True,
+                indices=node_id_order,
+                return_predecessors=False,
+                unweighted=False,
+            ),
+            from_indices,
+            to_indices,
+        )
 
     def _calculate_pair_distance_matrix(self, graph, pair_node_order, weight):
         """Helper function to parallelize `calculate_partitioning_distance_matrix`.
@@ -1193,17 +1289,3 @@ class Metric:
             metrics = pickle.load(file)
 
         return metrics
-
-
-def dijkstra_param(graph_matrix):
-    """Wrapper for the dijkstra function.
-
-    Fixes keyword arguments for the dijkstra function.
-    """
-
-    return dijkstra(
-        graph_matrix,
-        directed=True,
-        return_predecessors=False,
-        unweighted=False,
-    )

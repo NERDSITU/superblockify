@@ -485,7 +485,8 @@ class BasePartitioner(ABC):
         node_list = sorted(node_list, key=lambda x: len(x["nodes"]), reverse=True)
         node_list = [node for partition in node_list for node in partition["nodes"]]
         # Throw out duplicates, started from the back
-        node_list = list(dict.fromkeys(node_list[::-1]))[::-1]
+        node_list = list(dict.fromkeys(node_list[::-1]))[::-1]  # Should not change
+        # anything if requirements are met
         # Add nodes that are not in a partition, only the key of nodes is needed
         node_list += [node for node in self.graph.nodes if node not in node_list]
 
