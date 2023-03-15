@@ -10,6 +10,7 @@ import networkx as nx
 import osmnx as ox
 from numpy import linspace
 
+from .checks import is_valid_partitioning
 from .. import attribute, plot, metrics
 from ..utils import load_graph_from_place
 
@@ -209,6 +210,13 @@ class BasePartitioner(ABC):
             1, which means no chunking. A chunking over 3 seems to not be beneficial.
 
         """
+
+        # Check that the partitions and sparsified graph satisfy the requirements
+        if is_valid_partitioning(self):
+            logger.warning(
+                "The partitioning is not valid. The metric calculation will be done "
+                "anyway, but the results might be wrong."
+            )
 
         # Log calculating metrics
         logger.info("Calculating metrics for %s", self.name)
