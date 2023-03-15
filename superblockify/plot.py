@@ -117,7 +117,12 @@ def plot_by_attribute(
     # Make list of edge colors, order is the same as in graph.edges()
     e_c = list(
         make_edge_color_list(
-            graph, attr, colormap, attr_types=attr_types, minmax_val=minmax_val
+            graph,
+            attr,
+            colormap,
+            attr_types=attr_types,
+            minmax_val=minmax_val,
+            none_color=(0, 0, 0, 1),
         )
     )
 
@@ -134,6 +139,7 @@ def plot_by_attribute(
         node_alpha=node_alpha,
         edge_color=e_c,
         edge_linewidth=edge_linewidth,
+        bgcolor=(0, 0, 0, 0),
         **pg_kwargs,
     )
 
