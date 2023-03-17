@@ -10,7 +10,12 @@ import osmnx as ox
 from numpy import linspace
 
 from .checks import is_valid_partitioning
-from .. import attribute, plot, metrics
+from .. import attribute, plot
+from ..metrics import (
+    plot_distance_matrices,
+    plot_distance_matrices_pairwise_relative_difference,
+)
+from ..metrics.metric import Metric
 from ..utils import load_graph_from_place
 
 logger = logging.getLogger("superblockify")
@@ -125,7 +130,7 @@ class BasePartitioner(ABC):
         self.sparsified = None
         self.attribute_label = None
         self.attr_value_minmax = None
-        self.metric = metrics.Metric()
+        self.metric = Metric()
 
         # Log initialization
         logger.info(
@@ -226,13 +231,13 @@ class BasePartitioner(ABC):
             chunk_size=chunk_size,
         )
         if make_plots:
-            fig, _ = self.metric.plot_distance_matrices(
-                name=f"{self.name} - {self.__class__.__name__}"
+            fig, _ = plot_distance_matrices(
+                self.metric, name=f"{self.name} - {self.__class__.__name__}"
             )
             self.save_plot(fig, f"{self.name}_distance_matrices.pdf")
             fig.show()
-            fig, _ = self.metric.plot_distance_matrices_pairwise_relative_difference(
-                name=f"{self.name} - {self.__class__.__name__}"
+            fig, _ = plot_distance_matrices_pairwise_relative_difference(
+                self.metric, name=f"{self.name} - {self.__class__.__name__}"
             )
             self.save_plot(
                 fig, f"{self.name}_distance_matrices_pairwise_relative_difference.pdf"

@@ -4,6 +4,7 @@ from itertools import chain
 
 import osmnx as ox
 from networkx import Graph, is_isomorphic
+from numpy import zeros, array, fill_diagonal
 
 
 def extract_attributes(graph, edge_attributes, node_attributes):
@@ -116,3 +117,56 @@ def compare_components_and_partitions(list1, list2):
             elif element1[key] != element2[key]:
                 return False
     return True
+
+
+def has_pairwise_overlap(lists):
+    """Return a boolean array indicating overlap between pairs of lists.
+
+    Uses numpy arrays and vector broadcasting to speed up the calculation.
+    For short lists using set operations is faster.
+
+    Parameters
+    ----------
+    lists : list of lists
+        The lists to check for pairwise overlap. Lists can be of different length.
+
+    Raises
+    ------
+    ValueError
+        If lists is not a list of lists.
+    ValueError
+        If lists is empty.
+
+    Returns
+    -------
+    has_overlap : ndarray
+        A boolean array indicating whether there is overlap between each pair of
+        lists. has_overlap[i, j] is True if there is overlap between list i and
+        list j, and False otherwise.
+
+    """
+    if not isinstance(lists, list) or not all(isinstance(lst, list) for lst in lists):
+        raise ValueError("The input must be a list of lists.")
+    if not lists:
+        raise ValueError("The input must not be the empty list.")
+
+    # Convert lists to sets
+    sets = [set(lst) for lst in lists]
+
+    # Compute the pairwise intersection of the sets
+    intersections = zeros((len(sets), len(sets)))
+    for i, _ in enumerate(sets):
+        for j, _ in enumerate(sets):
+            intersections[i, j] = len(sets[i] & sets[j])
+            intersections[j, i] = intersections[i, j]
+
+    # Compute the pairwise union of the sets
+    unions = array([len(s) for s in sets]).reshape(-1, 1) + len(lists) - 1
+
+    # Compute whether there is overlap between each pair of sets
+    has_overlap = intersections > 0
+    overlaps = intersections / unions
+    fill_diagonal(overlaps, 0)
+    has_overlap |= overlaps > 0
+
+    return has_overlap
