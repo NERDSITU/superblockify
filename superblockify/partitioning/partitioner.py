@@ -4,7 +4,6 @@ import pickle
 from abc import ABC, abstractmethod
 from configparser import ConfigParser
 from os import path, makedirs
-from random import choice
 
 import networkx as nx
 import osmnx as ox
@@ -31,16 +30,16 @@ class BasePartitioner(ABC):
 
     Examples
     --------
-    >>> from superblockify.partitioning import DummyPartitioner
+    >>> from superblockify.partitioning import BasePartitioner
     >>> import osmnx as ox
     >>> name, search_str = "Resistencia", "Resistencia, Chaco, Argentina"
     >>> graph = ox.graph_from_place(search_str, network_type="drive")
-    >>> part = DummyPartitioner(graph=graph, name=name)
+    >>> part = BasePartitioner(graph=graph, name=name)
     >>> part.run(make_plots=True)
 
-    >>> from superblockify.partitioning import DummyPartitioner
+    >>> from superblockify.partitioning import BasePartitioner
     >>> import osmnx as ox
-    >>> part = DummyPartitioner(
+    >>> part = BasePartitioner(
     ...     name="Resistencia", search_str="Resistencia, Chaco, Argentina"
     ... )
     >>> part.run()
@@ -915,44 +914,3 @@ class BasePartitioner(ABC):
             )
 
         return partitioner
-
-
-class DummyPartitioner(BasePartitioner):
-    """Dummy partitioner.
-
-    Partitions randomly.
-    """
-
-    def run(self, make_plots=False, **kwargs):
-        """Run method. Must be overridden.
-
-        Assign random partitions to edges.
-        """
-
-        # The label under which the partition attribute is saved in the `self.graph`.
-        self.attribute_label = "dummy_attribute"
-
-        # Somehow determining the partition of edges
-        # - edges also may not be included in any partition and miss the label
-        values = list(range(3))
-        self.attr_value_minmax = (min(values), max(values))
-        attribute.new_edge_attribute_by_function(
-            self.graph, lambda bear: choice(values), "osmid", self.attribute_label
-        )
-
-        # A List of the existing partitions, the 'value' attribute should be equal to
-        # the edge attributes under the instances `attribute_label`, which belong to
-        # this partition
-        self.partitions = [
-            {
-                "name": str(num),
-                "value": num,
-                "subgraph": attribute.get_edge_subgraph_with_attribute_value(
-                    self.graph, self.attribute_label, num
-                ),
-                "num_edges": num,
-                "num_nodes": num,
-                "length_total": num,
-            }
-            for num in values
-        ]
