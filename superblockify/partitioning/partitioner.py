@@ -781,16 +781,14 @@ class BasePartitioner(ABC):
         return graph
 
     # IO methods
-    def save(self, save_metrics=False, save_graph_copy=False):
+    def save(self, save_graph_copy=False):
         """Save the partitioner.
 
-        Pickle the partitioner and save it to file. Metric object and graph can also be
-        saved.
+        Pickle the partitioner and save it to file. Metric object will be saved in
+        separate file.
 
         Parameters
         ----------
-        save_metrics : bool, optional
-            If True, save the metrics to a separate file.
         save_graph_copy : bool, optional
             If True, save the graph to a file. In the case the partitioner was
             initialized with a name and/or search string, the underlying graph is
@@ -811,8 +809,7 @@ class BasePartitioner(ABC):
             ox.save_graphml(self.graph, filepath=graph_path)
 
         # Save metrics
-        if save_metrics:
-            self.metric.save(self.name)
+        self.metric.save(self.name)
 
         # Save partitioner, with self.graph = None
         partitioner_path = path.join(self.results_dir, self.name + ".partitioner")
@@ -822,8 +819,6 @@ class BasePartitioner(ABC):
         else:
             logger.debug("Saving partitioner to %s", partitioner_path)
         with open(partitioner_path, "wb") as file:
-            # Remove graph from partitioner
-            graph = self.graph
             # Convert subgraph views to MultiDiGraphs for pickling, if they exist
             if self.partitions is not None:
                 for i, partition in enumerate(self.partitions):
@@ -838,10 +833,17 @@ class BasePartitioner(ABC):
             # Convert self.sparsified to MultiDiGraph for pickling
             if self.sparsified is not None:
                 self.sparsified = nx.MultiDiGraph(self.sparsified)
+            # Remove graph from partitioner
+            graph = self.graph
             self.graph = None
+            # Remove metric from partitioner
+            metric = self.metric
+            self.metric = None
             pickle.dump(self, file)
             # Restore graph
             self.graph = graph
+            # Restore metric
+            self.metric = metric
 
     @classmethod
     def load(cls, name):
@@ -875,7 +877,33 @@ class BasePartitioner(ABC):
         with open(partitioner_path, "rb") as file:
             partitioner = pickle.load(file)
 
-        # Metrics are still included in the partitioner, so no need to load them
+        # Load metric
+        metric_path = path.join(RESULTS_DIR, name, name + ".metric")
+        if path.exists(metric_path):
+            logger.debug("Loading metric from %s", metric_path)
+            partitioner.metric = Metric.load(name)
+        else:
+            logger.debug("Metric not found in %s, keeping empty", metric_path)
+
+        return cls._load_graph(partitioner, name)
+
+    @classmethod
+    def _load_graph(cls, partitioner, name):
+        """Load the graph of a partitioner.
+
+        Parameters
+        ----------
+        partitioner : BasePartitioner
+            Partitioner with graph not loaded.
+        name : str
+            Name of the partitioner. This is the name of the folder in which the
+            partitioner is saved. Also, the name of the graph and the metrics.
+
+        Returns
+        -------
+        partitioner : BasePartitioner
+            Partitioner with graph loaded.
+        """
 
         # Load graph - if possible from RESULTS_DIR, else from GRAPH_DIR
         graph_path = path.join(RESULTS_DIR, name, name + ".graphml")
@@ -898,7 +926,6 @@ class BasePartitioner(ABC):
                     partitioner.components[i][
                         "subgraph"
                     ] = partitioner.graph.edge_subgraph(component["subgraph"].edges)
-
         # Graphs of self.partitions need to be converted to be subgraphs of self.graph.
         if partitioner.partitions is not None:
             for i, partition in enumerate(partitioner.partitions):
@@ -906,11 +933,9 @@ class BasePartitioner(ABC):
                     partitioner.partitions[i][
                         "subgraph"
                     ] = partitioner.graph.edge_subgraph(partition["subgraph"].edges)
-
         # Convert self.sparsified to subgraph of self.graph.
         if partitioner.sparsified is not None:
             partitioner.sparsified = partitioner.graph.edge_subgraph(
                 partitioner.sparsified.edges
             )
-
         return partitioner

@@ -15,6 +15,7 @@ config = ConfigParser()
 config.read("config.ini")
 TEST_DATA = config["tests"]["test_data_path"]
 GRAPH_DIR = config["general"]["graph_dir"]
+RESULTS_DIR = config["general"]["results_dir"]
 
 
 class TestBasePartitioner:
@@ -251,13 +252,12 @@ class TestPartitioners:
                 partitioner_class(name, city_name, search_str, graph)
 
     @pytest.mark.parametrize(
-        "save_metrics,save_graph_copy,delete_before_load",
-        [(False, False, False), (True, True, False), (False, False, True)],
+        "save_graph_copy,delete_before_load",
+        [(False, False), (True, False), (False, True)],
     )
     def test_saving_and_loading(
         self,
         partitioner_class,
-        save_metrics,
         save_graph_copy,
         delete_before_load,
         _teardown_test_graph_io,
@@ -272,10 +272,18 @@ class TestPartitioners:
         part.run()
 
         # Save
-        part.save(save_metrics, save_graph_copy)
+        part.save(save_graph_copy)
         if delete_before_load:
             # Delete graph at GRAPH_DIR/Adliswil_tmp_save_load.graphml
             remove(path.join(GRAPH_DIR, "Adliswil_tmp_save_load.graphml"))
+            # Delete metrics at GRAPH_DIR/Adliswil_tmp_save_load.metric
+            remove(
+                path.join(
+                    RESULTS_DIR,
+                    "Adliswil_tmp_save_load_name",
+                    "Adliswil_tmp_save_load_name.metrics",
+                )
+            )
 
         # Load
         part_loaded = partitioner_class.load(part.name)
@@ -283,7 +291,7 @@ class TestPartitioners:
         assert part.__dict__.keys() == part_loaded.__dict__.keys()
         # Check if all instance attributes are equal (except graph if deleted)
         for attr in part.__dict__:
-            if attr == "graph" and delete_before_load:
+            if attr == "metric" or (attr == "graph" and delete_before_load):
                 continue
             if isinstance(getattr(part, attr), nx.Graph):
                 # For the graph only check equality of the nodes and edges, not the
