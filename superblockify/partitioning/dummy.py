@@ -2,8 +2,10 @@
 from random import choice
 
 from .partitioner import BasePartitioner
-from .. import new_edge_attribute_by_function
-from ..attribute import get_edge_subgraph_with_attribute_value
+from ..attribute import (
+    get_edge_subgraph_with_attribute_value,
+    new_edge_attribute_by_function,
+)
 
 
 class DummyPartitioner(BasePartitioner):
