@@ -11,6 +11,7 @@ from scipy.signal import find_peaks
 
 from superblockify import attribute
 from .partitioner import BasePartitioner
+from ..plot import save_plot
 
 logger = logging.getLogger("superblockify")
 
@@ -86,7 +87,7 @@ class BearingPartitioner(BasePartitioner):
 
         if make_plots:
             fig, _ = self.plot_peakfinding()
-            self.save_plot(fig, f"{self.name}_peakfinding.pdf")
+            save_plot(self.results_dir, fig, f"{self.name}_peakfinding.pdf")
             plt.show()
 
         # Make boundaries
@@ -94,7 +95,7 @@ class BearingPartitioner(BasePartitioner):
 
         if make_plots:
             fig, _ = self.plot_interval_splitting()
-            self.save_plot(fig, f"{self.name}_interval_splitting.pdf")
+            save_plot(self.results_dir, fig, f"{self.name}_interval_splitting.pdf")
             plt.show()
 
         # Write grouping attribute to graph
@@ -128,10 +129,10 @@ class BearingPartitioner(BasePartitioner):
 
         if make_plots:
             fig, _ = self.plot_subgraph_component_size("length")
-            self.save_plot(fig, f"{self.name}_subgraph_component_size.pdf")
+            save_plot(self.results_dir, fig, f"{self.name}_subgraph_component_size.pdf")
             plt.show()
             fig, _ = self.plot_partition_graph()
-            self.save_plot(fig, f"{self.name}_partition_graph.pdf")
+            save_plot(self.results_dir, fig, f"{self.name}_partition_graph.pdf")
             plt.show()
 
     def __bin_bearings(self, num_bins: int):

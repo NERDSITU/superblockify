@@ -16,6 +16,7 @@ from ..metrics import (
     plot_distance_matrices_pairwise_relative_difference,
 )
 from ..metrics.metric import Metric
+from ..plot import save_plot
 from ..utils import load_graph_from_place
 
 logger = logging.getLogger("superblockify")
@@ -234,13 +235,15 @@ class BasePartitioner(ABC):
             fig, _ = plot_distance_matrices(
                 self.metric, name=f"{self.name} - {self.__class__.__name__}"
             )
-            self.save_plot(fig, f"{self.name}_distance_matrices.pdf")
+            save_plot(self.results_dir, fig, f"{self.name}_distance_matrices.pdf")
             fig.show()
             fig, _ = plot_distance_matrices_pairwise_relative_difference(
                 self.metric, name=f"{self.name} - {self.__class__.__name__}"
             )
-            self.save_plot(
-                fig, f"{self.name}_distance_matrices_pairwise_relative_difference.pdf"
+            save_plot(
+                self.results_dir,
+                fig,
+                f"{self.name}_distance_matrices_pairwise_relative_difference.pdf",
             )
             fig.show()
 
@@ -698,48 +701,6 @@ class BasePartitioner(ABC):
                 f"{self.__class__.__name__} has no `attribute_label` yet,"
                 f"run before plotting graph."
             )
-
-    def save_plot(self, fig, filename, **sa_kwargs):
-        """Save the plot `fig` to file.
-
-        Saved in the self.results_dir/filename.
-
-        Parameters
-        ----------
-        fig : matplotlib.figure.Figure
-            Figure to save.
-        filename : str
-            Filename to save to.
-        sa_kwargs
-            Keyword arguments to pass to `matplotlib.pyplot.savefig`.
-        """
-
-        filename = path.join(self.results_dir, filename)
-        # Log saving
-        logger.debug(
-            "Saving plot (%s) to %s",
-            fig.axes[0].get_title(),
-            filename,
-        )
-
-        # Check if al axes are compatible with tight_layout
-        # if there are more than one axes
-        if len(fig.axes) > 1:
-            for axe in fig.axes:
-                # Also axe.get_subplotspec() might be None
-                if axe.get_subplotspec() is None:
-                    logger.debug(
-                        "Not using tight_layout because one of the axes "
-                        "has no subplotspec."
-                    )
-                    break
-            else:
-                fig.tight_layout()
-        else:
-            fig.tight_layout()
-
-        # Save
-        fig.savefig(filename, **sa_kwargs)
 
     def load_or_find_graph(self, city_name, search_str, reload_graph=False):
         """Load or find graph if it exists.

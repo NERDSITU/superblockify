@@ -9,6 +9,7 @@ from .partitioner import BasePartitioner
 from ..attribute import (
     new_edge_attribute_by_function,
 )
+from ..plot import save_plot
 
 logger = logging.getLogger("superblockify")
 
@@ -102,7 +103,7 @@ class ResidentialPartitioner(BasePartitioner):
 
         if make_plots:
             fig, _ = self.plot_partition_graph()
-            self.save_plot(fig, f"{self.name}_partition_graph.pdf")
+            save_plot(self.results_dir, fig, f"{self.name}_partition_graph.pdf")
             plt.show()
 
         self.components = self.partitions
@@ -120,10 +121,10 @@ class ResidentialPartitioner(BasePartitioner):
 
         if make_plots:
             fig, _ = self.plot_subgraph_component_size("length")
-            self.save_plot(fig, f"{self.name}_subgraph_component_size.pdf")
+            save_plot(self.results_dir, fig, f"{self.name}_subgraph_component_size.pdf")
             plt.show()
 
         if make_plots:
             fig, _ = self.plot_component_graph()
-            self.save_plot(fig, f"{self.name}_component_graph.pdf")
+            save_plot(self.results_dir, fig, f"{self.name}_component_graph.pdf")
             plt.show()
