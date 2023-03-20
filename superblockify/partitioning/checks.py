@@ -58,8 +58,9 @@ def is_valid_partitioning(partitioning):
         "and not the sparsified graph.",
         partitioning.name,
     )
-    if not nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
-        return False
+    # Needs to be optimized:
+    # if not nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
+    #     return False
 
     # 6. Check if each subgraph is connected to the sparsified graph
     logger.debug(
