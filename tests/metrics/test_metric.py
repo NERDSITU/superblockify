@@ -46,9 +46,7 @@ class TestMetric:
             "avg_path_length: S: 4, N: 11; )"
         )
 
-    @pytest.mark.xfail(
-        reason="Partitioners need to implement `self.sparsified`."
-    )
+    @pytest.mark.xfail(reason="Partitioners need to implement `self.sparsified`.")
     def test_calculate_all(self, test_city_small, partitioner_class):
         """Test the calculate_all method for full metrics."""
         city_name, graph = test_city_small
