@@ -14,7 +14,7 @@ class DummyPartitioner(BasePartitioner):
     Partitions randomly.
     """
 
-    def run(self, make_plots=False, **kwargs):
+    def partition_graph(self, make_plots=False, **kwargs):
         """Run method. Must be overridden.
 
         Assign random partitions to edges.

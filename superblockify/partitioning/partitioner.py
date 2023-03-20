@@ -4,6 +4,7 @@ import pickle
 from abc import ABC, abstractmethod
 from configparser import ConfigParser
 from os import path, makedirs
+from typing import final, Final, List
 
 import networkx as nx
 import osmnx as ox
@@ -124,13 +125,13 @@ class BasePartitioner(ABC):
             makedirs(self.results_dir)
 
         # Set Instance variables
-        self.name = name
-        self.city_name = city_name
-        self.partitions = None
-        self.components = None
+        self.name: Final[str] = name
+        self.city_name: str = city_name
+        self.partitions: List[dict] | None = None
+        self.components: List[dict] | None = None
         self.sparsified = None
-        self.attribute_label = None
-        self.attr_value_minmax = None
+        self.attribute_label: str | None = None
+        self.attr_value_minmax: tuple | None = None
         self.metric = Metric()
 
         # Log initialization
@@ -142,15 +143,58 @@ class BasePartitioner(ABC):
             len(self.graph.edges),
         )
 
-    @abstractmethod
-    def run(self, make_plots=False, **kwargs):
+    @final
+    def run(self, calculate_metrics=True, make_plots=False, **kwargs):
         """Run partitioning.
+
+        Parameters
+        ----------
+        calculate_metrics : bool, optional
+            If True, calculate the metrics and save them to self.results_dir/metrics.
+        make_plots : bool, optional
+            If True, make plots of the partitioning and save them to
+            self.results_dir/figures. Default is False.
+        """
+
+        self.partition_graph(make_plots=make_plots, **kwargs)
+
+        # If partitioner has only set the partitions, but not the sparsified graph,
+        # make it from the edges not in the partitions
+        if self.sparsified is None:
+            logger.debug(
+                "Sparsified graph not set. "
+                "Making it from the edges not in the partitions."
+            )
+            self.set_sparsified_from_components()
+
+        # Check that the partitions and sparsified graph satisfy the requirements
+        if not is_valid_partitioning(self):
+            warn = (
+                "The partitioning is not valid."
+                + " The metric calculation will be done anyway,"
+                " but the results might be wrong."
+                if calculate_metrics
+                else ""
+            )
+            logger.warning(warn)
+
+        if calculate_metrics:
+            self.calculate_metrics(make_plots=make_plots, **kwargs)
+
+    @abstractmethod
+    def partition_graph(self, make_plots=False, **kwargs):
+        """Partition the graph.
 
         Parameters
         ----------
         make_plots : bool, optional
             If True, make plots of the partitioning and save them to
             self.results_dir/figures. Default is False.
+
+        Notes
+        -----
+        This method should be implemented by the child class, kwargs are handed down
+        from the `run` method.
         """
 
         self.attribute_label = "example_label"
@@ -171,37 +215,6 @@ class BasePartitioner(ABC):
         - d_S(i, j): Shortest path on full graph
         - d_N(i, j): Shortest path with ban through LTNs
 
-        We define several types of combinations of these metrics:
-        (i, j are nodes in the graph)
-
-        The network metrics are the following:
-
-        - Coverage (fraction of network covered by a partition):
-          C = sum(1 if i in partition else 0) / len(graph.nodes)
-
-        - Components (number of connected components):
-          C = len(graph.components)
-
-        - Average path length:
-            - A(E) = mean(d_E(i, j)) where i <> j
-            - A(S) = mean(d_S(i, j)) where i <> j
-            - A(N) = mean(d_N(i, j)) where i <> j
-
-        - Directness:
-            - D(E, S) = mean(d_E(i, j) / d_S(i, j)) where i <> j
-            - D(E, N) = mean(d_E(i, j) / d_N(i, j)) where i <> j
-            - D(S, N) = mean(d_S(i, j) / d_N(i, j)) where i <> j
-
-        - Global efficiency:
-            - G(i; S/E) = sum(1/d_S(i, j)) / sum(1/d_E(i, j)) where for each sum i <> j
-            - G(i; N/E) = sum(1/d_N(i, j)) / sum(1/d_E(i, j)) where for each sum i <> j
-            - G(i; N/S) = sum(1/d_N(i, j)) / sum(1/d_S(i, j)) where for each sum i <> j
-
-        - Local efficiency:
-            - L(S/E) = sum(G(i; S/E)) / N where i = 1..N
-            - L(N/E) = sum(G(i; N/E)) / N where i = 1..N
-            - L(N/S) = sum(G(i; N/S)) / N where i = 1..N
-
         Parameters
         ----------
         make_plots : bool, optional
@@ -215,13 +228,6 @@ class BasePartitioner(ABC):
             1, which means no chunking. A chunking over 3 seems to not be beneficial.
 
         """
-
-        # Check that the partitions and sparsified graph satisfy the requirements
-        if is_valid_partitioning(self):
-            logger.warning(
-                "The partitioning is not valid. The metric calculation will be done "
-                "anyway, but the results might be wrong."
-            )
 
         # Log calculating metrics
         logger.info("Calculating metrics for %s", self.name)
@@ -361,6 +367,25 @@ class BasePartitioner(ABC):
             self.overwrite_attributes_of_ignored_components(
                 attribute_name=self.attribute_label, attribute_value=None
             )
+
+    def set_sparsified_from_components(self):
+        """Set sparsified graph from components.
+
+        Method for child classes to set the sparsified graph from the components.
+        The sparsified graph is the graph with all edges that are not in the
+        components. The sparsified graph is set to `self.sparsified`.
+        """
+        # list of edges in partitions
+        edges_in_partitions = {
+            edge
+            for component in self.components
+            for edge in component["subgraph"].edges(keys=True)
+        }
+        self.sparsified = self.graph.edge_subgraph(
+            # set of all edges - set of edges in partitions
+            set(list(self.graph.edges(keys=True)))
+            - edges_in_partitions
+        )
 
     def overwrite_attributes_of_ignored_components(
         self, attribute_name, attribute_value=None

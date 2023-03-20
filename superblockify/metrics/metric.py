@@ -33,6 +33,32 @@ class Metric:
     - d_S(i, j): Shortest path on full graph
     - d_N(i, j): Shortest path with ban through LTNs
 
+    We define several types of combinations of these metrics:
+    (i, j are nodes in the graph)
+
+    The network metrics are the following:
+
+    - Coverage (fraction of network covered by a partition):
+      C = sum(1 if i in partition else 0) / len(graph.nodes)
+
+    - Components (number of connected components):
+      C = len(graph.components)
+
+    - Average path length:
+        - A(E) = mean(d_E(i, j)) where i <> j
+        - A(S) = mean(d_S(i, j)) where i <> j
+        - A(N) = mean(d_N(i, j)) where i <> j
+
+    - Directness:
+        - D(E, S) = mean(d_E(i, j) / d_S(i, j)) where i <> j
+        - D(E, N) = mean(d_E(i, j) / d_N(i, j)) where i <> j
+        - D(S, N) = mean(d_S(i, j) / d_N(i, j)) where i <> j
+
+    - Global efficiency:
+        - G(i; S/E) = sum(1/d_S(i, j)) / sum(1/d_E(i, j)) where for each sum i <> j
+        - G(i; N/E) = sum(1/d_N(i, j)) / sum(1/d_E(i, j)) where for each sum i <> j
+        - G(i; N/S) = sum(1/d_N(i, j)) / sum(1/d_S(i, j)) where for each sum i <> j
+
     Attributes
     ----------
     coverage : float
