@@ -1,4 +1,5 @@
 """Measures for the metrics module."""
+import numpy as np
 from numpy import mean, sum as npsum, fill_diagonal, logical_and, isfinite
 
 
@@ -142,3 +143,57 @@ def calculate_coverage(partitioner, weight):
     return npsum(d[weight] for u, v, d in subgraph_edges) / npsum(
         d[weight] for u, v, d in partitioner.graph.edges(data=True)
     )
+
+
+def rel_increase(value_i, value_j):
+    """Calculate the relative increase of matrix value_i and value_j.
+
+    Ignore np.inf values and 0 values in the denominator.
+    """
+    # Use double precision to avoid overflow
+    value_i = value_i.astype(np.double)
+    value_j = value_j.astype(np.double)
+    return np.where(
+        (value_i == np.inf) | (value_j == np.inf) | (value_j == 0) | (value_i == 0),
+        np.inf,
+        value_i / value_j,
+    )
+
+
+def write_relative_increase_to_edges(
+    graph, distance_matrix, node_list, measure1, measure2
+):
+    """Write the relative increase of the distance matrix to the edges of the graph.
+
+    For each edge the relative increases to and from every node to the two nodes
+    of the edge are averaged and written to the edge attribute "rel_increase".
+
+    Parameters
+    ----------
+    graph : nx.Graph
+        The graph to write the relative increase to
+    distance_matrix : dict
+        The distance matrix for the network measures, as returned by instance attribute
+        :attr:`superblockify.metrics.metric.Metric.distance_matrix`
+    node_list : list
+        Indicating the order of the nodes in the distance matrix
+    measure1 : str
+        The first network measure
+    measure2 : str
+        The second network measure
+    """
+
+    rel_inc = rel_increase(distance_matrix[measure1], distance_matrix[measure2])
+
+    for u, v, k in graph.edges(keys=True):
+        # All distances to and from u and v
+        rel_inc_uv = np.concatenate(
+            (
+                rel_inc[node_list.index(u), :],
+                rel_inc[:, node_list.index(u)],
+                rel_inc[node_list.index(v), :],
+                rel_inc[:, node_list.index(v)],
+            )
+        )
+        # Remove np.inf values and average the remaining values
+        graph.edges[u, v, k]["rel_increase"] = np.mean(rel_inc_uv[rel_inc_uv != np.inf])

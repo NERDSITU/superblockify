@@ -3,8 +3,9 @@ from itertools import product
 
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib.colors import SymLogNorm
+from matplotlib.colors import LogNorm
 
+from .measures import rel_increase
 from ..plot import plot_by_attribute
 
 
@@ -159,17 +160,22 @@ def plot_distance_matrices_pairwise_relative_difference(metric, name=None):
     # save the relative difference and the minimal value for the colorbar regarding
     # the absolute value
     rel_diff = {}
-    min_val = 0
+    max_val_rel = 0
     # For the lower triangle
     for i, (key_i, value_i) in enumerate(metric.distance_matrix.items()):
-        for j, (key_j, value_j) in enumerate(metric.distance_matrix.items()):
+        for _, (key_j, value_j) in enumerate(metric.distance_matrix.items()):
             if f"{key_i}{key_j}" not in metric.directness.keys():
                 continue
             # Calculate the pairwise relative difference
             # Use np.inf if either value is np.inf or if the denominator is 0
-            rel_diff[key_i, key_j] = rel_increase(value_i, value_j)
-            # Find the minimal value for the colorbar
-            min_val = min(min_val, np.min(rel_diff[key_i, key_j]))
+            rel_diff[key_j, key_i] = rel_increase(value_j, value_i)
+            print(f"{key_i}{key_j}: {rel_diff[key_j, key_i]}")
+            # Find the maximal value for the colorbar regarding the absolute value
+            # (ignoring np.inf)
+            max_val_rel = max(
+                max_val_rel,
+                np.max(rel_diff[key_j, key_i][rel_diff[key_j, key_i] != np.inf]),
+            )
 
     # Plot distance matrices on diagonal axes and relative difference on the
     # lower triangle axes
@@ -195,17 +201,14 @@ def plot_distance_matrices_pairwise_relative_difference(metric, name=None):
             # The relative differences are all negative, the colormap will go from
             # min_val to 0, a fitting colormap is RdYlGn
             diff_im = axe.imshow(
-                rel_diff[key_j, key_i],
-                # vmin=min_val,
-                # vmax=0,
-                cmap="RdYlGn",
-                # log-scale
-                norm=SymLogNorm(linthresh=0.03, linscale=0.03, vmin=min_val, vmax=0),
+                rel_diff[key_i, key_j],
+                # vmin=1,
+                # vmax=max_val_rel,
+                # logaritmic scale
+                norm=LogNorm(vmin=1, vmax=max_val_rel),
+                cmap="RdYlGn_r",
             )
-            axe.set_title(
-                f"$\\frac{{d_{{{key_i}}}(i, j) - "
-                f"d_{{{key_j}}}(i, j)}}{{d_{{{key_i}}}(i, j)}}$"
-            )
+            axe.set_title(f"$\\frac{{d_{{{key_i}}}(i, j)}}{{d_{{{key_j}}}(i, j)}}$")
             axe.set_xlabel("Node $j$")
             axe.set_ylabel("Node $i$")
             axe.set_aspect("equal")
@@ -243,21 +246,6 @@ def plot_distance_matrices_pairwise_relative_difference(metric, name=None):
     return fig, axes
 
 
-def rel_increase(value_i, value_j):
-    """Calculate the relative increase of matrix value_i and value_j.
-
-    Ignore np.inf values and 0 values in the denominator.
-    """
-    # Use double precision to avoid overflow
-    value_i = value_i.astype(np.float64)
-    value_j = value_j.astype(np.float64)
-    return np.where(
-        (value_i == np.inf) | (value_j == np.inf) | (value_j == 0) | (value_i == 0),
-        np.inf,
-        (value_i - value_j) / value_i,
-    )
-
-
 def plot_component_wise_travel_increase(
     partitioner, distance_matrix, node_list, measure1, measure2, **pg_kwargs
 ):
@@ -268,7 +256,7 @@ def plot_component_wise_travel_increase(
     component. Relative travel increase is the percentual increase of the travel between
     measure 1 and measure 2.
 
-    Mean of (d_2(i, j) - d_1(i, j)) / d_1(i, j) if i in the concerning component.
+    Mean of d_1(i, j) / d_1(i, j) if i in the concerning component.
 
     Parameters
     ----------
@@ -351,7 +339,7 @@ def plot_relative_difference(metric, key_i, key_j, title=None):
     """
     # Calculate the relative difference
     rel_diff = rel_increase(
-        metric.distance_matrix[key_i], metric.distance_matrix[key_j]
+        metric.distance_matrix[key_j], metric.distance_matrix[key_i]
     )
 
     # Plot the relative difference
@@ -360,16 +348,17 @@ def plot_relative_difference(metric, key_i, key_j, title=None):
     # a fitting colormap is RdYlGn
     diff_im = plt.imshow(
         rel_diff,
-        # vmin=min_val,
-        # vmax=0,
-        cmap="RdYlGn",
+        # vmin=1,
+        # vmax=np.max(rel_diff),
+        cmap="RdYlGn_r",
         # log-scale
-        norm=SymLogNorm(linthresh=0.03, linscale=0.03, vmin=np.min(rel_diff), vmax=0),
+        norm=LogNorm(
+            vmin=1,
+            # max_val is the maximum value of the relative difference, but not np.inf
+            vmax=np.max(rel_diff[~np.isinf(rel_diff)]),
+        ),
     )
-    axe.set_title(
-        f"{title} $\\frac{{d_{{{key_i}}}(i, j) - "
-        f"d_{{{key_j}}}(i, j)}}{{d_{{{key_i}}}(i, j)}}$"
-    )
+    axe.set_title(f"{title} $\\frac{{d_{{{key_j}}}(i, j)}}{{d_{{{key_i}}}(i, j)}}$")
     axe.set_xlabel("Node $j$")
     axe.set_ylabel("Node $i$")
     axe.set_aspect("equal")
@@ -378,3 +367,32 @@ def plot_relative_difference(metric, key_i, key_j, title=None):
     fig.colorbar(diff_im, ax=axe, fraction=0.046, pad=0.04)
 
     return fig, axe
+
+def plot_relative_increase_on_graph(graph, **pg_kwargs):
+    """Plot the relative increase edge wise from attribute `rel_increase`.
+
+    Use `:func:metric.measures.write_relative_increase_to_edges` to write the relative
+    increase to the edges.
+
+    Parameters
+    ----------
+    graph : networkx.Graph
+        The graph to plot the relative increase on, must have the attribute
+        `rel_increase` on the edges.
+    pg_kwargs : dict
+        Keyword arguments for the plot_graph function.
+
+    Returns
+    -------
+    fig, axes : matplotlib.figure.Figure, matplotlib.axes.Axes
+        The figure and axes of the plot.
+    """
+
+    return plot_by_attribute(
+        graph,
+        "rel_increase",
+        attr_types="numerical",
+        cmap="RdYlGn_r",
+        minmax_val=(1, np.max([edge["rel_increase"] for edge in graph.edges.values()])),
+        **pg_kwargs,
+    )

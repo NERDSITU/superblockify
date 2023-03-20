@@ -12,6 +12,7 @@ from .distances import (
 from .measures import (
     calculate_global_efficiency,
     calculate_directness,
+    write_relative_increase_to_edges,
 )
 
 logger = logging.getLogger("superblockify")
@@ -163,6 +164,10 @@ class Metric:
         }
 
         self.calculate_all_measure_sums()
+
+        write_relative_increase_to_edges(
+            partitioner.graph, self.distance_matrix, self.node_list, "N", "S"
+        )
 
         # self.coverage = self.calculate_coverage(partitioner)
         # logger.debug("Coverage: %s", self.coverage)
