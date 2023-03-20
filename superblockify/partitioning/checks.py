@@ -39,20 +39,33 @@ def is_valid_partitioning(partitioning):
     """
 
     # 1. Check if the sparsified graph is connected
+    logger.debug(
+        "Checking if the sparsified graph of %s is connected.", partitioning.name
+    )
     if not is_weakly_connected(partitioning.sparsified):
         logger.error("The sparsified graph of %s is not connected.", partitioning.name)
         return False
 
     # 2. Check if each subgraph is connected
+    logger.debug("Checking if each subgraph of %s is connected.", partitioning.name)
     if not components_are_connected(partitioning):
         return False
 
     # 3. - 5. For every node and edge in the graph, check if it is contained in exactly
     # one subgraph and not the sparsified graph
+    logger.debug(
+        "Checking if each node and edge of %s is contained in exactly one subgraph "
+        "and not the sparsified graph.",
+        partitioning.name,
+    )
     if not nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
         return False
 
     # 6. Check if each subgraph is connected to the sparsified graph
+    logger.debug(
+        "Checking if each subgraph of %s is connected to the sparsified graph.",
+        partitioning.name,
+    )
     if not components_are_connect_sparsified(partitioning):
         return False
 
