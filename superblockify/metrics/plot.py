@@ -4,6 +4,8 @@ from itertools import product
 import numpy as np
 from matplotlib import pyplot as plt
 
+from ..plot import plot_by_attribute
+
 
 def plot_distance_distributions(
     dist_matrix, dist_title, coords, coord_title, labels, distance_unit="km"
@@ -165,14 +167,7 @@ def plot_distance_matrices_pairwise_relative_difference(metric, name=None):
                 continue
             # Calculate the pairwise relative difference
             # Use np.inf if either value is np.inf or if the denominator is 0
-            rel_diff[key_i, key_j] = np.where(
-                (value_i == np.inf)
-                | (value_j == np.inf)
-                | (value_j == 0)
-                | (value_i == 0),
-                np.inf,
-                (value_i - value_j) / value_j,
-            )
+            rel_diff[key_i, key_j] = rel_increase(value_i, value_j)
             # Find the minimal value for the colorbar
             min_val = min(min_val, np.min(rel_diff[key_i, key_j]))
 
@@ -241,3 +236,90 @@ def plot_distance_matrices_pairwise_relative_difference(metric, name=None):
     )
 
     return fig, axes
+
+
+def rel_increase(value_i, value_j):
+    """Calculate the relative increase of matrix value_i and value_j.
+
+    Ignore np.inf values and 0 values in the denominator.
+    """
+    # Use double precision to avoid overflow
+    value_i = value_i.astype(np.float64)
+    value_j = value_j.astype(np.float64)
+    return np.where(
+        (value_i == np.inf) | (value_j == np.inf) | (value_j == 0) | (value_i == 0),
+        np.inf,
+        (value_i - value_j) / value_i,
+    )
+
+
+def plot_component_wise_travel_increase(
+    partitioner, distance_matrix, node_list, measure1, measure2, **pg_kwargs
+):
+    """Calculate and plot the component-wise travel increase.
+
+    For every component of the partitioner, calculate the relative travel increase.
+    This is the mean of the relative travel increase for all pairs of nodes in the
+    component. Relative travel increase is the percentual increase of the travel between
+    measure 1 and measure 2.
+
+    Mean of (d_2(i, j) - d_1(i, j)) / d_1(i, j) if i in the concerning component.
+
+    Parameters
+    ----------
+    partitioner : Partitioner
+        The partitioner to calculate the component-wise travel increase for.
+    distance_matrix : dict
+        The distance matrix to calculate the component-wise travel increase for.
+    node_list : list
+        The list of nodes the distance matrices are sorted by.
+    measure1 : str
+        The name of the first measure. Key for the distance matrix.
+    measure2 : str
+        The name of the second measure. Key for the distance matrix.
+    pg_kwargs : dict
+        Keyword arguments for the plot_graph function.
+
+    Returns
+    -------
+    fig, axes : matplotlib.figure.Figure, matplotlib.axes.Axes
+        The figure and axes of the plot.
+    """
+
+    partition_nodes = partitioner.get_partition_nodes()
+
+    rel_incr = rel_increase(distance_matrix[measure1], distance_matrix[measure2])
+
+    for component in partition_nodes:
+        # Calculate mean of the relative travel increase: Take all increases from inside
+        # the component to all other nodes and reverse. All rows and columns with
+        # Indices in the component
+        nodes_idx = [node_list.index(node) for node in component["subgraph"].nodes]
+        # column from nodes to all other nodes
+        col = rel_incr[:, nodes_idx]
+        # row from all other nodes to nodes
+        row = rel_incr[nodes_idx, :]
+        # Take the mean of the union where the values is not np.inf
+        rel_increase_component = np.mean(
+            np.union1d(
+                col[~np.isinf(col)],
+                row[~np.isinf(row)],
+            )
+        )
+        component["rel_increase"] = rel_increase_component
+        # Write this to the edges of the subgraph
+        for edge in component["subgraph"].edges:
+            partitioner.graph.edges[edge]["rel_increase"] = rel_increase_component
+
+    # Plot by attribute
+    return plot_by_attribute(
+        partitioner.graph,
+        "rel_increase",
+        attr_types="numerical",
+        cmap="RdYlGn",
+        minmax_val=(
+            np.min([component["rel_increase"] for component in partition_nodes]),
+            np.max([component["rel_increase"] for component in partition_nodes])
+        ),
+        **pg_kwargs
+    )

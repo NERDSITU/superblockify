@@ -17,6 +17,7 @@ from ..metrics import (
     plot_distance_matrices_pairwise_relative_difference,
 )
 from ..metrics.metric import Metric
+from ..metrics.plot import plot_component_wise_travel_increase
 from ..plot import save_plot
 from ..utils import load_graph_from_place
 
@@ -49,8 +50,7 @@ class BasePartitioner(ABC):
     >>> part = BasePartitioner(
     ...     name="Resistencia", search_str="Resistencia, Chaco, Argentina"
     ... )
-    >>> part.run()
-    >>> part.calculate_metrics(make_plots=True, num_workers=6)
+    >>> part.run(calculate_metrics=True, make_plots=True, num_workers=6)
 
     """
 
@@ -252,6 +252,19 @@ class BasePartitioner(ABC):
                 f"{self.name}_distance_matrices_pairwise_relative_difference.pdf",
             )
             fig.show()
+
+            fig, _ = plot_component_wise_travel_increase(
+                self,
+                self.metric.distance_matrix,
+                self.metric.node_list,
+                measure1="S",
+                measure2="N",
+            )
+            save_plot(
+                self.results_dir,
+                fig,
+                f"{self.name}_component_wise_travel_increase.pdf",
+            )
 
         logger.debug("Metrics for %s: %s", self.name, self.metric)
 
