@@ -168,6 +168,7 @@ def plot_distance_matrices_pairwise_relative_difference(metric, name=None):
                 continue
             # Calculate the pairwise relative difference
             # Use np.inf if either value is np.inf or if the denominator is 0
+            # pylint: disable=arguments-out-of-order
             rel_diff[key_j, key_i] = rel_increase(value_j, value_i)
             print(f"{key_i}{key_j}: {rel_diff[key_j, key_i]}")
             # Find the maximal value for the colorbar regarding the absolute value
@@ -367,6 +368,7 @@ def plot_relative_difference(metric, key_i, key_j, title=None):
     fig.colorbar(diff_im, ax=axe, fraction=0.046, pad=0.04)
 
     return fig, axe
+
 
 def plot_relative_increase_on_graph(graph, **pg_kwargs):
     """Plot the relative increase edge wise from attribute `rel_increase`.

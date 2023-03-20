@@ -185,15 +185,17 @@ def write_relative_increase_to_edges(
 
     rel_inc = rel_increase(distance_matrix[measure1], distance_matrix[measure2])
 
-    for u, v, k in graph.edges(keys=True):
+    for node1, node2, key in graph.edges(keys=True):
         # All distances to and from u and v
         rel_inc_uv = np.concatenate(
             (
-                rel_inc[node_list.index(u), :],
-                rel_inc[:, node_list.index(u)],
-                rel_inc[node_list.index(v), :],
-                rel_inc[:, node_list.index(v)],
+                rel_inc[node_list.index(node1), :],
+                rel_inc[:, node_list.index(node1)],
+                rel_inc[node_list.index(node2), :],
+                rel_inc[:, node_list.index(node2)],
             )
         )
         # Remove np.inf values and average the remaining values
-        graph.edges[u, v, k]["rel_increase"] = np.mean(rel_inc_uv[rel_inc_uv != np.inf])
+        graph.edges[node1, node2, key]["rel_increase"] = np.mean(
+            rel_inc_uv[rel_inc_uv != np.inf]
+        )
