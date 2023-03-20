@@ -3,6 +3,7 @@ from itertools import product
 
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.colors import SymLogNorm
 
 from ..plot import plot_by_attribute
 
@@ -162,8 +163,7 @@ def plot_distance_matrices_pairwise_relative_difference(metric, name=None):
     # For the lower triangle
     for i, (key_i, value_i) in enumerate(metric.distance_matrix.items()):
         for j, (key_j, value_j) in enumerate(metric.distance_matrix.items()):
-            # Only plot the lower triangle
-            if j <= i:
+            if f"{key_i}{key_j}" not in metric.directness.keys():
                 continue
             # Calculate the pairwise relative difference
             # Use np.inf if either value is np.inf or if the denominator is 0
@@ -195,11 +195,16 @@ def plot_distance_matrices_pairwise_relative_difference(metric, name=None):
             # The relative differences are all negative, the colormap will go from
             # min_val to 0, a fitting colormap is RdYlGn
             diff_im = axe.imshow(
-                rel_diff[key_j, key_i], vmin=min_val, vmax=0, cmap="RdYlGn"
+                rel_diff[key_j, key_i],
+                # vmin=min_val,
+                # vmax=0,
+                cmap="RdYlGn",
+                # log-scale
+                norm=SymLogNorm(linthresh=0.03, linscale=0.03, vmin=min_val, vmax=0),
             )
             axe.set_title(
-                f"$\\frac{{d_{{{key_j}}}(i, j) - "
-                f"d_{{{key_i}}}(i, j)}}{{d_{{{key_i}}}(i, j)}}$"
+                f"$\\frac{{d_{{{key_i}}}(i, j) - "
+                f"d_{{{key_j}}}(i, j)}}{{d_{{{key_i}}}(i, j)}}$"
             )
             axe.set_xlabel("Node $j$")
             axe.set_ylabel("Node $i$")
@@ -299,7 +304,7 @@ def plot_component_wise_travel_increase(
         col = rel_incr[:, nodes_idx]
         # row from all other nodes to nodes
         row = rel_incr[nodes_idx, :]
-        # Take the mean of the union where the values is not np.inf
+        # Take the mean of the union where the values are not np.inf
         rel_increase_component = np.mean(
             np.union1d(
                 col[~np.isinf(col)],
@@ -319,7 +324,57 @@ def plot_component_wise_travel_increase(
         cmap="RdYlGn",
         minmax_val=(
             np.min([component["rel_increase"] for component in partition_nodes]),
-            np.max([component["rel_increase"] for component in partition_nodes])
+            np.max([component["rel_increase"] for component in partition_nodes]),
         ),
-        **pg_kwargs
+        **pg_kwargs,
     )
+
+
+def plot_relative_difference(metric, key_i, key_j, title=None):
+    """Plot the relative difference between two distance matrices.
+
+    Parameters
+    ----------
+    metric : Metric
+        The metric to plot the relative difference for.
+    key_i : str
+        The key of the first distance matrix. This is the baseline.
+    key_j : str
+        The key of the second distance matrix. This is the comparison.
+    title : str, optional
+        The title of the plot.
+
+    Returns
+    -------
+    fig, axe : matplotlib.figure.Figure, matplotlib.axes.Axes
+        The figure and axe of the plot.
+    """
+    # Calculate the relative difference
+    rel_diff = rel_increase(
+        metric.distance_matrix[key_i], metric.distance_matrix[key_j]
+    )
+
+    # Plot the relative difference
+    fig, axe = plt.subplots(1, 1, figsize=(8, 8))
+    # The relative differences are all negative, the colormap will go from min_val to 0,
+    # a fitting colormap is RdYlGn
+    diff_im = plt.imshow(
+        rel_diff,
+        # vmin=min_val,
+        # vmax=0,
+        cmap="RdYlGn",
+        # log-scale
+        norm=SymLogNorm(linthresh=0.03, linscale=0.03, vmin=np.min(rel_diff), vmax=0),
+    )
+    axe.set_title(
+        f"{title} $\\frac{{d_{{{key_i}}}(i, j) - "
+        f"d_{{{key_j}}}(i, j)}}{{d_{{{key_i}}}(i, j)}}$"
+    )
+    axe.set_xlabel("Node $j$")
+    axe.set_ylabel("Node $i$")
+    axe.set_aspect("equal")
+
+    # Plot the two colorbar
+    fig.colorbar(diff_im, ax=axe, fraction=0.046, pad=0.04)
+
+    return fig, axe

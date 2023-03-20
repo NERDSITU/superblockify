@@ -17,7 +17,7 @@ from ..metrics import (
     plot_distance_matrices_pairwise_relative_difference,
 )
 from ..metrics.metric import Metric
-from ..metrics.plot import plot_component_wise_travel_increase
+from ..metrics.plot import plot_component_wise_travel_increase, plot_relative_difference
 from ..plot import save_plot
 from ..utils import load_graph_from_place
 
@@ -253,6 +253,16 @@ class BasePartitioner(ABC):
             )
             fig.show()
 
+            fig, _ = plot_relative_difference(
+                self.metric, "S", "N", title=f"{self.name} - {self.__class__.__name__}"
+            )
+            save_plot(
+                self.results_dir,
+                fig,
+                f"{self.name}_relative_difference_SN.pdf",
+            )
+            fig.show()
+
             fig, _ = plot_component_wise_travel_increase(
                 self,
                 self.metric.distance_matrix,
@@ -265,6 +275,7 @@ class BasePartitioner(ABC):
                 fig,
                 f"{self.name}_component_wise_travel_increase.pdf",
             )
+            fig.show()
 
         logger.debug("Metrics for %s: %s", self.name, self.metric)
 
