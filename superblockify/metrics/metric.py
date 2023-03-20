@@ -93,6 +93,7 @@ class Metric:
 
         self.distance_matrix = None
         self.weight = None
+        self.node_list = None
 
     def calculate_all(
         self,
@@ -128,12 +129,12 @@ class Metric:
         # Set weight attribute
         self.weight = weight
 
-        node_list = partitioner.get_sorted_node_list()
+        self.node_list = partitioner.get_sorted_node_list()
 
         # Euclidean distances (E)
         dist_euclidean = calculate_euclidean_distance_matrix_projected(
             partitioner.graph,
-            node_order=node_list,
+            node_order=self.node_list,
             plot_distributions=make_plots,
         )
 
@@ -141,7 +142,7 @@ class Metric:
         dist_full_graph = calculate_distance_matrix(
             partitioner.graph,
             weight="length",
-            node_order=node_list,
+            node_order=self.node_list,
             plot_distributions=make_plots,
         )
 
@@ -149,7 +150,7 @@ class Metric:
         dist_partitioning_graph = calculate_partitioning_distance_matrix(
             partitioner,
             weight="length",
-            node_order=node_list,
+            node_order=self.node_list,
             num_workers=num_workers,
             chunk_size=chunk_size,
             plot_distributions=make_plots,
