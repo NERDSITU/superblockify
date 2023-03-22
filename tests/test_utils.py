@@ -4,7 +4,11 @@ from configparser import ConfigParser
 import pytest
 from numpy import array, array_equal
 
-from superblockify.utils import load_graph_from_place, has_pairwise_overlap
+from superblockify.utils import (
+    load_graph_from_place,
+    has_pairwise_overlap,
+    compare_dicts,
+)
 
 config = ConfigParser()
 config.read("config.ini")
@@ -107,3 +111,59 @@ def test__has_pairwise_overlap_exception(lists):
     with pytest.raises(ValueError):
         # pylint: disable=protected-access
         has_pairwise_overlap(lists)
+
+
+@pytest.mark.parametrize(
+    "dict1,dict2,expected",
+    [
+        ({}, {}, True),
+        ({}, {"a": 1}, False),  # missing key
+        ({"a": 1}, {}, False),  # missing key
+        ({"a": 1}, {"a": 1}, True),
+        ({"a": 1}, {"a": 2}, False),  # different value
+        ({"a": 1}, {"b": 1}, False),  # different key
+        ({"a": 1, "b": 2}, {"a": 1, "b": 2}, True),
+        ({"a": 1, "b": 2}, {"a": 1, "b": 3}, False),  # different value
+        ({"a": 1, "b": 2}, {"a": 1, "c": 2}, False),  # different key
+        ({"a": 1, "b": 2}, {"a": 1, "b": 2, "c": 3}, False),  # missing key
+        ({"a": 1, "b": 2, "c": 3}, {"a": 1, "b": 2}, False),  # missing key
+        ({(1, 2): 1}, {(1, 2): 1}, True),
+        ({(1, 2): 1}, {(1, 2): 2}, False),  # different value
+        ({"a": array([1, 2])}, {"a": array([1, 2])}, True),
+        ({"a": array([1, 2])}, {"a": array([1, 3])}, False),  # different value
+        ({"a": array([])}, {"a": array([])}, True),
+        ({"a": array([])}, {"a": array([1])}, False),  # different value
+        ({"a": array([1])}, {"a": [1]}, False),  # different type
+        ({"a": array([[1, 2], [3, 4]])}, {"a": array([[1, 2], [3, 4]])}, True),
+        ({"a": array([[1, 2], [3, 4]])}, {"a": array([[1, 2], [3, 5]])}, False),
+        ({"a": array([[1, 2], [3, 4]])}, {"a": array([[1, 2], [3, 4], [5, 6]])}, False),
+        # differing types
+        ({}, None, False),  # None
+        ({}, set(), False),  # set
+        ({}, [], False),  # list
+        ({}, array([]), False),  # ndarray
+        ({}, array([[]]), False),  # ndarray
+        ({}, tuple(), False),  # tuple
+        # nested dicts
+        ({"a": {"b": 1}}, {"a": {"b": 1}}, True),
+        ({"a": {"b": 1}}, {"a": {"b": 2}}, False),
+        (
+            {"a": {"a": [1]}, "b": {"b": array([1])}},
+            {"a": {"a": [1]}, "b": {"b": array([1])}},
+            True,
+        ),
+        (
+            {"a": {"a": [1]}, "b": {"b": array([1])}, "c": {"c": 1}},
+            {"a": {"a": [1]}, "b": {"b": array([1])}},
+            False,
+        ),
+        (
+            {"a": {"a": {"a": {"a": array([1])}}}},
+            {"a": {"a": {"a": {"a": array([1])}}}},
+            True,
+        ),
+    ],
+)
+def test_compare_dicts(dict1, dict2, expected):
+    """Test `compare_dicts`."""
+    assert compare_dicts(dict1, dict2) == expected

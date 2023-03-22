@@ -4,7 +4,7 @@ from itertools import chain
 
 import osmnx as ox
 from networkx import Graph, is_isomorphic
-from numpy import zeros, array, fill_diagonal
+from numpy import zeros, array, fill_diagonal, ndarray, array_equal
 
 
 def extract_attributes(graph, edge_attributes, node_attributes):
@@ -170,3 +170,38 @@ def has_pairwise_overlap(lists):
     has_overlap |= overlaps > 0
 
     return has_overlap
+
+
+def compare_dicts(dict1, dict2):
+    """Compare two dictionaries recursively.
+
+    Function to recursively compare nested dicts that might contain numpy arrays.
+
+    Parameters
+    ----------
+    dict1 : dict
+        The first dictionary to compare.
+    dict2 : dict
+        The second dictionary to compare.
+
+    Returns
+    -------
+    bool
+        True if the dictionaries are equal, False otherwise.
+    """
+
+    if type(dict1).__name__ != type(dict2).__name__:
+        return False
+
+    if isinstance(dict1, dict):
+        if dict1.keys() != dict2.keys():
+            return False
+        for key in dict1.keys():
+            if not compare_dicts(dict1[key], dict2[key]):
+                return False
+        return True
+
+    if isinstance(dict1, ndarray):
+        return array_equal(dict1, dict2)
+
+    return dict1 == dict2

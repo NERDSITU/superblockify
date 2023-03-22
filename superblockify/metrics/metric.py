@@ -14,6 +14,7 @@ from .measures import (
     calculate_directness,
     write_relative_increase_to_edges,
 )
+from ..utils import compare_dicts
 
 logger = logging.getLogger("superblockify")
 
@@ -230,7 +231,7 @@ class Metric:
         Tests the equality of the attributes of the objects.
         Used in input-output tests.
         """
-        return self.__dict__ == other.__dict__
+        return compare_dicts(self.__dict__, other.__dict__)
 
     def save(self, name):
         """Save the metric to a file.
