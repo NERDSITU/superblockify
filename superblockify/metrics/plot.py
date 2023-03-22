@@ -170,7 +170,6 @@ def plot_distance_matrices_pairwise_relative_difference(metric, name=None):
             # Use np.inf if either value is np.inf or if the denominator is 0
             # pylint: disable=arguments-out-of-order
             rel_diff[key_j, key_i] = rel_increase(value_j, value_i)
-            print(f"{key_i}{key_j}: {rel_diff[key_j, key_i]}")
             # Find the maximal value for the colorbar regarding the absolute value
             # (ignoring np.inf)
             max_val_rel = max(
