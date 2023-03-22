@@ -52,6 +52,5 @@ class DummyPartitioner(BasePartitioner):
         # For tests where the partitioner only uses partitions, not components
         self.components = None
 
-
         if make_plots:
             self.plot_component_graph()
