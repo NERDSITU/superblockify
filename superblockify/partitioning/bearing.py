@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 from matplotlib import cm
+from networkx import weakly_connected_components
 from scipy.signal import find_peaks
 
 from superblockify import attribute
@@ -112,7 +113,7 @@ class BearingPartitioner(BasePartitioner):
                 group_bearing[edge] = self._inter_vals["center_values"][i - 1]
         nx.set_edge_attributes(self.graph, group_bearing, self.attribute_label)
 
-        # Write partiton dict
+        # Write partition dict
         self.partitions = [
             {
                 "name": str(self._inter_vals["boundaries"][i : i + 2]),
@@ -122,11 +123,25 @@ class BearingPartitioner(BasePartitioner):
             if center_val is not None
         ]
 
-        # Make subgraphs for each partitions
+        # Make subgraphs for each partition
+        # Overwrite `self.attribute_label` so residential edges are not added to
+        # subgraphs.
+        for node1, node2, key in self.graph.edges(keys=True):
+            # check if edge is in self.residential_graph
+            if (node1, node2) not in self.residential_graph.edges:
+                self.graph.edges[node1, node2, key][self.attribute_label] = None
+
         self.make_subgraphs_from_attribute(
             split_disconnected=True,
             min_edge_count=min_edge_count,
             min_length=min_length,
+        )
+
+        # Make sparsified graph
+        self.set_sparsified_from_components()
+        # Produces graph that may be not connected, so we only take the LCC.
+        self.sparsified = self.graph.subgraph(
+            max(weakly_connected_components(self.sparsified), key=len)
         )
 
         if make_plots:
@@ -135,6 +150,9 @@ class BearingPartitioner(BasePartitioner):
             plt.show()
             fig, _ = self.plot_partition_graph()
             save_plot(self.results_dir, fig, f"{self.name}_partition_graph.pdf")
+            plt.show()
+            fig, _ = self.plot_component_graph()
+            save_plot(self.results_dir, fig, f"{self.name}_component_graph.pdf")
             plt.show()
 
     def __bin_bearings(self, num_bins: int):

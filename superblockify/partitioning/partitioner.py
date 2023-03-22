@@ -367,18 +367,23 @@ class BasePartitioner(ABC):
                 found_disconnected = True
                 # Add partitions for each connected component
                 for i, component in enumerate(connected_components):
+                    attribute_edge_subgraph = self.graph.edge_subgraph(
+                        (u, v, k)
+                        for u, v, k, d in self.graph.subgraph(component).edges(
+                            data=True, keys=True
+                        )
+                        if d.get(self.attribute_label) == part["value"]
+                    )
                     self.components.append(
                         {
                             "name": f"{part['name']}_component_{i}",
                             "value": part["value"],
-                            "subgraph": self.graph.subgraph(component),
-                            "num_edges": len(self.graph.subgraph(component).edges),
-                            "num_nodes": len(self.graph.subgraph(component).nodes),
+                            "subgraph": attribute_edge_subgraph,
+                            "num_edges": len(attribute_edge_subgraph.edges),
+                            "num_nodes": len(attribute_edge_subgraph.nodes),
                             "length_total": sum(
                                 d["length"]
-                                for u, v, d in self.graph.subgraph(component).edges(
-                                    data=True
-                                )
+                                for u, v, d in attribute_edge_subgraph.edges(data=True)
                             ),
                         }
                     )
