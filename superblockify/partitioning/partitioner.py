@@ -6,9 +6,8 @@ from configparser import ConfigParser
 from os import path, makedirs
 from typing import final, Final, List
 
-import networkx as nx
 import osmnx as ox
-from networkx import weakly_connected_components
+from networkx import weakly_connected_components, set_edge_attributes, MultiDiGraph
 from numpy import linspace
 from osmnx.stats import edge_length_total
 
@@ -365,7 +364,7 @@ class BasePartitioner(ABC):
 
         for part in self.partitions:
             # Split disconnected components
-            connected_components = nx.weakly_connected_components(part["subgraph"])
+            connected_components = weakly_connected_components(part["subgraph"])
             # Make list of generator of connected components
             connected_components = list(connected_components)
             logger.debug(
@@ -542,7 +541,7 @@ class BasePartitioner(ABC):
         if self.components:
             for component in self.components:
                 if component["ignore"]:
-                    nx.set_edge_attributes(
+                    set_edge_attributes(
                         component["subgraph"], attribute_value, attribute_name
                     )
 
@@ -718,7 +717,7 @@ class BasePartitioner(ABC):
         # Bake component labels into graph
         for component in self.components:
             if not component["ignore"]:
-                nx.set_edge_attributes(
+                set_edge_attributes(
                     component["subgraph"],
                     component["name"],
                     "component_name",
@@ -914,17 +913,13 @@ class BasePartitioner(ABC):
             # Convert subgraph views to MultiDiGraphs for pickling, if they exist
             if self.partitions is not None:
                 for i, partition in enumerate(self.partitions):
-                    self.partitions[i]["subgraph"] = nx.MultiDiGraph(
-                        partition["subgraph"]
-                    )
+                    self.partitions[i]["subgraph"] = MultiDiGraph(partition["subgraph"])
             if self.components is not None:
                 for i, component in enumerate(self.components):
-                    self.components[i]["subgraph"] = nx.MultiDiGraph(
-                        component["subgraph"]
-                    )
+                    self.components[i]["subgraph"] = MultiDiGraph(component["subgraph"])
             # Convert self.sparsified to MultiDiGraph for pickling
             if self.sparsified is not None:
-                self.sparsified = nx.MultiDiGraph(self.sparsified)
+                self.sparsified = MultiDiGraph(self.sparsified)
             # Remove graph from partitioner
             graph = self.graph
             self.graph = None
