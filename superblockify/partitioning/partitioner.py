@@ -8,7 +8,9 @@ from typing import final, Final, List
 
 import networkx as nx
 import osmnx as ox
+from networkx import weakly_connected_components
 from numpy import linspace
+from osmnx.stats import edge_length_total
 
 from .checks import is_valid_partitioning
 from .. import attribute, plot
@@ -58,7 +60,7 @@ class BasePartitioner(ABC):
 
     """
 
-    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes, too-many-lines
 
     def __init__(
         self,
@@ -404,6 +406,52 @@ class BasePartitioner(ABC):
                 attribute_name=self.attribute_label, attribute_value=None
             )
 
+    def set_components_from_sparsified(self):
+        """Set components from sparsified graph.
+
+        Method for child classes to set the components from the sparsified graph.
+        The components are the connected components of the rest graph without the
+        sparsified subgraph.
+        The components are set to `self.components`, also overwriting the
+        `self.partitions` attribute.
+        """
+
+        # Find difference, edgewise, between the graph and the sparsified subgraph
+        rest = self.graph.edge_subgraph(
+            [
+                (u, v, k)
+                for u, v, k, d in self.graph.edges(keys=True, data=True)
+                if (u, v, k) not in self.sparsified.edges(keys=True)
+            ]
+        )
+        wc_components = list(weakly_connected_components(rest))
+
+        self.attr_value_minmax = (0, len(wc_components))
+        self.partitions = []
+        for i, component in enumerate(wc_components):
+            # Find edges that are connected to the component nodes, but not sparsified
+            subgraph = self.graph.edge_subgraph(
+                [
+                    (u, v, k)
+                    for u, v, k in rest.edges(keys=True)
+                    if u in component or v in component
+                ]
+            )
+            self.partitions.append(
+                {
+                    "name": f"residential_{i}",
+                    "value": i,
+                    "subgraph": subgraph,
+                    "num_edges": subgraph.number_of_edges(),
+                    "num_nodes": subgraph.number_of_nodes(),
+                    "length_total": edge_length_total(subgraph),
+                }
+            )
+
+        self.components = self.partitions
+        for component in self.components:
+            component["ignore"] = False
+
     def set_sparsified_from_components(self):
         """Set sparsified graph from components.
 
@@ -411,10 +459,10 @@ class BasePartitioner(ABC):
         The sparsified graph is the graph with all edges that are not in the
         components. The sparsified graph is set to `self.sparsified`.
         """
-        # list of edges in partitions
+        # list of edges in partitions, use components if not None, else partitions
         edges_in_partitions = {
             edge
-            for component in self.components
+            for component in (self.components if self.components else self.partitions)
             for edge in component["subgraph"].edges(keys=True)
         }
         self.sparsified = self.graph.edge_subgraph(

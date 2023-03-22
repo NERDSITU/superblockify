@@ -90,7 +90,9 @@ def components_are_connected(partitioning):
     """
     found = True
 
-    for component in partitioning.components:
+    for component in (
+        partitioning.components if partitioning.components else partitioning.partitions
+    ):
         if not is_weakly_connected(component["subgraph"]):
             logger.error(
                 "The subgraph %s of %s is not connected.",
@@ -169,7 +171,11 @@ def nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
 
     for edge in partitioning.graph.edges:
         num_contained = 0
-        for component in partitioning.components:
+        for component in (
+            partitioning.components
+            if partitioning.components
+            else partitioning.partitions
+        ):
             if edge in component["subgraph"].edges:
                 num_contained += 1
         if edge in partitioning.sparsified.edges:
@@ -201,7 +207,9 @@ def components_are_connect_sparsified(partitioning):
         Whether each subgraph is connected to the sparsified graph
     """
 
-    for component in partitioning.components:
+    for component in (
+        partitioning.components if partitioning.components else partitioning.partitions
+    ):
         # subgraph and sparsified graph are connected if there is at least one node
         # that is contained in both
         if not any(

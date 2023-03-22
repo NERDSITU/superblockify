@@ -3,10 +3,8 @@ import logging
 
 import matplotlib.pyplot as plt
 from networkx import (
-    weakly_connected_components,
     strongly_connected_components,
 )
-from osmnx.stats import edge_length_total
 
 from .partitioner import BasePartitioner
 from ..attribute import (
@@ -72,60 +70,12 @@ class ResidentialPartitioner(BasePartitioner):
         # Construct subgraph of nodes in the largest weakly connected component
         self.sparsified = self.graph.subgraph(self.sparsified)
 
-        # if make_plots:
-        #     # Make plot of the sparsified subgraph
-        #     fig, _ =
-
-        # Find difference, edgewise, between the graph and the sparsified subgraph
-        rest = self.graph.edge_subgraph(
-            [
-                (u, v, k)
-                for u, v, k, d in self.graph.edges(keys=True, data=True)
-                if (u, v, k) not in self.sparsified.edges(keys=True)
-            ]
-        )
-        wc_components = list(weakly_connected_components(rest))
-
-        self.attr_value_minmax = (0, len(wc_components))
-        self.partitions = []
-        for i, component in enumerate(wc_components):
-            # Find edges that are connected to the component nodes, but not sparsified
-            subgraph = self.graph.edge_subgraph(
-                [
-                    (u, v, k)
-                    for u, v, k in rest.edges(keys=True)
-                    if u in component or v in component
-                ]
-            )
-            self.partitions.append(
-                {
-                    "name": f"residential_{i}",
-                    "value": i,
-                    "subgraph": subgraph,
-                    "num_edges": subgraph.number_of_edges(),
-                    "num_nodes": subgraph.number_of_nodes(),
-                    "length_total": edge_length_total(subgraph),
-                }
-            )
+        self.set_components_from_sparsified()
 
         if make_plots:
             fig, _ = self.plot_partition_graph()
             save_plot(self.results_dir, fig, f"{self.name}_partition_graph.pdf")
             plt.show()
-
-        self.components = self.partitions
-        for component in self.components:
-            component["ignore"] = False
-            #     (
-            #     component["num_edges"] < min_edge_count
-            #     or component["length_total"] < min_length
-            # )
-
-        logger.debug(
-            "Found %d components, %d of which are considered.",
-            len(self.components),
-            len([c for c in self.components if not c["ignore"]]),
-        )
 
         if make_plots:
             fig, _ = self.plot_subgraph_component_size("length")
