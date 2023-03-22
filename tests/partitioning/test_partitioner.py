@@ -1,4 +1,5 @@
 """Tests for the partitioner module."""
+import logging
 from configparser import ConfigParser
 from os import path, remove
 
@@ -10,6 +11,8 @@ from osmnx import load_graphml
 
 from superblockify.partitioning import BasePartitioner
 from superblockify.utils import compare_components_and_partitions
+
+logger = logging.getLogger("superblockify")
 
 config = ConfigParser()
 config.read("config.ini")
@@ -39,36 +42,24 @@ class TestBasePartitioner:
 class TestPartitioners:
     """Standard tests all classes of BasePartitioner need to suffice."""
 
-    def test_run(self, test_city_all, partitioner_class):
+    def test_run(self, test_city_all_precalculated):
         """Test run/partitioning method by design."""
-        city_name, graph = test_city_all
-        part = partitioner_class(
-            name=city_name + "_test", city_name=city_name, graph=graph
-        )
-        part.run()
+        part = test_city_all_precalculated
         assert part.graph is not None
         assert part.attribute_label is not None
         assert part.partitions is not None
 
-    def test_plot_partition_graph(self, test_city_all, partitioner_class):
+    def test_plot_partition_graph(self, test_city_small_precalculated):
         """Test `plot_partition_graph` by design."""
-        city_name, graph = test_city_all
-        part = partitioner_class(
-            name=city_name + "_test", city_name=city_name, graph=graph
-        )
-        part.run(show_analysis_plots=True)
+        part = test_city_small_precalculated
         fig, axe = part.plot_partition_graph()
         assert isinstance(fig, Figure)
         assert isinstance(axe, Axes)
         plt.close("all")
 
-    def test_plot_component_graph(self, test_city_all, partitioner_class):
+    def test_plot_component_graph(self, test_city_all_precalculated):
         """Test `plot_component_graph` by design."""
-        city_name, graph = test_city_all
-        part = partitioner_class(
-            name=city_name + "_test", city_name=city_name, graph=graph
-        )
-        part.run(show_analysis_plots=False)
+        part = test_city_all_precalculated
         if part.components is not None:
             fig, axe = part.plot_component_graph()
             assert isinstance(fig, Figure)
