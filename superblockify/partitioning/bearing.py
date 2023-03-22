@@ -40,7 +40,7 @@ class BearingPartitioner(BasePartitioner):
         )
 
     def partition_graph(
-        self, make_plots=False, min_length=1500, min_edge_count=5, **kwargs
+        self, make_plots=False, min_length=500, min_edge_count=5, **kwargs
     ):
         """Group by prominent bearing directions.
 
