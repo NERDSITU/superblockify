@@ -101,7 +101,7 @@ class BasePartitioner(ABC):
         ValueError
             If city_name is not a string or empty.
         KeyError
-            If search_str is an empty list.
+            If search_str is given, it must be a string or list of non-empty strings.
 
         Notes
         -----
@@ -113,6 +113,18 @@ class BasePartitioner(ABC):
             raise ValueError("Name must be a non-empty string.")
         if not isinstance(city_name, str) or city_name == "":
             raise ValueError("City name must be a non-empty string.")
+        if not (
+            search_str is None
+            or (isinstance(search_str, str) and search_str != "")
+            or (
+                isinstance(search_str, list)
+                and all(isinstance(s, str) and s != "" for s in search_str)
+                and search_str != []
+            )
+        ):
+            raise KeyError(
+                "Search_str must be a non-empty string or a list of non-empty strings."
+            )
 
         # First check weather a graph is found under GRAPH_DIR/city_name.graphml
         graph_path = path.join(GRAPH_DIR, f"{city_name}.graphml")
