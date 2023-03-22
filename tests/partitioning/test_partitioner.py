@@ -13,9 +13,6 @@ from superblockify.utils import compare_components_and_partitions
 
 config = ConfigParser()
 config.read("config.ini")
-TEST_DATA = config["tests"]["test_data_path"]
-GRAPH_DIR = config["general"]["graph_dir"]
-RESULTS_DIR = config["general"]["results_dir"]
 
 
 class TestBasePartitioner:
@@ -183,7 +180,11 @@ class TestPartitioners:
                 "Adliswil_tmp_name",
                 "Adliswil_tmp",
                 None,
-                load_graphml(path.join(TEST_DATA, "cities", "Adliswil.graphml")),
+                load_graphml(
+                    path.join(
+                        config["tests"]["test_data_path"], "cities", "Adliswil.graphml"
+                    )
+                ),
                 False,
             ),
             (
@@ -275,11 +276,15 @@ class TestPartitioners:
         part.save(save_graph_copy)
         if delete_before_load:
             # Delete graph at GRAPH_DIR/Adliswil_tmp_save_load.graphml
-            remove(path.join(GRAPH_DIR, "Adliswil_tmp_save_load.graphml"))
+            remove(
+                path.join(
+                    config["general"]["graph_dir"], "Adliswil_tmp_save_load.graphml"
+                )
+            )
             # Delete metrics at GRAPH_DIR/Adliswil_tmp_save_load.metric
             remove(
                 path.join(
-                    RESULTS_DIR,
+                    config["general"]["results_dir"],
                     "Adliswil_tmp_save_load_name",
                     "Adliswil_tmp_save_load_name.metrics",
                 )

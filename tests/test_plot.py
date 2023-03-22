@@ -14,7 +14,6 @@ from superblockify.plot import (
 
 config = ConfigParser()
 config.read("config.ini")
-TEST_DATA = config["tests"]["test_data_path"]
 
 
 @pytest.mark.parametrize("e_l,n_a", [(0.5, 0.5), (1, 0)])
@@ -27,7 +26,7 @@ def test_paint_streets(test_city_all, e_l, n_a, save):
         edge_linewidth=e_l,
         node_alpha=n_a,
         save=save,
-        filepath=f"{TEST_DATA}output/{city_path}.pdf",
+        filepath=f"{config['tests']['test_data_path']}output/{city_path}.pdf",
     )
     plt.close()
 

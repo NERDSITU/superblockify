@@ -15,9 +15,7 @@ from superblockify.partitioning import BasePartitioner
 config = ConfigParser()
 config.read("config.ini")
 TEST_DATA = config["tests"]["test_data_path"]
-GRAPH_DIR = config["general"]["graph_dir"]
 RESULTS_DIR = config["general"]["results_dir"]
-PLACES_SMALL = literal_eval(config["tests"]["places_small"])
 
 
 @pytest.fixture(
@@ -38,7 +36,11 @@ def test_city_all(request):
     params=[
         city
         for city in listdir(f"{TEST_DATA}cities/")
-        if city in [city[0] + ".graphml" for city in PLACES_SMALL]
+        if city
+        in [
+            city[0] + ".graphml"
+            for city in literal_eval(config["tests"]["places_small"])
+        ]
     ]
 )
 def test_city_small(request):
@@ -68,7 +70,7 @@ def _teardown_test_graph_io():
     yield None
     work_cities = ["Adliswil_tmp", "Adliswil_tmp_save_load"]
     for city in work_cities:
-        test_graph = path.join(GRAPH_DIR, city + ".graphml")
+        test_graph = path.join(config["general"]["graph_dir"], city + ".graphml")
         if path.exists(test_graph):
             remove(test_graph)
         results_dir = path.join(RESULTS_DIR, city + "_name")

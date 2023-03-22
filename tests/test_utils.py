@@ -8,14 +8,13 @@ from superblockify.utils import load_graph_from_place, has_pairwise_overlap
 
 config = ConfigParser()
 config.read("config.ini")
-TEST_DATA = config["tests"]["test_data_path"]
 
 
 def test_load_graph_from_place():
     """Test that the load_graph_from_place function works."""
 
     graph = load_graph_from_place(
-        f"{TEST_DATA}/cities/Adliswil.graphml",
+        f"{config['tests']['test_data_path']}/cities/Adliswil.graphml",
         "Adliswil, Bezirk Horgen, Zürich, Switzerland",
         network_type="drive",
     )
