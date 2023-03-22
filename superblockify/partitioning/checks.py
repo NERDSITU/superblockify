@@ -1,11 +1,14 @@
 """Checks for the partitioning module."""
 
 import logging
+from itertools import chain
 
 from networkx import is_weakly_connected
+from numpy import argwhere, fill_diagonal
 from osmnx import plot_graph
 
 from ..plot import plot_by_attribute
+from ..utils import has_pairwise_overlap
 
 logger = logging.getLogger("superblockify")
 
@@ -58,9 +61,8 @@ def is_valid_partitioning(partitioning):
         "and not the sparsified graph.",
         partitioning.name,
     )
-    # Needs to be optimized:
-    # if not nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
-    #     return False
+    if not nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
+        return False
 
     # 6. Check if each subgraph is connected to the sparsified graph
     logger.debug(
@@ -123,6 +125,7 @@ def nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
     """Check if each node and edge is contained in exactly one subgraph.
 
     Edges can also be contained in the sparsified graph.
+    Use :func:`superblockify.utils.has_pairwise_overlap` to check subgraphs overlap.
 
     Parameters
     ----------
@@ -135,60 +138,98 @@ def nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
         Whether each node and edge is contained in exactly one subgraph.
     """
 
-    duplicate_nodes = set()
+    partition_nodes_subgraphs = partitioning.get_partition_nodes()
 
-    for node in partitioning.graph.nodes:
-        num_contained = 0
-        for part in partitioning.get_partition_nodes():
-            if node in part["nodes"]:
-                num_contained += 1
-        if node in partitioning.sparsified.nodes:
-            num_contained += 1
-        if num_contained != 1:
-            duplicate_nodes.add(node)
-            logger.error(
-                "The node %s of %s is contained in %d subgraphs. It should be "
-                "contained in exactly one subgraph or the sparsified graph.",
-                node,
-                partitioning.name,
-                num_contained,
-            )
+    # Check overlap of nodes
+    nodes_overlap_matrix = has_pairwise_overlap(
+        [list(part["nodes"]) for part in partition_nodes_subgraphs]
+    )
+    fill_diagonal(nodes_overlap_matrix, False)
+    if nodes_overlap_matrix.any():
+        logger.error(
+            "The nodes of %s overlap in the following subgraphs: %s",
+            partitioning.name,
+            [
+                f"{partition_nodes_subgraphs[i]['name']} and "
+                f"{partition_nodes_subgraphs[j]['name']}"
+                for i, j in argwhere(nodes_overlap_matrix)
+                # only lower triangle, because matrix is symmetric
+                if i < j
+            ],
+        )
+        return False
 
-    # Plot graph with marked duplicate nodes
-    if len(duplicate_nodes) > 0:
-        # Write to attribute 'duplicate' 1 if node is in duplicate_nodes, 0 otherwise
+    # Nodes that are in no subgraph, neither the sparsified graph
+    missing_nodes = (
+        set(partitioning.graph.nodes)
+        - set(
+            # flattened set of all nodes in all subgraphs
+            chain.from_iterable(part["nodes"] for part in partition_nodes_subgraphs)
+        )
+        - set(partitioning.sparsified.nodes)
+    )
+    if len(missing_nodes) > 0:
+        logger.error(
+            "%s has %d nodes that are not contained in any subgraph or the "
+            "sparsified graph: %s",
+            partitioning.name,
+            len(missing_nodes),
+            missing_nodes,
+        )
+        # Write to attribute 'missing_nodes' 1 if node is in missing_nodes, 0 otherwise
         for node in partitioning.graph.nodes:
-            partitioning.graph.nodes[node]["duplicate_node"] = node in duplicate_nodes
+            partitioning.graph.nodes[node]["missing_nodes"] = node in missing_nodes
         plot_graph(
             partitioning.graph,
             node_color=[
-                "red" if partitioning.graph.nodes[node]["duplicate_node"] else "none"
+                "red" if partitioning.graph.nodes[node]["missing_nodes"] else "none"
                 for node in partitioning.graph.nodes
             ],
             bgcolor="none",
         )
         return False
 
-    for edge in partitioning.graph.edges:
-        num_contained = 0
-        for component in (
-            partitioning.components
-            if partitioning.components
-            else partitioning.partitions
-        ):
-            if edge in component["subgraph"].edges:
-                num_contained += 1
-        if edge in partitioning.sparsified.edges:
-            num_contained += 1
-        if num_contained != 1:
-            logger.error(
-                "The edge %s of %s is contained in %d subgraphs. It should be "
-                "contained in exactly one subgraph or the sparsified graph.",
-                edge,
-                partitioning.name,
-                num_contained,
+    # Check overlap of edges, including sparsified graph
+    edges_overlap_matrix = has_pairwise_overlap(
+        [list(part["subgraph"].edges) for part in partition_nodes_subgraphs]
+        + [list(partitioning.sparsified.edges)]
+    )
+    fill_diagonal(edges_overlap_matrix, False)
+    if edges_overlap_matrix.any():
+        namelist = [part["name"] for part in partition_nodes_subgraphs] + ["sparse"]
+
+        logger.error(
+            "The edges of %s overlap in the following subgraphs: %s",
+            partitioning.name,
+            [
+                f"{namelist[i]} and {namelist[j]}"
+                for i, j in argwhere(edges_overlap_matrix)
+                # only lower triangle, because matrix is symmetric
+                if i < j
+            ],
+        )
+        return False
+
+    # Edges that are in no subgraph, neither the sparsified graph
+    missing_edges = (
+        set(partitioning.graph.edges)
+        - set(
+            # flattened set of all edges in all subgraphs
+            chain.from_iterable(
+                part["subgraph"].edges for part in partition_nodes_subgraphs
             )
-            return False
+        )
+        - set(partitioning.sparsified.edges)
+    )
+    if len(missing_edges) > 0:
+        logger.error(
+            "%s has %d edges that are not contained in any subgraph or the "
+            "sparsified graph: %s",
+            partitioning.name,
+            len(missing_edges),
+            missing_edges,
+        )
+        return False
 
     return True
 
