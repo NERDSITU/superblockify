@@ -72,7 +72,7 @@ def test_city_all_preloaded_save(
     length test_data. Without metrics. Shared across all tests."""
     city_name, graph = test_city_all
     part = partitioner_class(
-        name=city_name + "_preloaded_test", city_name=city_name, graph=graph
+        name=city_name + "_preloaded_test", city_name=city_name, graph=graph.copy()
     )
     part.save(save_graph_copy=True)
     return part.name, part.__class__
@@ -94,7 +94,7 @@ def test_city_all_precalculated_save(
     length test_data. Without metrics. Shared across all tests."""
     city_name, graph = test_city_all
     part = partitioner_class(
-        name=city_name + "_precalculated_test", city_name=city_name, graph=graph
+        name=city_name + "_precalculated_test", city_name=city_name, graph=graph.copy()
     )
     part.run(calculate_metrics=False)
     part.save(save_graph_copy=True)
@@ -114,7 +114,9 @@ def test_city_small_precalculated(test_city_small, partitioner_class):
     """Fixture for loading and parametrizing small cities with bearing and length
     test_data. Without metrics."""
     city_name, graph = test_city_small
-    part = partitioner_class(name=city_name + "_test", city_name=city_name, graph=graph)
+    part = partitioner_class(
+        name=city_name + "_test", city_name=city_name, graph=graph.copy()
+    )
     part.run(calculate_metrics=False)
     return part
 

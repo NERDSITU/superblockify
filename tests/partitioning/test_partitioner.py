@@ -133,7 +133,7 @@ class TestPartitioners:
         self, test_city_small_precalculated
     ):
         """Test `overwrite_attributes_of_ignored_components` exception handling."""
-        part = test_city_small_precalculated
+        part = test_city_small_precalculated.copy()
         part.components = None
         with pytest.raises(AssertionError):
             part.overwrite_attributes_of_ignored_components(
