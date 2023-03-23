@@ -22,7 +22,7 @@ def test_paint_streets(test_city_all, e_l, n_a, save):
     """Test `paint_streets` by design."""
     city_path, graph = test_city_all
     paint_streets(
-        graph,
+        graph.copy(),
         edge_linewidth=e_l,
         node_alpha=n_a,
         save=save,
@@ -48,6 +48,8 @@ def test_paint_streets_empty_plot(test_city_all):
 def test_plot_by_attribute(test_city_all):
     """Test `plot_by_attribute` by design."""
     _, graph = test_city_all
+    # work on copy of graph, as it is a shared fixture
+    graph = graph.copy()
 
     # Use osmid as attribute determining color
     # Some osmid attributes return lists, not ints, just take first element
@@ -126,6 +128,8 @@ def test_make_edge_color_list_faulty_attr_type(test_city_all, attr_type, minmax)
 def test_make_edge_color_list_attr_unsortable(test_city_all):
     """Test `make_edge_color_list` with unsortable attribute."""
     _, graph = test_city_all
+    # work on copy of graph, as it is a shared fixture
+    graph = graph.copy()
     colormap = plt.get_cmap("rainbow")
     # Set first edge with to a number, second one to a string, third one to a list
     node = list(graph.edges(data=True))[0]

@@ -65,7 +65,9 @@ def partitioner_class(request):
 
 
 @pytest.fixture(scope="session")
-def test_city_all_preloaded_save(test_city_all, partitioner_class):
+def test_city_all_preloaded_save(
+    test_city_all, partitioner_class, _teardown_test_folders
+):
     """Fixture for saving preloaded partitioners for all cities with bearing and
     length test_data. Without metrics. Shared across all tests."""
     city_name, graph = test_city_all
@@ -85,7 +87,9 @@ def test_city_all_preloaded(test_city_all_preloaded_save, _teardown_test_folders
 
 
 @pytest.fixture(scope="session")
-def test_city_all_precalculated_save(test_city_all, partitioner_class):
+def test_city_all_precalculated_save(
+    test_city_all, partitioner_class, _teardown_test_folders
+):
     """Fixture for saving precalculated partitioners for all cities with bearing and
     length test_data. Without metrics. Shared across all tests."""
     city_name, graph = test_city_all
@@ -98,9 +102,7 @@ def test_city_all_precalculated_save(test_city_all, partitioner_class):
 
 
 @pytest.fixture(scope="function")
-def test_city_all_precalculated(
-    test_city_all_precalculated_save, _teardown_test_folders
-):
+def test_city_all_precalculated(test_city_all_precalculated_save):
     """Fixture for precalculated partitioners for all cities with bearing and length.
     Without metrics. Loaded for each test."""
     name, cls = test_city_all_precalculated_save
