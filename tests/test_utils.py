@@ -80,6 +80,7 @@ def test_load_graph_from_place():
         ),
     ],
 )
+@pytest.mark.filterwarnings("ignore:invalid value encountered")
 def test__has_pairwise_overlap(lists, expected):
     """Test `_has_pairwise_overlap` by design."""
     # Check if ndarrays are equal

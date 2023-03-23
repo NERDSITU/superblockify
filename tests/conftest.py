@@ -141,3 +141,11 @@ def _teardown_test_folders():
     for folder in listdir(RESULTS_DIR):
         if folder.endswith("_test"):
             rmtree(path.join(RESULTS_DIR, folder))
+
+
+@pytest.fixture(scope="function", autouse=True)
+def _patch_plt_show(monkeypatch):
+    """Patch plt.show() and plt.Figure.show() to prevent plots from showing during
+    tests."""
+    monkeypatch.setattr("matplotlib.pyplot.show", lambda: None)
+    monkeypatch.setattr("matplotlib.pyplot.Figure.show", lambda _: None)

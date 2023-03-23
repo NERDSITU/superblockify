@@ -2,6 +2,7 @@
 
 import logging
 from itertools import chain
+from sys import modules
 
 from networkx import is_weakly_connected
 from numpy import argwhere, fill_diagonal
@@ -111,6 +112,7 @@ def components_are_connected(partitioning):
                 attr_types="numerical",
                 cmap="hsv",
                 minmax_val=(0, 1),
+                show="pytest" not in modules,
             )
             # Reset edge attribute 'highlight'
             for edge in component["subgraph"].edges:
@@ -186,6 +188,7 @@ def nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
                 for node in partitioning.graph.nodes
             ],
             bgcolor="none",
+            show="pytest" not in modules,
         )
         return False
 
