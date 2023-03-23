@@ -1,5 +1,6 @@
 """Plotting functions."""
 import logging
+from os import path
 
 import networkx as nx
 import osmnx as ox
@@ -117,7 +118,12 @@ def plot_by_attribute(
     # Make list of edge colors, order is the same as in graph.edges()
     e_c = list(
         make_edge_color_list(
-            graph, attr, colormap, attr_types=attr_types, minmax_val=minmax_val
+            graph,
+            attr,
+            colormap,
+            attr_types=attr_types,
+            minmax_val=minmax_val,
+            none_color=(0, 0, 0, 1),
         )
     )
 
@@ -134,6 +140,7 @@ def plot_by_attribute(
         node_alpha=node_alpha,
         edge_color=e_c,
         edge_linewidth=edge_linewidth,
+        bgcolor=(0, 0, 0, 0),
         **pg_kwargs,
     )
 
@@ -301,6 +308,7 @@ def plot_component_size(
     minmax_val=None,
     num_component_log_scale=True,
     show_legend=None,
+    xticks=None,
     **kwargs,
 ):  # pylint: disable=too-many-locals
     """Plot the distribution of component sizes for each partition value.
@@ -337,6 +345,8 @@ def plot_component_size(
     show_legend : bool, optional
         If True, the legend is shown. If None, the legend is shown if the unique
         values of the partition are less than 23.
+    xticks : list, optional
+        List of xticks
     kwargs
         Keyword arguments to pass to `matplotlib.pyplot.plot`.
 
@@ -364,7 +374,7 @@ def plot_component_size(
     if num_component_log_scale:
         axe.set_yscale("log")
     axe.grid(True)
-    plt.xticks([0, 15, 30, 45, 60, 75, 90])
+    plt.xticks(xticks)
 
     # Make legend with unique colors
     sorted_unique_values = sorted(set(component_values))
@@ -414,40 +424,101 @@ def plot_component_size(
     return fig, axe
 
 
-def plot_distance_distributions(
-    dist_matrix, dist_title, coords, coord_title, labels, distance_unit="km"
-):
-    """Plot the distributions of the euclidean distances and coordinates.
+def plot_road_type_for(graph, included_types, name, **plt_kwargs):
+    """Plot the distribution of road types for the given graph.
+
+    Find possible road types from the graph's edges, or at
+    https://wiki.openstreetmap.org/wiki/Key:highway.
 
     Parameters
     ----------
-    dist_matrix : ndarray
-        The distance matrix for the partitioning. dist_matrix[i, j] is the euclidean
-        distance between node i and node j.
-    dist_title : str
-        The title of the histogram of the euclidean distances.
-    coords : tuple
-        The coordinates of the nodes. coords[0] is the x-coordinates, coords[1] is
-        the y-coordinates. Can be either angular or euclidean coordinates.
-    coord_title : str
-        The title of the scatter plot of the coordinates.
-    labels : tuple
-        The labels of the coordinates. labels[0] is the label of the x-coordinate,
-        labels[1] is the label of the y-coordinate.
-    distance_unit : str, optional
+    graph : networkx.MultiDiGraph
+        Input graph
+    included_types : list
+        List of osm highway keys to be highlighted, all other edges have another color
+    name : str
+        Title of the plot
+    plt_kwargs
+        Keyword arguments to pass to `matplotlib.pyplot.plot`.
 
+    Returns
+    -------
+    fig, axe : tuple
+        matplotlib figure, axis
     """
-    _, axe = plt.subplots(1, 2, figsize=(10, 5))
-    # Plot distribution of distances
-    axe[0].hist(dist_matrix.flatten() / 1000, bins=100)
-    axe[0].set_title(dist_title)
-    axe[0].set_xlabel(f"Distance [{distance_unit}]")
-    axe[0].set_ylabel("Count")
-    # Plot scatter plot of lat/lon, aspect ratio should be 1:1
-    axe[1].set_aspect("equal")
-    axe[1].scatter(coords[0], coords[1], alpha=0.5, s=1)
-    axe[1].set_title(coord_title)
-    axe[1].set_xlabel(labels[0])
-    axe[1].set_ylabel(labels[1])
-    plt.tight_layout()
-    plt.show()
+
+    # Write to 'searched_road_type' attribute 1 if edge is in included_types,
+    # 0 otherwise
+    # graph.edges[edge]["highway"] could be list or string
+    for edge in graph.edges:
+        if (
+            isinstance(graph.edges[edge]["highway"], list)
+            and any(
+                road_type in included_types
+                for road_type in graph.edges[edge]["highway"]
+            )
+        ) or (
+            isinstance(graph.edges[edge]["highway"], str)
+            and graph.edges[edge]["highway"] in included_types
+        ):
+            graph.edges[edge]["residential"] = 1
+        else:
+            graph.edges[edge]["residential"] = 0
+
+    # Plot
+    logger.debug("Plotting residential/other edges for %s.", name)
+
+    # Use plot_by_attribute to plot the distribution of residential edges
+    return plot_by_attribute(
+        graph,
+        "residential",
+        attr_types="numerical",
+        cmap="cool",
+        minmax_val=(0, 1),
+        **plt_kwargs,
+    )
+
+
+def save_plot(results_dir, fig, filename, **sa_kwargs):
+    """Save the plot `fig` to file.
+
+    Saved in the results_dir/filename.
+
+    Parameters
+    ----------
+    results_dir : str
+        Directory to save to.
+    fig : matplotlib.figure.Figure
+        Figure to save.
+    filename : str
+        Filename to save to.
+    sa_kwargs
+        Keyword arguments to pass to `matplotlib.pyplot.savefig`.
+    """
+
+    filename = path.join(results_dir, filename)
+    # Log saving
+    logger.debug(
+        "Saving plot (%s) to %s",
+        fig.axes[0].get_title(),
+        filename,
+    )
+
+    # Check if al axes are compatible with tight_layout
+    # if there are more than one axes
+    if len(fig.axes) > 1:
+        for axe in fig.axes:
+            # Also axe.get_subplotspec() might be None
+            if axe.get_subplotspec() is None:
+                logger.debug(
+                    "Not using tight_layout because one of the axes "
+                    "has no subplotspec."
+                )
+                break
+        else:
+            fig.tight_layout()
+    else:
+        fig.tight_layout()
+
+    # Save
+    fig.savefig(filename, **sa_kwargs)

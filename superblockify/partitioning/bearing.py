@@ -7,10 +7,12 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 from matplotlib import cm
+from networkx import weakly_connected_components
 from scipy.signal import find_peaks
 
 from superblockify import attribute
 from .partitioner import BasePartitioner
+from ..plot import save_plot
 
 logger = logging.getLogger("superblockify")
 
@@ -29,13 +31,22 @@ class BearingPartitioner(BasePartitioner):
         self._inter_vals = {}
         self.attr_value_minmax = (0, 90)
 
-    def run(
-        self, show_analysis_plots=False, min_length=1500, min_edge_count=5, **kwargs
+        self.residential_graph = self.graph.copy()
+        self.residential_graph.remove_edges_from(
+            [
+                (u, v)
+                for u, v, d in self.residential_graph.edges(data=True)
+                if d["highway"] != "residential" or "residential" not in d["highway"]
+            ]
+        )
+
+    def partition_graph(
+        self, make_plots=False, min_length=500, min_edge_count=5, **kwargs
     ):
         """Group by prominent bearing directions.
 
         Procedure to determine the graphs partitions based on the edges bearings.
-            1. Bin bearings.
+            1. Bin bearings. Only on residential edges.
             2. Find peaks.
             3. Determine boundaries/intervals corresponding to a partition.
             4. (optional) Plot found peaks and interval splits.
@@ -48,7 +59,7 @@ class BearingPartitioner(BasePartitioner):
 
         Parameters
         ----------
-        show_analysis_plots : bool, optional
+        make_plots : bool, optional
             If True show visualization graphs of the approach.
         min_length : float, optional
             Minimum component length in meters to be considered for partitioning.
@@ -77,20 +88,22 @@ class BearingPartitioner(BasePartitioner):
         if len(self._bin_info["peak_ind"]) < 1:
             raise ArithmeticError("No peaks were found.")
 
-        if show_analysis_plots:
-            self.plot_peakfinding()
+        if make_plots:
+            fig, _ = self.plot_peakfinding()
+            save_plot(self.results_dir, fig, f"{self.name}_peakfinding.pdf")
             plt.show()
 
         # Make boundaries
         self.__make_boundaries()
 
-        if show_analysis_plots:
-            self.plot_interval_splitting()
+        if make_plots:
+            fig, _ = self.plot_interval_splitting()
+            save_plot(self.results_dir, fig, f"{self.name}_interval_splitting.pdf")
             plt.show()
 
         # Write grouping attribute to graph
         self.attribute_label = "bearing_group"
-        group_bearing = nx.get_edge_attributes(self.graph, "bearing_90")
+        group_bearing = nx.get_edge_attributes(self.residential_graph, "bearing_90")
         logger.debug("Writing attribute 'bearing_group' to graph.")
         for edge, bearing in group_bearing.items():
             if np.isnan(bearing):
@@ -100,7 +113,7 @@ class BearingPartitioner(BasePartitioner):
                 group_bearing[edge] = self._inter_vals["center_values"][i - 1]
         nx.set_edge_attributes(self.graph, group_bearing, self.attribute_label)
 
-        # Write partiton dict
+        # Write partition dict
         self.partitions = [
             {
                 "name": str(self._inter_vals["boundaries"][i : i + 2]),
@@ -110,15 +123,36 @@ class BearingPartitioner(BasePartitioner):
             if center_val is not None
         ]
 
-        # Make subgraphs for each partitions
+        # Make subgraphs for each partition
+        # Overwrite `self.attribute_label` so residential edges are not added to
+        # subgraphs.
+        for node1, node2, key in self.graph.edges(keys=True):
+            # check if edge is in self.residential_graph
+            if (node1, node2) not in self.residential_graph.edges:
+                self.graph.edges[node1, node2, key][self.attribute_label] = None
+
         self.make_subgraphs_from_attribute(
             split_disconnected=True,
             min_edge_count=min_edge_count,
             min_length=min_length,
         )
 
-        if show_analysis_plots:
-            self.plot_subgraph_component_size("length")
+        # Make sparsified graph
+        self.set_sparsified_from_components()
+        # Produces graph that may be not connected, so we only take the LCC.
+        self.sparsified = self.graph.subgraph(
+            max(weakly_connected_components(self.sparsified), key=len)
+        )
+
+        if make_plots:
+            fig, _ = self.plot_subgraph_component_size("length")
+            save_plot(self.results_dir, fig, f"{self.name}_subgraph_component_size.pdf")
+            plt.show()
+            fig, _ = self.plot_partition_graph()
+            save_plot(self.results_dir, fig, f"{self.name}_partition_graph.pdf")
+            plt.show()
+            fig, _ = self.plot_component_graph()
+            save_plot(self.results_dir, fig, f"{self.name}_component_graph.pdf")
             plt.show()
 
     def __bin_bearings(self, num_bins: int):
@@ -147,7 +181,7 @@ class BearingPartitioner(BasePartitioner):
 
         # Write attribute where bearings are baked down modulo 90 degrees.
         attribute.new_edge_attribute_by_function(
-            self.graph, lambda bear: bear % 90, "bearing", "bearing_90"
+            self.residential_graph, lambda bear: bear % 90, "bearing", "bearing_90"
         )
 
         bins = (
@@ -156,7 +190,8 @@ class BearingPartitioner(BasePartitioner):
             / (self._bin_info["num_bins"] * 2)
         )
         count, bin_edges = np.histogram(
-            list(nx.get_edge_attributes(self.graph, "bearing_90").values()), bins=bins
+            list(nx.get_edge_attributes(self.residential_graph, "bearing_90").values()),
+            bins=bins,
         )
         # move last bin to front, so eg 0.01° and 359.99° will be binned together
         count = np.roll(count, 1)

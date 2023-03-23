@@ -5,11 +5,15 @@ import pytest
 from matplotlib import pyplot as plt
 
 from superblockify import new_edge_attribute_by_function
-from superblockify.plot import paint_streets, plot_by_attribute, make_edge_color_list
+from superblockify.plot import (
+    paint_streets,
+    plot_by_attribute,
+    make_edge_color_list,
+    plot_road_type_for,
+)
 
 config = ConfigParser()
 config.read("config.ini")
-TEST_DATA = config["tests"]["test_data_path"]
 
 
 @pytest.mark.parametrize("e_l,n_a", [(0.5, 0.5), (1, 0)])
@@ -18,11 +22,11 @@ def test_paint_streets(test_city_all, e_l, n_a, save):
     """Test `paint_streets` by design."""
     city_path, graph = test_city_all
     paint_streets(
-        graph,
+        graph.copy(),
         edge_linewidth=e_l,
         node_alpha=n_a,
         save=save,
-        filepath=f"{TEST_DATA}output/{city_path[:-8]}.pdf",
+        filepath=f"{config['tests']['test_data_path']}output/{city_path}.pdf",
     )
     plt.close()
 
@@ -44,6 +48,8 @@ def test_paint_streets_empty_plot(test_city_all):
 def test_plot_by_attribute(test_city_all):
     """Test `plot_by_attribute` by design."""
     _, graph = test_city_all
+    # work on copy of graph, as it is a shared fixture
+    graph = graph.copy()
 
     # Use osmid as attribute determining color
     # Some osmid attributes return lists, not ints, just take first element
@@ -122,9 +128,37 @@ def test_make_edge_color_list_faulty_attr_type(test_city_all, attr_type, minmax)
 def test_make_edge_color_list_attr_unsortable(test_city_all):
     """Test `make_edge_color_list` with unsortable attribute."""
     _, graph = test_city_all
+    # work on copy of graph, as it is a shared fixture
+    graph = graph.copy()
     colormap = plt.get_cmap("rainbow")
     # Set first edge with to a number, second one to a string, third one to a list
     node = list(graph.edges(data=True))[0]
     graph[node[0]][node[1]][0]["bearing"] = "str"
 
     make_edge_color_list(graph, "bearing", cmap=colormap, attr_types="categorical")
+
+
+@pytest.mark.parametrize(
+    "road_types",
+    [
+        ["residential"],
+        ["residential", "unclassified"],
+        [
+            "motorway",
+            "trunk",
+            "primary",
+            "secondary",
+            "tertiary",
+            "motorway_link",
+            "trunk_link",
+            "primary_link",
+            "secondary_link",
+            "tertiary_link",
+        ],
+    ],
+)
+def test_plot_road_type_for(test_city_all, road_types):
+    """Test `plot_road_type_for` by design."""
+    city_name, graph = test_city_all
+    plot_road_type_for(graph, included_types=road_types, name=city_name)
+    plt.close()
