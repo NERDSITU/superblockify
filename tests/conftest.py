@@ -74,7 +74,7 @@ def test_city_all_preloaded_save(
     part = partitioner_class(
         name=city_name + "_preloaded_test", city_name=city_name, graph=graph.copy()
     )
-    part.save(save_graph_copy=True)
+    part.save(save_graph_copy=False)
     return part.name, part.__class__
 
 
@@ -97,7 +97,7 @@ def test_city_all_precalculated_save(
         name=city_name + "_precalculated_test", city_name=city_name, graph=graph.copy()
     )
     part.run(calculate_metrics=False)
-    part.save(save_graph_copy=True)
+    part.save(save_graph_copy=False)
     return part.name, part.__class__
 
 
