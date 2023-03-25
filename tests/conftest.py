@@ -121,7 +121,7 @@ def test_city_small_precalculated(test_city_small, partitioner_class):
     part = partitioner_class(
         name=f"{city_name}_{partitioner_class.__name__}_precalculated_test",
         city_name=city_name,
-        graph=graph.copy()
+        graph=graph.copy(),
     )
     part.run(calculate_metrics=False)
     return part
