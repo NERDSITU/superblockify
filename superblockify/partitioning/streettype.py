@@ -1,7 +1,6 @@
 """Approach only based on street type."""
 import logging
 
-import matplotlib.pyplot as plt
 from networkx import (
     strongly_connected_components,
 )
@@ -10,7 +9,6 @@ from .partitioner import BasePartitioner
 from ..attribute import (
     new_edge_attribute_by_function,
 )
-from ..plot import save_plot
 
 logger = logging.getLogger("superblockify")
 
@@ -71,18 +69,3 @@ class ResidentialPartitioner(BasePartitioner):
         self.sparsified = self.graph.subgraph(self.sparsified)
 
         self.set_components_from_sparsified()
-
-        if make_plots:
-            fig, _ = self.plot_partition_graph()
-            save_plot(self.results_dir, fig, f"{self.name}_partition_graph.pdf")
-            plt.show()
-
-        if make_plots:
-            fig, _ = self.plot_subgraph_component_size("length")
-            save_plot(self.results_dir, fig, f"{self.name}_subgraph_component_size.pdf")
-            plt.show()
-
-        if make_plots:
-            fig, _ = self.plot_component_graph()
-            save_plot(self.results_dir, fig, f"{self.name}_component_graph.pdf")
-            plt.show()

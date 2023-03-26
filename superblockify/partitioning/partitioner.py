@@ -7,22 +7,14 @@ from os import path, makedirs
 from typing import final, Final, List
 
 import osmnx as ox
+from matplotlib import pyplot as plt
 from networkx import weakly_connected_components, set_edge_attributes, MultiDiGraph
 from numpy import linspace
 from osmnx.stats import edge_length_total
 
 from .checks import is_valid_partitioning
 from .. import attribute, plot
-from ..metrics import (
-    plot_distance_matrices,
-    plot_distance_matrices_pairwise_relative_difference,
-)
 from ..metrics.metric import Metric
-from ..metrics.plot import (
-    plot_component_wise_travel_increase,
-    plot_relative_difference,
-    plot_relative_increase_on_graph,
-)
 from ..plot import save_plot
 from ..utils import load_graph_from_place
 
@@ -195,6 +187,19 @@ class BasePartitioner(ABC):
             )
             logger.warning(warn)
 
+        if make_plots:
+            if self.partitions:
+                fig, _ = self.plot_partition_graph()
+                save_plot(self.results_dir, fig, f"{self.name}_partition_graph.pdf")
+                plt.show()
+            fig, _ = self.plot_subgraph_component_size("length")
+            save_plot(self.results_dir, fig, f"{self.name}_subgraph_component_size.pdf")
+            plt.show()
+            if self.components:
+                fig, _ = self.plot_component_graph()
+                save_plot(self.results_dir, fig, f"{self.name}_component_graph.pdf")
+                plt.show()
+
         if calculate_metrics:
             self.calculate_metrics(make_plots=make_plots, **kwargs)
 
@@ -254,53 +259,6 @@ class BasePartitioner(ABC):
             num_workers=num_workers,
             chunk_size=chunk_size,
         )
-        if make_plots:
-            fig, _ = plot_distance_matrices(
-                self.metric, name=f"{self.name} - {self.__class__.__name__}"
-            )
-            save_plot(self.results_dir, fig, f"{self.name}_distance_matrices.pdf")
-            fig.show()
-            fig, _ = plot_distance_matrices_pairwise_relative_difference(
-                self.metric, name=f"{self.name} - {self.__class__.__name__}"
-            )
-            save_plot(
-                self.results_dir,
-                fig,
-                f"{self.name}_distance_matrices_pairwise_relative_difference.pdf",
-            )
-            fig.show()
-
-            fig, _ = plot_relative_difference(
-                self.metric, "S", "N", title=f"{self.name} - {self.__class__.__name__}"
-            )
-            save_plot(
-                self.results_dir,
-                fig,
-                f"{self.name}_relative_difference_SN.pdf",
-            )
-            fig.show()
-
-            fig, _ = plot_component_wise_travel_increase(
-                self,
-                self.metric.distance_matrix,
-                self.metric.node_list,
-                measure1="S",
-                measure2="N",
-            )
-            save_plot(
-                self.results_dir,
-                fig,
-                f"{self.name}_component_wise_travel_increase.pdf",
-            )
-            fig.show()
-
-            fig, _ = plot_relative_increase_on_graph(self.graph)
-            save_plot(
-                self.results_dir,
-                fig,
-                f"{self.name}_relative_increase_on_graph.pdf",
-            )
-            fig.show()
 
         logger.debug("Metrics for %s: %s", self.name, self.metric)
 

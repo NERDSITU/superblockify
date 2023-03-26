@@ -14,6 +14,16 @@ from .measures import (
     calculate_directness,
     write_relative_increase_to_edges,
 )
+from ..metrics import (
+    plot_distance_matrices,
+    plot_distance_matrices_pairwise_relative_difference,
+)
+from ..metrics.plot import (
+    plot_component_wise_travel_increase,
+    plot_relative_difference,
+    plot_relative_increase_on_graph,
+)
+from ..plot import save_plot
 from ..utils import compare_dicts
 
 logger = logging.getLogger("superblockify")
@@ -169,6 +179,57 @@ class Metric:
         write_relative_increase_to_edges(
             partitioner.graph, self.distance_matrix, self.node_list, "N", "S"
         )
+
+        if make_plots:
+            fig, _ = plot_distance_matrices(
+                self, name=f"{partitioner.name} - {partitioner.__class__.__name__}"
+            )
+            save_plot(
+                partitioner.results_dir,
+                fig,
+                f"{partitioner.name}_distance_matrices.pdf",
+            )
+            fig.show()
+            fig, _ = plot_distance_matrices_pairwise_relative_difference(
+                self, name=f"{partitioner.name} - {partitioner.__class__.__name__}"
+            )
+            save_plot(
+                partitioner.results_dir,
+                fig,
+                f"{partitioner.name}_distance_matrices_"
+                f"pairwise_relative_difference.pdf",
+            )
+            fig.show()
+
+            fig, _ = plot_relative_difference(
+                self, "S", "N", title=f"{partitioner.name} - {self.__class__.__name__}"
+            )
+            save_plot(
+                partitioner.results_dir,
+                fig,
+                f"{partitioner.name}_relative_difference_SN.pdf",
+            )
+            fig.show()
+
+            fig, _ = plot_component_wise_travel_increase(
+                partitioner,
+                self.distance_matrix,
+                self.node_list,
+                measure1="S",
+                measure2="N",
+            )
+            save_plot(
+                partitioner.results_dir,
+                fig,
+                f"{partitioner.name}_component_wise_travel_increase.pdf",
+            )
+
+            fig, _ = plot_relative_increase_on_graph(partitioner.graph)
+            save_plot(
+                partitioner.results_dir,
+                fig,
+                f"{partitioner.name}_relative_increase_on_graph.pdf",
+            )
 
         # self.coverage = self.calculate_coverage(partitioner)
         # logger.debug("Coverage: %s", self.coverage)
