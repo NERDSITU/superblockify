@@ -161,16 +161,61 @@ def make_edge_color_list(
     graph : networkx.MultiDiGraph
         Input graph
     attr : string
-        Graph's attribute to select colors by
+        Graph's edge attribute to select colors by
     attr_types : string, optional
-        Type of the attribute to be plotted, can be 'numerical' or 'categorical'
+        Type of the edge attribute to be plotted, can be 'numerical' or 'categorical'
     cmap : matplotlib.colors.Colormap
-        Colormap to use for the plot
+        Colormap to use for the edge colors
     minmax_val : tuple, optional
         If `attr_types` is 'numerical', tuple of (min, max) values of the attribute
         to be plotted (default: min and max of attr)
     none_color : tuple, optional
         Color to use for edges with `None` attribute value
+
+    Returns
+    -------
+    list
+        List of edge colors, order is the same as in graph.edges()
+
+    """
+    return make_color_list(
+        graph,
+        attr,
+        cmap,
+        obj_type="edge",
+        attr_types=attr_types,
+        minmax_val=minmax_val,
+        none_color=none_color,
+    )
+
+
+def make_node_color_list(
+    graph,
+    attr,
+    cmap,
+    attr_types="numerical",
+    minmax_val=None,
+    none_color=(0.5, 0.5, 0.5, 1),
+):
+    """Make a list of node colors based on a node attribute and colormap.
+
+    Color will be chosen based on the specified node attribute passed to a colormap.
+
+    Parameters
+    ----------
+    graph : networkx.MultiDiGraph
+        Input graph
+    attr : string
+        Graph's node attribute to select colors by
+    attr_types : string, optional
+        Type of the node attribute to be plotted, can be 'numerical' or 'categorical'
+    cmap : matplotlib.colors.Colormap
+        Colormap to use for the node colors
+    minmax_val : tuple, optional
+        If `attr_types` is 'numerical', tuple of (min, max) values of the attribute
+        to be plotted (default: min and max of attr)
+    none_color : tuple, optional
+        Color to use for nodes with `None` attribute value
 
     Raises
     ------
@@ -182,8 +227,64 @@ def make_edge_color_list(
     Returns
     -------
     list
-        List of edge colors, order is the same as in graph.edges()
+        List of node colors, order is the same as in graph.nodes()
 
+    """
+    return make_color_list(
+        graph,
+        attr,
+        cmap,
+        obj_type="node",
+        attr_types=attr_types,
+        minmax_val=minmax_val,
+        none_color=none_color,
+    )
+
+
+def make_color_list(
+    graph,
+    attr,
+    cmap,
+    obj_type="edge",
+    attr_types="numerical",
+    minmax_val=None,
+    none_color=(0.5, 0.5, 0.5, 1),
+):
+    """Make a list of colors based on an attribute and colormap.
+
+    Color will be chosen based on the specified attribute passed to a colormap.
+
+    Parameters
+    ----------
+    graph : networkx.MultiDiGraph
+        Input graph
+    attr : string
+        Graph's attribute to select colors by
+    cmap : matplotlib.colors.Colormap
+        Colormap to use for the colors
+    obj_type : string, optional
+        Type of the object to take the attribute from, can be 'edge' or 'node'
+    attr_types : string, optional
+        Type of the attribute to be plotted, can be 'numerical' or 'categorical'
+    minmax_val : tuple, optional
+        If `attr_types` is 'numerical', tuple of (min, max) values of the attribute
+        to be plotted (default: min and max of attr)
+    none_color : tuple, optional
+        Color to use for objects with `None` attribute value
+
+    Raises
+    ------
+    ValueError
+        If `attr_types` is not 'numerical' or 'categorical'
+    ValueError
+        If `attr_types` is 'categorical' and `minmax_val` is not None
+    ValueError
+        If `obj_type` is not "edge" or "node"
+
+    Returns
+    -------
+    list
+        List of colors, order is the same as in graph.nodes() or graph.edges()
     """
 
     if attr_types == "categorical" and minmax_val is not None:
@@ -192,19 +293,35 @@ def make_edge_color_list(
             f"it should be None."
         )
 
+    if obj_type not in ["edge", "node"]:
+        raise ValueError(
+            f"The `obj_type` attribute was set to {obj_type}, "
+            f"it should be either 'edge' or 'node'."
+        )
+
     if attr_types == "numerical":
         minmax_val = determine_minmax_val(graph, minmax_val, attr)
+        if obj_type == "edge":
+            return [
+                cmap((attr_val - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
+                if attr_val is not None
+                else none_color
+                for u, v, k, attr_val in graph.edges(keys=True, data=attr)
+            ]
+        # obj_type == "node"
         return [
             cmap((attr_val - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
             if attr_val is not None
             else none_color
-            for u, v, k, attr_val in graph.edges(keys=True, data=attr)
+            for u, attr_val in graph.nodes(data=attr)
         ]
     if attr_types == "categorical":
         # Enumerate through the unique values of the attribute
         # and assign a color to each value, `None` will be assigned to `none_color`.
-        unique_vals = set(
-            attr_val for u, v, k, attr_val in graph.edges(keys=True, data=attr)
+        unique_vals = (
+            set(attr_val for u, v, k, attr_val in graph.edges(keys=True, data=attr))
+            if obj_type == "edge"
+            else set(attr_val for u, attr_val in graph.nodes(data=attr))
         )
 
         # To sort the values, remove None from the set, sort the values,
@@ -223,11 +340,19 @@ def make_edge_color_list(
         finally:
             unique_vals.append(None)
 
+        if obj_type == "node":
+            return [
+                cmap(unique_vals.index(attr_val) / (len(unique_vals) - 1))
+                if attr_val is not None
+                else none_color
+                for u, v, k, attr_val in graph.edges(keys=True, data=attr)
+            ]
+        # obj_type == "node"
         return [
             cmap(unique_vals.index(attr_val) / (len(unique_vals) - 1))
             if attr_val is not None
             else none_color
-            for u, v, k, attr_val in graph.edges(keys=True, data=attr)
+            for u, attr_val in graph.nodes(data=attr)
         ]
     # If attr_types is not 'numerical' or 'categorical', raise an error
     raise ValueError(

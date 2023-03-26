@@ -8,7 +8,9 @@ from superblockify import new_edge_attribute_by_function
 from superblockify.plot import (
     paint_streets,
     plot_by_attribute,
+    make_color_list,
     make_edge_color_list,
+    make_node_color_list,
     plot_road_type_for,
 )
 
@@ -45,22 +47,26 @@ def test_paint_streets_empty_plot(test_city_all):
         paint_streets(graph, edge_linewidth=0, node_size=0)
 
 
-def test_plot_by_attribute(test_city_all):
-    """Test `plot_by_attribute` by design."""
+@pytest.fixture(scope="module")
+def test_city_all_osmid1(test_city_all):
+    """Return a graph with a the osmid baked down to a single value."""
     _, graph = test_city_all
     # work on copy of graph, as it is a shared fixture
     graph = graph.copy()
-
-    # Use osmid as attribute determining color
     # Some osmid attributes return lists, not ints, just take first element
     new_edge_attribute_by_function(
         graph,
         lambda osmid: osmid if isinstance(osmid, int) else osmid[0],
         "osmid",
-        "osmid_0",
+        "osmid",
+        allow_overwriting=True,
     )
+    return graph
 
-    plot_by_attribute(graph, "osmid_0", cmap="rainbow")
+
+def test_plot_by_attribute(test_city_all_osmid1):
+    """Test `plot_by_attribute` by design."""
+    plot_by_attribute(test_city_all_osmid1, "osmid", cmap="rainbow")
     plt.close()
 
 
@@ -105,6 +111,19 @@ def test_make_edge_color_list(test_city_all):
     assert len(edge_color_list[0]) == 4
 
 
+def test_make_node_color_list(test_city_all_osmid1):
+    """Test `make_node_color_list` by design."""
+    colormap = plt.get_cmap("rainbow")
+    node_color_list = list(
+        make_node_color_list(
+            test_city_all_osmid1, "osmid", cmap=colormap, attr_types="numerical"
+        )
+    )
+    assert len(node_color_list) == len(test_city_all_osmid1.nodes)
+    assert isinstance(node_color_list[0], tuple)
+    assert len(node_color_list[0]) == 4
+
+
 @pytest.mark.parametrize(
     "attr_type,minmax",
     [
@@ -115,13 +134,19 @@ def test_make_edge_color_list(test_city_all):
         ("numerical", True),  # minmax not two-element tuple or None
     ],
 )
-def test_make_edge_color_list_faulty_attr_type(test_city_all, attr_type, minmax):
+@pytest.mark.parametrize("obj_type", ["node", "edge"])
+def test_make_color_list_faulty_attr_type(test_city_all, obj_type, attr_type, minmax):
     """Test `make_edge_color_list` with faulty attr_type."""
     _, graph = test_city_all
     colormap = plt.get_cmap("rainbow")
     with pytest.raises((ValueError, TypeError)):
-        make_edge_color_list(
-            graph, "bearing", cmap=colormap, attr_types=attr_type, minmax_val=minmax
+        make_color_list(
+            graph,
+            "bearing",
+            cmap=colormap,
+            obj_type=obj_type,
+            attr_types=attr_type,
+            minmax_val=minmax,
         )
 
 
