@@ -159,8 +159,6 @@ def test_determine_minmax_val(minmax_val, attr_type, expected):
     graph = path_graph(5)
     set_edge_attributes(graph, {edge: {"attr": edge[0]} for edge in graph.edges})
     set_node_attributes(graph, {node: {"attr": node} for node in graph.nodes})
-    print(graph.edges(data=True))
-    print(graph.nodes(data=True))
     assert determine_minmax_val(graph, minmax_val, "attr", attr_type) == expected
 
 
