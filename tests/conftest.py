@@ -143,7 +143,7 @@ def _teardown_test_folders():
             rmtree(path.join(RESULTS_DIR, folder))
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(scope="function", autouse=config.getboolean("tests", "hide_plots"))
 def _patch_plt_show(monkeypatch):
     """Patch plt.show() and plt.Figure.show() to prevent plots from showing during
     tests."""
