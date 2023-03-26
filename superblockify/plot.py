@@ -6,9 +6,8 @@ import networkx as nx
 import osmnx as ox
 from matplotlib import patches
 from matplotlib import pyplot as plt
-from numpy import amin, amax
 
-from superblockify import attribute
+from .attribute import determine_minmax_val, new_edge_attribute_by_function
 
 logger = logging.getLogger("superblockify")
 
@@ -44,7 +43,7 @@ def paint_streets(graph, cmap="hsv", **pg_kwargs):
         graph = ox.add_edge_bearings(graph)
 
     # Write attribute where bearings are baked down modulo 90 degrees.
-    attribute.new_edge_attribute_by_function(
+    new_edge_attribute_by_function(
         graph, lambda bear: bear % 90, "bearing", "bearing_90"
     )
 
@@ -235,65 +234,6 @@ def make_edge_color_list(
         f"The `attr_types` attribute was set to {attr_types}, "
         f"it should be 'numerical' or 'categorical'."
     )
-
-
-def determine_minmax_val(graph, minmax_val, attr):
-    """Determine the min and max values of an attribute in a graph.
-
-    This function is used to determine the min and max values of an attribute.
-    If `minmax_val` is None, the min and max values of the attribute in the graph
-    are used. If `minmax_val` is a tuple of length 2, the values are used as
-    min and max values. If `minmax_val` is a tuple of length 2, but the first
-    value is larger than the second, a ValueError is raised.
-    If only one value in the tuple is given, the other value is set accordingly.
-
-    Parameters
-    ----------
-    graph : networkx.MultiDiGraph
-        Input graph
-    minmax_val : tuple, None
-        Tuple of (min, max) values of the attribute to be plotted or None
-    attr : string
-        Graph's attribute to select min and max values by
-
-    Raises
-    ------
-    ValueError
-        If `minmax_val` is not a tuple of length 2 or None.
-    ValueError
-        If `minmax_val[0]` is not smaller than `minmax_val[1]`.
-
-    """
-
-    if minmax_val is not None and (
-        not isinstance(minmax_val, tuple) or len(minmax_val) != 2
-    ):
-        raise ValueError(
-            f"The `minmax_val` attribute was set to {minmax_val}, "
-            f"it should be a tuple of length 2 or None."
-        )
-
-    # Determine min and max values of the attribute
-    logger.debug("Given minmax_val for attribute %s: %s", attr, minmax_val)
-    if minmax_val is None or minmax_val[0] is None or minmax_val[1] is None:
-        # Min and max of the attribute, ignoring `None` values
-        minmax = (
-            amin([v for v in nx.get_edge_attributes(graph, attr).values() if v]),
-            amax([v for v in nx.get_edge_attributes(graph, attr).values() if v]),
-        )
-        if minmax_val is None:
-            minmax_val = minmax
-        elif minmax_val[0] is None:
-            minmax_val = (minmax[0], minmax_val[1])
-        else:
-            minmax_val = (minmax_val[0], minmax[1])
-        logger.debug("Determined minmax_val for attribute %s: %s", attr, minmax_val)
-    if minmax_val[0] >= minmax_val[1]:
-        raise ValueError(
-            f"The `minmax_val` attribute is {minmax_val}, "
-            f"but the first value must be smaller than the second."
-        )
-    return minmax_val
 
 
 def plot_component_size(
