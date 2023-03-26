@@ -1,7 +1,12 @@
 """Tests for the attribute module."""
 import pytest
-from networkx import set_edge_attributes, path_graph, get_edge_attributes, Graph, \
-    set_node_attributes
+from networkx import (
+    set_edge_attributes,
+    path_graph,
+    get_edge_attributes,
+    Graph,
+    set_node_attributes,
+)
 
 from superblockify.attribute import (
     new_edge_attribute_by_function,
