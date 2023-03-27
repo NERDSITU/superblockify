@@ -111,10 +111,10 @@ def components_are_connected(partitioning):
                 partitioning.graph.edges[edge]["highlight"] = 1
             plot_by_attribute(
                 partitioning.graph,
-                "highlight",
-                attr_types="numerical",
-                cmap="hsv",
-                minmax_val=(0, 1),
+                edge_attr="highlight",
+                edge_attr_types="numerical",
+                edge_cmap="hsv",
+                edge_minmax_val=(0, 1),
                 show="pytest" not in modules
                 or not config.getboolean("tests", "hide_plots"),
             )

@@ -9,7 +9,7 @@ from shutil import rmtree
 import osmnx as ox
 import pytest
 
-from superblockify import partitioning
+from superblockify import partitioning, new_edge_attribute_by_function
 from superblockify.partitioning import BasePartitioner
 
 config = ConfigParser()
@@ -117,6 +117,23 @@ def test_city_small_precalculated(test_city_small, partitioner_class):
     part = partitioner_class(name=city_name + "_test", city_name=city_name, graph=graph)
     part.run(calculate_metrics=False)
     return part
+
+
+@pytest.fixture(scope="module")
+def test_city_small_osmid1(test_city_small):
+    """Return a graph with a the osmid baked down to a single value."""
+    _, graph = test_city_small
+    # work on copy of graph, as it is a shared fixture
+    graph = graph.copy()
+    # Some osmid attributes return lists, not ints, just take first element
+    new_edge_attribute_by_function(
+        graph,
+        lambda osmid: osmid if isinstance(osmid, int) else osmid[0],
+        "osmid",
+        "osmid",
+        allow_overwriting=True,
+    )
+    return graph
 
 
 @pytest.fixture(scope="class")

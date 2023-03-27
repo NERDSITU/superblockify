@@ -626,8 +626,8 @@ class BasePartitioner(ABC):
         )
         return plot.plot_by_attribute(
             self.graph,
-            self.attribute_label,
-            minmax_val=self.attr_value_minmax,
+            edge_attr=self.attribute_label,
+            edge_minmax_val=self.attr_value_minmax,
             **pba_kwargs,
         )
 

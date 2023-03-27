@@ -48,18 +48,28 @@ def paint_streets(graph, cmap="hsv", **pg_kwargs):
     )
 
     return plot_by_attribute(
-        graph, "bearing_90", attr_types="numerical", cmap=cmap, **pg_kwargs
+        graph,
+        edge_attr="bearing_90",
+        edge_attr_types="numerical",
+        edge_cmap=cmap,
+        **pg_kwargs,
     )
 
 
 def plot_by_attribute(
     graph,
-    attr,
-    attr_types="numerical",
-    cmap="hsv",
+    edge_attr=None,
+    edge_attr_types="numerical",
+    edge_cmap="hsv",
     edge_linewidth=1,
-    node_alpha=0,
-    minmax_val=None,
+    edge_minmax_val=None,
+    node_attr=None,
+    node_attr_types="numerical",
+    node_cmap="hsv",
+    node_size=15,
+    node_minmax_val=None,
+    edge_color=None,
+    node_color=None,
     **pg_kwargs,
 ):
     """Plot a graph based on an edge attribute and colormap.
@@ -71,73 +81,147 @@ def plot_by_attribute(
     ----------
     graph : networkx.MultiDiGraph
         Input graph
-    attr : string
-        Graph's attribute to select colors by
-    attr_types : string, optional
-        Type of the attribute to be plotted, can be 'numerical' or 'categorical'
-    cmap : string, optional
-        Name of a matplotlib colormap
+    edge_attr : string, optional
+        Graph's edge attribute to select colors by
+    edge_attr_types : string, optional
+        Type of the edge attribute to be plotted, can be 'numerical' or 'categorical'
+    edge_cmap : string, optional
+        Name of a matplotlib colormap to use for the edge colors
     edge_linewidth : float, optional
         Width of the edges' lines
-    node_alpha : float, optional
-        Opacity of the nodes
-    edge_color : None, optional
-        Do not pass this attribute, as it is set by the bearing direction.
-    minmax_val : tuple, optional
-        Tuple of (min, max) values of the attribute to be plotted
-        (default: min and max of attr)
+    edge_minmax_val : tuple, optional
+        Tuple of (min, max) values of the edge attribute to be plotted
+        (default: min and max of edge attr)
+    node_attr : string, optional
+        Graph's node attribute to select colors by
+    node_attr_types : string, optional
+        Type of the node attribute to be plotted, can be 'numerical' or 'categorical'
+    node_cmap : string, optional
+        Name of a matplotlib colormap to use for the node colors
+    node_size : int, optional
+        Size of the nodes
+    node_minmax_val : tuple, optional
+        Tuple of (min, max) values of the node attribute to be plotted
+        (default: min and max of node attr)
     pg_kwargs
         Keyword arguments to pass to `osmnx.plot_graph`.
+    edge_color : string, optional
+        Do not pass this attribute if `edge_attr` is set, as it is set by the
+        edge attribute and colormap.
+    node_color : string, optional
+        Do not pass this attribute if `node_attr` is set, as it is set by the
+        node attribute and colormap.
 
     Raises
     ------
     ValueError
-        If edge_color was set to anything but None.
+        If `edge_color`/`node_color` is set while `edge_attr`/`node_attr` is set.
     ValueError
         If `edge_linewidth` and `node_size` both <= 0, otherwise the plot will be empty.
+    ValueError
+        If `edge_attr` and `node_attr` are both None.
 
     Returns
     -------
     fig, axe : tuple
         matplotlib figure, axis
 
+    Notes
+    -----
+    At least one of `edge_attr` or `node_attr` must be set.
+
     """
+    # pylint: disable=too-many-arguments, too-many-locals
 
-    if ("edge_color" in pg_kwargs) and (pg_kwargs["edge_color"] is not None):
+    # Check if edge_attr and node_attr are both None
+    if edge_attr is None and node_attr is None:
+        raise ValueError("At least one of `edge_attr` or `node_attr` must be set.")
+    # If edge_attr/node_attr is set it cannot be in pg_kwargs, check respectively
+    if edge_attr and edge_color is not None:
         raise ValueError(
-            f"The `edge_color` attribute was set to {pg_kwargs['edge_color']}, "
-            f"it will be overwritten by the colors determined with the "
-            f"bearings and colormap."
+            f"The `edge_color` attribute was set to {edge_color}, it will be "
+            f"overwritten by the colors determined with the bearings and colormap."
+        )
+    if node_attr and node_color is not None:
+        raise ValueError(
+            f"The `node_color` attribute was set to {node_color}, it will be "
+            f"overwritten by the colors determined with the bearings and colormap."
         )
 
-    # Choose the color for each edge based on the edge's attribute value,
-    # if `None`, set to gray.
-    colormap = plt.get_cmap(cmap)
+    e_c, n_c = None, None
 
-    # Make list of edge colors, order is the same as in graph.edges()
-    e_c = list(
-        make_edge_color_list(
+    if edge_attr:
+        # Choose the color for each edge based on the edge's attribute value,
+        # if `None`, set to black.
+        # Make list of edge colors, order is the same as in graph.edges()
+        e_c = list(
+            make_edge_color_list(
+                graph,
+                edge_attr,
+                plt.get_cmap(edge_cmap),
+                attr_types=edge_attr_types,
+                minmax_val=edge_minmax_val,
+                none_color=(0, 0, 0, 1),  # black
+            )
+        )
+        # Print list of unique colors in the colormap, with a set comprehension
+        logger.debug(
+            "Unique colors in the edge colormap %s (len %s): %s",
+            edge_cmap,
+            len(e_c),
+            {tuple(c) for c in e_c},
+        )
+    if node_attr:
+        # Choose the color for each node based on the node's attribute value,
+        # if `None`, set to black.
+        # Make list of node colors, order is the same as in graph.nodes()
+        n_c = list(
+            make_node_color_list(
+                graph,
+                node_attr,
+                plt.get_cmap(node_cmap),
+                attr_types=node_attr_types,
+                minmax_val=node_minmax_val,
+                none_color=(0, 0, 0, 0),  # transparent
+            )
+        )
+        # Print list of unique colors in the colormap, with a set comprehension
+        logger.debug(
+            "Unique colors in the node colormap %s: %s",
+            node_cmap,
+            {tuple(c) for c in n_c},
+        )
+
+    # If only edge_attr is set
+    if e_c and not n_c:
+        # Plot graph with osmnx's function, pass further attributes
+        return ox.plot_graph(
             graph,
-            attr,
-            colormap,
-            attr_types=attr_types,
-            minmax_val=minmax_val,
-            none_color=(0, 0, 0, 1),
+            node_size=node_size,
+            edge_color=e_c,
+            # node_color=node_color,
+            edge_linewidth=edge_linewidth,
+            bgcolor=(0, 0, 0, 0),
+            **pg_kwargs,
         )
-    )
-
-    # Print list of unique colors in the colormap, with a set comprehension
-    logger.debug(
-        "Unique colors in the colormap %s: %s",
-        cmap,
-        {tuple(c) for c in e_c},
-    )
-
-    # Plot graph with osmnx's function, pass further attributes
+    # If only node_attr is set
+    if n_c and not e_c:
+        # Plot graph with osmnx's function, pass further attributes
+        return ox.plot_graph(
+            graph,
+            node_size=node_size,
+            edge_color=edge_color,
+            node_color=n_c,
+            edge_linewidth=edge_linewidth,
+            bgcolor=(0, 0, 0, 0),
+            **pg_kwargs,
+        )
+    # If both edge_attr and node_attr are set
     return ox.plot_graph(
         graph,
-        node_alpha=node_alpha,
+        node_size=node_size,
         edge_color=e_c,
+        node_color=n_c,
         edge_linewidth=edge_linewidth,
         bgcolor=(0, 0, 0, 0),
         **pg_kwargs,
@@ -536,10 +620,10 @@ def plot_road_type_for(graph, included_types, name, **plt_kwargs):
     # Use plot_by_attribute to plot the distribution of residential edges
     return plot_by_attribute(
         graph,
-        "residential",
-        attr_types="numerical",
-        cmap="cool",
-        minmax_val=(0, 1),
+        edge_attr="residential",
+        edge_attr_types="numerical",
+        edge_cmap="cool",
+        edge_minmax_val=(0, 1),
         **plt_kwargs,
     )
 

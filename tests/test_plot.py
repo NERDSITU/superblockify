@@ -4,7 +4,6 @@ from configparser import ConfigParser
 import pytest
 from matplotlib import pyplot as plt
 
-from superblockify import new_edge_attribute_by_function
 from superblockify.plot import (
     paint_streets,
     plot_by_attribute,
@@ -47,34 +46,41 @@ def test_paint_streets_empty_plot(test_city_all):
         paint_streets(graph, edge_linewidth=0, node_size=0)
 
 
-@pytest.fixture(scope="module")
-def test_city_all_osmid1(test_city_all):
-    """Return a graph with a the osmid baked down to a single value."""
-    _, graph = test_city_all
-    # work on copy of graph, as it is a shared fixture
-    graph = graph.copy()
-    # Some osmid attributes return lists, not ints, just take first element
-    new_edge_attribute_by_function(
-        graph,
-        lambda osmid: osmid if isinstance(osmid, int) else osmid[0],
-        "osmid",
-        "osmid",
-        allow_overwriting=True,
-    )
-    return graph
-
-
-def test_plot_by_attribute(test_city_all_osmid1):
+def test_plot_by_attribute(test_city_small_osmid1):
     """Test `plot_by_attribute` by design."""
-    plot_by_attribute(test_city_all_osmid1, "osmid", cmap="rainbow")
+    plot_by_attribute(test_city_small_osmid1, edge_attr="osmid", edge_cmap="rainbow")
     plt.close()
 
 
-def test_plot_by_attribute_no_attribute(test_city_all):
+@pytest.mark.parametrize(
+    "attributes",
+    [
+        {"edge_attr": None, "node_attr": None},
+        {"edge_color": "white"},
+        {"node_color": "white"},
+        {"edge_linewidth": 0, "node_size": 0},
+        {"edge_attr_types": "ff"},
+        {"node_attr_types": None},
+        {"edge_minmax_val": (1, 1)},
+        {"node_cmap": "unknown"},
+    ],
+)
+def test_plot_by_attribute_faulty(attributes, test_city_small_osmid1):
     """Test `plot_by_attribute` with missing attribute."""
-    _, graph = test_city_all
+    healthy_kwargs = {
+        "edge_attr": "bearing",
+        "edge_cmap": "rainbow",
+        "edge_color": None,
+        "node_attr": "osmid",
+        "node_cmap": "rainbow",
+        "node_color": None,
+    }
+    # change the dict with the given attributes
+    for key, value in attributes.items():
+        healthy_kwargs[key] = value
+
     with pytest.raises(ValueError):
-        plot_by_attribute(graph, "non_existent_attribute")
+        plot_by_attribute(test_city_small_osmid1, **healthy_kwargs)
 
 
 @pytest.mark.parametrize(
@@ -96,7 +102,7 @@ def test_plot_by_attribute_minmax_val_faulty(test_city_all, minmax_val_faulty):
     """Test `plot_by_attribute` with faulty minmax_val."""
     _, graph = test_city_all
     with pytest.raises(ValueError):
-        plot_by_attribute(graph, "osmid", minmax_val=minmax_val_faulty)
+        plot_by_attribute(graph, edge_attr="osmid", node_minmax_val=minmax_val_faulty)
 
 
 def test_make_edge_color_list(test_city_all):
@@ -111,15 +117,15 @@ def test_make_edge_color_list(test_city_all):
     assert len(edge_color_list[0]) == 4
 
 
-def test_make_node_color_list(test_city_all_osmid1):
+def test_make_node_color_list(test_city_small_osmid1):
     """Test `make_node_color_list` by design."""
     colormap = plt.get_cmap("rainbow")
     node_color_list = list(
         make_node_color_list(
-            test_city_all_osmid1, "osmid", cmap=colormap, attr_types="numerical"
+            test_city_small_osmid1, "osmid", cmap=colormap, attr_types="numerical"
         )
     )
-    assert len(node_color_list) == len(test_city_all_osmid1.nodes)
+    assert len(node_color_list) == len(test_city_small_osmid1.nodes)
     assert isinstance(node_color_list[0], tuple)
     assert len(node_color_list[0]) == 4
 
