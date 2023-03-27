@@ -177,15 +177,7 @@ class BasePartitioner(ABC):
             self.set_sparsified_from_components()
 
         # Check that the partitions and sparsified graph satisfy the requirements
-        if not is_valid_partitioning(self):
-            warn = (
-                "The partitioning is not valid."
-                + " The metric calculation will be done anyway,"
-                " but the results might be wrong."
-                if calculate_metrics
-                else ""
-            )
-            logger.warning(warn)
+        is_valid_partitioning(self)
 
         if make_plots:
             if self.partitions:

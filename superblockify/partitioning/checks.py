@@ -44,19 +44,22 @@ def is_valid_partitioning(partitioning):
         Whether the partitioning is valid
 
     """
+    is_valid = True
 
     # 1. Check if the sparsified graph is connected
     logger.debug(
         "Checking if the sparsified graph of %s is connected.", partitioning.name
     )
     if not is_weakly_connected(partitioning.sparsified):
-        logger.error("The sparsified graph of %s is not connected.", partitioning.name)
-        return False
+        logger.warning(
+            "The sparsified graph of %s is not connected.", partitioning.name
+        )
+        is_valid = False
 
     # 2. Check if each subgraph is connected
     logger.debug("Checking if each subgraph of %s is connected.", partitioning.name)
     if not components_are_connected(partitioning):
-        return False
+        is_valid = False
 
     # 3. - 5. For every node and edge in the graph, check if it is contained in exactly
     # one subgraph and not the sparsified graph
@@ -66,7 +69,7 @@ def is_valid_partitioning(partitioning):
         partitioning.name,
     )
     if not nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
-        return False
+        is_valid = False
 
     # 6. Check if each subgraph is connected to the sparsified graph
     logger.debug(
@@ -74,11 +77,13 @@ def is_valid_partitioning(partitioning):
         partitioning.name,
     )
     if not components_are_connect_sparsified(partitioning):
-        return False
+        is_valid = False
 
-    logger.info("The partitioning %s is valid.", partitioning.name)
-
-    return True
+    if is_valid:
+        logger.info("The partitioning %s is valid.", partitioning.name)
+    else:
+        logger.error("The partitioning %s is not valid.", partitioning.name)
+    return is_valid
 
 
 def components_are_connected(partitioning):
@@ -100,7 +105,7 @@ def components_are_connected(partitioning):
         partitioning.components if partitioning.components else partitioning.partitions
     ):
         if not is_weakly_connected(component["subgraph"]):
-            logger.error(
+            logger.warning(
                 "The subgraph %s of %s is not connected.",
                 component["name"],
                 partitioning.name,
@@ -143,6 +148,7 @@ def nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
     bool
         Whether each node and edge is contained in exactly one subgraph.
     """
+    is_valid = True
 
     partition_nodes_subgraphs = partitioning.get_partition_nodes()
 
@@ -152,7 +158,7 @@ def nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
     )
     fill_diagonal(nodes_overlap_matrix, False)
     if nodes_overlap_matrix.any():
-        logger.error(
+        logger.warning(
             "The nodes of %s overlap in the following subgraphs: %s",
             partitioning.name,
             [
@@ -163,7 +169,7 @@ def nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
                 if i < j
             ],
         )
-        return False
+        is_valid = False
 
     # Nodes that are in no subgraph, neither the sparsified graph
     missing_nodes = (
@@ -175,7 +181,7 @@ def nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
         - set(partitioning.sparsified.nodes)
     )
     if len(missing_nodes) > 0:
-        logger.error(
+        logger.warning(
             "%s has %d nodes that are not contained in any subgraph or the "
             "sparsified graph: %s",
             partitioning.name,
@@ -195,7 +201,7 @@ def nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
             show="pytest" not in modules
             or not config.getboolean("tests", "hide_plots"),
         )
-        return False
+        is_valid = False
 
     # Check overlap of edges, including sparsified graph
     edges_overlap_matrix = has_pairwise_overlap(
@@ -206,7 +212,7 @@ def nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
     if edges_overlap_matrix.any():
         namelist = [part["name"] for part in partition_nodes_subgraphs] + ["sparse"]
 
-        logger.error(
+        logger.warning(
             "The edges of %s overlap in the following subgraphs: %s",
             partitioning.name,
             [
@@ -216,7 +222,7 @@ def nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
                 if i < j
             ],
         )
-        return False
+        is_valid = False
 
     # Edges that are in no subgraph, neither the sparsified graph
     missing_edges = (
@@ -230,16 +236,16 @@ def nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
         - set(partitioning.sparsified.edges)
     )
     if len(missing_edges) > 0:
-        logger.error(
+        logger.warning(
             "%s has %d edges that are not contained in any subgraph or the "
             "sparsified graph: %s",
             partitioning.name,
             len(missing_edges),
             missing_edges,
         )
-        return False
+        is_valid = False
 
-    return True
+    return is_valid
 
 
 def components_are_connect_sparsified(partitioning):
@@ -266,7 +272,7 @@ def components_are_connect_sparsified(partitioning):
             and node in partitioning.sparsified.nodes
             for node in partitioning.graph.nodes
         ):
-            logger.error(
+            logger.warning(
                 "The subgraph %s of %s is not connected to the sparsified graph.",
                 component["name"],
                 partitioning.name,
