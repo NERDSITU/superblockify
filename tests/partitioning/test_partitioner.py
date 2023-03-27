@@ -1,6 +1,7 @@
 """Tests for the partitioner module."""
 import logging
 from configparser import ConfigParser
+from copy import deepcopy
 from os import path, remove
 
 import networkx as nx
@@ -133,7 +134,8 @@ class TestPartitioners:
         self, test_city_small_precalculated
     ):
         """Test `overwrite_attributes_of_ignored_components` exception handling."""
-        part = test_city_small_precalculated
+        # work on copy of object
+        part = deepcopy(test_city_small_precalculated)
         part.components = None
         with pytest.raises(AssertionError):
             part.overwrite_attributes_of_ignored_components(
