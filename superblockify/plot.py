@@ -85,8 +85,8 @@ def plot_by_attribute(
         Graph's edge attribute to select colors by
     edge_attr_types : string, optional
         Type of the edge attribute to be plotted, can be 'numerical' or 'categorical'
-    edge_cmap : string, optional
-        Name of a matplotlib colormap to use for the edge colors
+    edge_cmap : string or matplotlib.colors.ListedColormap, optional
+        Name of a matplotlib colormap to use for the edge colors or a colormap object
     edge_linewidth : float, optional
         Width of the edges' lines
     edge_minmax_val : tuple, optional
@@ -96,8 +96,8 @@ def plot_by_attribute(
         Graph's node attribute to select colors by
     node_attr_types : string, optional
         Type of the node attribute to be plotted, can be 'numerical' or 'categorical'
-    node_cmap : string, optional
-        Name of a matplotlib colormap to use for the node colors
+    node_cmap : string or matplotlib.colors.ListedColormap, optional
+        Name of a matplotlib colormap to use for the node colors or a colormap object
     node_size : int, optional
         Size of the nodes
     node_minmax_val : tuple, optional
@@ -157,8 +157,10 @@ def plot_by_attribute(
         e_c = list(
             make_edge_color_list(
                 graph,
-                edge_attr,
-                plt.get_cmap(edge_cmap),
+                attr=edge_attr,
+                cmap=plt.get_cmap(edge_cmap)
+                if isinstance(edge_cmap, str)
+                else edge_cmap,
                 attr_types=edge_attr_types,
                 minmax_val=edge_minmax_val,
                 none_color=(0, 0, 0, 1),  # black
@@ -178,8 +180,10 @@ def plot_by_attribute(
         n_c = list(
             make_node_color_list(
                 graph,
-                node_attr,
-                plt.get_cmap(node_cmap),
+                attr=node_attr,
+                cmap=plt.get_cmap(node_cmap)
+                if isinstance(node_cmap, str)
+                else node_cmap,
                 attr_types=node_attr_types,
                 minmax_val=node_minmax_val,
                 none_color=(0, 0, 0, 0),  # transparent
@@ -187,8 +191,9 @@ def plot_by_attribute(
         )
         # Print list of unique colors in the colormap, with a set comprehension
         logger.debug(
-            "Unique colors in the node colormap %s: %s",
+            "Unique colors in the node colormap %s (len %s): %s",
             node_cmap,
+            len(n_c),
             {tuple(c) for c in n_c},
         )
 
@@ -199,7 +204,7 @@ def plot_by_attribute(
             graph,
             node_size=node_size,
             edge_color=e_c,
-            # node_color=node_color,
+            node_color=node_color if node_color else (0, 0, 0, 0),
             edge_linewidth=edge_linewidth,
             bgcolor=(0, 0, 0, 0),
             **pg_kwargs,
@@ -210,7 +215,7 @@ def plot_by_attribute(
         return ox.plot_graph(
             graph,
             node_size=node_size,
-            edge_color=edge_color,
+            edge_color=edge_color if edge_color else (0, 0, 0, 0),
             node_color=n_c,
             edge_linewidth=edge_linewidth,
             bgcolor=(0, 0, 0, 0),
@@ -384,7 +389,7 @@ def make_color_list(
         )
 
     if attr_types == "numerical":
-        minmax_val = determine_minmax_val(graph, minmax_val, attr)
+        minmax_val = determine_minmax_val(graph, minmax_val, attr, attr_type=obj_type)
         if obj_type == "edge":
             return [
                 cmap((attr_val - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
@@ -424,7 +429,7 @@ def make_color_list(
         finally:
             unique_vals.append(None)
 
-        if obj_type == "node":
+        if obj_type == "edge":
             return [
                 cmap(unique_vals.index(attr_val) / (len(unique_vals) - 1))
                 if attr_val is not None

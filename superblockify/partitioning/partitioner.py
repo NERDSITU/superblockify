@@ -8,11 +8,13 @@ from typing import final, Final, List
 
 import osmnx as ox
 from matplotlib import pyplot as plt
+from matplotlib.colors import ListedColormap
 from networkx import weakly_connected_components, set_edge_attributes, MultiDiGraph
-from numpy import linspace
+from numpy import linspace, array
 from osmnx.stats import edge_length_total
 
 from .checks import is_valid_partitioning
+from .representative import set_representative_nodes
 from .. import attribute, plot
 from ..metrics.metric import Metric
 from ..plot import save_plot
@@ -178,6 +180,11 @@ class BasePartitioner(ABC):
 
         # Check that the partitions and sparsified graph satisfy the requirements
         is_valid_partitioning(self)
+
+        # Set representative nodes
+        set_representative_nodes(
+            self.components if self.components else self.partitions
+        )
 
         if make_plots:
             if self.partitions:
@@ -664,7 +671,7 @@ class BasePartitioner(ABC):
             self.name,
             self.attribute_label,
         )
-        # Bake component labels into graph
+        # Bake component labels and representative nodes into graph
         for component in self.components:
             if not component["ignore"]:
                 set_edge_attributes(
@@ -672,12 +679,31 @@ class BasePartitioner(ABC):
                     component["name"],
                     "component_name",
                 )
+                self.graph.nodes[component["representative_node_id"]][
+                    "representative_node_name"
+                ] = component["name"]
+
+        cmap = plt.get_cmap("prism")
+        # So markers for representative nodes are not the same color as the edges,
+        # where they are placed on, construct a new color map from the prism color
+        # map, but which is darker. Same colors as cmap, but all values are
+        # multiplied by 0.75, except the alpha value, which is set to 1.
+        dark_cmap = ListedColormap(
+            array([cmap(i) for i in range(cmap.N)]) * array([0.75, 0.75, 0.75, 1])
+        )
+
         return plot.plot_by_attribute(
             self.graph,
-            attr="component_name",
-            attr_types="categorical",
-            cmap="prism",
-            minmax_val=None,
+            edge_attr="component_name",
+            edge_attr_types="categorical",
+            edge_cmap=cmap,
+            edge_minmax_val=None,
+            node_attr="representative_node_name",
+            node_attr_types="categorical",
+            node_cmap=dark_cmap,
+            node_minmax_val=None,
+            node_size=40,
+            node_zorder=2,
             **pba_kwargs,
         )
 

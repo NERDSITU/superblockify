@@ -46,9 +46,23 @@ def test_paint_streets_empty_plot(test_city_all):
         paint_streets(graph, edge_linewidth=0, node_size=0)
 
 
-def test_plot_by_attribute(test_city_small_osmid1):
+@pytest.mark.parametrize(
+    "e_a,n_a",
+    [
+        ("bearing", "osmid"),
+        ("bearing", None),
+        (None, "osmid"),
+    ],
+)
+def test_plot_by_attribute(test_city_small_osmid, e_a, n_a):
     """Test `plot_by_attribute` by design."""
-    plot_by_attribute(test_city_small_osmid1, edge_attr="osmid", edge_cmap="rainbow")
+    plot_by_attribute(
+        test_city_small_osmid,
+        edge_attr=e_a,
+        edge_cmap="rainbow",
+        node_attr=n_a,
+        node_cmap="rainbow",
+    )
     plt.close()
 
 
@@ -65,13 +79,13 @@ def test_plot_by_attribute(test_city_small_osmid1):
         {"node_cmap": "unknown"},
     ],
 )
-def test_plot_by_attribute_faulty(attributes, test_city_small_osmid1):
+def test_plot_by_attribute_faulty(attributes, test_city_small_osmid):
     """Test `plot_by_attribute` with missing attribute."""
     healthy_kwargs = {
         "edge_attr": "bearing",
         "edge_cmap": "rainbow",
         "edge_color": None,
-        "node_attr": "osmid",
+        "node_attr": "osmid1",
         "node_cmap": "rainbow",
         "node_color": None,
     }
@@ -80,7 +94,7 @@ def test_plot_by_attribute_faulty(attributes, test_city_small_osmid1):
         healthy_kwargs[key] = value
 
     with pytest.raises(ValueError):
-        plot_by_attribute(test_city_small_osmid1, **healthy_kwargs)
+        plot_by_attribute(test_city_small_osmid, **healthy_kwargs)
 
 
 @pytest.mark.parametrize(
@@ -117,15 +131,15 @@ def test_make_edge_color_list(test_city_all):
     assert len(edge_color_list[0]) == 4
 
 
-def test_make_node_color_list(test_city_small_osmid1):
+def test_make_node_color_list(test_city_small_osmid):
     """Test `make_node_color_list` by design."""
     colormap = plt.get_cmap("rainbow")
     node_color_list = list(
         make_node_color_list(
-            test_city_small_osmid1, "osmid", cmap=colormap, attr_types="numerical"
+            test_city_small_osmid, "osmid", cmap=colormap, attr_types="numerical"
         )
     )
-    assert len(node_color_list) == len(test_city_small_osmid1.nodes)
+    assert len(node_color_list) == len(test_city_small_osmid.nodes)
     assert isinstance(node_color_list[0], tuple)
     assert len(node_color_list[0]) == 4
 

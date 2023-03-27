@@ -39,15 +39,16 @@ class ResidentialPartitioner(BasePartitioner):
             False
         """
 
+        self.attribute_label = "residential"
+
         # Write to 'residential' attribute 1 if edge['highway'] is or contains
         # 'residential', None otherwise
         new_edge_attribute_by_function(
             self.graph,
             lambda highway: 1 if "residential" in highway else None,
             source_attribute="highway",
-            destination_attribute="residential",
+            destination_attribute=self.attribute_label,
         )
-        self.attribute_label = "residential"
 
         # Find all edges that are not residential and make a subgraph of them
         non_residential_edges = [

@@ -197,7 +197,6 @@ def determine_minmax_val(graph, minmax_val, attr, attr_type="edge"):
                 ),
             )
         else:
-            print(get_node_attributes(graph, attr).values())
             minmax = (
                 amin(
                     [
@@ -214,7 +213,6 @@ def determine_minmax_val(graph, minmax_val, attr, attr_type="edge"):
                     ]
                 ),
             )
-            print(minmax)
         if minmax_val is None or minmax_val == (None, None):
             minmax_val = minmax
         elif minmax_val[0] is None:

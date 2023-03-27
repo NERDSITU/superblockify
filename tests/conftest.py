@@ -8,8 +8,9 @@ from shutil import rmtree
 
 import osmnx as ox
 import pytest
+from networkx import set_node_attributes
 
-from superblockify import partitioning, new_edge_attribute_by_function
+from superblockify import partitioning
 from superblockify.partitioning import BasePartitioner
 
 config = ConfigParser()
@@ -76,7 +77,7 @@ def test_city_all_preloaded_save(
         city_name=city_name,
         graph=graph.copy(),
     )
-    part.save(save_graph_copy=False)
+    part.save(save_graph_copy=True)
     return part.name, part.__class__
 
 
@@ -101,7 +102,7 @@ def test_city_all_precalculated_save(
         graph=graph.copy(),
     )
     part.run(calculate_metrics=False)
-    part.save(save_graph_copy=False)
+    part.save(save_graph_copy=True)
     return part.name, part.__class__
 
 
@@ -128,18 +129,16 @@ def test_city_small_precalculated(test_city_small, partitioner_class):
 
 
 @pytest.fixture(scope="module")
-def test_city_small_osmid1(test_city_small):
-    """Return a graph with a the osmid baked down to a single value."""
+def test_city_small_osmid(test_city_small):
+    """Return a graph with the osmid baked down to a single value."""
     _, graph = test_city_small
     # work on copy of graph, as it is a shared fixture
     graph = graph.copy()
     # Some osmid attributes return lists, not ints, just take first element
-    new_edge_attribute_by_function(
+    set_node_attributes(
         graph,
-        lambda osmid: osmid if isinstance(osmid, int) else osmid[0],
+        {node: node for node in graph.nodes()},
         "osmid",
-        "osmid",
-        allow_overwriting=True,
     )
     return graph
 
