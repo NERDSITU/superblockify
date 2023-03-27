@@ -24,6 +24,11 @@ def set_representative_nodes(components):
     components.
 
     """
+
+    def _distance_to_rep_point(node_geometry):
+        """Return the distance from the node to the representative point."""
+        return node_geometry.distance(hull_nodes_reppoint)
+
     for component in components:
         # Get the nodes as a geodataframe
         nodes = graph_to_gdfs(
@@ -35,10 +40,12 @@ def set_representative_nodes(components):
 
         # 2. find representative point of the polygon: Point geometry
         hull_nodes_reppoint: GeometryArray = hull_nodes.representative_point()
+
         # note that .centroid() is not guaranteed to be *within* the geometry,
         # while .representative point() is
 
         # 3. find network node that is closest to the representative point
+
         component["representative_node_id"] = nodes.geometry.apply(
-            lambda x: x.distance(hull_nodes_reppoint)
+            _distance_to_rep_point
         ).idxmin()
