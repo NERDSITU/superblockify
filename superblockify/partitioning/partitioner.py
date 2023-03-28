@@ -424,7 +424,8 @@ class BasePartitioner(ABC):
                 continue
             subgraph = self.graph.edge_subgraph(
                 # forward edges + backward edges - span directed graph from undirected
-                list(edges) + [(v, u, k) for u, v, k in edges]
+                list(edges)
+                + [(v, u, k) for u, v, k in edges]
             )
             self.partitions.append(
                 {
