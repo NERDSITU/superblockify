@@ -9,7 +9,11 @@ from typing import final, Final, List
 import osmnx as ox
 from matplotlib import pyplot as plt
 from matplotlib.colors import ListedColormap
-from networkx import weakly_connected_components, set_edge_attributes, MultiDiGraph
+from networkx import (
+    weakly_connected_components,
+    set_edge_attributes,
+    MultiDiGraph,
+)
 from numpy import linspace, array
 from osmnx.stats import edge_length_total
 
@@ -393,22 +397,34 @@ class BasePartitioner(ABC):
         rest = self.graph.edge_subgraph(
             [
                 (u, v, k)
-                for u, v, k, d in self.graph.edges(keys=True, data=True)
+                for u, v, k, _ in self.graph.edges(keys=True, data=True)
                 if (u, v, k) not in self.sparsified.edges(keys=True)
             ]
+        ).copy()
+
+        rest.remove_nodes_from(self.sparsified.nodes())
+        logger.debug(
+            "Making components from sparsified graph, "
+            "rest graph has %d nodes and %d edges.",
+            len(rest.nodes),
+            len(rest.edges),
         )
+
+        # Find weakly connected components on the rest graph with split nodes
         wc_components = list(weakly_connected_components(rest))
 
         self.attr_value_minmax = (0, len(wc_components))
         self.partitions = []
+        undirected = self.graph.to_undirected()
         for i, component in enumerate(wc_components):
-            # Find edges that are connected to the component nodes, but not sparsified
+            # Find edges that are connected to the component nodes, on undirected graph
+            edges = undirected.edges(component, keys=True)
+            if not edges:
+                logger.debug("Skipping empty component %d", i)
+                continue
             subgraph = self.graph.edge_subgraph(
-                [
-                    (u, v, k)
-                    for u, v, k in rest.edges(keys=True)
-                    if u in component or v in component
-                ]
+                # forward edges + backward edges - span directed graph from undirected
+                list(edges) + [(v, u, k) for u, v, k in edges]
             )
             self.partitions.append(
                 {
