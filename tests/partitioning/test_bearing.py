@@ -1,4 +1,5 @@
 """Tests for the partitioner module."""
+from copy import deepcopy
 from itertools import product
 
 import numpy as np
@@ -16,7 +17,7 @@ class TestBearingPartitioner:
         """Test `__bin_bearings` class method by design."""
         city_name, graph = test_city_all
         part = BearingPartitioner(
-            name=city_name + "_test", city_name=city_name, graph=graph
+            name=city_name + "_test", city_name=city_name, graph=deepcopy(graph)
         )
         part._BearingPartitioner__bin_bearings(bin_num)
         assert part._bin_info["num_bins"] == bin_num
