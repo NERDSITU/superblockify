@@ -45,9 +45,7 @@ def test_load_graph_from_place():
         ("CPH-osmid-list", ["R2192363", "R2186660"]),
     ],
 )
-def test_load_graph_from_place_search_str_types(
-    city, search_string
-):
+def test_load_graph_from_place_search_str_types(city, search_string):
     """Test that the load_graph_from_place function works with different search string
     types."""
     graph = load_graph_from_place(
