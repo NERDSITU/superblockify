@@ -49,3 +49,7 @@ def set_representative_nodes(components):
         component["representative_node_id"] = nodes.geometry.apply(
             _distance_to_rep_point
         ).idxmin()
+
+        component["subgraph"].nodes[component["representative_node_id"]][
+            "representative_node_name"
+        ] = component["name"]

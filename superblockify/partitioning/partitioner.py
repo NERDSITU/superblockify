@@ -688,7 +688,7 @@ class BasePartitioner(ABC):
             self.name,
             self.attribute_label,
         )
-        # Bake component labels and representative nodes into graph
+        # Bake component labels into graph
         for component in self.components:
             if not component["ignore"]:
                 set_edge_attributes(
@@ -696,9 +696,6 @@ class BasePartitioner(ABC):
                     component["name"],
                     "component_name",
                 )
-                self.graph.nodes[component["representative_node_id"]][
-                    "representative_node_name"
-                ] = component["name"]
 
         cmap = plt.get_cmap("prism")
         # So markers for representative nodes are not the same color as the edges,
