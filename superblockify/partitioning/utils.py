@@ -11,7 +11,7 @@ logger = logging.getLogger("superblockify")
 def save_to_gpkg(partitioner, save_path=None):
     """Save the partitioner's graph and LTNs to a geodatapackage.
 
-    THe name of the components (/partitions) are saved into a "classification" edge
+    The name of the components (/partitions) are saved into a "classification" edge
     attribute. The sparse graph is saved with the value "SPARSE" into the
     "classification" edge attribute.
 
@@ -29,6 +29,20 @@ def save_to_gpkg(partitioner, save_path=None):
         If the partitioner has no components or partitions attribute.
     ValueError
         If the partitioner has no sparsified subgraph.
+
+    Notes
+    -----
+    The geopackage will contain the following layers:
+    - nodes
+        - representative_node_name
+        - missing_nodes: if node is not in any component/partition or sparsified graph
+        - y, x, lat, lon, geometry
+    - edges
+        - classification
+        - osmid, highway, length, geometry
+        - (bearing: the bearing of the edge, bearing_90: mod(bearing, 90))
+        - (residential: 1 if edge['highway'] is or contains 'residential',
+          None otherwise)
     """
 
     if partitioner.sparsified is None:
@@ -81,14 +95,24 @@ def save_to_gpkg(partitioner, save_path=None):
         # change the edge attribute in the whole subgraph, applying the LTN
         set_edge_attributes(part["subgraph"], part["name"], "classification")
 
-    edges = graph_to_gdfs(partitioner.graph, nodes=False, fill_edge_geometry=True)
+    nodes, edges = graph_to_gdfs(partitioner.graph, nodes=True, fill_edge_geometry=True)
     # For attributes that are lists, we need to convert them to strings
     for col in edges.columns:
         if edges[col].dtype == "object":
             logger.debug("Converting column %s of type %s to str.", col, type(col))
             edges[col] = edges[col].astype(str)
-    edges.to_file(
-        filepath,
-        layer="edges",
-        index=False,
-    )
+    # Sparsified edges are saved with the value "SPARSE" into the "classification"
+    # edge attribute
+    set_edge_attributes(partitioner.sparsified, "SPARSE", "classification")
+
+    # Remove certain attributes from nodes and edges
+    # nodes = nodes.drop(columns=[])
+    edges = edges.drop(columns=["component_name", "length"])
+
+    # list attributes in nodes and edges
+    logger.info("Nodes attributes: %s", nodes.columns)
+    logger.info("Edges attributes: %s", edges.columns)
+
+    # Save nodes and edges to seperate layers/geodataframes of same geodatapackage
+    nodes.to_file(filepath, layer="nodes", index=False, mode="w")  # overwrite
+    edges.to_file(filepath, layer="edges", index=False, mode="a")  # append
