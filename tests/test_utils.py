@@ -1,5 +1,7 @@
 """Tests for the utils module."""
 from configparser import ConfigParser
+from os import remove
+from os.path import exists
 
 import pytest
 from numpy import array, array_equal
@@ -26,6 +28,48 @@ def test_load_graph_from_place():
     assert graph is not None
     assert len(graph) > 0
     assert graph.size() > 0
+
+
+@pytest.mark.parametrize(
+    "city,search_string",
+    [
+        ("CPH-str", "Københavns Kommune, Region Hovedstaden, Danmark"),
+        (
+            "CPH-list",
+            [
+                "Københavns Kommune, Region Hovedstaden, Danmark",
+                "Frederiksberg Kommune, Denmark",
+            ],
+        ),
+        ("CPH-osmid", "R2192363"),
+        ("CPH-osmid-list", ["R2192363", "R2186660"]),
+    ],
+)
+def test_load_graph_from_place_search_str_types(
+    city, search_string
+):
+    """Test that the load_graph_from_place function works with different search string
+    types."""
+    graph = load_graph_from_place(
+        save_as=f"{config['tests']['test_data_path']}/cities/{city}_query_test.graphml",
+        search_string=search_string,
+        network_type="drive",
+    )
+    assert graph is not None
+    assert len(graph) > 0
+    assert graph.size() > 0
+
+
+@pytest.fixture(scope="module")
+def _delete_query_test_graphs():
+    """Delete the query test graphs."""
+    yield
+    for city in ["CPH-str", "CPH-list", "CPH-osmid", "CPH-osmid-list"]:
+        filepath = (
+            f"{config['tests']['test_data_path']}/cities/{city}_query_test.graphml"
+        )
+        if exists(filepath):
+            remove(filepath)
 
 
 @pytest.mark.parametrize(
