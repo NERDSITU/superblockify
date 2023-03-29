@@ -128,6 +128,22 @@ def test_city_small_precalculated(test_city_small, partitioner_class):
     return part
 
 
+@pytest.fixture(scope="session")
+def test_one_city_precalculated(partitioner_class):
+    """Fixture for loading and parametrizing small cities with bearing and length
+    test_data. Without metrics. Take only one city of test_city_small."""
+    city_name, graph = SMALL_CITIES[0][:-8], ox.load_graphml(
+        filepath=f"{TEST_DATA}cities/" + SMALL_CITIES[0]
+    )
+    part = partitioner_class(
+        name=f"{city_name}_{partitioner_class.__name__}_precalculated_test",
+        city_name=city_name,
+        graph=graph.copy(),
+    )
+    part.run(calculate_metrics=False)
+    return part
+
+
 @pytest.fixture(scope="module")
 def test_city_small_osmid(test_city_small):
     """Return a graph with the osmid baked down to a single value."""

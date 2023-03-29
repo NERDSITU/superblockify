@@ -1,6 +1,6 @@
 """Utility functions for Partitioners."""
 import logging
-from os import path
+from os import path, remove
 
 from networkx import set_edge_attributes
 from osmnx import graph_to_gdfs
@@ -73,10 +73,12 @@ def save_to_gpkg(partitioner, save_path=None):
         logger.info(
             "Using partitions attribute to save LTNs to geodatapackage %s", filepath
         )
-    else:
+
+    if not isinstance(parts, list):
         raise ValueError(
-            "Partitioner has neither components nor partitions attribute, "
-            "this should not happen."
+            f"Partitioner's components/partitions attribute is of type {type(parts)}, "
+            "but should be a list of dicts where each dict has a 'subgraph' and "
+            "'name' key."
         )
     # if parts are not None and type is not list of dicts with "subgraph" and "name"
     if not all(
@@ -94,6 +96,9 @@ def save_to_gpkg(partitioner, save_path=None):
         # As part["subgraph"] is connected to partitioner.graph, we can just
         # change the edge attribute in the whole subgraph, applying the LTN
         set_edge_attributes(part["subgraph"], part["name"], "classification")
+    # Sparsified edges are saved with the value "SPARSE" into the "classification"
+    # edge attribute
+    set_edge_attributes(partitioner.sparsified, "SPARSE", "classification")
 
     nodes, edges = graph_to_gdfs(partitioner.graph, nodes=True, fill_edge_geometry=True)
     # For attributes that are lists, we need to convert them to strings
@@ -101,18 +106,20 @@ def save_to_gpkg(partitioner, save_path=None):
         if edges[col].dtype == "object":
             logger.debug("Converting column %s of type %s to str.", col, type(col))
             edges[col] = edges[col].astype(str)
-    # Sparsified edges are saved with the value "SPARSE" into the "classification"
-    # edge attribute
-    set_edge_attributes(partitioner.sparsified, "SPARSE", "classification")
+
+    # list attributes in nodes and edges
+    logger.info("Node attributes: %s", nodes.columns)
+    logger.info("Edge attributes: %s", edges.columns)
 
     # Remove certain attributes from nodes and edges
     # nodes = nodes.drop(columns=[])
-    edges = edges.drop(columns=["component_name", "length"])
-
-    # list attributes in nodes and edges
-    logger.info("Nodes attributes: %s", nodes.columns)
-    logger.info("Edges attributes: %s", edges.columns)
+    edges = edges.drop(
+        columns=[attr for attr in edges.columns if attr in ["component_name", "length"]]
+    )
 
     # Save nodes and edges to seperate layers/geodataframes of same geodatapackage
-    nodes.to_file(filepath, layer="nodes", index=False, mode="w")  # overwrite
-    edges.to_file(filepath, layer="edges", index=False, mode="a")  # append
+    remove(filepath)
+    nodes.to_file(filepath, layer="nodes", index=False, mode="w")
+    logger.info("Saved %d nodes to %s", len(nodes), filepath)
+    edges.to_file(filepath, layer="edges", index=False, mode="w")
+    logger.info("Saved %d edges to %s", len(edges), filepath)
