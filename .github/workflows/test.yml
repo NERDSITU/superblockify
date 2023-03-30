@@ -20,6 +20,7 @@ jobs:
           auto-update-conda: true
           activate-environment: OSMnxPyrLab
           environment-file: environment.yml
+          miniconda-version: "latest"
 
       - name: Show environment infos
         run: |
