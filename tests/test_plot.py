@@ -54,10 +54,10 @@ def test_paint_streets_empty_plot(test_city_all_copy):
         (None, "osmid"),
     ],
 )
-def test_plot_by_attribute(test_city_small_osmid, e_a, n_a):
+def test_plot_by_attribute(test_city_small_osmid_copy, e_a, n_a):
     """Test `plot_by_attribute` by design."""
     plot_by_attribute(
-        test_city_small_osmid,
+        test_city_small_osmid_copy,
         edge_attr=e_a,
         edge_cmap="rainbow",
         node_attr=n_a,
@@ -79,7 +79,7 @@ def test_plot_by_attribute(test_city_small_osmid, e_a, n_a):
         {"node_cmap": "unknown"},
     ],
 )
-def test_plot_by_attribute_faulty(attributes, test_city_small_osmid):
+def test_plot_by_attribute_faulty(attributes, test_city_small_osmid_copy):
     """Test `plot_by_attribute` with missing attribute."""
     healthy_kwargs = {
         "edge_attr": "bearing",
@@ -94,7 +94,7 @@ def test_plot_by_attribute_faulty(attributes, test_city_small_osmid):
         healthy_kwargs[key] = value
 
     with pytest.raises(ValueError):
-        plot_by_attribute(test_city_small_osmid, **healthy_kwargs)
+        plot_by_attribute(test_city_small_osmid_copy, **healthy_kwargs)
 
 
 @pytest.mark.parametrize(
@@ -131,15 +131,15 @@ def test_make_edge_color_list(test_city_all_copy):
     assert len(edge_color_list[0]) == 4
 
 
-def test_make_node_color_list(test_city_small_osmid):
+def test_make_node_color_list(test_city_small_osmid_copy):
     """Test `make_node_color_list` by design."""
     colormap = plt.get_cmap("rainbow")
     node_color_list = list(
         make_node_color_list(
-            test_city_small_osmid, "osmid", cmap=colormap, attr_types="numerical"
+            test_city_small_osmid_copy, "osmid", cmap=colormap, attr_types="numerical"
         )
     )
-    assert len(node_color_list) == len(test_city_small_osmid.nodes)
+    assert len(node_color_list) == len(test_city_small_osmid_copy.nodes)
     assert isinstance(node_color_list[0], tuple)
     assert len(node_color_list[0]) == 4
 

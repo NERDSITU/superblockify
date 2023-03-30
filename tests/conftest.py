@@ -143,10 +143,17 @@ def test_city_small_precalculated(test_city_small, partitioner_class):
     return part
 
 
+@pytest.fixture(scope="function")
+def test_city_small_precalculated_copy(test_city_small_precalculated):
+    """Return a copy of small cities with bearing and length test_data. Without
+    metrics."""
+    return deepcopy(test_city_small_precalculated)
+
+
 @pytest.fixture(scope="session")
 def test_one_city_precalculated(partitioner_class):
-    """Fixture for loading and parametrizing small cities with bearing and length
-    test_data. Without metrics. Take only one city of test_city_small."""
+    """Fixture for loading and parametrizing one small city with bearing and length
+    test_data. Without metrics."""
     city_name, graph = SMALL_CITIES[0][:-8], ox.load_graphml(
         filepath=f"{TEST_DATA}cities/" + SMALL_CITIES[0]
     )
@@ -159,12 +166,16 @@ def test_one_city_precalculated(partitioner_class):
     return part
 
 
+@pytest.fixture(scope="function")
+def test_one_city_precalculated_copy(test_one_city_precalculated):
+    """Return a copy of one city with bearing and length test_data. Without metrics."""
+    return deepcopy(test_one_city_precalculated)
+
+
 @pytest.fixture(scope="module")
 def test_city_small_osmid(test_city_small):
     """Return a graph with the osmid baked down to a single value."""
     _, graph = test_city_small
-    # work on copy of graph, as it is a shared fixture
-    graph = graph.copy()
     # Some osmid attributes return lists, not ints, just take first element
     set_node_attributes(
         graph,
@@ -175,10 +186,9 @@ def test_city_small_osmid(test_city_small):
 
 
 @pytest.fixture(scope="function")
-def test_city_small_precalculated_copy(test_city_small_precalculated):
-    """Fixture for getting a copy of small cities with bearing and length
-    test_data. Without metrics."""
-    return deepcopy(test_city_small_precalculated)
+def test_city_small_osmid_copy(test_city_small_osmid):
+    """Return a copy of the graph with the osmid baked down to a single value."""
+    return test_city_small_osmid.copy()
 
 
 @pytest.fixture(scope="class")
