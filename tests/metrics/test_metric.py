@@ -47,13 +47,9 @@ class TestMetric:
         )
 
     @pytest.mark.xfail(reason="Partitioners need to implement `self.sparsified`.")
-    def test_calculate_all(self, test_city_small_copy, partitioner_class):
+    def test_calculate_all(self, test_city_small_precalculated):
         """Test the calculate_all method for full metrics."""
-        city_name, graph = test_city_small_copy
-        part = partitioner_class(
-            name=city_name + "_test", city_name=city_name, graph=graph
-        )
-        part.run()
+        part = deepcopy(test_city_small_precalculated)
         part.calculate_metrics(make_plots=True)
         plt.close("all")
 

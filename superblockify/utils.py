@@ -1,6 +1,7 @@
 """Utility functions for superblockify."""
 
 from itertools import chain
+from re import match
 
 import osmnx as ox
 from networkx import Graph, is_isomorphic
@@ -63,6 +64,8 @@ def load_graph_from_place(save_as, search_string, **gfp_kwargs):
     search_string : str or list of str
         The place to load the graph from. Find the place name on OpenStreetMap.
         https://nominatim.openstreetmap.org/
+        Can otherwise be OSM relation ID or a list of those. They have the format
+        "R1234567". Not mixed with place names.
     **gfp_kwargs
         Keyword arguments to pass to osmnx.graph_from_place.
 
@@ -71,7 +74,23 @@ def load_graph_from_place(save_as, search_string, **gfp_kwargs):
     networkx.MultiDiGraph
         The graph loaded from the place.
     """
-    graph = ox.graph_from_place(search_string, **gfp_kwargs)
+
+    # check the format of the search string, match to regex R\d+, str or list of str
+    # use re.match(r"R\d+", search_string) or to all elements in list
+    if (
+        isinstance(search_string, str)
+        and match(r"R\d+", search_string)
+        or isinstance(search_string, list)
+        and all(isinstance(s, str) and match(r"R\d+", s) for s in search_string)
+    ):
+        mult_polygon = ox.geocode_to_gdf(search_string, by_osmid=True)
+        # geopandas.GeoDataFrame, every column is polygon
+        # make shapely.geometry.MultiPolygon from all polygons
+        mult_polygon = mult_polygon["geometry"].unary_union
+        graph = ox.graph_from_polygon(mult_polygon, **gfp_kwargs)
+    else:
+        graph = ox.graph_from_place(search_string, **gfp_kwargs)
+
     graph = ox.distance.add_edge_lengths(graph)
     graph = extract_attributes(
         graph,

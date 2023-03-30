@@ -1,5 +1,10 @@
 """Work with graph attributes."""
-from networkx import get_edge_attributes, set_edge_attributes
+import logging
+
+from networkx import get_edge_attributes, set_edge_attributes, get_node_attributes
+from numpy import amin, amax
+
+logger = logging.getLogger("superblockify")
 
 
 def new_edge_attribute_by_function(
@@ -122,3 +127,104 @@ def get_edge_subgraph_with_attribute_value(graph, attribute_label, attribute_val
         )
 
     return graph.edge_subgraph(edges)
+
+
+def determine_minmax_val(graph, minmax_val, attr, attr_type="edge"):
+    """Determine the min and max values of an attribute in a graph.
+
+    This function is used to determine the min and max values of an attribute.
+    If `minmax_val` is None, the min and max values of the attribute in the graph
+    are used. If `minmax_val` is a tuple of length 2, the values are used as
+    min and max values. If `minmax_val` is a tuple of length 2, but the first
+    value is larger than the second, a ValueError is raised.
+    If only one value in the tuple is given, the other value is set accordingly.
+
+    Parameters
+    ----------
+    graph : networkx.MultiDiGraph
+        Input graph
+    minmax_val : tuple, None
+        Tuple of (min, max) values of the attribute to be plotted or None
+    attr : string
+        Graph's attribute to select min and max values by
+    attr_type : string, optional
+        Type of the attribute, either "edge" or "node"
+
+    Raises
+    ------
+    ValueError
+        If `minmax_val` is not a tuple of length 2 or None.
+    ValueError
+        If `minmax_val[0]` is not smaller than `minmax_val[1]`.
+    ValueError
+        If `attr_type` is not "edge" or "node".
+
+    """
+
+    if minmax_val is not None and (
+        not isinstance(minmax_val, tuple) or len(minmax_val) != 2
+    ):
+        raise ValueError(
+            f"The `minmax_val` attribute was set to {minmax_val}, "
+            f"it should be a tuple of length 2 or None."
+        )
+
+    if attr_type not in ["edge", "node"]:
+        raise ValueError(
+            f"The `attr_type` attribute was set to {attr_type}, "
+            f"it should be either 'edge' or 'node'."
+        )
+
+    # Determine min and max values of the edge attribute
+    logger.debug("Given minmax_val for edge attribute %s: %s", attr, minmax_val)
+    if minmax_val is None or minmax_val[0] is None or minmax_val[1] is None:
+        # Min and max of the edge attribute, ignoring `None` values
+        if attr_type == "edge":
+            minmax = (
+                amin(
+                    [
+                        v
+                        for v in get_edge_attributes(graph, attr).values()
+                        if v is not None
+                    ]
+                ),
+                amax(
+                    [
+                        v
+                        for v in get_edge_attributes(graph, attr).values()
+                        if v is not None
+                    ]
+                ),
+            )
+        else:
+            minmax = (
+                amin(
+                    [
+                        v
+                        for v in get_node_attributes(graph, attr).values()
+                        if v is not None
+                    ]
+                ),
+                amax(
+                    [
+                        v
+                        for v in get_node_attributes(graph, attr).values()
+                        if v is not None
+                    ]
+                ),
+            )
+        if minmax_val is None or minmax_val == (None, None):
+            minmax_val = minmax
+        elif minmax_val[0] is None:
+            minmax_val = (minmax[0], minmax_val[1])
+        else:
+            minmax_val = (minmax_val[0], minmax[1])
+        logger.debug(
+            "Determined minmax_val for edge attribute %s: %s", attr, minmax_val
+        )
+    if minmax_val[0] >= minmax_val[1]:
+        raise ValueError(
+            f"The `minmax_val` attribute is {minmax_val}, "
+            f"but the first value must be smaller than the second."
+        )
+    return minmax_val

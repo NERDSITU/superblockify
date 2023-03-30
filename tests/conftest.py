@@ -9,6 +9,7 @@ from shutil import rmtree
 
 import osmnx as ox
 import pytest
+from networkx import set_node_attributes
 
 from superblockify import partitioning
 from superblockify.partitioning import BasePartitioner
@@ -142,6 +143,37 @@ def test_city_small_precalculated(test_city_small, partitioner_class):
     return part
 
 
+@pytest.fixture(scope="session")
+def test_one_city_precalculated(partitioner_class):
+    """Fixture for loading and parametrizing small cities with bearing and length
+    test_data. Without metrics. Take only one city of test_city_small."""
+    city_name, graph = SMALL_CITIES[0][:-8], ox.load_graphml(
+        filepath=f"{TEST_DATA}cities/" + SMALL_CITIES[0]
+    )
+    part = partitioner_class(
+        name=f"{city_name}_{partitioner_class.__name__}_precalculated_test",
+        city_name=city_name,
+        graph=graph.copy(),
+    )
+    part.run(calculate_metrics=False)
+    return part
+
+
+@pytest.fixture(scope="module")
+def test_city_small_osmid(test_city_small):
+    """Return a graph with the osmid baked down to a single value."""
+    _, graph = test_city_small
+    # work on copy of graph, as it is a shared fixture
+    graph = graph.copy()
+    # Some osmid attributes return lists, not ints, just take first element
+    set_node_attributes(
+        graph,
+        {node: node for node in graph.nodes()},
+        "osmid",
+    )
+    return graph
+
+
 @pytest.fixture(scope="function")
 def test_city_small_precalculated_copy(test_city_small_precalculated):
     """Fixture for getting a copy of small cities with bearing and length
@@ -173,7 +205,7 @@ def _teardown_test_folders():
             rmtree(path.join(RESULTS_DIR, folder))
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(scope="function", autouse=config.getboolean("tests", "hide_plots"))
 def _patch_plt_show(monkeypatch):
     """Patch plt.show() and plt.Figure.show() to prevent plots from showing during
     tests."""

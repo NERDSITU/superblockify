@@ -307,10 +307,10 @@ def plot_component_wise_travel_increase(
     # Plot by attribute
     return plot_by_attribute(
         partitioner.graph,
-        "rel_increase",
-        attr_types="numerical",
-        cmap="RdYlGn",
-        minmax_val=(
+        edge_attr="rel_increase",
+        edge_attr_types="numerical",
+        edge_cmap="RdYlGn",
+        edge_minmax_val=(
             np.min([component["rel_increase"] for component in partition_nodes]),
             np.max([component["rel_increase"] for component in partition_nodes]),
         ),
@@ -391,9 +391,12 @@ def plot_relative_increase_on_graph(graph, **pg_kwargs):
 
     return plot_by_attribute(
         graph,
-        "rel_increase",
-        attr_types="numerical",
-        cmap="RdYlGn_r",
-        minmax_val=(1, np.max([edge["rel_increase"] for edge in graph.edges.values()])),
+        edge_attr="rel_increase",
+        edge_attr_types="numerical",
+        edge_cmap="RdYlGn_r",
+        edge_minmax_val=(
+            1,
+            np.max([edge["rel_increase"] for edge in graph.edges.values()]),
+        ),
         **pg_kwargs,
     )
