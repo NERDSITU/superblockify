@@ -1,6 +1,7 @@
 """Utility functions for Partitioners."""
 import logging
-from os import path, remove
+from os import remove
+from os.path import exists, join
 
 from networkx import set_edge_attributes
 from osmnx import graph_to_gdfs
@@ -61,7 +62,7 @@ def save_to_gpkg(partitioner, save_path=None):
     filepath = (
         save_path
         if save_path is not None
-        else path.join(partitioner.results_dir, partitioner.name + ".gpkg")
+        else join(partitioner.results_dir, partitioner.name + ".gpkg")
     )
     if partitioner.components:
         parts = partitioner.components
@@ -118,7 +119,9 @@ def save_to_gpkg(partitioner, save_path=None):
     )
 
     # Save nodes and edges to seperate layers/geodataframes of same geodatapackage
-    remove(filepath)
+    # if file already exists, remove it
+    if exists(filepath):
+        remove(filepath)
     nodes.to_file(filepath, layer="nodes", index=False, mode="w")
     logger.info("Saved %d nodes to %s", len(nodes), filepath)
     edges.to_file(filepath, layer="edges", index=False, mode="w")
