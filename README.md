@@ -38,3 +38,9 @@ The logging is done using the `logging` module. The logging level can be set in 
 or `CRITICAL`. It defaults to `INFO` and a rotating file handler is set up to log
 to `results/logs/superblockify.log`. The log file is rotated every megabyte and the last
 three log files are kept.
+
+## Testing
+
+The tests are specified using the `pytest` signature, see [`tests/`](tests/) folder, and
+can be run using a test runner of choice.
+A pipeline is set up, see [`.github/workflows/test.yml`](.github/workflows/test.yml).

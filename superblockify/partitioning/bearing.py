@@ -144,17 +144,6 @@ class BearingPartitioner(BasePartitioner):
             max(weakly_connected_components(self.sparsified), key=len)
         )
 
-        if make_plots:
-            fig, _ = self.plot_subgraph_component_size("length")
-            save_plot(self.results_dir, fig, f"{self.name}_subgraph_component_size.pdf")
-            plt.show()
-            fig, _ = self.plot_partition_graph()
-            save_plot(self.results_dir, fig, f"{self.name}_partition_graph.pdf")
-            plt.show()
-            fig, _ = self.plot_component_graph()
-            save_plot(self.results_dir, fig, f"{self.name}_component_graph.pdf")
-            plt.show()
-
     def __bin_bearings(self, num_bins: int):
         """Construct histogram of `self.graph` bearings.
 

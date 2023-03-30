@@ -2,12 +2,14 @@
 import inspect
 from ast import literal_eval
 from configparser import ConfigParser
+from copy import deepcopy
 from os import listdir, path, remove
 from os.path import getsize
 from shutil import rmtree
 
 import osmnx as ox
 import pytest
+from networkx import set_node_attributes
 
 from superblockify import partitioning
 from superblockify.partitioning import BasePartitioner
@@ -42,12 +44,26 @@ def test_city_all(request):
     )
 
 
+@pytest.fixture(scope="function")
+def test_city_all_copy(test_city_all):
+    """Fixture for getting a copy of all city graphs from test_data."""
+    city_name, graph = test_city_all
+    return city_name, graph.copy()
+
+
 @pytest.fixture(scope="session", params=SMALL_CITIES)
 def test_city_small(request):
     """Fixture for loading and parametrizing small city graphs from test_data."""
     return request.param[:-8], ox.load_graphml(
         filepath=f"{TEST_DATA}cities/" + request.param
     )
+
+
+@pytest.fixture(scope="function")
+def test_city_small_copy(test_city_small):
+    """Fixture for getting a copy of small city graphs from test_data."""
+    city_name, graph = test_city_small
+    return city_name, graph.copy()
 
 
 @pytest.fixture(
@@ -72,9 +88,11 @@ def test_city_all_preloaded_save(
     length test_data. Without metrics. Shared across all tests."""
     city_name, graph = test_city_all
     part = partitioner_class(
-        name=city_name + "_preloaded_test", city_name=city_name, graph=graph
+        name=f"{city_name}_{partitioner_class.__name__}_preloaded_test",
+        city_name=city_name,
+        graph=graph.copy(),
     )
-    part.save(save_graph_copy=True)
+    part.save(save_graph_copy=False)
     return part.name, part.__class__
 
 
@@ -94,7 +112,9 @@ def test_city_all_precalculated_save(
     length test_data. Without metrics. Shared across all tests."""
     city_name, graph = test_city_all
     part = partitioner_class(
-        name=city_name + "_precalculated_test", city_name=city_name, graph=graph
+        name=f"{city_name}_{partitioner_class.__name__}_precalculated_test",
+        city_name=city_name,
+        graph=graph.copy(),
     )
     part.run(calculate_metrics=False)
     part.save(save_graph_copy=True)
@@ -114,9 +134,61 @@ def test_city_small_precalculated(test_city_small, partitioner_class):
     """Fixture for loading and parametrizing small cities with bearing and length
     test_data. Without metrics."""
     city_name, graph = test_city_small
-    part = partitioner_class(name=city_name + "_test", city_name=city_name, graph=graph)
+    part = partitioner_class(
+        name=f"{city_name}_{partitioner_class.__name__}_precalculated_test",
+        city_name=city_name,
+        graph=graph.copy(),
+    )
     part.run(calculate_metrics=False)
     return part
+
+
+@pytest.fixture(scope="function")
+def test_city_small_precalculated_copy(test_city_small_precalculated):
+    """Return a copy of small cities with bearing and length test_data. Without
+    metrics."""
+    return deepcopy(test_city_small_precalculated)
+
+
+@pytest.fixture(scope="session")
+def test_one_city_precalculated(partitioner_class):
+    """Fixture for loading and parametrizing one small city with bearing and length
+    test_data. Without metrics."""
+    city_name, graph = SMALL_CITIES[0][:-8], ox.load_graphml(
+        filepath=f"{TEST_DATA}cities/" + SMALL_CITIES[0]
+    )
+    part = partitioner_class(
+        name=f"{city_name}_{partitioner_class.__name__}_precalculated_test",
+        city_name=city_name,
+        graph=graph.copy(),
+    )
+    part.run(calculate_metrics=False)
+    return part
+
+
+@pytest.fixture(scope="function")
+def test_one_city_precalculated_copy(test_one_city_precalculated):
+    """Return a copy of one city with bearing and length test_data. Without metrics."""
+    return deepcopy(test_one_city_precalculated)
+
+
+@pytest.fixture(scope="module")
+def test_city_small_osmid(test_city_small):
+    """Return a graph with the osmid baked down to a single value."""
+    _, graph = test_city_small
+    # Some osmid attributes return lists, not ints, just take first element
+    set_node_attributes(
+        graph,
+        {node: node for node in graph.nodes()},
+        "osmid",
+    )
+    return graph
+
+
+@pytest.fixture(scope="function")
+def test_city_small_osmid_copy(test_city_small_osmid):
+    """Return a copy of the graph with the osmid baked down to a single value."""
+    return test_city_small_osmid.copy()
 
 
 @pytest.fixture(scope="class")
@@ -143,7 +215,7 @@ def _teardown_test_folders():
             rmtree(path.join(RESULTS_DIR, folder))
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(scope="function", autouse=config.getboolean("tests", "hide_plots"))
 def _patch_plt_show(monkeypatch):
     """Patch plt.show() and plt.Figure.show() to prevent plots from showing during
     tests."""

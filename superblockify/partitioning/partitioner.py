@@ -7,22 +7,20 @@ from os import path, makedirs
 from typing import final, Final, List
 
 import osmnx as ox
-from networkx import weakly_connected_components, set_edge_attributes, MultiDiGraph
-from numpy import linspace
+from matplotlib import pyplot as plt
+from matplotlib.colors import ListedColormap
+from networkx import (
+    weakly_connected_components,
+    set_edge_attributes,
+    MultiDiGraph,
+)
+from numpy import linspace, array
 from osmnx.stats import edge_length_total
 
 from .checks import is_valid_partitioning
+from .representative import set_representative_nodes
 from .. import attribute, plot
-from ..metrics import (
-    plot_distance_matrices,
-    plot_distance_matrices_pairwise_relative_difference,
-)
 from ..metrics.metric import Metric
-from ..metrics.plot import (
-    plot_component_wise_travel_increase,
-    plot_relative_difference,
-    plot_relative_increase_on_graph,
-)
 from ..plot import save_plot
 from ..utils import load_graph_from_place
 
@@ -185,15 +183,25 @@ class BasePartitioner(ABC):
             self.set_sparsified_from_components()
 
         # Check that the partitions and sparsified graph satisfy the requirements
-        if not is_valid_partitioning(self):
-            warn = (
-                "The partitioning is not valid."
-                + " The metric calculation will be done anyway,"
-                " but the results might be wrong."
-                if calculate_metrics
-                else ""
-            )
-            logger.warning(warn)
+        is_valid_partitioning(self)
+
+        # Set representative nodes
+        set_representative_nodes(
+            self.components if self.components else self.partitions
+        )
+
+        if make_plots:
+            if self.partitions:
+                fig, _ = self.plot_partition_graph()
+                save_plot(self.results_dir, fig, f"{self.name}_partition_graph.pdf")
+                plt.show()
+            fig, _ = self.plot_subgraph_component_size("length")
+            save_plot(self.results_dir, fig, f"{self.name}_subgraph_component_size.pdf")
+            plt.show()
+            if self.components:
+                fig, _ = self.plot_component_graph()
+                save_plot(self.results_dir, fig, f"{self.name}_component_graph.pdf")
+                plt.show()
 
         if calculate_metrics:
             self.calculate_metrics(make_plots=make_plots, **kwargs)
@@ -254,53 +262,6 @@ class BasePartitioner(ABC):
             num_workers=num_workers,
             chunk_size=chunk_size,
         )
-        if make_plots:
-            fig, _ = plot_distance_matrices(
-                self.metric, name=f"{self.name} - {self.__class__.__name__}"
-            )
-            save_plot(self.results_dir, fig, f"{self.name}_distance_matrices.pdf")
-            fig.show()
-            fig, _ = plot_distance_matrices_pairwise_relative_difference(
-                self.metric, name=f"{self.name} - {self.__class__.__name__}"
-            )
-            save_plot(
-                self.results_dir,
-                fig,
-                f"{self.name}_distance_matrices_pairwise_relative_difference.pdf",
-            )
-            fig.show()
-
-            fig, _ = plot_relative_difference(
-                self.metric, "S", "N", title=f"{self.name} - {self.__class__.__name__}"
-            )
-            save_plot(
-                self.results_dir,
-                fig,
-                f"{self.name}_relative_difference_SN.pdf",
-            )
-            fig.show()
-
-            fig, _ = plot_component_wise_travel_increase(
-                self,
-                self.metric.distance_matrix,
-                self.metric.node_list,
-                measure1="S",
-                measure2="N",
-            )
-            save_plot(
-                self.results_dir,
-                fig,
-                f"{self.name}_component_wise_travel_increase.pdf",
-            )
-            fig.show()
-
-            fig, _ = plot_relative_increase_on_graph(self.graph)
-            save_plot(
-                self.results_dir,
-                fig,
-                f"{self.name}_relative_increase_on_graph.pdf",
-            )
-            fig.show()
 
         logger.debug("Metrics for %s: %s", self.name, self.metric)
 
@@ -436,22 +397,35 @@ class BasePartitioner(ABC):
         rest = self.graph.edge_subgraph(
             [
                 (u, v, k)
-                for u, v, k, d in self.graph.edges(keys=True, data=True)
+                for u, v, k, _ in self.graph.edges(keys=True, data=True)
                 if (u, v, k) not in self.sparsified.edges(keys=True)
             ]
+        ).copy()
+
+        rest.remove_nodes_from(self.sparsified.nodes())
+        logger.debug(
+            "Making components from sparsified graph, "
+            "rest graph has %d nodes and %d edges.",
+            len(rest.nodes),
+            len(rest.edges),
         )
+
+        # Find weakly connected components on the rest graph with split nodes
         wc_components = list(weakly_connected_components(rest))
 
         self.attr_value_minmax = (0, len(wc_components))
         self.partitions = []
+        undirected = self.graph.to_undirected()
         for i, component in enumerate(wc_components):
-            # Find edges that are connected to the component nodes, but not sparsified
+            # Find edges that are connected to the component nodes, on undirected graph
+            edges = undirected.edges(component, keys=True)
+            if not edges:
+                logger.debug("Skipping empty component %d", i)
+                continue
             subgraph = self.graph.edge_subgraph(
-                [
-                    (u, v, k)
-                    for u, v, k in rest.edges(keys=True)
-                    if u in component or v in component
-                ]
+                # forward edges + backward edges - span directed graph from undirected
+                list(edges)
+                + [(v, u, k) for u, v, k in edges]
             )
             self.partitions.append(
                 {
@@ -668,8 +642,8 @@ class BasePartitioner(ABC):
         )
         return plot.plot_by_attribute(
             self.graph,
-            self.attribute_label,
-            minmax_val=self.attr_value_minmax,
+            edge_attr=self.attribute_label,
+            edge_minmax_val=self.attr_value_minmax,
             **pba_kwargs,
         )
 
@@ -722,12 +696,28 @@ class BasePartitioner(ABC):
                     component["name"],
                     "component_name",
                 )
+
+        cmap = plt.get_cmap("prism")
+        # So markers for representative nodes are not the same color as the edges,
+        # where they are placed on, construct a new color map from the prism color
+        # map, but which is darker. Same colors as cmap, but all values are
+        # multiplied by 0.75, except the alpha value, which is set to 1.
+        dark_cmap = ListedColormap(
+            array([cmap(i) for i in range(cmap.N)]) * array([0.75, 0.75, 0.75, 1])
+        )
+
         return plot.plot_by_attribute(
             self.graph,
-            attr="component_name",
-            attr_types="categorical",
-            cmap="prism",
-            minmax_val=None,
+            edge_attr="component_name",
+            edge_attr_types="categorical",
+            edge_cmap=cmap,
+            edge_minmax_val=None,
+            node_attr="representative_node_name",
+            node_attr_types="categorical",
+            node_cmap=dark_cmap,
+            node_minmax_val=None,
+            node_size=40,
+            node_zorder=2,
             **pba_kwargs,
         )
 

@@ -27,7 +27,7 @@ jobs:
           conda list
 
       - name: Run tests with coverage
-        run: coverage run -m pytest
+        run: pytest --cov=superblockify tests/
 
       - name: Coverage comment
         id: coverage_comment
