@@ -156,7 +156,7 @@ def test_make_node_color_list(test_city_small_osmid_copy):
 )
 @pytest.mark.parametrize("obj_type", ["node", "edge"])
 def test_make_color_list_faulty_attr_type(
-        test_city_all_copy, obj_type, attr_type, minmax
+    test_city_all_copy, obj_type, attr_type, minmax
 ):
     """Test `make_edge_color_list` with faulty attr_type."""
     _, graph = test_city_all_copy
