@@ -12,9 +12,9 @@ from superblockify.metrics.distances import (
 
 
 @pytest.mark.parametrize("weight", ["length", None])
-def test_calculate_distance_matrix(test_city_small, weight):
+def test_calculate_distance_matrix(test_city_small_copy, weight):
     """Test calculating all pairwise distances for the full graphs."""
-    _, graph = test_city_small
+    _, graph = test_city_small_copy
     calculate_distance_matrix(graph, weight=weight, plot_distributions=True)
     # With node ordering
     calculate_distance_matrix(
@@ -23,21 +23,21 @@ def test_calculate_distance_matrix(test_city_small, weight):
     plt.close("all")
 
 
-def test_calculate_distance_matrix_negative_weight(test_city_small):
+def test_calculate_distance_matrix_negative_weight(test_city_small_copy):
     """Test calculating all pairwise distances for the full graphs with negative
     weights.
     """
-    _, graph = test_city_small
+    _, graph = test_city_small_copy
     # Change the first edge length to -1
     graph.edges[list(graph.edges)[0]]["length"] = -1
     with pytest.raises(ValueError):
         calculate_distance_matrix(graph, weight="length")
 
 
-def test_calculate_euclidean_distance_matrix_projected(test_city_all):
+def test_calculate_euclidean_distance_matrix_projected(test_city_all_copy):
     """Test calculating all pairwise euclidean distances for the full graphs.
     Projected."""
-    _, graph = test_city_all
+    _, graph = test_city_all_copy
     calculate_euclidean_distance_matrix_projected(graph, plot_distributions=True)
     # With node ordering
     calculate_euclidean_distance_matrix_projected(
@@ -60,12 +60,12 @@ def test_calculate_euclidean_distance_matrix_projected(test_city_all):
     ],
 )
 def test_calculate_euclidean_distance_matrix_projected_faulty_coords(
-    test_city_small, key, value
+    test_city_small_copy, key, value
 ):
     """Test calculating all pairwise euclidean distances for the full graphs
     with missing coordinates. Projected.
     """
-    _, graph = test_city_small
+    _, graph = test_city_small_copy
     # Change key attribute of first node
     graph.nodes[list(graph.nodes)[0]][key] = value
     with pytest.raises(ValueError):
@@ -73,11 +73,11 @@ def test_calculate_euclidean_distance_matrix_projected_faulty_coords(
 
 
 def test_calculate_euclidean_distance_matrix_projected_unprojected_graph(
-    test_city_small,
+    test_city_small_copy,
 ):
     """Test `calculate_euclidean_distance_matrix_projected` exception handling
     unprojected graph."""
-    _, graph = test_city_small
+    _, graph = test_city_small_copy
 
     # Pseudo-unproject graph
     graph.graph["crs"] = "epsg:4326"
@@ -90,10 +90,10 @@ def test_calculate_euclidean_distance_matrix_projected_unprojected_graph(
         calculate_euclidean_distance_matrix_projected(graph)
 
 
-def test_calculate_euclidean_distance_matrix_haversine(test_city_small):
+def test_calculate_euclidean_distance_matrix_haversine(test_city_small_copy):
     """Test calculating all pairwise euclidean distances for the full graphs.
     Haversine."""
-    _, graph = test_city_small
+    _, graph = test_city_small_copy
     calculate_euclidean_distance_matrix_haversine(graph, plot_distributions=True)
     # With node ordering
     calculate_euclidean_distance_matrix_haversine(
@@ -120,12 +120,12 @@ def test_calculate_euclidean_distance_matrix_haversine(test_city_small):
     ],
 )
 def test_calculate_euclidean_distance_matrix_haversine_faulty_coords(
-    test_city_small, key, value
+    test_city_small_copy, key, value
 ):
     """Test calculating all pairwise euclidean distances for the full graphs
     with missing coordinates. Haversine.
     """
-    _, graph = test_city_small
+    _, graph = test_city_small_copy
     # Change key attribute of first node
     graph.nodes[list(graph.nodes)[0]][key] = value
     with pytest.raises(ValueError):
@@ -133,9 +133,11 @@ def test_calculate_euclidean_distance_matrix_haversine_faulty_coords(
 
 
 @pytest.mark.xfail(reason="Partitioners need to implement `self.sparsified`.")
-def test_calculate_partitioning_distance_matrix(test_city_small, partitioner_class):
+def test_calculate_partitioning_distance_matrix(
+    test_city_small_copy, partitioner_class
+):
     """Test calculating distances for partitioned graph by design."""
-    city_name, graph = test_city_small
+    city_name, graph = test_city_small_copy
     part = partitioner_class(name=city_name + "_test", city_name=city_name, graph=graph)
     part.run()
     calculate_partitioning_distance_matrix(
@@ -154,11 +156,11 @@ def test_calculate_partitioning_distance_matrix(test_city_small, partitioner_cla
 
 @pytest.mark.xfail(reason="Partitioners need to implement `self.sparsified`.")
 def test_calculate_partitioning_distance_matrix_partitions_overlap(
-    test_city_small, partitioner_class
+    test_city_small_copy, partitioner_class
 ):
     """Test calculating distances for partitioned graph with overlapping
     partitions."""
-    city_name, graph = test_city_small
+    city_name, graph = test_city_small_copy
     part = partitioner_class(name=city_name + "_test", city_name=city_name, graph=graph)
     part.run()
     # Duplicate partitions /component

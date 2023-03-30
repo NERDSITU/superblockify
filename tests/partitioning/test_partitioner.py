@@ -1,7 +1,6 @@
 """Tests for the partitioner module."""
 import logging
 from configparser import ConfigParser
-from copy import deepcopy
 from os import path, remove
 
 import networkx as nx
@@ -23,9 +22,9 @@ class TestBasePartitioner:
     """Class to test the BasePartitioner and its dummy class."""
 
     # pylint: disable=abstract-class-instantiated
-    def test_instantiate_abstract_class(self, test_city_all):
+    def test_instantiate_abstract_class(self, test_city_all_copy):
         """Test instantiating the abstract base class itself."""
-        _, graph = test_city_all
+        _, graph = test_city_all_copy
         with pytest.raises(TypeError):
             BasePartitioner(graph)
 
@@ -50,9 +49,9 @@ class TestPartitioners:
         assert part.attribute_label is not None
         assert part.partitions is not None
 
-    def test_plot_partition_graph(self, test_city_small_precalculated):
+    def test_plot_partition_graph(self, test_city_small_precalculated_copy):
         """Test `plot_partition_graph` by design."""
-        part = test_city_small_precalculated
+        part = test_city_small_precalculated_copy
         fig, axe = part.plot_partition_graph()
         assert isinstance(fig, Figure)
         assert isinstance(axe, Axes)
@@ -123,28 +122,27 @@ class TestPartitioners:
         ["", "invalid", "node", None, 10, 1.0, True, False],
     )
     def test_plot_subgraph_component_size_invalid_measure(
-        self, test_city_small_precalculated, invalid_measure
+        self, test_city_small_precalculated_copy, invalid_measure
     ):
         """Test `plot_subgraph_component_size` with unavailable measure."""
-        part = test_city_small_precalculated
+        part = test_city_small_precalculated_copy
         with pytest.raises(ValueError):
             part.plot_subgraph_component_size(invalid_measure)
 
     def test_overwrite_attributes_of_ignored_components_unpartitioned(
-        self, test_city_small_precalculated
+        self, test_city_small_precalculated_copy
     ):
         """Test `overwrite_attributes_of_ignored_components` exception handling."""
-        # work on copy of object
-        part = deepcopy(test_city_small_precalculated)
+        part = test_city_small_precalculated_copy
         part.components = None
         with pytest.raises(AssertionError):
             part.overwrite_attributes_of_ignored_components(
                 attribute_name=part.attribute_label
             )
 
-    def test_get_sorted_node_list(self, test_city_small_precalculated):
+    def test_get_sorted_node_list(self, test_city_small_precalculated_copy):
         """Test `get_sorted_node_list` by design."""
-        part = test_city_small_precalculated
+        part = test_city_small_precalculated_copy
         sorted_nodes = part.get_sorted_node_list()
         assert set(sorted_nodes) == set(part.graph.nodes())
 

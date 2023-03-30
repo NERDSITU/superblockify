@@ -2,6 +2,7 @@
 import inspect
 from ast import literal_eval
 from configparser import ConfigParser
+from copy import deepcopy
 from os import listdir, path, remove
 from os.path import getsize
 from shutil import rmtree
@@ -42,12 +43,26 @@ def test_city_all(request):
     )
 
 
+@pytest.fixture(scope="function")
+def test_city_all_copy(test_city_all):
+    """Fixture for getting a copy of all city graphs from test_data."""
+    city_name, graph = test_city_all
+    return city_name, graph.copy()
+
+
 @pytest.fixture(scope="session", params=SMALL_CITIES)
 def test_city_small(request):
     """Fixture for loading and parametrizing small city graphs from test_data."""
     return request.param[:-8], ox.load_graphml(
         filepath=f"{TEST_DATA}cities/" + request.param
     )
+
+
+@pytest.fixture(scope="function")
+def test_city_small_copy(test_city_small):
+    """Fixture for getting a copy of small city graphs from test_data."""
+    city_name, graph = test_city_small
+    return city_name, graph.copy()
 
 
 @pytest.fixture(
@@ -101,7 +116,7 @@ def test_city_all_precalculated_save(
         graph=graph.copy(),
     )
     part.run(calculate_metrics=False)
-    part.save(save_graph_copy=False)
+    part.save(save_graph_copy=True)
     return part.name, part.__class__
 
 
@@ -125,6 +140,13 @@ def test_city_small_precalculated(test_city_small, partitioner_class):
     )
     part.run(calculate_metrics=False)
     return part
+
+
+@pytest.fixture(scope="function")
+def test_city_small_precalculated_copy(test_city_small_precalculated):
+    """Fixture for getting a copy of small cities with bearing and length
+    test_data. Without metrics."""
+    return deepcopy(test_city_small_precalculated)
 
 
 @pytest.fixture(scope="class")
