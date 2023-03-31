@@ -890,7 +890,7 @@ class BasePartitioner(ABC):
             ox.save_graphml(self.graph, filepath=graph_path)
 
         # Save metrics
-        self.metric.save(self.name)
+        self.metric.save(self.results_dir, self.name)
 
         # Save partitioner, with self.graph = None
         partitioner_path = path.join(self.results_dir, self.name + ".partitioner")

@@ -3,8 +3,8 @@ import inspect
 from ast import literal_eval
 from configparser import ConfigParser
 from copy import deepcopy
-from os import listdir, path, remove
-from os.path import getsize
+from os import listdir, remove
+from os.path import getsize, join, exists
 from shutil import rmtree
 
 import osmnx as ox
@@ -93,6 +93,8 @@ def test_city_all_preloaded_save(
         graph=graph.copy(),
     )
     part.save(save_graph_copy=False)
+    assert exists(join(part.results_dir, part.name + ".partitioner"))
+    assert exists(join(part.results_dir, part.name + ".metrics"))
     return part.name, part.__class__
 
 
@@ -197,11 +199,11 @@ def _teardown_test_graph_io():
     yield None
     work_cities = ["Adliswil_tmp", "Adliswil_tmp_save_load"]
     for city in work_cities:
-        test_graph = path.join(config["general"]["graph_dir"], city + ".graphml")
-        if path.exists(test_graph):
+        test_graph = join(config["general"]["graph_dir"], city + ".graphml")
+        if exists(test_graph):
             remove(test_graph)
-        results_dir = path.join(RESULTS_DIR, city + "_name")
-        if path.exists(results_dir):
+        results_dir = join(RESULTS_DIR, city + "_name")
+        if exists(results_dir):
             rmtree(results_dir)
 
 
@@ -212,7 +214,7 @@ def _teardown_test_folders():
     # Delete all folders in RESULTS_DIR that end with _test
     for folder in listdir(RESULTS_DIR):
         if folder.endswith("_test"):
-            rmtree(path.join(RESULTS_DIR, folder))
+            rmtree(join(RESULTS_DIR, folder))
 
 
 @pytest.fixture(scope="function", autouse=config.getboolean("tests", "hide_plots"))

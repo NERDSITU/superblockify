@@ -294,19 +294,21 @@ class Metric:
         """
         return compare_dicts(self.__dict__, other.__dict__)
 
-    def save(self, name):
+    def save(self, folder, name):
         """Save the metric to a file.
 
-        Will be saved as a pickle file at RESULTS_DIR/name.metrics.
+        Will be saved as a pickle file at folder/name.metrics.
 
         Parameters
         ----------
+        folder : str
+            The folder to save the metric to.
         name : str
             The name of the file to save the metric to.
 
         """
 
-        metrics_path = path.join(RESULTS_DIR, name, name + ".metrics")
+        metrics_path = path.join(folder, name + ".metrics")
         # Check if metrics already exist
         if path.exists(metrics_path):
             logger.debug("Metrics already exist, overwriting %s", metrics_path)

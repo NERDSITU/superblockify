@@ -48,6 +48,8 @@ class TestPartitioners:
         assert part.graph is not None
         assert part.attribute_label is not None
         assert part.partitions is not None
+        assert part.name is not None and part.name != ""
+        assert part.city_name is not None and part.city_name != ""
 
     def test_plot_partition_graph(self, test_city_small_precalculated_copy):
         """Test `plot_partition_graph` by design."""
