@@ -182,13 +182,13 @@ class BasePartitioner(ABC):
             )
             self.set_sparsified_from_components()
 
-        # Check that the partitions and sparsified graph satisfy the requirements
-        is_valid_partitioning(self)
-
         # Set representative nodes
         set_representative_nodes(
             self.components if self.components else self.partitions
         )
+
+        # Check that the partitions and sparsified graph satisfy the requirements
+        is_valid_partitioning(self)
 
         if make_plots:
             if self.partitions:
