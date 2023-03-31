@@ -527,7 +527,7 @@ class BasePartitioner(ABC):
         with `split_disconnected` set to True, the nodes of the components are returned.
 
         Per default, nodes are considered to be inside a partition if they are in the
-        subgraph of the partition and have a degree of at least 2. Also, `ignored`
+        subgraph of the partition and not in the sparsified subgraph. Also, `ignored`
         components are left out.
 
         Nodes inside the sparsified graph are not considered to be inside a partition.
@@ -551,28 +551,28 @@ class BasePartitioner(ABC):
         self.__check_has_been_run()
 
         # List of partitions /unignored components
-        # Only take `name` and `subgraph` from the components
-        if self.components:
-            partitions = [
-                {"name": comp["name"], "subgraph": comp["subgraph"]}
-                for comp in self.components
-                if not comp["ignore"]
-            ]
-        else:
-            partitions = [
-                {"name": part["name"], "subgraph": part["subgraph"]}
-                for part in self.partitions
-            ]
+        # Only take `name`, `subgraph` and `representative_node_id` from the components
+        partitions = [
+            {
+                "name": part["name"],
+                "subgraph": part["subgraph"],
+                "rep_node": part["representative_node_id"],
+            }
+            for part in (self.components if self.components else self.partitions)
+            # if there is the key "ignore" and it is True, ignore the partition
+            if not (part.get("ignore") is True)
+        ]
 
         # Add list of nodes "inside" each partitions
-        #  - nodes that have at least a degree of 2
+        #  - nodes that are not shared with the sparsified graph are considered to be
+        #    inside the partition
         #  - from these the distances are calculated
         #  - the nodes not in any partitions are considered as the unpartitioned nodes
         for part in partitions:
             part["nodes"] = {
                 node
                 for node in part["subgraph"].nodes()
-                if part["subgraph"].degree(node) >= 2
+                if part["subgraph"].degree(node) >= 1
                 and node not in self.sparsified.nodes
             }
 
