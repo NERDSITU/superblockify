@@ -53,7 +53,7 @@ class BasePartitioner(ABC):
     >>> part = BasePartitioner(
     ...     name="Resistencia", search_str="Resistencia, Chaco, Argentina"
     ... )
-    >>> part.run(calculate_metrics=True, make_plots=True, num_workers=6)
+    >>> part.run(approach=True, make_plots=True, num_workers=6)
 
     """
 
@@ -159,17 +159,30 @@ class BasePartitioner(ABC):
         )
 
     @final
-    def run(self, calculate_metrics=True, make_plots=False, **kwargs):
+    def run(self, approach="rep_nodes", make_plots=False, **kwargs):
         """Run partitioning.
 
         Parameters
         ----------
-        calculate_metrics : bool, optional
-            If True, calculate the metrics and save them to self.results_dir/metrics.
+        approach : str, optional
+            If 'rep_nodes', calculate only the metrics using the representative nodes.
+            If 'full', calculate the metrics using all nodes in the graph.
+            If False, don't calculate the metrics. Default is 'rep_nodes'.
+            Save them to self.results_dir/metrics.
         make_plots : bool, optional
             If True, make plots of the partitioning and save them to
             self.results_dir/figures. Default is False.
+
+        Raises
+        ------
+        ValueError
+            If approach is not 'rep_nodes', 'full' or False.
         """
+
+        if approach not in ["rep_nodes", "full", False]:
+            raise ValueError(
+                "Argument `approach` must be 'rep_nodes', 'full' or False."
+            )
 
         self.partition_graph(make_plots=make_plots, **kwargs)
 
@@ -203,8 +216,8 @@ class BasePartitioner(ABC):
                 save_plot(self.results_dir, fig, f"{self.name}_component_graph.pdf")
                 plt.show()
 
-        if calculate_metrics:
-            self.calculate_metrics(make_plots=make_plots, **kwargs)
+        if approach:
+            self.calculate_metrics(approach=approach, make_plots=make_plots, **kwargs)
 
     @abstractmethod
     def partition_graph(self, make_plots=False, **kwargs):
@@ -229,7 +242,9 @@ class BasePartitioner(ABC):
             {"name": "one", "value": 1.0},
         ]
 
-    def calculate_metrics(self, make_plots=False, num_workers=None, chunk_size=1):
+    def calculate_metrics(
+        self, make_plots=False, num_workers=None, chunk_size=1, approach="rep_nodes"
+    ):
         """Calculate metrics for the partitioning.
 
         Calculates the metrics for the partitioning and writes them to the
@@ -251,6 +266,10 @@ class BasePartitioner(ABC):
         chunk_size : int, optional
             Size of chunks to split the graph into for parallel processing. Default is
             1, which means no chunking. A chunking over 3 seems to not be beneficial.
+        approach : str, optional
+            If 'rep_nodes', calculate only the metrics using the representative nodes.
+            If 'full', calculate the metrics using all nodes in the graph.
+            Default is 'rep_nodes'.
 
         """
 
@@ -258,6 +277,7 @@ class BasePartitioner(ABC):
         logger.info("Calculating metrics for %s", self.name)
         self.metric.calculate_all(
             partitioner=self,
+            approach=approach,
             make_plots=make_plots,
             num_workers=num_workers,
             chunk_size=chunk_size,

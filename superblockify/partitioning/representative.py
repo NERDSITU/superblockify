@@ -11,6 +11,8 @@ def set_representative_nodes(components):
 
     It determines the convex hull of the component and returns the node next to the
     representative point of the convex hull.
+    If a component consists out of one edge connected to the sparsified graph, the
+    representative node is the one that has the lower degree.
 
     Parameters
     ----------
@@ -30,6 +32,12 @@ def set_representative_nodes(components):
         return node_geometry.distance(hull_nodes_reppoint)
 
     for component in components:
+        if component["num_edges"] == 1 and component["num_nodes"] == 2:
+            component["representative_node_id"] = min(
+                component["subgraph"].nodes, key=component["subgraph"].degree
+            )
+            continue
+
         # Get the nodes as a geodataframe
         nodes = graph_to_gdfs(
             G=component["subgraph"], nodes=True, edges=False, fill_edge_geometry=False

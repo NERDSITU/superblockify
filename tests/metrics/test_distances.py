@@ -4,20 +4,28 @@ from matplotlib import pyplot as plt
 from numpy import inf
 
 from superblockify.metrics.distances import (
-    calculate_distance_matrix,
+    calculate_path_distance_matrix,
     calculate_euclidean_distance_matrix_projected,
     calculate_euclidean_distance_matrix_haversine,
     calculate_partitioning_distance_matrix,
+    calculate_distance_matrices,
 )
+
+
+@pytest.mark.parametrize("approach", [True, False, 1, "a", None, "Full", [], {}, set()])
+def test_calculate_distance_matrices_faulty_approach(approach):
+    """Test error handling for faulty approach in calculate_distance_matrices."""
+    with pytest.raises(ValueError):
+        calculate_distance_matrices([], None, approach, "", 0, False, 0)
 
 
 @pytest.mark.parametrize("weight", ["length", None])
 def test_calculate_distance_matrix(test_city_small_copy, weight):
     """Test calculating all pairwise distances for the full graphs."""
     _, graph = test_city_small_copy
-    calculate_distance_matrix(graph, weight=weight, plot_distributions=True)
+    calculate_path_distance_matrix(graph, weight=weight, plot_distributions=True)
     # With node ordering
-    calculate_distance_matrix(
+    calculate_path_distance_matrix(
         graph, node_order=list(graph.nodes), plot_distributions=True
     )
     plt.close("all")
@@ -31,7 +39,7 @@ def test_calculate_distance_matrix_negative_weight(test_city_small_copy):
     # Change the first edge length to -1
     graph.edges[list(graph.edges)[0]]["length"] = -1
     with pytest.raises(ValueError):
-        calculate_distance_matrix(graph, weight="length")
+        calculate_path_distance_matrix(graph, weight="length")
 
 
 def test_calculate_euclidean_distance_matrix_projected(test_city_all_copy):

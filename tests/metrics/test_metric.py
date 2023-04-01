@@ -47,11 +47,30 @@ class TestMetric:
         )
 
     @pytest.mark.xfail(reason="Partitioners need to implement `self.sparsified`.")
-    def test_calculate_all(self, test_city_small_precalculated_copy):
+    def test_calculate_all_full(self, test_city_small_precalculated_copy):
         """Test the calculate_all method for full metrics."""
         part = test_city_small_precalculated_copy
-        part.calculate_metrics(make_plots=True)
+        part.calculate_metrics(approach="full", make_plots=True)
         plt.close("all")
+        for dist_matrix in part.metric.distance_matrix.values():
+            assert dist_matrix.shape == (part.graph.number_of_nodes(),) * 2
+
+    @pytest.mark.xfail(reason="Partitioners need to implement `self.sparsified`.")
+    def test_calculate_all_rep_nodes(self, test_one_city_precalculated_copy):
+        """Test the calculate_all method for representative node metrics."""
+        part = test_one_city_precalculated_copy
+        part.calculate_metrics(approach="rep_nodes", make_plots=True)
+        plt.close("all")
+
+    @pytest.mark.parametrize(
+        "approach",  # only 'rep_nodes' and 'full' are valid
+        [True, False, "invalid", 1, 0.5, -1, -0.5, None, [], {}, set()],
+    )
+    def test_calculate_all_invalid_approach(self, approach):
+        """Test the calculate_all method for invalid approaches."""
+        metric = Metric()
+        with pytest.raises(ValueError):
+            metric.calculate_all(None, approach=approach)
 
     def test_saving_and_loading(
         self,

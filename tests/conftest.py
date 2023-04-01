@@ -118,7 +118,7 @@ def test_city_all_precalculated_save(
         city_name=city_name,
         graph=graph.copy(),
     )
-    part.run(calculate_metrics=False)
+    part.run(approach=False)
     part.save(save_graph_copy=True)
     return part.name, part.__class__
 
@@ -141,7 +141,7 @@ def test_city_small_precalculated(test_city_small, partitioner_class):
         city_name=city_name,
         graph=graph.copy(),
     )
-    part.run(calculate_metrics=False)
+    part.run(approach=False)
     return part
 
 
@@ -164,7 +164,7 @@ def test_one_city_precalculated(partitioner_class):
         city_name=city_name,
         graph=graph.copy(),
     )
-    part.run(calculate_metrics=False)
+    part.run(approach=False)
     return part
 
 
@@ -172,6 +172,23 @@ def test_one_city_precalculated(partitioner_class):
 def test_one_city_precalculated_copy(test_one_city_precalculated):
     """Return a copy of one city with bearing and length test_data. Without metrics."""
     return deepcopy(test_one_city_precalculated)
+
+@pytest.fixture(scope="session")
+def test_city_small_preloaded(test_city_small, partitioner_class):
+    """Fixture for loading and parametrizing small cities not run yet."""
+    city_name, graph = test_city_small
+    part = partitioner_class(
+        name=f"{city_name}_{partitioner_class.__name__}_preloaded_test",
+        city_name=city_name,
+        graph=graph.copy(),
+    )
+    part.save(save_graph_copy=False)
+    return part
+
+@pytest.fixture(scope="function")
+def test_city_small_preloaded_copy(test_city_small_preloaded):
+    """Return a copy of small cities not run yet."""
+    return deepcopy(test_city_small_preloaded)
 
 
 @pytest.fixture(scope="module")
