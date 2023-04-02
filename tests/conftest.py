@@ -173,6 +173,7 @@ def test_one_city_precalculated_copy(test_one_city_precalculated):
     """Return a copy of one city with bearing and length test_data. Without metrics."""
     return deepcopy(test_one_city_precalculated)
 
+
 @pytest.fixture(scope="session")
 def test_city_small_preloaded(test_city_small, partitioner_class):
     """Fixture for loading and parametrizing small cities not run yet."""
@@ -184,6 +185,7 @@ def test_city_small_preloaded(test_city_small, partitioner_class):
     )
     part.save(save_graph_copy=False)
     return part
+
 
 @pytest.fixture(scope="function")
 def test_city_small_preloaded_copy(test_city_small_preloaded):
