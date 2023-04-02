@@ -164,7 +164,7 @@ class BasePartitioner(ABC):
 
         Parameters
         ----------
-        approach : str, optional
+        approach : str or bool, optional
             If 'rep_nodes', calculate only the metrics using the representative nodes.
             If 'full', calculate the metrics using all nodes in the graph.
             If False, don't calculate the metrics. Default is 'rep_nodes'.
