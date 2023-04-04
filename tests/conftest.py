@@ -1,5 +1,4 @@
 """Module for test fixtures available for all test files"""
-import inspect
 from ast import literal_eval
 from configparser import ConfigParser
 from copy import deepcopy
@@ -11,8 +10,7 @@ import osmnx as ox
 import pytest
 from networkx import set_node_attributes
 
-from superblockify import partitioning
-from superblockify.partitioning import BasePartitioner
+from superblockify.partitioning import __all_partitioners__
 
 config = ConfigParser()
 config.read("config.ini")
@@ -33,6 +31,20 @@ SMALL_CITIES = [
 
 # Redefining names for extending fixtures
 # pylint: disable=redefined-outer-name
+
+
+@pytest.fixture(
+    scope="session",
+    params=[
+        part
+        if not getattr(part, "__deprecated__", False)
+        else pytest.param(part, marks=pytest.mark.xfail(reason=part.__deprecated__))
+        for part in __all_partitioners__
+    ],
+)
+def partitioner_class(request):
+    """Fixture for parametrizing all partitioners inheriting from BasePartitioner."""
+    return request.param
 
 
 @pytest.fixture(scope="session", params=ALL_CITIES_SORTED)
@@ -64,20 +76,6 @@ def test_city_small_copy(test_city_small):
     """Fixture for getting a copy of small city graphs from test_data."""
     city_name, graph = test_city_small
     return city_name, graph.copy()
-
-
-@pytest.fixture(
-    scope="session",
-    params=inspect.getmembers(
-        partitioning,
-        predicate=lambda o: inspect.isclass(o)
-        and issubclass(o, BasePartitioner)
-        and o is not BasePartitioner,
-    ),
-)
-def partitioner_class(request):
-    """Fixture for parametrizing all partitioners inheriting from BasePartitioner."""
-    return request.param[1]
 
 
 @pytest.fixture(scope="session")

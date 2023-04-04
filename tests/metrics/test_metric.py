@@ -1,6 +1,5 @@
 """Tests for the metric class."""
 import matplotlib.pyplot as plt
-import pytest
 
 from superblockify.metrics.metric import Metric
 
@@ -46,7 +45,6 @@ class TestMetric:
             "avg_path_length: S: 4, N: 11; )"
         )
 
-    @pytest.mark.xfail(reason="Partitioners need to implement `self.sparsified`.")
     def test_calculate_all(self, test_city_small_precalculated_copy):
         """Test the calculate_all method for full metrics."""
         part = test_city_small_precalculated_copy
