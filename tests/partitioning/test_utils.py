@@ -3,7 +3,7 @@ from os.path import join, exists
 
 import pytest
 
-from superblockify import save_to_gpkg
+from superblockify.partitioning.utils import show_highway_stats, save_to_gpkg
 
 
 @pytest.mark.parametrize("save_path", [None, "test.gpkg"])
@@ -51,3 +51,9 @@ def test_save_to_gpkg_faulty_subgraphs(
         setattr(test_one_city_precalculated_copy, attribute, value)
     with pytest.raises(ValueError):
         save_to_gpkg(test_one_city_precalculated_copy)
+
+
+def test_show_highway_stats(test_city_all):
+    """Test showing highway stats by design."""
+    _, graph = test_city_all
+    show_highway_stats(graph)

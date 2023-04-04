@@ -17,6 +17,7 @@ from networkx import (
 from numpy import linspace, array
 from osmnx.stats import edge_length_total
 
+from .utils import show_highway_stats
 from .checks import is_valid_partitioning
 from .representative import set_representative_nodes
 from .. import attribute, plot
@@ -133,6 +134,8 @@ class BasePartitioner(ABC):
             self.graph = graph
         else:
             raise ValueError("Either graph or search_str must be provided.")
+
+        show_highway_stats(self.graph)
 
         # Create results directory
         self.results_dir = path.join(RESULTS_DIR, name)

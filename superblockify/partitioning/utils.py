@@ -126,3 +126,40 @@ def save_to_gpkg(partitioner, save_path=None):
     logger.info("Saved %d nodes to %s", len(nodes), filepath)
     edges.to_file(filepath, layer="edges", index=False, mode="w")
     logger.info("Saved %d edges to %s", len(edges), filepath)
+
+
+def show_highway_stats(graph):
+    """Show the number of edges for each highway type in the graph.
+
+    Also show the type proportions of the highway attributes.
+
+    Parameters
+    ----------
+    graph : networkx.classes.multidigraph.MultiDiGraph
+        Graph, where the edges have a "highway" attribute.
+
+    Notes
+    -----
+    The highway is usually a string, but can also be a list of strings.
+    If the proportion of edges with a highway attribute of type 'str' is
+    below 98%, a warning is logged.
+    """
+    edges = graph_to_gdfs(graph, nodes=False, fill_edge_geometry=False)
+    # highway counts
+    highway_counts = edges.highway.value_counts().to_frame("count")
+    highway_counts["proportion"] = highway_counts["count"] / len(edges)
+    logger.info(
+        "Highway counts (type, count, proportion): \n%s", highway_counts.to_string()
+    )
+    # dtypes of the highway attributes
+    dtype_counts = edges.highway.apply(type).value_counts().to_frame("count")
+    dtype_counts["proportion"] = dtype_counts["count"] / len(edges)
+    logger.debug(
+        "Dtype counts (type, count, proportion): \n%s", dtype_counts.to_string()
+    )
+    # Warning if 'str' is underrepresented
+    if dtype_counts.loc[dtype_counts.index == str, "proportion"].values < 0.98:
+        logger.warning(
+            "The dtype of the 'highway' attribute is not 'str' in %d%% of the edges.",
+            (1 - dtype_counts.loc[dtype_counts.index == str, "proportion"]) * 100,
+        )
