@@ -187,9 +187,12 @@ def remove_dead_ends_directed(graph):
     """
     if not graph.is_directed():
         raise ValueError("Graph must be directed.")
+    num_nodes = len(graph.nodes)
     # Get the largest strongly connected component
     scc = max(strongly_connected_components(graph), key=len)
     # Remove all nodes that are not in the largest strongly connected component
     for node in list(graph.nodes):
         if node not in scc:
             graph.remove_node(node)
+    if len(graph.nodes) < num_nodes:
+        logger.debug("Removed %d dead ends.", num_nodes - len(graph.nodes))
