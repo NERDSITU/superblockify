@@ -874,7 +874,7 @@ class BasePartitioner(ABC):
             graph = load_graph_from_place(
                 save_as=graph_path,
                 search_string=search_str,
-                network_type="drive",
+                custom_filter=config["graph"]["network_filter"],
                 simplify=True,
             )
             logger.debug("Saving graph to %s", graph_path)
