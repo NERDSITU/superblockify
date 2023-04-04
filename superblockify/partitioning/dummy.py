@@ -1,10 +1,12 @@
 """Dummy partitioner."""
 from networkx import weakly_connected_components
 from numpy import mean, min as npmin, max as npmax
+from typing_extensions import deprecated
 
 from .partitioner import BasePartitioner
 
 
+@deprecated("DummyPartitioner does not necessarily produce a valid partitioning.")
 class DummyPartitioner(BasePartitioner):
     """Dummy partitioner.
 
