@@ -3,7 +3,11 @@ from os.path import join, exists
 
 import pytest
 
-from superblockify.partitioning.utils import show_highway_stats, save_to_gpkg
+from superblockify.partitioning.utils import (
+    show_highway_stats,
+    save_to_gpkg,
+    remove_dead_ends_directed,
+)
 
 
 @pytest.mark.parametrize("save_path", [None, "test.gpkg"])
@@ -53,7 +57,24 @@ def test_save_to_gpkg_faulty_subgraphs(
         save_to_gpkg(test_one_city_precalculated_copy)
 
 
-def test_show_highway_stats(test_city_all):
+def test_show_highway_stats(test_city_all_copy):
     """Test showing highway stats by design."""
-    _, graph = test_city_all
+    _, graph = test_city_all_copy
     show_highway_stats(graph)
+
+
+def test_remove_dead_ends_directed(test_city_all_copy):
+    """Test removing dead ends by design."""
+    _, graph = test_city_all_copy
+    num_edges, num_nodes = len(graph.edges), len(graph.nodes)
+    remove_dead_ends_directed(graph)
+    assert len(graph.edges) <= num_edges
+    assert len(graph.nodes) <= num_nodes
+
+
+def test_remove_dead_ends_unidirected(test_city_all_copy):
+    """Test removing dead ends error for undirected graph."""
+    _, graph = test_city_all_copy
+    graph = graph.to_undirected()
+    with pytest.raises(ValueError):
+        remove_dead_ends_directed(graph)

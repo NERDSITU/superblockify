@@ -3,7 +3,7 @@ import logging
 from os import remove
 from os.path import exists, join
 
-from networkx import set_edge_attributes
+from networkx import set_edge_attributes, strongly_connected_components
 from osmnx import graph_to_gdfs
 
 logger = logging.getLogger("superblockify")
@@ -163,3 +163,33 @@ def show_highway_stats(graph):
             "The dtype of the 'highway' attribute is not 'str' in %d%% of the edges.",
             (1 - dtype_counts.loc[dtype_counts.index == str, "proportion"]) * 100,
         )
+
+
+def remove_dead_ends_directed(graph):
+    """Remove all dead ends from the directed graph.
+
+    Comes down to removing all nodes that are not in the largest strongly connected
+    component.
+
+    Parameters
+    ----------
+    graph : networkx.classes.multidigraph.MultiDiGraph
+        Graph to remove dead ends from.
+
+    Raises
+    ------
+    ValueError
+        If the graph is not directed.
+
+    Notes
+    -----
+    The graph is modified in place.
+    """
+    if not graph.is_directed():
+        raise ValueError("Graph must be directed.")
+    # Get the largest strongly connected component
+    scc = max(strongly_connected_components(graph), key=len)
+    # Remove all nodes that are not in the largest strongly connected component
+    for node in list(graph.nodes):
+        if node not in scc:
+            graph.remove_node(node)
