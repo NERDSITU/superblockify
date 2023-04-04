@@ -33,6 +33,20 @@ SMALL_CITIES = [
 # pylint: disable=redefined-outer-name
 
 
+@pytest.fixture(
+    scope="session",
+    params=[
+        part
+        if not getattr(part, "__deprecated__", False)
+        else pytest.param(part, marks=pytest.mark.xfail(reason=part.__deprecated__))
+        for part in __all_partitioners__
+    ],
+)
+def partitioner_class(request):
+    """Fixture for parametrizing all partitioners inheriting from BasePartitioner."""
+    return request.param
+
+
 @pytest.fixture(scope="session", params=ALL_CITIES_SORTED)
 def test_city_all(request):
     """Fixture for loading and parametrizing all city graphs from test_data."""
@@ -62,12 +76,6 @@ def test_city_small_copy(test_city_small):
     """Fixture for getting a copy of small city graphs from test_data."""
     city_name, graph = test_city_small
     return city_name, graph.copy()
-
-
-@pytest.fixture(scope="session", params=__all_partitioners__)
-def partitioner_class(request):
-    """Fixture for parametrizing all partitioners inheriting from BasePartitioner."""
-    return request.param
 
 
 @pytest.fixture(scope="session")
