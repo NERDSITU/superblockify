@@ -46,7 +46,6 @@ class TestMetric:
             "avg_path_length: S: 4, N: 11; )"
         )
 
-    @pytest.mark.xfail(reason="Partitioners need to implement `self.sparsified`.")
     def test_calculate_all_full(self, test_city_small_precalculated_copy):
         """Test the calculate_all method for full metrics."""
         part = test_city_small_precalculated_copy
@@ -55,7 +54,6 @@ class TestMetric:
         for dist_matrix in part.metric.distance_matrix.values():
             assert dist_matrix.shape == (part.graph.number_of_nodes(),) * 2
 
-    @pytest.mark.xfail(reason="Partitioners need to implement `self.sparsified`.")
     def test_calculate_all_rep_nodes(self, test_one_city_precalculated_copy):
         """Test the calculate_all method for representative node metrics."""
         part = test_one_city_precalculated_copy

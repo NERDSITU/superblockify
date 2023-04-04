@@ -20,7 +20,7 @@ def save_to_gpkg(partitioner, save_path=None):
     ----------
     partitioner : superblockify.partitioning.BasePartitioner
         The partitioner to save.
-    save_path : str,
+    save_path : str, optional
         The path to save the geodatapackage to. If None, it will be saved to the
         partitioners folder at (part.results_dir, part.name + ".gpkg")
 

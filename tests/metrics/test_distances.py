@@ -140,7 +140,6 @@ def test_calculate_euclidean_distance_matrix_haversine_faulty_coords(
         calculate_euclidean_distance_matrix_haversine(graph)
 
 
-@pytest.mark.xfail(reason="Partitioners need to implement `self.sparsified`.")
 def test_calculate_partitioning_distance_matrix(
     test_city_small_copy, partitioner_class
 ):
@@ -162,7 +161,6 @@ def test_calculate_partitioning_distance_matrix(
     plt.close("all")
 
 
-@pytest.mark.xfail(reason="Partitioners need to implement `self.sparsified`.")
 def test_calculate_partitioning_distance_matrix_partitions_overlap(
     test_city_small_copy, partitioner_class
 ):

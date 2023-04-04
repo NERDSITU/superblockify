@@ -9,6 +9,7 @@ import numpy as np
 from matplotlib import cm
 from networkx import weakly_connected_components
 from scipy.signal import find_peaks
+from typing_extensions import deprecated
 
 from superblockify import attribute
 from .partitioner import BasePartitioner
@@ -17,6 +18,7 @@ from ..plot import save_plot
 logger = logging.getLogger("superblockify")
 
 
+@deprecated("BearingPartitioner does not necessarily produce a valid partitioning.")
 class BearingPartitioner(BasePartitioner):
     """Bearing partitioner.
 
