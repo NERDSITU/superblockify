@@ -72,7 +72,7 @@ def test_remove_dead_ends_directed(test_city_all_copy):
     assert len(graph.nodes) <= num_nodes
 
 
-def test_remove_dead_ends_unidirected(test_city_all_copy):
+def test_remove_dead_ends_undirected(test_city_all_copy):
     """Test removing dead ends error for undirected graph."""
     _, graph = test_city_all_copy
     graph = graph.to_undirected()
