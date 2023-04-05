@@ -209,7 +209,7 @@ def calculate_path_distance_matrix(
 def calculate_euclidean_distance_matrix_projected(
     graph, node_order=None, plot_distributions=False
 ):
-    """Calculate the euclidean distances between all nodes in the graph.
+    """Calculate the Euclidean distances between all nodes in the graph.
 
     Uses the x and y coordinates of the nodes of a projected graph. The coordinates
     are in meters.
@@ -223,13 +223,13 @@ def calculate_euclidean_distance_matrix_projected(
         The order of the nodes in the distance matrix. If None, the ordering is
         produced by graph.nodes().
     plot_distributions : bool, optional
-        If True, plot the distributions of the euclidean distances and coordinates.
+        If True, plot the distributions of the Euclidean distances and coordinates.
         Sanity check for the coordinate values.
 
     Returns
     -------
     dist_matrix : ndarray
-        The distance matrix for the partitioning. dist_matrix[i, j] is the euclidean
+        The distance matrix for the partitioning. dist_matrix[i, j] is the Euclidean
         distance between node i and node j.
 
     Raises
@@ -259,7 +259,7 @@ def calculate_euclidean_distance_matrix_projected(
     if np.any(np.isinf(x_coord)) or np.any(np.isinf(y_coord)):
         raise ValueError("Graph has infinite coordinates.")
 
-    # Calculate the euclidean distances between all nodes
+    # Calculate the Euclidean distances between all nodes
     dist_matrix = np.sqrt(
         np.square(x_coord[:, np.newaxis] - x_coord[np.newaxis, :])
         + np.square(y_coord[:, np.newaxis] - y_coord[np.newaxis, :])
@@ -270,7 +270,7 @@ def calculate_euclidean_distance_matrix_projected(
     if plot_distributions:
         plot_distance_distributions(
             dist_matrix,
-            dist_title="Distribution of euclidean distances",
+            dist_title="Distribution of Euclidean distances",
             coords=(x_coord, y_coord),
             coord_title="Scatter plot of projected coordinates",
             labels=("x", "y"),
@@ -282,7 +282,7 @@ def calculate_euclidean_distance_matrix_projected(
 def calculate_euclidean_distance_matrix_haversine(
     graph, node_order=None, plot_distributions=False
 ):
-    """Calculate the euclidean distances between all nodes in the graph.
+    """Calculate the Euclidean distances between all nodes in the graph.
 
     Uses the **Haversine formula** to calculate the distances between all nodes in
     the graph. The coordinates are in degrees.
@@ -295,13 +295,13 @@ def calculate_euclidean_distance_matrix_haversine(
         The order of the nodes in the distance matrix. If None, the ordering is
         produced by graph.nodes().
     plot_distributions : bool, optional
-        If True, plot the distributions of the euclidean distances and coordinates.
+        If True, plot the distributions of the Euclidean distances and coordinates.
         Sanity check for the coordinate values.
 
     Returns
     -------
     dist_matrix : ndarray
-        The distance matrix for the partitioning. dist_matrix[i, j] is the euclidean
+        The distance matrix for the partitioning. dist_matrix[i, j] is the Euclidean
         distance between node i and node j.
 
     Raises
@@ -317,7 +317,7 @@ def calculate_euclidean_distance_matrix_haversine(
 
     start_time = time()
 
-    # Calculate the euclidean distances between all nodes
+    # Calculate the Euclidean distances between all nodes
     # Do vectorized calculation for all nodes
     lat = np.array([graph.nodes[node]["lat"] for node in node_order])
     lon = np.array([graph.nodes[node]["lon"] for node in node_order])
@@ -366,7 +366,7 @@ def calculate_euclidean_distance_matrix_haversine(
         # Plot distribution of distances and scatter plot of lat/lon
         plot_distance_distributions(
             dist_matrix,
-            dist_title="Distribution of euclidean distances",
+            dist_title="Distribution of Euclidean distances",
             coords=(node1_lon, node1_lat),
             coord_title="Scatter plot of lat/lon",
             labels=("Longitude", "Latitude"),
@@ -426,7 +426,7 @@ def calculate_partitioning_distance_matrix(
         Keep this low if the graph is big or has many partitions. We suggest to
         keep this at 1.
     plot_distributions : bool, optional
-        If True, plot the distributions of the euclidean distances and coordinates.
+        If True, plot the distributions of the Euclidean distances and coordinates.
     check_overlap : bool, optional
         If True, check that the partitions do not overlap node-wise.
 

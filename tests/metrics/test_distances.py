@@ -43,7 +43,7 @@ def test_calculate_distance_matrix_negative_weight(test_city_small_copy):
 
 
 def test_calculate_euclidean_distance_matrix_projected(test_city_all_copy):
-    """Test calculating all pairwise euclidean distances for the full graphs.
+    """Test calculating all pairwise Euclidean distances for the full graphs.
     Projected."""
     _, graph = test_city_all_copy
     calculate_euclidean_distance_matrix_projected(graph, plot_distributions=True)
@@ -70,7 +70,7 @@ def test_calculate_euclidean_distance_matrix_projected(test_city_all_copy):
 def test_calculate_euclidean_distance_matrix_projected_faulty_coords(
     test_city_small_copy, key, value
 ):
-    """Test calculating all pairwise euclidean distances for the full graphs
+    """Test calculating all pairwise Euclidean distances for the full graphs
     with missing coordinates. Projected.
     """
     _, graph = test_city_small_copy
@@ -99,7 +99,7 @@ def test_calculate_euclidean_distance_matrix_projected_unprojected_graph(
 
 
 def test_calculate_euclidean_distance_matrix_haversine(test_city_small_copy):
-    """Test calculating all pairwise euclidean distances for the full graphs.
+    """Test calculating all pairwise Euclidean distances for the full graphs.
     Haversine."""
     _, graph = test_city_small_copy
     calculate_euclidean_distance_matrix_haversine(graph, plot_distributions=True)
@@ -130,7 +130,7 @@ def test_calculate_euclidean_distance_matrix_haversine(test_city_small_copy):
 def test_calculate_euclidean_distance_matrix_haversine_faulty_coords(
     test_city_small_copy, key, value
 ):
-    """Test calculating all pairwise euclidean distances for the full graphs
+    """Test calculating all pairwise Euclidean distances for the full graphs
     with missing coordinates. Haversine.
     """
     _, graph = test_city_small_copy

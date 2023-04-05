@@ -12,18 +12,18 @@ from ..plot import plot_by_attribute
 def plot_distance_distributions(
     dist_matrix, dist_title, coords, coord_title, labels, distance_unit="km"
 ):
-    """Plot the distributions of the euclidean distances and coordinates.
+    """Plot the distributions of the Euclidean distances and coordinates.
 
     Parameters
     ----------
     dist_matrix : ndarray
-        The distance matrix for the partitioning. dist_matrix[i, j] is the euclidean
+        The distance matrix for the partitioning. dist_matrix[i, j] is the Euclidean
         distance between node i and node j.
     dist_title : str
-        The title of the histogram of the euclidean distances.
+        The title of the histogram of the Euclidean distances.
     coords : tuple
         The coordinates of the nodes. coords[0] is the x-coordinates, coords[1] is
-        the y-coordinates. Can be either angular or euclidean coordinates.
+        the y-coordinates. Can be either angular or Euclidean coordinates.
     coord_title : str
         The title of the scatter plot of the coordinates.
     labels : tuple
