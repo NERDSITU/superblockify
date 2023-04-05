@@ -17,9 +17,13 @@ from networkx import (
 from numpy import linspace, array
 from osmnx.stats import edge_length_total
 
-from .utils import show_highway_stats, remove_dead_ends_directed
 from .checks import is_valid_partitioning
 from .representative import set_representative_nodes
+from .utils import (
+    show_highway_stats,
+    remove_dead_ends_directed,
+    split_up_isolated_edges_directed,
+)
 from .. import attribute, plot
 from ..metrics.metric import Metric
 from ..plot import save_plot
@@ -417,11 +421,13 @@ class BasePartitioner(ABC):
         `self.partitions` attribute.
         """
 
+        split_up_isolated_edges_directed(self.graph, self.sparsified)
+
         # Find difference, edgewise, between the graph and the sparsified subgraph
         rest = self.graph.edge_subgraph(
             [
                 (u, v, k)
-                for u, v, k, _ in self.graph.edges(keys=True, data=True)
+                for u, v, k in self.graph.edges(keys=True, data=False)
                 if (u, v, k) not in self.sparsified.edges(keys=True)
             ]
         ).copy()
