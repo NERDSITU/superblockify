@@ -9,7 +9,8 @@ __pycache__/
 # Development
 *.egg-info
 .coverage
-docs/*
+docs/api/*
+!docs/api/index.rst
 
 # OSMnx cache
 **/cache/
@@ -20,3 +21,4 @@ docs/*
 # outputs - add manually
 data/*
 tests/test_data/output/*
+public/*
