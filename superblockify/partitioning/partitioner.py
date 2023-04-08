@@ -986,7 +986,7 @@ class BasePartitioner(ABC):
             partitioner = pickle.load(file)
 
         # Load metric
-        metric_path = join(RESULTS_DIR, name, name + ".metric")
+        metric_path = join(RESULTS_DIR, name, name + ".metrics")
         if exists(metric_path):
             logger.debug("Loading metric from %s", metric_path)
             partitioner.metric = Metric.load(name)
