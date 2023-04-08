@@ -3,13 +3,14 @@
 import os
 from ast import literal_eval
 from configparser import ConfigParser
+from os.path import dirname, join
 
 print(f"Current working directory: {os.getcwd()}")
 
 from superblockify import ResidentialPartitioner
 
 config = ConfigParser()
-config.read("config.ini")
+config.read(join(dirname(__file__), "..", "..", "config.ini"))
 PLACES_GENERAL = literal_eval(config["tests"]["places_general"])
 PLACES_SMALL = literal_eval(config["tests"]["places_small"])
 

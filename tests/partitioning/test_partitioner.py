@@ -2,6 +2,7 @@
 import logging
 from configparser import ConfigParser
 from os import path, remove
+from os.path import dirname, join
 
 import networkx as nx
 import pytest
@@ -15,7 +16,7 @@ from superblockify.utils import compare_components_and_partitions
 logger = logging.getLogger("superblockify")
 
 config = ConfigParser()
-config.read("config.ini")
+config.read(join(dirname(__file__), "..", "..", "config.ini"))
 
 
 class TestBasePartitioner:

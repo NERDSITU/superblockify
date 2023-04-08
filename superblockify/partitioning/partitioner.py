@@ -3,7 +3,8 @@ import logging
 import pickle
 from abc import ABC, abstractmethod
 from configparser import ConfigParser
-from os import path, makedirs
+from os import makedirs
+from os.path import join, exists, dirname
 from typing import final, Final, List
 
 import osmnx as ox
@@ -32,7 +33,7 @@ from ..utils import load_graph_from_place
 logger = logging.getLogger("superblockify")
 
 config = ConfigParser()
-config.read("config.ini")
+config.read(join(dirname(__file__), "..", "..", "config.ini"))
 GRAPH_DIR = config["general"]["graph_dir"]
 RESULTS_DIR = config["general"]["results_dir"]
 
@@ -129,8 +130,8 @@ class BasePartitioner(ABC):
             )
 
         # First check weather a graph is found under GRAPH_DIR/city_name.graphml
-        graph_path = path.join(GRAPH_DIR, f"{city_name}.graphml")
-        if path.exists(graph_path):
+        graph_path = join(GRAPH_DIR, f"{city_name}.graphml")
+        if exists(graph_path):
             self.graph = self.load_or_find_graph(city_name, search_str, reload_graph)
         elif search_str is not None:
             self.graph = self.load_or_find_graph(city_name, search_str)
@@ -143,8 +144,8 @@ class BasePartitioner(ABC):
         show_highway_stats(self.graph)
 
         # Create results directory
-        self.results_dir = path.join(RESULTS_DIR, name)
-        if not path.exists(self.results_dir):
+        self.results_dir = join(RESULTS_DIR, name)
+        if not exists(self.results_dir):
             makedirs(self.results_dir)
 
         # Set Instance variables
@@ -875,8 +876,8 @@ class BasePartitioner(ABC):
         """
 
         # Check if graph already exists
-        graph_path = path.join(GRAPH_DIR, city_name + ".graphml")
-        if path.exists(graph_path) and not reload_graph:
+        graph_path = join(GRAPH_DIR, city_name + ".graphml")
+        if exists(graph_path) and not reload_graph:
             logger.debug("Loading graph from %s", graph_path)
             graph = ox.load_graphml(graph_path)
         else:
@@ -915,7 +916,7 @@ class BasePartitioner(ABC):
 
         # Save graph
         if save_graph_copy:
-            graph_path = path.join(self.results_dir, self.name + ".graphml")
+            graph_path = join(self.results_dir, self.name + ".graphml")
             logger.debug("Saving graph copy to %s", graph_path)
             ox.save_graphml(self.graph, filepath=graph_path)
 
@@ -923,9 +924,9 @@ class BasePartitioner(ABC):
         self.metric.save(self.results_dir, self.name)
 
         # Save partitioner, with self.graph = None
-        partitioner_path = path.join(self.results_dir, self.name + ".partitioner")
+        partitioner_path = join(self.results_dir, self.name + ".partitioner")
         # Check if partitioner already exists
-        if path.exists(partitioner_path):
+        if exists(partitioner_path):
             logger.debug("Partitioner already exists, overwriting %s", partitioner_path)
         else:
             logger.debug("Saving partitioner to %s", partitioner_path)
@@ -979,14 +980,14 @@ class BasePartitioner(ABC):
         """
 
         # Load partitioner
-        partitioner_path = path.join(RESULTS_DIR, name, name + ".partitioner")
+        partitioner_path = join(RESULTS_DIR, name, name + ".partitioner")
         logger.debug("Loading partitioner from %s", partitioner_path)
         with open(partitioner_path, "rb") as file:
             partitioner = pickle.load(file)
 
         # Load metric
-        metric_path = path.join(RESULTS_DIR, name, name + ".metric")
-        if path.exists(metric_path):
+        metric_path = join(RESULTS_DIR, name, name + ".metric")
+        if exists(metric_path):
             logger.debug("Loading metric from %s", metric_path)
             partitioner.metric = Metric.load(name)
         else:
@@ -1013,13 +1014,13 @@ class BasePartitioner(ABC):
         """
 
         # Load graph - if possible from RESULTS_DIR, else from GRAPH_DIR
-        graph_path = path.join(RESULTS_DIR, name, name + ".graphml")
-        if path.exists(graph_path):
+        graph_path = join(RESULTS_DIR, name, name + ".graphml")
+        if exists(graph_path):
             logger.debug("Loading graph from %s", graph_path)
             partitioner.graph = ox.load_graphml(graph_path)
         else:
-            graph_path = path.join(GRAPH_DIR, partitioner.city_name + ".graphml")
-            if path.exists(graph_path):
+            graph_path = join(GRAPH_DIR, partitioner.city_name + ".graphml")
+            if exists(graph_path):
                 logger.debug("Loading graph from %s", graph_path)
                 partitioner.graph = ox.load_graphml(graph_path)
             else:

@@ -3,7 +3,7 @@ from ast import literal_eval
 from configparser import ConfigParser
 from copy import deepcopy
 from os import listdir, remove
-from os.path import getsize, join, exists
+from os.path import getsize, join, exists, dirname
 from shutil import rmtree
 
 import osmnx as ox
@@ -13,7 +13,7 @@ from networkx import set_node_attributes
 from superblockify.partitioning import __all_partitioners__
 
 config = ConfigParser()
-config.read("config.ini")
+config.read(join(dirname(__file__), "..", "config.ini"))
 TEST_DATA = config["tests"]["test_data_path"]
 RESULTS_DIR = config["general"]["results_dir"]
 

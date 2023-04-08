@@ -6,6 +6,7 @@ blackd
 isort
 pylint
 pytest
+pytest-cov
 coverage
 sphinx
 numpydoc

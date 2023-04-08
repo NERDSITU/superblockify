@@ -2,6 +2,7 @@
 import logging
 from configparser import ConfigParser
 from itertools import chain
+from os.path import dirname, join
 from sys import modules
 
 from networkx import is_weakly_connected
@@ -14,7 +15,7 @@ from ..utils import has_pairwise_overlap
 logger = logging.getLogger("superblockify")
 
 config = ConfigParser()
-config.read("config.ini")
+config.read(join(dirname(__file__), "..", "..", "config.ini"))
 
 
 def is_valid_partitioning(partitioning):

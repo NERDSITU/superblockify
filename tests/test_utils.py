@@ -1,7 +1,7 @@
 """Tests for the utils module."""
 from configparser import ConfigParser
 from os import remove
-from os.path import exists
+from os.path import exists, join, dirname
 
 import pytest
 from numpy import array, array_equal
@@ -13,7 +13,7 @@ from superblockify.utils import (
 )
 
 config = ConfigParser()
-config.read("config.ini")
+config.read(join(dirname(__file__), "..", "config.ini"))
 
 
 def test_load_graph_from_place():

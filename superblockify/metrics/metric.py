@@ -2,7 +2,7 @@
 import logging
 import pickle
 from configparser import ConfigParser
-from os import path
+from os.path import dirname, join, exists
 
 from .distances import calculate_distance_matrices
 from .measures import (
@@ -25,7 +25,7 @@ from ..utils import compare_dicts
 logger = logging.getLogger("superblockify")
 
 config = ConfigParser()
-config.read("config.ini")
+config.read(join(dirname(__file__), "..", "..", "config.ini"))
 RESULTS_DIR = config["general"]["results_dir"]
 
 
@@ -331,9 +331,9 @@ class Metric:
 
         """
 
-        metrics_path = path.join(folder, name + ".metrics")
+        metrics_path = join(folder, name + ".metrics")
         # Check if metrics already exist
-        if path.exists(metrics_path):
+        if exists(metrics_path):
             logger.debug("Metrics already exist, overwriting %s", metrics_path)
         else:
             logger.debug("Saving metrics to %s", metrics_path)
@@ -356,7 +356,7 @@ class Metric:
 
         """
 
-        metrics_path = path.join(RESULTS_DIR, name, name + ".metrics")
+        metrics_path = join(RESULTS_DIR, name, name + ".metrics")
         logger.debug("Loading metrics from %s", metrics_path)
         with open(metrics_path, "rb") as file:
             metrics = pickle.load(file)
