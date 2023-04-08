@@ -116,7 +116,7 @@ def test_city_all_precalculated_save(
         city_name=city_name,
         graph=graph.copy(),
     )
-    part.run(approach=False)
+    part.run(calculate_metrics=False)
     part.save(save_graph_copy=True)
     return part.name, part.__class__
 
@@ -139,7 +139,7 @@ def test_city_small_precalculated(test_city_small, partitioner_class):
         city_name=city_name,
         graph=graph.copy(),
     )
-    part.run(approach=False)
+    part.run(calculate_metrics=False)
     return part
 
 
@@ -162,7 +162,7 @@ def test_one_city_precalculated(partitioner_class):
         city_name=city_name,
         graph=graph.copy(),
     )
-    part.run(approach=False)
+    part.run(calculate_metrics=False)
     return part
 
 

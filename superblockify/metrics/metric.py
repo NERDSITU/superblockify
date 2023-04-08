@@ -100,17 +100,14 @@ class Metric:
         self.global_efficiency = {"SE": None, "NE": None, "NS": None}
 
         self.distance_matrix = None
-        self.rep_distance_matrix = None
+        self.predecessor_matrix = None
         self.weight = None
         self.node_list = None
-        self.rep_node_list = None
-        self.approach = None
 
     def calculate_all(
         self,
         partitioner,
         weight="length",
-        approach="rep_nodes",
         num_workers=None,
         chunk_size=1,
         make_plots=False,
@@ -126,9 +123,6 @@ class Metric:
             The partitioner object to calculate the metrics for
         weight : str, optional
             The edge attribute to use as weight, by default "length", if None count hops
-        approach : str, optional
-            The approach to use for calculating the distances, by default "rep_nodes".
-            Can be "rep_nodes" or "full".
         num_workers : int, optional
             The number of workers to use for multiprocessing. If None, use
             min(32, os.cpu_count() + 4), by default None
@@ -137,54 +131,20 @@ class Metric:
         make_plots : bool, optional
             Whether to make plots of the distributions of the distances for each
             network measure, by default False
-
-        Raises
-        ------
-        ValueError
-            If the approach is not "rep_nodes" or "full"
         """
         # pylint: disable=unused-argument
 
-        if approach not in ["rep_nodes", "full"]:
-            raise ValueError(
-                f"Unknown approach '{approach}' for calculating the distance matrix. "
-                f"Must be 'rep_nodes' or 'full'."
-            )
-
         self.weight = weight  # weight attribute
         self.node_list = partitioner.get_sorted_node_list()  # full node list
-        self.rep_node_list = [  # representative node list
-            comp["rep_node"] for comp in partitioner.get_partition_nodes()
-        ]  # There might be rep_nodes that are in the sparsified graph
-        self.rep_node_list += [
-            node
-            for node in partitioner.sparsified.nodes
-            if node not in self.rep_node_list
-        ]
 
-        if approach == "full":
-            self.distance_matrix = calculate_distance_matrices(
-                self.node_list,
-                partitioner,
-                weight,
-                "full",
-                chunk_size,
-                make_plots,
-                num_workers,
-            )
-            self.extract_rep_distance_matrix()
-        else:
-            self.rep_distance_matrix = calculate_distance_matrices(
-                self.rep_node_list,
-                partitioner,
-                weight,
-                "rep_nodes",
-                chunk_size,
-                make_plots,
-                num_workers,
-            )
-
-        self.approach = approach
+        self.distance_matrix, self.predecessor_matrix = calculate_distance_matrices(
+            self.node_list,
+            partitioner,
+            weight,
+            chunk_size,
+            make_plots,
+            num_workers,
+        )
 
         self.calculate_all_measure_sums()
 
@@ -362,14 +322,3 @@ class Metric:
             metrics = pickle.load(file)
 
         return metrics
-
-    def extract_rep_distance_matrix(self):
-        """Extract the representative distance matrix from the full distance matrix.
-
-        Use partitioner.get_partition_nodes() to get the representative nodes. Find the
-        corresponding indices in the full distance matrix and extract the sub-matrix.
-        """
-        rep_indices = [self.node_list.index(node) for node in self.rep_node_list]
-        self.rep_distance_matrix = {}
-        for key, value in self.distance_matrix.items():
-            self.rep_distance_matrix[key] = value[rep_indices, :][:, rep_indices]

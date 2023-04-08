@@ -52,15 +52,6 @@ class TestPartitioners:
         assert part.name is not None and part.name != ""
         assert part.city_name is not None and part.city_name != ""
 
-    @pytest.mark.parametrize(
-        "approach",  # only False, 'rep_nodes', 'full' are valid
-        [True, "invalid", 1, 0.5, -1, -0.5, None, [], {}, set()],
-    )
-    def test_run_invalid_approach(self, test_city_small_preloaded_copy, approach):
-        """Test run method with invalid arguments."""
-        with pytest.raises(ValueError):
-            test_city_small_preloaded_copy.run(approach=approach)
-
     def test_plot_partition_graph(self, test_city_small_precalculated_copy):
         """Test `plot_partition_graph` by design."""
         part = test_city_small_precalculated_copy
@@ -275,7 +266,7 @@ class TestPartitioners:
             city_name="Adliswil_tmp_save_load",
             search_str="Adliswil, Bezirk Horgen, Zürich, Switzerland",
         )
-        part.run(approach=False)
+        part.run(calculate_metrics=False)
 
         # Save
         part.save(save_graph_copy)

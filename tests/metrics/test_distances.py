@@ -8,15 +8,7 @@ from superblockify.metrics.distances import (
     calculate_euclidean_distance_matrix_projected,
     calculate_euclidean_distance_matrix_haversine,
     calculate_partitioning_distance_matrix,
-    calculate_distance_matrices,
 )
-
-
-@pytest.mark.parametrize("approach", [True, False, 1, "a", None, "Full", [], {}, set()])
-def test_calculate_distance_matrices_faulty_approach(approach):
-    """Test error handling for faulty approach in calculate_distance_matrices."""
-    with pytest.raises(ValueError):
-        calculate_distance_matrices([], None, approach, "", 0, False, 0)
 
 
 @pytest.mark.parametrize("weight", ["length", None])
