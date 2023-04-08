@@ -22,3 +22,4 @@ docs/api/*
 data/*
 tests/test_data/output/*
 public/*
+jupyter_execute/*

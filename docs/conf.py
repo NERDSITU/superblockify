@@ -14,6 +14,8 @@ import sys
 
 sys.path.insert(0, os.path.abspath(".."))
 
+from superblockify import __version__
+
 autodoc_mock_imports = [
     "networkx",
     "osmnx",
@@ -31,7 +33,7 @@ autodoc_mock_imports = [
 project = "superblockify"
 copyright = "2023, Carlson Büth"
 author = "Carlson Büth"
-release = "0.0.0"
+release = __version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -82,9 +84,15 @@ html_theme_options = {
     "repository_branch": "main",
     "use_source_button": True,
     "use_repository_button": True,
-    "use_download_button": False,
+    "use_download_button": True,
     "path_to_docs": "docs",
     # "home_page_in_toc": True,
+    "launch_buttons": {
+        "binderhub_url": "https://mybinder.org",
+        "colab_url": "https://colab.research.google.com/",
+        "deepnote_url": "https://deepnote.com/",
+        "notebook_interface": "jupyterlab",
+    },
 }
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
