@@ -538,8 +538,9 @@ def calculate_partitioning_distance_matrix(
     for name, (dist, pred) in sorted(
         results, key=lambda x: x[0] != "sparsified", reverse=True
     ):
-        partitions[name]["node_order_idx"] = [node_order.index(n) for n in
-                                              partitions[name]["nodelist"]]
+        partitions[name]["node_order_idx"] = [
+            node_order.index(n) for n in partitions[name]["nodelist"]
+        ]
         dist_matrix[
             np.ix_(
                 partitions[name]["node_order_idx"],
@@ -549,7 +550,9 @@ def calculate_partitioning_distance_matrix(
 
         def predecessors_vectorized(p_simple):
             if p_simple != -9999:
-                return node_order_indices[partitions[name]["node_order_idx"][p_simple]]  # pylint: disable=cell-var-from-loop
+                return node_order_indices[
+                    partitions[name]["node_order_idx"][p_simple]
+                ]  # pylint: disable=cell-var-from-loop
             return p_simple
 
         pred_matrix[
