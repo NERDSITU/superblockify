@@ -142,7 +142,7 @@ def test_calculate_partitioning_distance_matrix(
         calculate_partitioning_distance_matrix(
             part,
             # reverse node order
-            node_order= list(part.graph.nodes)[::-1],
+            node_order=list(part.graph.nodes)[::-1],
             plot_distributions=True,
             check_overlap=True,
             num_workers=4,
