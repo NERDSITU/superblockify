@@ -1,6 +1,7 @@
 """Distance calculation for the network metrics."""
 import logging
 from datetime import timedelta
+from itertools import combinations
 from multiprocessing import cpu_count, Pool
 from time import time
 
@@ -386,7 +387,7 @@ def calculate_partitioning_distance_matrix(
     chunk_size=1,
     plot_distributions=False,
     check_overlap=True,
-):  # pylint: disable=too-many-locals
+):
     """Calculate the distance matrix for the partitioning.
 
     This is the pairwise distance between all pairs of nodes, where the shortest
@@ -409,7 +410,7 @@ def calculate_partitioning_distance_matrix(
         produced by graph.nodes().
     num_workers : int, optional
         The maximal number of workers used to process distance matrices. If None,
-        the number of workers is set to min(32, cpu_count() // 2).
+        the number of workers is set to ``min(32, cpu_count() // 2)``.
         Choose this number carefully, as it can lead to memory errors if too high,
         if the graph has partitions. In this case another partitioner approach
         might yield better results.
@@ -429,7 +430,8 @@ def calculate_partitioning_distance_matrix(
         If partitions don't have unique names.
     ValueError
         If the partitions overlap node-wise. For nodes considered to be in the
-        partition, see `BasePartitioner.get_partition_nodes()`.
+        partition, see :func:`BasePartitioner.get_partition_nodes()
+        <superblockify.partitioning.partitioner.BasePartitioner.get_partition_nodes()>`.
 
     Returns
     -------
@@ -482,135 +484,9 @@ def calculate_partitioning_distance_matrix(
         "nodelist": list(partitioner.sparsified.nodes),
     }
 
-    logger.debug("Preparing combinations for processing.")
-    start_time = time()
-
-    combs = (
-        (
-            name,
-            to_scipy_sparse_array(
-                part["subgraph"],
-                weight=weight,
-                format="csr",
-                nodelist=part["nodelist"],
-            ),
-        )
-        for name, part in partitions.items()
+    dist_matrix, pred_matrix = shortest_paths_restricted(
+        partitioner.graph, partitions, weight, node_order, num_workers, chunk_size
     )
-
-    # Calculate the combinations in parallel
-    logger.debug(
-        "Calculating %d separate distance matrices in parallel, "
-        "with %d workers and chunk-size %d.",
-        len(partitions),
-        num_workers,
-        chunk_size,
-    )
-    # Parallelized calculation with `p.imap_unordered`
-    with Pool(processes=num_workers) as pool:
-        results = list(
-            tqdm(
-                pool.imap_unordered(
-                    dijkstra_param,
-                    combs,
-                    chunksize=chunk_size,
-                ),
-                desc="Calculating distance matrices",
-                total=len(partitions),
-                unit_scale=1,
-            )
-        )
-    logger.debug(
-        "Finished calculating %d separate distance matrices in %s. "
-        "Combining the results.",
-        len(partitions),
-        timedelta(seconds=time() - start_time),
-    )
-
-    # Construct the distance matrix for the partitioning, half-precision float
-    dist_matrix = np.full((len(node_order), len(node_order)), np.inf, dtype=np.half)
-    pred_matrix = np.full((len(node_order), len(node_order)), -9999, dtype=np.int32)
-    node_order_indices = list(range(len(node_order)))
-
-    # Construct matrices for the separate distances and predecessors
-    # sort `results` to ensure that the sparsified partition is last
-    # as the shared nodes should be determined by the sparsified graph
-    for name, (dist, pred) in sorted(
-        results, key=lambda x: x[0] != "sparsified", reverse=True
-    ):
-        partitions[name]["node_order_idx"] = [
-            node_order.index(n) for n in partitions[name]["nodelist"]
-        ]
-        dist_matrix[
-            np.ix_(
-                partitions[name]["node_order_idx"],
-                partitions[name]["node_order_idx"],
-            )
-        ] = dist
-
-        def predecessors_vectorized(p_simple):
-            if p_simple != -9999:
-                return node_order_indices[
-                    partitions[name][  # pylint: disable=cell-var-from-loop
-                        "node_order_idx"
-                    ][p_simple]
-                ]
-            return p_simple
-
-        pred_matrix[
-            np.ix_(
-                partitions[name]["node_order_idx"],
-                partitions[name]["node_order_idx"],
-            )
-        ] = np.vectorize(predecessors_vectorized)(pred)
-
-    logger.debug("Constructing csr matrix for simplified calculation.")
-
-    ## Fill up distances
-    # Construct simplified graph
-    graph_restricted = dist_matrix.copy()
-    n_partition_indices = [
-        i
-        for i in node_order_indices
-        if i not in partitions["sparsified"]["node_order_idx"]
-    ]
-    graph_restricted[np.ix_(n_partition_indices, n_partition_indices)] = np.inf
-
-    # Construct Compressed Sparse Row matrix
-    # https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_matrix.html
-    data = graph_restricted.flatten()
-    row, col = np.indices(graph_restricted.shape)
-    row, col = row.flatten(), col.flatten()
-    # remove the diagonal
-    data = data[row != col]
-    row, col = row[row != col], col[row != col]
-    # remove inf values
-    data, row, col = data[data != np.inf], row[data != np.inf], col[data != np.inf]
-
-    graph_restricted = csr_matrix(
-        (data, (row, col)), shape=(len(node_order), len(node_order))
-    )
-    logger.debug(
-        "Constructed csr matrix of sparsity %.2f%% (%d/%d) for simplified "
-        "calculation. Running Dijkstra's algorithm...",
-        100 * (1 - graph_restricted.nnz / len(node_order) ** 2),
-        graph_restricted.nnz,
-        len(node_order) ** 2,
-    )
-    start_time = time()
-    dist_simple, pred_simple = dijkstra(
-        graph_restricted, directed=True, return_predecessors=True
-    )
-    logger.debug(
-        "Restricted all-pairs shortest path lengths for graph with $d partitions, "
-        " %d nodes and %d edges calculated in %s. Reconstructing predecessors...",
-        len(partitions) - 1,
-        len(node_order),
-        timedelta(seconds=time() - start_time),
-    )
-    min_mask = dist_simple < dist_matrix
-    dist_matrix = np.where(min_mask, dist_simple, dist_matrix)
-    pred_matrix[min_mask] = pred_matrix[pred_simple[min_mask], np.where(min_mask)[1]]
 
     if plot_distributions:
         # Where `dist_full_graph` is inf, replace with 0
@@ -634,14 +510,178 @@ def calculate_partitioning_distance_matrix(
     return dist_matrix, pred_matrix
 
 
-def dijkstra_param(comb):
+def shortest_paths_restricted(
+    graph, partitions, weight, node_order, num_workers=2, chunk_size=1
+):
+    """Calculate restricted shortest paths.
+
+    Shortest distances and predecessors with restrictions of not passing through
+    partitions. The passed partitions is a dictionary with the partition names as
+    keys and the partition as value. The partition is a dictionary with the keys
+    `subgraph`, `nodes` and `nodelist`. The dict needs to have a special partition,
+    called `sparsified`, which is the sparsified graph. The `nodes` key is a list
+    of nodes that are exclusive to the partition, i.e. nodes that are not shared
+    with the sparsified graph or on partition boundaries. The `nodelist` key is a
+    list of nodes that are exclusive to the partition and nodes that are shared
+    with the sparsified graph. The subgraphs all need to be graphs views of a shared
+    graph. The Partitioner class produces such partitions, after passing the
+    integrated :func:`is_valid_partitioning()
+    <superblockify.partitioning.checks.is_valid_partitioning>` checks.
+
+    Parameters
+    ----------
+    graph : networkx.MultiDiGraph
+        The graph to calculate the shortest paths for.
+    partitions : dict
+        The partitions to calculate the shortest paths for. The keys are the
+        partition names and the values are dictionaries with the keys `subgraph`,
+        `nodes` and `nodelist`.
+    weight : str or None, optional
+        The edge attribute to use as weight. If None, all edge weights are 1.
+    node_order : list
+        The order of the nodes in the distance matrix.
+    num_workers : int, optional
+        The number of workers to use for the multiprocessing pool. Defaults to 2.
+    chunk_size : int, optional
+        The chunk size for the multiprocessing pool. Defaults to 1.
+
+    Returns
+    -------
+    dist_matrix : ndarray
+        The distance matrix for the partitioning.
+    pred_matrix : ndarray
+        The predecessor matrix for the partitioning.
+
+    Notes
+    -----
+    For usage with a :class:`Partitioner
+    <superblockify.partitioning.partitioner.BasePartitioner>`,
+    see :func:`calculate_partitioning_distance_matrix()
+    <superblockify.metrics.distances.calculate_partitioning_distance_matrix>`.
+    """
+    # pylint: disable=too-many-locals
+
+    # node_order indices
+    # filtered indices: sparse/partition
+    n_sparse_indices = [node_order.index(n) for n in partitions["sparsified"]["nodes"]]
+    part_name_order = [name for name in partitions.keys() if name != "sparsified"]
+    n_partition_indices_separate = [
+        [node_order.index(n) for n in partitions[name]["nodes"]]
+        for name in part_name_order
+    ]
+    n_partition_indices = [n for part in n_partition_indices_separate for n in part]
+
+    # Semipermeable graphs
+    g_leaving = graph.copy()
+    # Construct Compressed Sparse Row matrix
+    # https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_matrix.html
+    g_leaving = to_scipy_sparse_array(
+        g_leaving, nodelist=node_order, weight=weight, format="coo"
+    )
+    data, row, col = g_leaving.data, g_leaving.row, g_leaving.col
+
+    # Remove edges between different partitions
+    # (col, row in separate n_partition_indices_separate)
+    for n_ind_1, n_ind_2 in combinations(n_partition_indices_separate, 2):
+        mask = np.logical_and(np.isin(row, n_ind_1), np.isin(col, n_ind_2))
+        mask = np.logical_or(
+            mask, np.logical_and(np.isin(row, n_ind_2), np.isin(col, n_ind_1))
+        )
+        data, row, col = data[~mask], row[~mask], col[~mask]
+    g_entering = (data, (row, col))
+
+    # Remove edges from partition to sparse
+    mask = np.logical_and(
+        np.isin(row, n_partition_indices), np.isin(col, n_sparse_indices)
+    )
+    data, row, col = data[~mask], row[~mask], col[~mask]
+    g_leaving = csr_matrix((data, (row, col)), shape=(len(node_order), len(node_order)))
+    # Remove edges from sparse to partition
+    data, (row, col) = g_entering
+    mask = np.logical_and(
+        np.isin(row, n_sparse_indices), np.isin(col, n_partition_indices)
+    )
+    data, row, col = data[~mask], row[~mask], col[~mask]
+    g_entering = csr_matrix(
+        (data, (row, col)), shape=(len(node_order), len(node_order))
+    )
+
+    # Calculate the combinations in parallel
+    logger.debug(
+        "Calculating 2 semipermeable distance matrices with %d workers.",
+        min(2, num_workers),
+    )
+    start_time = time()
+    # Parallelized calculation with `p.imap_unordered`
+    with Pool(processes=min(2, num_workers)) as pool:
+        results = list(
+            tqdm(
+                pool.imap_unordered(
+                    dijkstra_settings,
+                    [g_leaving, g_entering],
+                    chunksize=1,
+                ),
+                desc="Calculating distance matrices",
+                total=2,
+                unit_scale=1,
+            )
+        )
+    logger.debug(
+        "Finished calculating distance matrices in %s. Combining the results.",
+        timedelta(seconds=time() - start_time),
+    )
+    min_mask = results[0][0] < results[1][0]
+    dist_le, pred_le = results[1]
+    dist_le[min_mask] = results[0][0][min_mask]
+    pred_le[min_mask] = results[0][1][min_mask]
+
+    # Fill up paths
+    n_partition_intersect_indices = [
+        list(
+            set(partitions["sparsified"]["nodelist"]).intersection(
+                partitions[name]["nodelist"]
+            )
+        )
+        for name in part_name_order
+    ]
+    n_partition_intersect_indices = [
+        [node_order.index(n) for n in part_indices]
+        for part_indices in n_partition_intersect_indices
+    ]
+
+    start_time = time()
+
+    # Loop, for didactic purposes
+    for part_idx, part_intersect in zip(
+        n_partition_indices_separate, n_partition_intersect_indices
+    ):
+        for i in part_idx:
+            for j in n_partition_indices:
+                if i == j:
+                    continue
+                # distances from i to j, over all possible k in part_intersect
+                dists = dist_le[i, part_intersect] + dist_le[part_intersect, j]
+                # index of minimum distance for predecessor
+                min_idx = np.argmin(dists)
+                if dists[min_idx] >= dist_le[i, j]:
+                    continue
+                dist_le[i, j] = dists[min_idx]
+                pred_le[i, j] = pred_le[part_intersect[min_idx], j]
+
+    logger.debug(
+        "Finished filling up paths in %s.",
+        timedelta(seconds=time() - start_time),
+    )
+
+    return dist_le, pred_le
+
+
+def dijkstra_settings(sparse_matrix):
     """Wrapper for the dijkstra function.
 
     Fixes keyword arguments for the dijkstra function.
     """
-    name, sparse_matrix = comb
-
-    return name, dijkstra(
+    return dijkstra(
         sparse_matrix,
         directed=True,
         indices=None,  # all nodes, sorted as in sparse_matrix
