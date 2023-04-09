@@ -426,6 +426,8 @@ def calculate_partitioning_distance_matrix(
     Raises
     ------
     ValueError
+        If partitions don't have unique names.
+    ValueError
         If the partitions overlap node-wise. For nodes considered to be in the
         partition, see `BasePartitioner.get_partition_nodes()`.
 
@@ -448,14 +450,19 @@ def calculate_partitioning_distance_matrix(
         num_workers = min(32, cpu_count() // 2)
         logger.debug("No number of workers specified, using %s.", num_workers)
 
+    partitions = partitioner.get_partition_nodes()
+    # Check that the partitions have unique names
+    if len(partitions) != len({part["name"] for part in partitions}):
+        raise ValueError("Partitions must have unique names.")
+
     partitions = {
         part["name"]: {
             "subgraph": part["subgraph"],
             "nodes": list(part["nodes"]),  # exclusive nodes inside the subgraph
             "nodelist": list(part["subgraph"]),  # also nodes shared with the
-            # sparsified graph or
+            # sparsified graph or on partition boundaries
         }
-        for part in partitioner.get_partition_nodes()
+        for part in partitions
     }
 
     # Check that none of the partitions overlap by checking that the intersection
@@ -594,7 +601,7 @@ def calculate_partitioning_distance_matrix(
         " %d nodes and %d edges calculated in %s. Reconstructing predecessors...",
         len(partitions) - 1,
         len(node_order),
-        time() - start_time,
+        timedelta(seconds=time() - start_time),
     )
     min_mask = dist_simple < dist_matrix
     dist_matrix = np.where(min_mask, dist_simple, dist_matrix)

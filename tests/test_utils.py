@@ -123,7 +123,7 @@ def _delete_query_test_graphs():
     ],
 )
 @pytest.mark.filterwarnings("ignore:invalid value encountered")
-def test__has_pairwise_overlap(lists, expected):
+def test_has_pairwise_overlap(lists, expected):
     """Test `_has_pairwise_overlap` by design."""
     # Check if ndarrays are equal
     # pylint: disable=protected-access
@@ -149,7 +149,7 @@ def test__has_pairwise_overlap(lists, expected):
         [[1, 2], [3, 4], [5, 6], "a"],
     ],
 )
-def test__has_pairwise_overlap_exception(lists):
+def test_has_pairwise_overlap_exception(lists):
     """Test `_has_pairwise_overlap` exception handling."""
     with pytest.raises(ValueError):
         # pylint: disable=protected-access

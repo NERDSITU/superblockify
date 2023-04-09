@@ -153,19 +153,37 @@ def test_calculate_partitioning_distance_matrix(
     plt.close("all")
 
 
-def test_calculate_partitioning_distance_matrix_partitions_overlap(
-    test_city_small_copy, partitioner_class
+def test_calculate_partitioning_distance_matrix_duplicate_partition_names(
+    test_city_small_precalculated_copy,
 ):
-    """Test calculating distances for partitioned graph with overlapping
-    partitions."""
-    city_name, graph = test_city_small_copy
-    part = partitioner_class(name=city_name + "_test", city_name=city_name, graph=graph)
-    part.run()
+    """Test calculating distances for partitioned graph with duplicate partition
+    names."""
+    part = test_city_small_precalculated_copy
     # Duplicate partitions /component
     if part.components is not None:
         part.components += part.components
     else:
         part.partitions += part.partitions
+
+    with pytest.raises(ValueError):
+        calculate_partitioning_distance_matrix(part)
+
+
+def test_calculate_partitioning_distance_matrix_partitions_overlap(
+    test_city_small_precalculated_copy,
+):
+    """Test calculating distances for partitioned graph with overlapping
+    partitions."""
+    part = test_city_small_precalculated_copy
+    # Duplicate partitions /component
+    if part.components is not None:
+        # Duplicate component but with different name
+        part.components += [part.components[-1].copy()]
+        # Rename duplicate partition
+        part.components[-1]["name"] = part.components[-1]["name"] + "_dup"
+    else:
+        part.partitions += [part.partitions[1].copy()]
+        part.partitions[-1]["name"] = part.partitions[-1]["name"] + "_dup"
 
     with pytest.raises(ValueError):
         calculate_partitioning_distance_matrix(part, check_overlap=True)
