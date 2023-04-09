@@ -132,24 +132,25 @@ def test_calculate_euclidean_distance_matrix_haversine_faulty_coords(
         calculate_euclidean_distance_matrix_haversine(graph)
 
 
+@pytest.mark.parametrize("predefined_node_order", [True, False])
 def test_calculate_partitioning_distance_matrix(
-    test_city_small_copy, partitioner_class
+    test_city_small_precalculated_copy, predefined_node_order
 ):
     """Test calculating distances for partitioned graph by design."""
-    city_name, graph = test_city_small_copy
-    part = partitioner_class(name=city_name + "_test", city_name=city_name, graph=graph)
-    part.run()
-    calculate_partitioning_distance_matrix(
-        part, plot_distributions=True, check_overlap=True, num_workers=4
-    )
-    # With node ordering
-    calculate_partitioning_distance_matrix(
-        part,
-        node_order=list(graph.nodes),
-        plot_distributions=True,
-        check_overlap=True,
-        num_workers=4,
-    )
+    part = test_city_small_precalculated_copy
+    if predefined_node_order:
+        calculate_partitioning_distance_matrix(
+            part,
+            # reverse node order
+            node_order= list(part.graph.nodes)[::-1],
+            plot_distributions=True,
+            check_overlap=True,
+            num_workers=4,
+        )
+    else:
+        calculate_partitioning_distance_matrix(
+            part, plot_distributions=True, check_overlap=True, num_workers=4
+        )
     plt.close("all")
 
 
