@@ -551,8 +551,10 @@ def calculate_partitioning_distance_matrix(
         def predecessors_vectorized(p_simple):
             if p_simple != -9999:
                 return node_order_indices[
-                    partitions[name]["node_order_idx"][p_simple]
-                ]  # pylint: disable=cell-var-from-loop
+                    partitions[name][  # pylint: disable=cell-var-from-loop
+                        "node_order_idx"
+                    ][p_simple]
+                ]
             return p_simple
 
         pred_matrix[
