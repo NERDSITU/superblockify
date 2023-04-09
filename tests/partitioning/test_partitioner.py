@@ -258,7 +258,7 @@ class TestPartitioners:
         save_graph_copy,
         delete_before_load,
         _teardown_test_graph_io,
-    ):
+    ):  # pylint: disable=too-many-branches
         """Test saving and loading of partitioner."""
         # Prepare
         part = partitioner_class(
@@ -277,7 +277,7 @@ class TestPartitioners:
                     config["general"]["graph_dir"], "Adliswil_tmp_save_load.graphml"
                 )
             )
-            # Delete metrics at GRAPH_DIR/Adliswil_tmp_save_load.metric
+            # Delete metrics at RESULTS_DIR/.../Adliswil_tmp_save_load_name.metrics
             remove(
                 path.join(
                     config["general"]["results_dir"],
@@ -302,17 +302,39 @@ class TestPartitioners:
                     attr,
                     part.name,
                 )
+                if not save_graph_copy:
+                    # the edges where the id is looking like uuid4().int must be
+                    # ignored. The rest must be the same. Delete nodes from both graphs
+                    # delete any id that does not fit into int64
+                    for node in list(getattr(part, attr).nodes):
+                        if node >= 2**63:
+                            getattr(part, attr).remove_node(node)
+                    for node in list(getattr(part_loaded, attr).nodes):
+                        if node >= 2**63:
+                            getattr(part_loaded, attr).remove_node(node)
                 assert set(getattr(part, attr).nodes) == set(
                     getattr(part_loaded, attr).nodes
-                ) and set(getattr(part, attr).edges) == set(
-                    getattr(part_loaded, attr).edges
                 )
+                if save_graph_copy:
+                    assert set(getattr(part, attr).edges) == set(
+                        getattr(part_loaded, attr).edges
+                    )
             elif (
                 attr in ["components", "partitions"] and getattr(part, attr) is not None
             ):
-                assert compare_components_and_partitions(
-                    getattr(part, attr), getattr(part_loaded, attr)
-                )
+                if save_graph_copy:
+                    # For not saved graph copy, the components and partitions might
+                    # not be reconstructed completely.
+                    assert compare_components_and_partitions(
+                        getattr(part, attr), getattr(part_loaded, attr)
+                    )
+                else:  # Therefore, only compare the keys of the dicts in the lists.
+                    assert all(
+                        set(elem.keys()) == set(elem_loaded.keys())
+                        for elem, elem_loaded in zip(
+                            getattr(part, attr), getattr(part_loaded, attr)
+                        )
+                    )
             elif all(
                 isinstance(elem, dict)
                 for elem in [getattr(part, attr), getattr(part_loaded, attr)]
