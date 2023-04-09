@@ -335,6 +335,6 @@ def get_new_node_id(graph):
     from the osm node ids.
     """
     node_id = uuid4().int
-    while node_id in graph.nodes or node_id < 2 ** 63:
+    while node_id in graph.nodes or node_id < 2**63:
         node_id = uuid4().int
     return node_id
