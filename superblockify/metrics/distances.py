@@ -662,15 +662,19 @@ def shortest_paths_restricted(
         # There is a different amount of i-j than j-k, calculate all combinations
         # and then mask out the invalid ones
         # add to a new dimension
-        dists = dist_le[np.ix_(part_idx, part_intersect)][:, :, np.newaxis] + \
-                dist_le[np.ix_(part_intersect, n_partition_indices)][np.newaxis, :, :]
+        dists = (
+            dist_le[np.ix_(part_idx, part_intersect)][:, :, np.newaxis]
+            + dist_le[np.ix_(part_intersect, n_partition_indices)][np.newaxis, :, :]
+        )
         # get index of minimum distance for predecessor, use new axis
         min_idx = np.argmin(dists, axis=1)
 
         # write minima into dist_step
         dist_step[np.ix_(part_idx, n_partition_indices)] = dists[
-            np.arange(dists.shape[0])[:, np.newaxis], min_idx, np.arange(
-                dists.shape[-1])]
+            np.arange(dists.shape[0])[:, np.newaxis],
+            min_idx,
+            np.arange(dists.shape[-1]),
+        ]
 
         # write predecessors into pred_step
         # predecessor i-k is the same as predecessor k-j
@@ -683,16 +687,8 @@ def shortest_paths_restricted(
         # might be vectorized
 
     mask = dist_step < dist_le
-    dist_le = np.where(
-        mask,
-        dist_step,
-        dist_le
-    )
-    pred_le = np.where(
-        mask,
-        pred_step,
-        pred_le
-    )
+    dist_le = np.where(mask, dist_step, dist_le)
+    pred_le = np.where(mask, pred_step, pred_le)
 
     logger.debug(
         "Finished filling up paths in %s.",
