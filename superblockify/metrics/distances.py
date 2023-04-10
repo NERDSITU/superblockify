@@ -559,7 +559,7 @@ def shortest_paths_restricted(
     see :func:`calculate_partitioning_distance_matrix()
     <superblockify.metrics.distances.calculate_partitioning_distance_matrix>`.
     """
-    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals, unused-argument
 
     # node_order indices
     # filtered indices: sparse/partition
@@ -651,22 +651,48 @@ def shortest_paths_restricted(
 
     start_time = time()
 
-    # Loop, for didactic purposes
+    dist_step = np.full_like(dist_le, np.inf)
+    pred_step = np.full_like(pred_le, -9999)
+
     for part_idx, part_intersect in zip(
         n_partition_indices_separate, n_partition_intersect_indices
     ):
-        for i in part_idx:
-            for j in n_partition_indices:
+        # Add distances from i in part_idx to all j in n_partition_indices
+        # to the same j to all k in n_partition_indices
+        # There is a different amount of i-j than j-k, calculate all combinations
+        # and then mask out the invalid ones
+        # add to a new dimension
+        dists = dist_le[np.ix_(part_idx, part_intersect)][:, :, np.newaxis] + \
+                dist_le[np.ix_(part_intersect, n_partition_indices)][np.newaxis, :, :]
+        # get index of minimum distance for predecessor, use new axis
+        min_idx = np.argmin(dists, axis=1)
+
+        # write minima into dist_step
+        dist_step[np.ix_(part_idx, n_partition_indices)] = dists[
+            np.arange(dists.shape[0])[:, np.newaxis], min_idx, np.arange(
+                dists.shape[-1])]
+
+        # write predecessors into pred_step
+        # predecessor i-k is the same as predecessor k-j
+        # into pred_step, write the predecessor of k-j
+        for n_p, i in enumerate(part_idx):
+            for m_p, j in enumerate(n_partition_indices):
                 if i == j:
                     continue
-                # distances from i to j, over all possible k in part_intersect
-                dists = dist_le[i, part_intersect] + dist_le[part_intersect, j]
-                # index of minimum distance for predecessor
-                min_idx = np.argmin(dists)
-                if dists[min_idx] >= dist_le[i, j]:
-                    continue
-                dist_le[i, j] = dists[min_idx]
-                pred_le[i, j] = pred_le[part_intersect[min_idx], j]
+                pred_step[i, j] = pred_le[part_intersect[min_idx[n_p, m_p]], j]
+        # might be vectorized
+
+    mask = dist_step < dist_le
+    dist_le = np.where(
+        mask,
+        dist_step,
+        dist_le
+    )
+    pred_le = np.where(
+        mask,
+        pred_step,
+        pred_le
+    )
 
     logger.debug(
         "Finished filling up paths in %s.",
