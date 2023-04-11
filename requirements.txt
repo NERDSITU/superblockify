@@ -6,7 +6,10 @@ blackd
 isort
 pylint
 pytest
+pytest-cov
 coverage
 sphinx
-sphinx_rtd_theme
+numpydoc
+myst-nb
+sphinx-book-theme
 tqdm

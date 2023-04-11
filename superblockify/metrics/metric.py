@@ -2,13 +2,9 @@
 import logging
 import pickle
 from configparser import ConfigParser
-from os import path
+from os.path import dirname, join, exists
 
-from .distances import (
-    calculate_euclidean_distance_matrix_projected,
-    calculate_distance_matrix,
-    calculate_partitioning_distance_matrix,
-)
+from .distances import calculate_distance_matrices
 from .measures import (
     calculate_global_efficiency,
     calculate_directness,
@@ -29,7 +25,7 @@ from ..utils import compare_dicts
 logger = logging.getLogger("superblockify")
 
 config = ConfigParser()
-config.read("config.ini")
+config.read(join(dirname(__file__), "..", "..", "config.ini"))
 RESULTS_DIR = config["general"]["results_dir"]
 
 
@@ -104,6 +100,7 @@ class Metric:
         self.global_efficiency = {"SE": None, "NE": None, "NS": None}
 
         self.distance_matrix = None
+        self.predecessor_matrix = None
         self.weight = None
         self.node_list = None
 
@@ -134,45 +131,20 @@ class Metric:
         make_plots : bool, optional
             Whether to make plots of the distributions of the distances for each
             network measure, by default False
-
         """
         # pylint: disable=unused-argument
 
-        # Set weight attribute
-        self.weight = weight
+        self.weight = weight  # weight attribute
+        self.node_list = partitioner.get_sorted_node_list()  # full node list
 
-        self.node_list = partitioner.get_sorted_node_list()
-
-        # Euclidean distances (E)
-        dist_euclidean = calculate_euclidean_distance_matrix_projected(
-            partitioner.graph,
-            node_order=self.node_list,
-            plot_distributions=make_plots,
-        )
-
-        # On the full graph (S)
-        dist_full_graph = calculate_distance_matrix(
-            partitioner.graph,
-            weight="length",
-            node_order=self.node_list,
-            plot_distributions=make_plots,
-        )
-
-        # On the partitioning graph (N)
-        dist_partitioning_graph = calculate_partitioning_distance_matrix(
+        self.distance_matrix, self.predecessor_matrix = calculate_distance_matrices(
+            self.node_list,
             partitioner,
-            weight="length",
-            node_order=self.node_list,
-            num_workers=num_workers,
-            chunk_size=chunk_size,
-            plot_distributions=make_plots,
+            weight,
+            chunk_size,
+            make_plots,
+            num_workers,
         )
-
-        self.distance_matrix = {
-            "E": dist_euclidean,
-            "S": dist_full_graph,
-            "N": dist_partitioning_graph,
-        }
 
         self.calculate_all_measure_sums()
 
@@ -181,55 +153,66 @@ class Metric:
         )
 
         if make_plots:
-            fig, _ = plot_distance_matrices(
-                self, name=f"{partitioner.name} - {partitioner.__class__.__name__}"
-            )
-            save_plot(
-                partitioner.results_dir,
-                fig,
-                f"{partitioner.name}_distance_matrices.pdf",
-            )
-            fig.show()
-            fig, _ = plot_distance_matrices_pairwise_relative_difference(
-                self, name=f"{partitioner.name} - {partitioner.__class__.__name__}"
-            )
-            save_plot(
-                partitioner.results_dir,
-                fig,
-                f"{partitioner.name}_distance_matrices_"
-                f"pairwise_relative_difference.pdf",
-            )
-            fig.show()
+            self.make_all_plots(partitioner)
 
-            fig, _ = plot_relative_difference(
-                self, "S", "N", title=f"{partitioner.name} - {self.__class__.__name__}"
-            )
-            save_plot(
-                partitioner.results_dir,
-                fig,
-                f"{partitioner.name}_relative_difference_SN.pdf",
-            )
-            fig.show()
+        # self.coverage = self.calculate_coverage(partitioner)
+        # logger.debug("Coverage: %s", self.coverage)
 
-            fig, _ = plot_component_wise_travel_increase(
-                partitioner,
-                self.distance_matrix,
-                self.node_list,
-                measure1="S",
-                measure2="N",
-            )
-            save_plot(
-                partitioner.results_dir,
-                fig,
-                f"{partitioner.name}_component_wise_travel_increase.pdf",
-            )
+    def make_all_plots(self, partitioner):
+        """Make all plots for the metrics.
 
-            fig, _ = plot_relative_increase_on_graph(partitioner.graph)
-            save_plot(
-                partitioner.results_dir,
-                fig,
-                f"{partitioner.name}_relative_increase_on_graph.pdf",
-            )
+        Parameters
+        ----------
+        partitioner : BasePartitioner
+            The partitioner object to calculate the metrics for
+        """
+
+        fig, _ = plot_distance_matrices(
+            self, name=f"{partitioner.name} - {partitioner.__class__.__name__}"
+        )
+        save_plot(
+            partitioner.results_dir,
+            fig,
+            f"{partitioner.name}_distance_matrices.pdf",
+        )
+        fig.show()
+        fig, _ = plot_distance_matrices_pairwise_relative_difference(
+            self, name=f"{partitioner.name} - {partitioner.__class__.__name__}"
+        )
+        save_plot(
+            partitioner.results_dir,
+            fig,
+            f"{partitioner.name}_distance_matrices_"
+            f"pairwise_relative_difference.pdf",
+        )
+        fig.show()
+        fig, _ = plot_relative_difference(
+            self, "S", "N", title=f"{partitioner.name} - {self.__class__.__name__}"
+        )
+        save_plot(
+            partitioner.results_dir,
+            fig,
+            f"{partitioner.name}_relative_difference_SN.pdf",
+        )
+        fig.show()
+        fig, _ = plot_component_wise_travel_increase(
+            partitioner,
+            self.distance_matrix,
+            self.node_list,
+            measure1="S",
+            measure2="N",
+        )
+        save_plot(
+            partitioner.results_dir,
+            fig,
+            f"{partitioner.name}_component_wise_travel_increase.pdf",
+        )
+        fig, _ = plot_relative_increase_on_graph(partitioner.graph)
+        save_plot(
+            partitioner.results_dir,
+            fig,
+            f"{partitioner.name}_relative_increase_on_graph.pdf",
+        )
 
         # self.coverage = self.calculate_coverage(partitioner)
         # logger.debug("Coverage: %s", self.coverage)
@@ -294,21 +277,23 @@ class Metric:
         """
         return compare_dicts(self.__dict__, other.__dict__)
 
-    def save(self, name):
+    def save(self, folder, name):
         """Save the metric to a file.
 
-        Will be saved as a pickle file at RESULTS_DIR/name.metrics.
+        Will be saved as a pickle file at folder/name.metrics.
 
         Parameters
         ----------
+        folder : str
+            The folder to save the metric to.
         name : str
             The name of the file to save the metric to.
 
         """
 
-        metrics_path = path.join(RESULTS_DIR, name, name + ".metrics")
+        metrics_path = join(folder, name + ".metrics")
         # Check if metrics already exist
-        if path.exists(metrics_path):
+        if exists(metrics_path):
             logger.debug("Metrics already exist, overwriting %s", metrics_path)
         else:
             logger.debug("Saving metrics to %s", metrics_path)
@@ -331,7 +316,7 @@ class Metric:
 
         """
 
-        metrics_path = path.join(RESULTS_DIR, name, name + ".metrics")
+        metrics_path = join(RESULTS_DIR, name, name + ".metrics")
         logger.debug("Loading metrics from %s", metrics_path)
         with open(metrics_path, "rb") as file:
             metrics = pickle.load(file)

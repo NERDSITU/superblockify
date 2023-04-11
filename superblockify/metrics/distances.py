@@ -1,13 +1,14 @@
 """Distance calculation for the network metrics."""
 import logging
 from datetime import timedelta
-from itertools import combinations, chain
+from itertools import combinations
 from multiprocessing import cpu_count, Pool
 from time import time
 
 import numpy as np
 from networkx import to_scipy_sparse_array
 from osmnx.projection import is_projected
+from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import dijkstra
 from tqdm import tqdm
 
@@ -19,7 +20,70 @@ logger = logging.getLogger("superblockify")
 _AVG_EARTH_RADIUS_M = 6.3781e6  # in meters, arXiv:1510.07674 [astro-ph.SR]
 
 
-def calculate_distance_matrix(
+def calculate_distance_matrices(
+    node_list, partitioner, weight, chunk_size, make_plots, num_workers
+):
+    """Calculate the distance matrices for the partitioning.
+
+    Parameters
+    ----------
+    node_list : list
+        The list of nodes to calculate the distance matrices for
+    partitioner : superblockify.Partitioner
+        The partitioner to calculate the distance matrices for
+    weight : str, optional
+        The edge attribute to use as weight, if None count hops
+    chunk_size : int
+        The chunk size for the multiprocessing pool
+    make_plots : bool
+        If True, the distance distributions are plotted
+    num_workers : int
+        The number of workers to use for the multiprocessing pool
+
+    Returns
+    -------
+    dict
+        The distance matrices for the partitioning. The keys are the distance
+        matrix types, the values are the distance matrices, corresponding to the
+        node order in ``node_list``.
+    dict
+        The predecessors for the distance matrices. The keys correspond to the
+        keys of the distance matrices, the values are the predecessors for the
+        distance matrices.
+    """
+
+    dist_matrix = {
+        # Euclidean distances (E)
+        "E": calculate_euclidean_distance_matrix_projected(
+            partitioner.graph,
+            node_order=node_list,
+            plot_distributions=make_plots,
+        )
+    }
+
+    predecessors = {}
+
+    # On the full graph (S)
+    dist_matrix["S"], predecessors["S"] = calculate_path_distance_matrix(
+        partitioner.graph,
+        weight=weight,
+        node_order=node_list,
+        plot_distributions=make_plots,
+    )
+    # On the partitioning graph (N)
+    dist_matrix["N"], predecessors["N"] = calculate_partitioning_distance_matrix(
+        partitioner,
+        weight=weight,
+        node_order=node_list,
+        num_workers=num_workers,
+        chunk_size=chunk_size,
+        plot_distributions=make_plots,
+    )
+
+    return dist_matrix, predecessors
+
+
+def calculate_path_distance_matrix(
     graph,
     weight=None,
     node_order=None,
@@ -37,6 +101,7 @@ def calculate_distance_matrix(
     algorithm can be implemented with ``O[N^3]`` computational cost. [1]_
 
     Runtime comparison:
+
     - Scheveningen, NL (N = 1002, E = 2329):
         - Dijkstra: 172ms
         - Floyd-Warshall: 193ms
@@ -80,6 +145,9 @@ def calculate_distance_matrix(
     dist_matrix : ndarray
         The distance matrix for the partitioning. dist_matrix[i, j] is the shortest
         path length from node i to node j.
+    predecessors : ndarray
+        The predecessors for the distance matrix. predecessors[i, j] is the node
+        before node j on the shortest path from node i to node j. [3]_
 
     References
     ----------
@@ -104,8 +172,8 @@ def calculate_distance_matrix(
         graph, weight=weight, format="csr", nodelist=node_order
     )
     start_time = time()
-    dist_full_graph = dijkstra(
-        graph_matrix, directed=True, return_predecessors=False, unweighted=False
+    dist_full_graph, predecessors = dijkstra(
+        graph_matrix, directed=True, return_predecessors=True, unweighted=False
     )
 
     # Convert to half-precision to save memory
@@ -139,13 +207,13 @@ def calculate_distance_matrix(
             else f"k{weight}",
         )
 
-    return dist_full_graph
+    return dist_full_graph, predecessors
 
 
 def calculate_euclidean_distance_matrix_projected(
     graph, node_order=None, plot_distributions=False
 ):
-    """Calculate the euclidean distances between all nodes in the graph.
+    """Calculate the Euclidean distances between all nodes in the graph.
 
     Uses the x and y coordinates of the nodes of a projected graph. The coordinates
     are in meters.
@@ -159,13 +227,13 @@ def calculate_euclidean_distance_matrix_projected(
         The order of the nodes in the distance matrix. If None, the ordering is
         produced by graph.nodes().
     plot_distributions : bool, optional
-        If True, plot the distributions of the euclidean distances and coordinates.
+        If True, plot the distributions of the Euclidean distances and coordinates.
         Sanity check for the coordinate values.
 
     Returns
     -------
     dist_matrix : ndarray
-        The distance matrix for the partitioning. dist_matrix[i, j] is the euclidean
+        The distance matrix for the partitioning. dist_matrix[i, j] is the Euclidean
         distance between node i and node j.
 
     Raises
@@ -195,7 +263,7 @@ def calculate_euclidean_distance_matrix_projected(
     if np.any(np.isinf(x_coord)) or np.any(np.isinf(y_coord)):
         raise ValueError("Graph has infinite coordinates.")
 
-    # Calculate the euclidean distances between all nodes
+    # Calculate the Euclidean distances between all nodes
     dist_matrix = np.sqrt(
         np.square(x_coord[:, np.newaxis] - x_coord[np.newaxis, :])
         + np.square(y_coord[:, np.newaxis] - y_coord[np.newaxis, :])
@@ -206,7 +274,7 @@ def calculate_euclidean_distance_matrix_projected(
     if plot_distributions:
         plot_distance_distributions(
             dist_matrix,
-            dist_title="Distribution of euclidean distances",
+            dist_title="Distribution of Euclidean distances",
             coords=(x_coord, y_coord),
             coord_title="Scatter plot of projected coordinates",
             labels=("x", "y"),
@@ -218,7 +286,7 @@ def calculate_euclidean_distance_matrix_projected(
 def calculate_euclidean_distance_matrix_haversine(
     graph, node_order=None, plot_distributions=False
 ):
-    """Calculate the euclidean distances between all nodes in the graph.
+    """Calculate the Euclidean distances between all nodes in the graph.
 
     Uses the **Haversine formula** to calculate the distances between all nodes in
     the graph. The coordinates are in degrees.
@@ -231,13 +299,13 @@ def calculate_euclidean_distance_matrix_haversine(
         The order of the nodes in the distance matrix. If None, the ordering is
         produced by graph.nodes().
     plot_distributions : bool, optional
-        If True, plot the distributions of the euclidean distances and coordinates.
+        If True, plot the distributions of the Euclidean distances and coordinates.
         Sanity check for the coordinate values.
 
     Returns
     -------
     dist_matrix : ndarray
-        The distance matrix for the partitioning. dist_matrix[i, j] is the euclidean
+        The distance matrix for the partitioning. dist_matrix[i, j] is the Euclidean
         distance between node i and node j.
 
     Raises
@@ -253,7 +321,7 @@ def calculate_euclidean_distance_matrix_haversine(
 
     start_time = time()
 
-    # Calculate the euclidean distances between all nodes
+    # Calculate the Euclidean distances between all nodes
     # Do vectorized calculation for all nodes
     lat = np.array([graph.nodes[node]["lat"] for node in node_order])
     lon = np.array([graph.nodes[node]["lon"] for node in node_order])
@@ -302,7 +370,7 @@ def calculate_euclidean_distance_matrix_haversine(
         # Plot distribution of distances and scatter plot of lat/lon
         plot_distance_distributions(
             dist_matrix,
-            dist_title="Distribution of euclidean distances",
+            dist_title="Distribution of Euclidean distances",
             coords=(node1_lon, node1_lat),
             coord_title="Scatter plot of lat/lon",
             labels=("Longitude", "Latitude"),
@@ -319,19 +387,17 @@ def calculate_partitioning_distance_matrix(
     chunk_size=1,
     plot_distributions=False,
     check_overlap=True,
-):  # pylint: disable=too-many-locals
+):
     """Calculate the distance matrix for the partitioning.
 
     This is the pairwise distance between all pairs of nodes, where the shortest
     paths are only allowed to traverse edges in the start and goal partitions and
     unpartitioned edges.
-    For this, for each combination of start and goal partitions, the shortest
-    paths are calculated using `calculate_distance_matrix()`, as well as for the
-    unpartitioned edges.
-    Finally, a big distance matrix is constructed, where the distances for the
-    edges in the start and goal partitions are taken from the distance matrix for
-    the corresponding partition, and the distances for the unpartitioned edges are
-    taken from the distance matrix for the unpartitioned edges.
+    For this we calculate the distances and predecessors on the sparsified graph and the
+    subgraphs separately. Then we combine the distances and predecessors to get a full
+    distance matrix.
+    We cannot do one big calculation, because the restrictions, to only enter/leave,
+    are dynamic and depend on the start and goal node.
 
     Parameters
     ----------
@@ -344,7 +410,7 @@ def calculate_partitioning_distance_matrix(
         produced by graph.nodes().
     num_workers : int, optional
         The maximal number of workers used to process distance matrices. If None,
-        the number of workers is set to min(32, cpu_count() // 2).
+        the number of workers is set to ``min(32, cpu_count() // 2)``.
         Choose this number carefully, as it can lead to memory errors if too high,
         if the graph has partitions. In this case another partitioner approach
         might yield better results.
@@ -354,212 +420,72 @@ def calculate_partitioning_distance_matrix(
         Keep this low if the graph is big or has many partitions. We suggest to
         keep this at 1.
     plot_distributions : bool, optional
-        If True, plot the distributions of the euclidean distances and coordinates.
+        If True, plot the distributions of the Euclidean distances and coordinates.
     check_overlap : bool, optional
         If True, check that the partitions do not overlap node-wise.
 
     Raises
     ------
     ValueError
+        If partitions don't have unique names.
+    ValueError
         If the partitions overlap node-wise. For nodes considered to be in the
-        partition, see `BasePartitioner.get_partition_nodes()`.
+        partition, see :func:`BasePartitioner.get_partition_nodes()
+        <superblockify.partitioning.partitioner.BasePartitioner.get_partition_nodes()>`.
 
     Returns
     -------
     dist_matrix : ndarray
         The distance matrix for the partitioning. dist_matrix[i, j] is the distance
         between node i and node j for the given rules of the partitioning.
-
+        In the order of `node_order` if given, otherwise as produced by `graph.nodes()`.
+    predecessors : ndarray
+        The predecessor matrix for the partitioning. predecessors[i, j] is the
+        predecessor of node j on the shortest path from node i for the given rules
+        of the partitioning.
     """
+
     if node_order is None:
-        node_order = list(partitioner.get_sorted_node_list())
+        node_order = list(partitioner.graph.nodes)
 
     if num_workers is None:
         num_workers = min(32, cpu_count() // 2)
         logger.debug("No number of workers specified, using %s.", num_workers)
 
-    start_time = time()
-
     partitions = partitioner.get_partition_nodes()
+    # Check that the partitions have unique names
+    if len(partitions) != len({part["name"] for part in partitions}):
+        raise ValueError("Partitions must have unique names.")
+
+    partitions = {
+        part["name"]: {
+            "subgraph": part["subgraph"],
+            "nodes": list(part["nodes"]),  # exclusive nodes inside the subgraph
+            "nodelist": list(part["subgraph"]),  # also nodes shared with the
+            # sparsified graph or on partition boundaries
+        }
+        for part in partitions
+    }
 
     # Check that none of the partitions overlap by checking that the intersection
     # of the nodes in each partition is empty.
     if check_overlap:
         pairwise_overlap = has_pairwise_overlap(
-            [list(part["nodes"]) for part in partitions]
+            [list(part["nodes"]) for part in partitions.values()]
         )
         # Check if any element in the pairwise overlap matrix is True, except the
         # diagonal
         if np.any(pairwise_overlap[np.triu_indices_from(pairwise_overlap, k=1)]):
             raise ValueError("The partitions overlap node-wise. This is not allowed.")
 
-    # Get unpartitioned nodes
-    # as partitioner.graph.nodes() - all nodes in partitions
-    unpartitioned_nodes = set(partitioner.graph.nodes()) - set(
-        node for part in partitions for node in part["nodes"]
-    )
+    partitions["sparsified"] = {
+        "subgraph": partitioner.sparsified,
+        "nodes": list(partitioner.sparsified.nodes),
+        "nodelist": list(partitioner.sparsified.nodes),
+    }
 
-    # Preparing the combinations for processing. Generator of tuples of the form:
-    # (name, sparse_matrix, node_id_order, from_indices, to_indices)
-    # name: name of the processing combination
-    # sparse_matrix: the sparse matrix to calculate the distances for
-    # node_id_order: the order of the nodes in the sparse matrix which should be
-    #                fully calculated
-    # from_indices: the indices of the dijkstra result to save the distances from
-    # to_indices: the indices of the distance matrix to save the distances to
-    #             (the indices are the indices in the node_id_order)
-    # This is done so not every combination also calculates the distances for the
-    # unpartitioned edges, but only the ones that need it.
-
-    logger.debug("Preparing combinations for processing.")
-
-    # Start <> Goal
-    combs = (
-        (
-            f"{start['name']}<>{goal['name']}",
-            to_scipy_sparse_array(
-                partitioner.graph,
-                weight=weight,
-                format="csr",
-                nodelist=list(start["nodes"])
-                + list(goal["nodes"])
-                + list(unpartitioned_nodes),
-            ),
-            np.arange(len(start["nodes"]) + len(goal["nodes"])),
-            [
-                np.ix_(
-                    range(len(start["nodes"])),
-                    range(
-                        len(start["nodes"]),
-                        len(start["nodes"]) + len(goal["nodes"]),
-                    ),
-                ),
-                np.ix_(
-                    range(
-                        len(start["nodes"]),
-                        len(start["nodes"]) + len(goal["nodes"]),
-                    ),
-                    range(len(start["nodes"])),
-                ),
-            ],
-            [
-                np.ix_(
-                    [node_order.index(n) for n in start["nodes"]],
-                    [node_order.index(n) for n in goal["nodes"]],
-                ),
-                np.ix_(
-                    [node_order.index(n) for n in goal["nodes"]],
-                    [node_order.index(n) for n in start["nodes"]],
-                ),
-            ],
-        )
-        for (start, goal) in combinations(partitions, 2)
-    )
-
-    # Start == Goal + Sparsified (unpartitioned edges)
-    combs = chain(
-        combs,
-        (
-            (
-                f"{part['name']}+Sparsified",
-                to_scipy_sparse_array(
-                    partitioner.graph,
-                    weight=weight,
-                    format="csr",
-                    nodelist=list(part["nodes"]) + list(unpartitioned_nodes),
-                ),
-                np.arange(len(part["nodes"]) + len(unpartitioned_nodes)),
-                # Index with all items, don't need to split
-                [
-                    np.ix_(
-                        range(len(part["nodes"]) + len(unpartitioned_nodes)),
-                        range(len(part["nodes"]) + len(unpartitioned_nodes)),
-                    )
-                ],
-                [
-                    np.ix_(
-                        [
-                            node_order.index(n)
-                            for n in list(part["nodes"]) + list(unpartitioned_nodes)
-                        ],
-                        [
-                            node_order.index(n)
-                            for n in list(part["nodes"]) + list(unpartitioned_nodes)
-                        ],
-                    ),
-                ],
-            )
-            for part in partitions
-        ),
-    )
-
-    # Only Sparsified (unpartitioned edges)
-    combs = chain(
-        combs,
-        (
-            (
-                "unp",
-                to_scipy_sparse_array(
-                    partitioner.graph,
-                    weight=weight,
-                    format="csr",
-                    nodelist=list(unpartitioned_nodes),
-                ),
-                np.arange(len(unpartitioned_nodes)),
-                # Index with all items, don't need to split
-                [
-                    np.ix_(
-                        range(len(unpartitioned_nodes)),
-                        range(len(unpartitioned_nodes)),
-                    )
-                ],
-                [
-                    np.ix_(
-                        [node_order.index(n) for n in list(unpartitioned_nodes)],
-                        [node_order.index(n) for n in list(unpartitioned_nodes)],
-                    ),
-                ],
-            ),
-        ),
-    )
-
-    # Calculate the combinations in parallel
-    # We expect comb to be a generator of length binom(n, 2) + n + 1 = (n^2 + n) / 2
-    # + 1
-    logger.debug(
-        "Calculating distance matrices for %s partitions, %d combinations, "
-        "with %d workers and chunk-size %d.",
-        len(partitions),
-        (len(partitions) / 2 + 1 / 2) * len(partitions) + 1,
-        num_workers,
-        chunk_size,
-    )
-    # Parallelized calculation with `p.imap_unordered`
-    with Pool(processes=num_workers) as pool:
-        results = list(
-            tqdm(
-                pool.imap_unordered(
-                    dijkstra_param,
-                    combs,
-                    chunksize=chunk_size,
-                ),
-                desc="Calculating distance matrices",
-                total=(len(partitions) / 2 + 1 / 2) * len(partitions) + 1,
-                unit_scale=1,
-            )
-        )
-
-    # Construct the distance matrix for the partitioning, half-precision float
-    dist_matrix = np.full((len(node_order), len(node_order)), np.inf, dtype=np.half)
-    for part_combo_dist_matrix, from_indices, to_indices in results:
-        # Fill the distance matrix with the distances for the nodes in this pair
-        for from_index, to_index in zip(from_indices, to_indices):
-            dist_matrix[to_index] = part_combo_dist_matrix[from_index]
-
-    logger.debug(
-        "Calculated distance matrices for all combinations of partitions in %s "
-        "seconds.",
-        time() - start_time,
+    dist_matrix, pred_matrix = shortest_paths_restricted(
+        partitioner.graph, partitions, weight, node_order, num_workers, chunk_size
     )
 
     if plot_distributions:
@@ -581,24 +507,206 @@ def calculate_partitioning_distance_matrix(
             else weight,
         )
 
-    return dist_matrix
+    return dist_matrix, pred_matrix
 
 
-def dijkstra_param(comb):
+def shortest_paths_restricted(
+    graph, partitions, weight, node_order, num_workers=2, chunk_size=1
+):
+    """Calculate restricted shortest paths.
+
+    Shortest distances and predecessors with restrictions of not passing through
+    partitions. The passed partitions is a dictionary with the partition names as
+    keys and the partition as value. The partition is a dictionary with the keys
+    `subgraph`, `nodes` and `nodelist`. The dict needs to have a special partition,
+    called `sparsified`, which is the sparsified graph. The `nodes` key is a list
+    of nodes that are exclusive to the partition, i.e. nodes that are not shared
+    with the sparsified graph or on partition boundaries. The `nodelist` key is a
+    list of nodes that are exclusive to the partition and nodes that are shared
+    with the sparsified graph. The subgraphs all need to be graphs views of a shared
+    graph. The Partitioner class produces such partitions, after passing the
+    integrated :func:`is_valid_partitioning()
+    <superblockify.partitioning.checks.is_valid_partitioning>` checks.
+
+    Parameters
+    ----------
+    graph : networkx.MultiDiGraph
+        The graph to calculate the shortest paths for.
+    partitions : dict
+        The partitions to calculate the shortest paths for. The keys are the
+        partition names and the values are dictionaries with the keys `subgraph`,
+        `nodes` and `nodelist`.
+    weight : str or None, optional
+        The edge attribute to use as weight. If None, all edge weights are 1.
+    node_order : list
+        The order of the nodes in the distance matrix.
+    num_workers : int, optional
+        The number of workers to use for the multiprocessing pool. Defaults to 2.
+    chunk_size : int, optional
+        The chunk size for the multiprocessing pool. Defaults to 1.
+
+    Returns
+    -------
+    dist_matrix : ndarray
+        The distance matrix for the partitioning.
+    pred_matrix : ndarray
+        The predecessor matrix for the partitioning.
+
+    Notes
+    -----
+    For usage with a :class:`Partitioner
+    <superblockify.partitioning.partitioner.BasePartitioner>`,
+    see :func:`calculate_partitioning_distance_matrix()
+    <superblockify.metrics.distances.calculate_partitioning_distance_matrix>`.
+    """
+    # pylint: disable=too-many-locals, unused-argument
+
+    # node_order indices
+    # filtered indices: sparse/partition
+    n_sparse_indices = [node_order.index(n) for n in partitions["sparsified"]["nodes"]]
+    part_name_order = [name for name in partitions.keys() if name != "sparsified"]
+    n_partition_indices_separate = [
+        [node_order.index(n) for n in partitions[name]["nodes"]]
+        for name in part_name_order
+    ]
+    n_partition_indices = [n for part in n_partition_indices_separate for n in part]
+
+    # Semipermeable graphs
+    g_leaving = graph.copy()
+    # Construct Compressed Sparse Row matrix
+    # https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_matrix.html
+    g_leaving = to_scipy_sparse_array(
+        g_leaving, nodelist=node_order, weight=weight, format="coo"
+    )
+    data, row, col = g_leaving.data, g_leaving.row, g_leaving.col
+
+    # Remove edges between different partitions
+    # (col, row in separate n_partition_indices_separate)
+    for n_ind_1, n_ind_2 in combinations(n_partition_indices_separate, 2):
+        mask = np.logical_and(np.isin(row, n_ind_1), np.isin(col, n_ind_2))
+        mask = np.logical_or(
+            mask, np.logical_and(np.isin(row, n_ind_2), np.isin(col, n_ind_1))
+        )
+        data, row, col = data[~mask], row[~mask], col[~mask]
+    g_entering = (data, (row, col))
+
+    # Remove edges from partition to sparse
+    mask = np.logical_and(
+        np.isin(row, n_partition_indices), np.isin(col, n_sparse_indices)
+    )
+    data, row, col = data[~mask], row[~mask], col[~mask]
+    g_leaving = csr_matrix((data, (row, col)), shape=(len(node_order), len(node_order)))
+    # Remove edges from sparse to partition
+    data, (row, col) = g_entering
+    mask = np.logical_and(
+        np.isin(row, n_sparse_indices), np.isin(col, n_partition_indices)
+    )
+    data, row, col = data[~mask], row[~mask], col[~mask]
+    g_entering = csr_matrix(
+        (data, (row, col)), shape=(len(node_order), len(node_order))
+    )
+
+    # Calculate the combinations in parallel
+    logger.debug(
+        "Calculating 2 semipermeable distance matrices with %d workers.",
+        min(2, num_workers),
+    )
+    start_time = time()
+    # Parallelized calculation with `p.imap_unordered`
+    with Pool(processes=min(2, num_workers)) as pool:
+        results = list(
+            tqdm(
+                pool.imap_unordered(
+                    dijkstra_settings,
+                    [g_leaving, g_entering],
+                    chunksize=1,
+                ),
+                desc="Calculating distance matrices",
+                total=2,
+                unit_scale=1,
+            )
+        )
+    logger.debug(
+        "Finished calculating distance matrices in %s. Combining the results.",
+        timedelta(seconds=time() - start_time),
+    )
+    min_mask = results[0][0] < results[1][0]
+    dist_le, pred_le = results[1]
+    dist_le[min_mask] = results[0][0][min_mask]
+    pred_le[min_mask] = results[0][1][min_mask]
+
+    # Fill up paths
+    n_partition_intersect_indices = [
+        list(
+            set(partitions["sparsified"]["nodelist"]).intersection(
+                partitions[name]["nodelist"]
+            )
+        )
+        for name in part_name_order
+    ]
+    n_partition_intersect_indices = [
+        [node_order.index(n) for n in part_indices]
+        for part_indices in n_partition_intersect_indices
+    ]
+
+    start_time = time()
+
+    dist_step = np.full_like(dist_le, np.inf)
+    pred_step = np.full_like(pred_le, -9999)
+
+    for part_idx, part_intersect in zip(
+        n_partition_indices_separate, n_partition_intersect_indices
+    ):
+        # Add distances from i in part_idx to all j in n_partition_indices
+        # to the same j to all k in n_partition_indices
+        # There is a different amount of i-j than j-k, calculate all combinations
+        # and then mask out the invalid ones
+        # add to a new dimension
+        dists = (
+            dist_le[np.ix_(part_idx, part_intersect)][:, :, np.newaxis]
+            + dist_le[np.ix_(part_intersect, n_partition_indices)][np.newaxis, :, :]
+        )
+        # get index of minimum distance for predecessor, use new axis
+        min_idx = np.argmin(dists, axis=1)
+
+        # write minima into dist_step
+        dist_step[np.ix_(part_idx, n_partition_indices)] = dists[
+            np.arange(dists.shape[0])[:, np.newaxis],
+            min_idx,
+            np.arange(dists.shape[-1]),
+        ]
+
+        # write predecessors into pred_step
+        # predecessor i-k is the same as predecessor k-j
+        # into pred_step, write the predecessor of k-j
+        for n_p, i in enumerate(part_idx):
+            for m_p, j in enumerate(n_partition_indices):
+                if i == j:
+                    continue
+                pred_step[i, j] = pred_le[part_intersect[min_idx[n_p, m_p]], j]
+        # might be vectorized
+
+    mask = dist_step < dist_le
+    dist_le = np.where(mask, dist_step, dist_le)
+    pred_le = np.where(mask, pred_step, pred_le)
+
+    logger.debug(
+        "Finished filling up paths in %s.",
+        timedelta(seconds=time() - start_time),
+    )
+
+    return dist_le, pred_le
+
+
+def dijkstra_settings(sparse_matrix):
     """Wrapper for the dijkstra function.
 
     Fixes keyword arguments for the dijkstra function.
     """
-    _, sparse_matrix, node_id_order, from_indices, to_indices = comb
-
-    return (
-        dijkstra(
-            sparse_matrix,
-            directed=True,
-            indices=node_id_order,
-            return_predecessors=False,
-            unweighted=False,
-        ),
-        from_indices,
-        to_indices,
+    return dijkstra(
+        sparse_matrix,
+        directed=True,
+        indices=None,  # all nodes, sorted as in sparse_matrix
+        return_predecessors=True,
+        unweighted=False,
     )

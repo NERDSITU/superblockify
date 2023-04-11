@@ -2,8 +2,8 @@
 from ast import literal_eval
 from configparser import ConfigParser
 from copy import deepcopy
-from os import listdir, path, remove
-from os.path import getsize
+from os import listdir, remove
+from os.path import getsize, join, exists, dirname
 from shutil import rmtree
 
 import osmnx as ox
@@ -13,7 +13,7 @@ from networkx import set_node_attributes
 from superblockify.partitioning import __all_partitioners__
 
 config = ConfigParser()
-config.read("config.ini")
+config.read(join(dirname(__file__), "..", "config.ini"))
 TEST_DATA = config["tests"]["test_data_path"]
 RESULTS_DIR = config["general"]["results_dir"]
 
@@ -91,6 +91,8 @@ def test_city_all_preloaded_save(
         graph=graph.copy(),
     )
     part.save(save_graph_copy=False)
+    assert exists(join(part.results_dir, part.name + ".partitioner"))
+    assert exists(join(part.results_dir, part.name + ".metrics"))
     return part.name, part.__class__
 
 
@@ -170,6 +172,25 @@ def test_one_city_precalculated_copy(test_one_city_precalculated):
     return deepcopy(test_one_city_precalculated)
 
 
+@pytest.fixture(scope="session")
+def test_city_small_preloaded(test_city_small, partitioner_class):
+    """Fixture for loading and parametrizing small cities not run yet."""
+    city_name, graph = test_city_small
+    part = partitioner_class(
+        name=f"{city_name}_{partitioner_class.__name__}_preloaded_test",
+        city_name=city_name,
+        graph=graph.copy(),
+    )
+    part.save(save_graph_copy=False)
+    return part
+
+
+@pytest.fixture(scope="function")
+def test_city_small_preloaded_copy(test_city_small_preloaded):
+    """Return a copy of small cities not run yet."""
+    return deepcopy(test_city_small_preloaded)
+
+
 @pytest.fixture(scope="module")
 def test_city_small_osmid(test_city_small):
     """Return a graph with the osmid baked down to a single value."""
@@ -195,11 +216,11 @@ def _teardown_test_graph_io():
     yield None
     work_cities = ["Adliswil_tmp", "Adliswil_tmp_save_load"]
     for city in work_cities:
-        test_graph = path.join(config["general"]["graph_dir"], city + ".graphml")
-        if path.exists(test_graph):
+        test_graph = join(config["general"]["graph_dir"], city + ".graphml")
+        if exists(test_graph):
             remove(test_graph)
-        results_dir = path.join(RESULTS_DIR, city + "_name")
-        if path.exists(results_dir):
+        results_dir = join(RESULTS_DIR, city + "_name")
+        if exists(results_dir):
             rmtree(results_dir)
 
 
@@ -210,7 +231,7 @@ def _teardown_test_folders():
     # Delete all folders in RESULTS_DIR that end with _test
     for folder in listdir(RESULTS_DIR):
         if folder.endswith("_test"):
-            rmtree(path.join(RESULTS_DIR, folder))
+            rmtree(join(RESULTS_DIR, folder))
 
 
 @pytest.fixture(scope="function", autouse=config.getboolean("tests", "hide_plots"))

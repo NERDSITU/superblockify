@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from numpy import inf
 
 from superblockify.metrics.distances import (
-    calculate_distance_matrix,
+    calculate_path_distance_matrix,
     calculate_euclidean_distance_matrix_projected,
     calculate_euclidean_distance_matrix_haversine,
     calculate_partitioning_distance_matrix,
@@ -15,9 +15,9 @@ from superblockify.metrics.distances import (
 def test_calculate_distance_matrix(test_city_small_copy, weight):
     """Test calculating all pairwise distances for the full graphs."""
     _, graph = test_city_small_copy
-    calculate_distance_matrix(graph, weight=weight, plot_distributions=True)
+    calculate_path_distance_matrix(graph, weight=weight, plot_distributions=True)
     # With node ordering
-    calculate_distance_matrix(
+    calculate_path_distance_matrix(
         graph, node_order=list(graph.nodes), plot_distributions=True
     )
     plt.close("all")
@@ -31,11 +31,11 @@ def test_calculate_distance_matrix_negative_weight(test_city_small_copy):
     # Change the first edge length to -1
     graph.edges[list(graph.edges)[0]]["length"] = -1
     with pytest.raises(ValueError):
-        calculate_distance_matrix(graph, weight="length")
+        calculate_path_distance_matrix(graph, weight="length")
 
 
 def test_calculate_euclidean_distance_matrix_projected(test_city_all_copy):
-    """Test calculating all pairwise euclidean distances for the full graphs.
+    """Test calculating all pairwise Euclidean distances for the full graphs.
     Projected."""
     _, graph = test_city_all_copy
     calculate_euclidean_distance_matrix_projected(graph, plot_distributions=True)
@@ -62,7 +62,7 @@ def test_calculate_euclidean_distance_matrix_projected(test_city_all_copy):
 def test_calculate_euclidean_distance_matrix_projected_faulty_coords(
     test_city_small_copy, key, value
 ):
-    """Test calculating all pairwise euclidean distances for the full graphs
+    """Test calculating all pairwise Euclidean distances for the full graphs
     with missing coordinates. Projected.
     """
     _, graph = test_city_small_copy
@@ -91,7 +91,7 @@ def test_calculate_euclidean_distance_matrix_projected_unprojected_graph(
 
 
 def test_calculate_euclidean_distance_matrix_haversine(test_city_small_copy):
-    """Test calculating all pairwise euclidean distances for the full graphs.
+    """Test calculating all pairwise Euclidean distances for the full graphs.
     Haversine."""
     _, graph = test_city_small_copy
     calculate_euclidean_distance_matrix_haversine(graph, plot_distributions=True)
@@ -122,7 +122,7 @@ def test_calculate_euclidean_distance_matrix_haversine(test_city_small_copy):
 def test_calculate_euclidean_distance_matrix_haversine_faulty_coords(
     test_city_small_copy, key, value
 ):
-    """Test calculating all pairwise euclidean distances for the full graphs
+    """Test calculating all pairwise Euclidean distances for the full graphs
     with missing coordinates. Haversine.
     """
     _, graph = test_city_small_copy
@@ -132,40 +132,59 @@ def test_calculate_euclidean_distance_matrix_haversine_faulty_coords(
         calculate_euclidean_distance_matrix_haversine(graph)
 
 
+@pytest.mark.parametrize("predefined_node_order", [True, False])
 def test_calculate_partitioning_distance_matrix(
-    test_city_small_copy, partitioner_class
+    test_city_small_precalculated_copy, predefined_node_order
 ):
     """Test calculating distances for partitioned graph by design."""
-    city_name, graph = test_city_small_copy
-    part = partitioner_class(name=city_name + "_test", city_name=city_name, graph=graph)
-    part.run()
-    calculate_partitioning_distance_matrix(
-        part, plot_distributions=True, check_overlap=True, num_workers=4
-    )
-    # With node ordering
-    calculate_partitioning_distance_matrix(
-        part,
-        node_order=list(graph.nodes),
-        plot_distributions=True,
-        check_overlap=True,
-        num_workers=4,
-    )
+    part = test_city_small_precalculated_copy
+    if predefined_node_order:
+        calculate_partitioning_distance_matrix(
+            part,
+            # reverse node order
+            node_order=list(part.graph.nodes)[::-1],
+            plot_distributions=True,
+            check_overlap=True,
+            num_workers=4,
+        )
+    else:
+        calculate_partitioning_distance_matrix(
+            part, plot_distributions=True, check_overlap=True, num_workers=4
+        )
     plt.close("all")
 
 
-def test_calculate_partitioning_distance_matrix_partitions_overlap(
-    test_city_small_copy, partitioner_class
+def test_calculate_partitioning_distance_matrix_duplicate_partition_names(
+    test_city_small_precalculated_copy,
 ):
-    """Test calculating distances for partitioned graph with overlapping
-    partitions."""
-    city_name, graph = test_city_small_copy
-    part = partitioner_class(name=city_name + "_test", city_name=city_name, graph=graph)
-    part.run()
+    """Test calculating distances for partitioned graph with duplicate partition
+    names."""
+    part = test_city_small_precalculated_copy
     # Duplicate partitions /component
     if part.components is not None:
         part.components += part.components
     else:
         part.partitions += part.partitions
+
+    with pytest.raises(ValueError):
+        calculate_partitioning_distance_matrix(part)
+
+
+def test_calculate_partitioning_distance_matrix_partitions_overlap(
+    test_city_small_precalculated_copy,
+):
+    """Test calculating distances for partitioned graph with overlapping
+    partitions."""
+    part = test_city_small_precalculated_copy
+    # Duplicate partitions /component
+    if part.components is not None:
+        # Duplicate component but with different name
+        part.components += [part.components[-1].copy()]
+        # Rename duplicate partition
+        part.components[-1]["name"] = part.components[-1]["name"] + "_dup"
+    else:
+        part.partitions += [part.partitions[1].copy()]
+        part.partitions[-1]["name"] = part.partitions[-1]["name"] + "_dup"
 
     with pytest.raises(ValueError):
         calculate_partitioning_distance_matrix(part, check_overlap=True)

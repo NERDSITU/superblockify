@@ -1,6 +1,7 @@
 """Load this module to fetch test data needed for certain tests."""
 from ast import literal_eval
 from configparser import ConfigParser
+from os.path import join, dirname
 
 import osmnx as ox
 
@@ -10,7 +11,7 @@ from superblockify.utils import load_graph_from_place
 ox.config(use_cache=False, log_console=True)
 
 config = ConfigParser()
-config.read("config.ini")
+config.read(join(dirname(__file__), "..", "..", "config.ini"))
 
 if __name__ == "__main__":
     for place in literal_eval(config["tests"]["places_small"]) + literal_eval(

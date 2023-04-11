@@ -45,11 +45,13 @@ class TestMetric:
             "avg_path_length: S: 4, N: 11; )"
         )
 
-    def test_calculate_all(self, test_city_small_precalculated_copy):
+    def test_calculate_metrics(self, test_city_small_precalculated_copy):
         """Test the calculate_all method for full metrics."""
         part = test_city_small_precalculated_copy
         part.calculate_metrics(make_plots=True)
         plt.close("all")
+        for dist_matrix in part.metric.distance_matrix.values():
+            assert dist_matrix.shape == (part.graph.number_of_nodes(),) * 2
 
     def test_saving_and_loading(
         self,

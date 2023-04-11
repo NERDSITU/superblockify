@@ -1,13 +1,12 @@
 """Approach only based on street type."""
 import logging
 
-from networkx import (
-    strongly_connected_components,
-)
+from networkx import weakly_connected_components
 
 from .partitioner import BasePartitioner
 from ..attribute import (
     new_edge_attribute_by_function,
+    get_edge_subgraph_with_attribute_value,
 )
 
 logger = logging.getLogger("superblockify")
@@ -45,28 +44,28 @@ class ResidentialPartitioner(BasePartitioner):
         # 'residential', None otherwise
         new_edge_attribute_by_function(
             self.graph,
-            lambda highway: 1 if "residential" in highway else None,
+            # check if 'residential' or 'living_street' == highway or in highway
+            lambda h: 1 if h in ["residential", "living_street"] else 0,
             source_attribute="highway",
             destination_attribute=self.attribute_label,
         )
 
-        # Find all edges that are not residential and make a subgraph of them
-        non_residential_edges = [
-            (u, v, k)
-            for u, v, k, d in self.graph.edges(keys=True, data=True)
-            if d[self.attribute_label] is None
-        ]
-
+        self.sparsified = get_edge_subgraph_with_attribute_value(
+            self.graph, self.attribute_label, 0
+        )
         logger.debug(
             "Found %d edges that are not residential, find LCC of them.",
-            len(non_residential_edges),
+            len(self.sparsified.edges),
         )
 
         # Find the largest connected component of the non-residential edges
-        self.sparsified = self.graph.edge_subgraph(non_residential_edges)
-        # Nodes in of the largest strongly connected component
-        self.sparsified = max(strongly_connected_components(self.sparsified), key=len)
+        # Nodes in of the largest weakly connected component
+        self.sparsified = max(weakly_connected_components(self.sparsified), key=len)
         # Construct subgraph of nodes in the largest weakly connected component
         self.sparsified = self.graph.subgraph(self.sparsified)
+        # Graph was spanned with nodes, disregarding edge types
+        self.sparsified = get_edge_subgraph_with_attribute_value(
+            self.sparsified, self.attribute_label, 0
+        )
 
         self.set_components_from_sparsified()

@@ -1,5 +1,6 @@
 """Tests for the plot module."""
 from configparser import ConfigParser
+from os.path import join, dirname
 
 import pytest
 from matplotlib import pyplot as plt
@@ -14,7 +15,7 @@ from superblockify.plot import (
 )
 
 config = ConfigParser()
-config.read("config.ini")
+config.read(join(dirname(__file__), "..", "config.ini"))
 
 
 @pytest.mark.parametrize("e_l,n_a", [(0.5, 0.5), (1, 0)])

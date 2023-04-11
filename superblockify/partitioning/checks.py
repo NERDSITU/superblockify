@@ -2,6 +2,7 @@
 import logging
 from configparser import ConfigParser
 from itertools import chain
+from os.path import dirname, join
 from sys import modules
 
 from networkx import is_weakly_connected
@@ -14,7 +15,7 @@ from ..utils import has_pairwise_overlap
 logger = logging.getLogger("superblockify")
 
 config = ConfigParser()
-config.read("config.ini")
+config.read(join(dirname(__file__), "..", "..", "config.ini"))
 
 
 def is_valid_partitioning(partitioning):
@@ -31,6 +32,7 @@ def is_valid_partitioning(partitioning):
         5. No node or edge of `graph` is not contained in any subgraph or the
            sparsified graph
         6. Each subgraph is connected to the sparsified graph
+        7. Representative nodes are contained in their respective subgraph
 
 
     Parameters
@@ -79,10 +81,21 @@ def is_valid_partitioning(partitioning):
     if not components_are_connect_sparsified(partitioning):
         is_valid = False
 
+    # 7. Check if representative nodes are contained in their subgraph
+    logger.debug(
+        "Checking if representative nodes of %s are contained in their subgraph.",
+        partitioning.name,
+    )
+    if not representative_nodes_are_contained_in_subgraph(partitioning):
+        is_valid = False
+
     if is_valid:
         logger.info("The partitioning %s is valid.", partitioning.name)
     else:
-        logger.error("The partitioning %s is not valid.", partitioning.name)
+        logger.error(
+            "The partitioning %s is not valid. See warnings for more information.",
+            partitioning.name,
+        )
     return is_valid
 
 
@@ -279,4 +292,32 @@ def components_are_connect_sparsified(partitioning):
             )
             return False
 
+    return True
+
+
+def representative_nodes_are_contained_in_subgraph(partitioning):
+    """Check if representative nodes are contained in their subgraph.
+
+    Parameters
+    ----------
+    partitioning : partitioning.partitioner.BasePartitioner
+        Partitioning to check.
+
+    Returns
+    -------
+    bool
+        Whether representative nodes are contained in their subgraph.
+    """
+    partition_nodes_subgraphs = partitioning.get_partition_nodes()
+
+    for component in partition_nodes_subgraphs:
+        if not component["rep_node"] in component["subgraph"].nodes:
+            logger.warning(
+                "The representative node %s of %s is not contained in the "
+                "subgraph %s.",
+                component["rep_node"],
+                partitioning.name,
+                component["name"],
+            )
+            return False
     return True

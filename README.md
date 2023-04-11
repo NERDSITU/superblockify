@@ -25,7 +25,7 @@ by executing (`environmentSetupVersionless.sh` in the working directory)
 ```bash
 conda create -n OSMnxPyrLab -c conda-forge --file requirements.txt
 conda activate OSMnxPyrLab
-conda env export > environment.yml
+conda env export | grep -v "^prefix: " > environment.yml
 ```
 
 which does not have explicit versions, but might resolve dependency issues. Using

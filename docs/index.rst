@@ -1,20 +1,20 @@
-.. superblockify documentation master file, created by
-   sphinx-quickstart on Fri Dec  9 12:57:42 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+:notoc:
 
-Welcome to superblockify's documentation!
-=========================================
+***************************
+Superblockify documentation
+***************************
+
+On these pages you can find documentation for Superblockify.
+
+You can also find the `API documentation <api/index.html>`__.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :caption: Overview
+   :maxdepth: 1
+   :glob:
 
-   modules
+   guide/getting_started
+   guide/index
+   api/index
+   changelog
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

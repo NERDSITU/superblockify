@@ -3,7 +3,8 @@ import logging
 import pickle
 from abc import ABC, abstractmethod
 from configparser import ConfigParser
-from os import path, makedirs
+from os import makedirs
+from os.path import join, exists, dirname
 from typing import final, Final, List
 
 import osmnx as ox
@@ -19,6 +20,11 @@ from osmnx.stats import edge_length_total
 
 from .checks import is_valid_partitioning
 from .representative import set_representative_nodes
+from .utils import (
+    show_highway_stats,
+    remove_dead_ends_directed,
+    split_up_isolated_edges_directed,
+)
 from .. import attribute, plot
 from ..metrics.metric import Metric
 from ..plot import save_plot
@@ -27,7 +33,7 @@ from ..utils import load_graph_from_place
 logger = logging.getLogger("superblockify")
 
 config = ConfigParser()
-config.read("config.ini")
+config.read(join(dirname(__file__), "..", "..", "config.ini"))
 GRAPH_DIR = config["general"]["graph_dir"]
 RESULTS_DIR = config["general"]["results_dir"]
 
@@ -53,7 +59,7 @@ class BasePartitioner(ABC):
     >>> part = BasePartitioner(
     ...     name="Resistencia", search_str="Resistencia, Chaco, Argentina"
     ... )
-    >>> part.run(calculate_metrics=True, make_plots=True, num_workers=6)
+    >>> part.run(approach=True, make_plots=True, num_workers=6)
 
     """
 
@@ -124,8 +130,8 @@ class BasePartitioner(ABC):
             )
 
         # First check weather a graph is found under GRAPH_DIR/city_name.graphml
-        graph_path = path.join(GRAPH_DIR, f"{city_name}.graphml")
-        if path.exists(graph_path):
+        graph_path = join(GRAPH_DIR, f"{city_name}.graphml")
+        if exists(graph_path):
             self.graph = self.load_or_find_graph(city_name, search_str, reload_graph)
         elif search_str is not None:
             self.graph = self.load_or_find_graph(city_name, search_str)
@@ -134,9 +140,12 @@ class BasePartitioner(ABC):
         else:
             raise ValueError("Either graph or search_str must be provided.")
 
+        remove_dead_ends_directed(self.graph)
+        show_highway_stats(self.graph)
+
         # Create results directory
-        self.results_dir = path.join(RESULTS_DIR, name)
-        if not path.exists(self.results_dir):
+        self.results_dir = join(RESULTS_DIR, name)
+        if not exists(self.results_dir):
             makedirs(self.results_dir)
 
         # Set Instance variables
@@ -164,8 +173,9 @@ class BasePartitioner(ABC):
 
         Parameters
         ----------
-        calculate_metrics : bool, optional
-            If True, calculate the metrics and save them to self.results_dir/metrics.
+        calculate_metrics : str or bool, optional
+            If True, calculate metrics for the partitioning. If False, don't.
+            Save them to self.results_dir/metrics. Default is True.
         make_plots : bool, optional
             If True, make plots of the partitioning and save them to
             self.results_dir/figures. Default is False.
@@ -182,13 +192,13 @@ class BasePartitioner(ABC):
             )
             self.set_sparsified_from_components()
 
-        # Check that the partitions and sparsified graph satisfy the requirements
-        is_valid_partitioning(self)
-
         # Set representative nodes
         set_representative_nodes(
             self.components if self.components else self.partitions
         )
+
+        # Check that the partitions and sparsified graph satisfy the requirements
+        is_valid_partitioning(self)
 
         if make_plots:
             if self.partitions:
@@ -393,11 +403,13 @@ class BasePartitioner(ABC):
         `self.partitions` attribute.
         """
 
+        split_up_isolated_edges_directed(self.graph, self.sparsified)
+
         # Find difference, edgewise, between the graph and the sparsified subgraph
         rest = self.graph.edge_subgraph(
             [
                 (u, v, k)
-                for u, v, k, _ in self.graph.edges(keys=True, data=True)
+                for u, v, k in self.graph.edges(keys=True, data=False)
                 if (u, v, k) not in self.sparsified.edges(keys=True)
             ]
         ).copy()
@@ -527,7 +539,7 @@ class BasePartitioner(ABC):
         with `split_disconnected` set to True, the nodes of the components are returned.
 
         Per default, nodes are considered to be inside a partition if they are in the
-        subgraph of the partition and have a degree of at least 2. Also, `ignored`
+        subgraph of the partition and not in the sparsified subgraph. Also, `ignored`
         components are left out.
 
         Nodes inside the sparsified graph are not considered to be inside a partition.
@@ -551,28 +563,28 @@ class BasePartitioner(ABC):
         self.__check_has_been_run()
 
         # List of partitions /unignored components
-        # Only take `name` and `subgraph` from the components
-        if self.components:
-            partitions = [
-                {"name": comp["name"], "subgraph": comp["subgraph"]}
-                for comp in self.components
-                if not comp["ignore"]
-            ]
-        else:
-            partitions = [
-                {"name": part["name"], "subgraph": part["subgraph"]}
-                for part in self.partitions
-            ]
+        # Only take `name`, `subgraph` and `representative_node_id` from the components
+        partitions = [
+            {
+                "name": part["name"],
+                "subgraph": part["subgraph"],
+                "rep_node": part["representative_node_id"],
+            }
+            for part in (self.components if self.components else self.partitions)
+            # if there is the key "ignore" and it is True, ignore the partition
+            if not (part.get("ignore") is True)
+        ]
 
         # Add list of nodes "inside" each partitions
-        #  - nodes that have at least a degree of 2
+        #  - nodes that are not shared with the sparsified graph are considered to be
+        #    inside the partition
         #  - from these the distances are calculated
         #  - the nodes not in any partitions are considered as the unpartitioned nodes
         for part in partitions:
             part["nodes"] = {
                 node
                 for node in part["subgraph"].nodes()
-                if part["subgraph"].degree(node) >= 2
+                if part["subgraph"].degree(node) >= 1
                 and node not in self.sparsified.nodes
             }
 
@@ -845,8 +857,8 @@ class BasePartitioner(ABC):
         """
 
         # Check if graph already exists
-        graph_path = path.join(GRAPH_DIR, city_name + ".graphml")
-        if path.exists(graph_path) and not reload_graph:
+        graph_path = join(GRAPH_DIR, city_name + ".graphml")
+        if exists(graph_path) and not reload_graph:
             logger.debug("Loading graph from %s", graph_path)
             graph = ox.load_graphml(graph_path)
         else:
@@ -854,7 +866,7 @@ class BasePartitioner(ABC):
             graph = load_graph_from_place(
                 save_as=graph_path,
                 search_string=search_str,
-                network_type="drive",
+                custom_filter=config["graph"]["network_filter"],
                 simplify=True,
             )
             logger.debug("Saving graph to %s", graph_path)
@@ -885,17 +897,17 @@ class BasePartitioner(ABC):
 
         # Save graph
         if save_graph_copy:
-            graph_path = path.join(self.results_dir, self.name + ".graphml")
+            graph_path = join(self.results_dir, self.name + ".graphml")
             logger.debug("Saving graph copy to %s", graph_path)
             ox.save_graphml(self.graph, filepath=graph_path)
 
         # Save metrics
-        self.metric.save(self.name)
+        self.metric.save(self.results_dir, self.name)
 
         # Save partitioner, with self.graph = None
-        partitioner_path = path.join(self.results_dir, self.name + ".partitioner")
+        partitioner_path = join(self.results_dir, self.name + ".partitioner")
         # Check if partitioner already exists
-        if path.exists(partitioner_path):
+        if exists(partitioner_path):
             logger.debug("Partitioner already exists, overwriting %s", partitioner_path)
         else:
             logger.debug("Saving partitioner to %s", partitioner_path)
@@ -949,14 +961,14 @@ class BasePartitioner(ABC):
         """
 
         # Load partitioner
-        partitioner_path = path.join(RESULTS_DIR, name, name + ".partitioner")
+        partitioner_path = join(RESULTS_DIR, name, name + ".partitioner")
         logger.debug("Loading partitioner from %s", partitioner_path)
         with open(partitioner_path, "rb") as file:
             partitioner = pickle.load(file)
 
         # Load metric
-        metric_path = path.join(RESULTS_DIR, name, name + ".metric")
-        if path.exists(metric_path):
+        metric_path = join(RESULTS_DIR, name, name + ".metrics")
+        if exists(metric_path):
             logger.debug("Loading metric from %s", metric_path)
             partitioner.metric = Metric.load(name)
         else:
@@ -983,13 +995,13 @@ class BasePartitioner(ABC):
         """
 
         # Load graph - if possible from RESULTS_DIR, else from GRAPH_DIR
-        graph_path = path.join(RESULTS_DIR, name, name + ".graphml")
-        if path.exists(graph_path):
+        graph_path = join(RESULTS_DIR, name, name + ".graphml")
+        if exists(graph_path):
             logger.debug("Loading graph from %s", graph_path)
             partitioner.graph = ox.load_graphml(graph_path)
         else:
-            graph_path = path.join(GRAPH_DIR, partitioner.city_name + ".graphml")
-            if path.exists(graph_path):
+            graph_path = join(GRAPH_DIR, partitioner.city_name + ".graphml")
+            if exists(graph_path):
                 logger.debug("Loading graph from %s", graph_path)
                 partitioner.graph = ox.load_graphml(graph_path)
             else:
