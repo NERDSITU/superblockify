@@ -14,8 +14,6 @@ import sys
 
 sys.path.insert(0, os.path.abspath(".."))
 
-from superblockify import __version__
-
 autodoc_mock_imports = [
     "networkx",
     "osmnx",
@@ -33,7 +31,7 @@ autodoc_mock_imports = [
 project = "superblockify"
 copyright = "2023, Carlson Büth"
 author = "Carlson Büth"
-release = __version__
+release = "0.1.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
