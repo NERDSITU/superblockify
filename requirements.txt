@@ -1,15 +1,25 @@
+# Dependencies
 osmnx
 pyrosm
+tqdm
+contextily
+
+# Editor
 jupyterlab
 jupyterlab_code_formatter
+
+# Code Quality
 blackd
 isort
 pylint
+
+# Testing
 pytest
 pytest-cov
 coverage
+
+# Documentation
 sphinx
 numpydoc
 myst-nb
 sphinx-book-theme
-tqdm
