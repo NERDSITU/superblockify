@@ -136,13 +136,9 @@ def calculate_coverage(partitioner, weight):
         The edge attribute to use as weight.
     """
 
-    subgraph_edges = [
-        part["subgraph"].edges(data=True) for part in partitioner.get_partition_nodes()
-    ]
-
-    return npsum(d[weight] for u, v, d in subgraph_edges) / npsum(
-        d[weight] for u, v, d in partitioner.graph.edges(data=True)
-    )
+    return 1 - npsum(
+        d[weight] for u, v, d in partitioner.sparsified.edges(data=True)
+    ) / npsum(d[weight] for u, v, d in partitioner.graph.edges(data=True))
 
 
 def rel_increase(value_i, value_j):

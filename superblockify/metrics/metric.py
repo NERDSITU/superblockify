@@ -9,6 +9,7 @@ from .measures import (
     calculate_global_efficiency,
     calculate_directness,
     write_relative_increase_to_edges,
+    calculate_coverage,
 )
 from ..metrics import (
     plot_distance_matrices,
@@ -137,6 +138,9 @@ class Metric:
         self.weight = weight  # weight attribute
         self.node_list = partitioner.get_sorted_node_list()  # full node list
 
+        self.coverage = calculate_coverage(partitioner, weight="length")
+        logger.debug("Coverage: %s", self.coverage)
+
         self.distance_matrix, self.predecessor_matrix = calculate_distance_matrices(
             self.node_list,
             partitioner,
@@ -154,9 +158,6 @@ class Metric:
 
         if make_plots:
             self.make_all_plots(partitioner)
-
-        # self.coverage = self.calculate_coverage(partitioner)
-        # logger.debug("Coverage: %s", self.coverage)
 
     def make_all_plots(self, partitioner):
         """Make all plots for the metrics.
