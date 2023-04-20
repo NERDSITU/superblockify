@@ -9,12 +9,11 @@ from .measures import (
     calculate_global_efficiency,
     calculate_directness,
     write_relative_increase_to_edges,
+    calculate_coverage,
 )
-from ..metrics import (
+from .plot import (
     plot_distance_matrices,
     plot_distance_matrices_pairwise_relative_difference,
-)
-from ..metrics.plot import (
     plot_component_wise_travel_increase,
     plot_relative_difference,
     plot_relative_increase_on_graph,
@@ -137,6 +136,9 @@ class Metric:
         self.weight = weight  # weight attribute
         self.node_list = partitioner.get_sorted_node_list()  # full node list
 
+        self.coverage = calculate_coverage(partitioner, weight="length")
+        logger.debug("Coverage: %s", self.coverage)
+
         self.distance_matrix, self.predecessor_matrix = calculate_distance_matrices(
             self.node_list,
             partitioner,
@@ -154,9 +156,6 @@ class Metric:
 
         if make_plots:
             self.make_all_plots(partitioner)
-
-        # self.coverage = self.calculate_coverage(partitioner)
-        # logger.debug("Coverage: %s", self.coverage)
 
     def make_all_plots(self, partitioner):
         """Make all plots for the metrics.
@@ -187,7 +186,7 @@ class Metric:
         )
         fig.show()
         fig, _ = plot_relative_difference(
-            self, "S", "N", title=f"{partitioner.name} - {self.__class__.__name__}"
+            self, "N", "S", title=f"{partitioner.name} - {self.__class__.__name__}"
         )
         save_plot(
             partitioner.results_dir,
@@ -199,8 +198,8 @@ class Metric:
             partitioner,
             self.distance_matrix,
             self.node_list,
-            measure1="S",
-            measure2="N",
+            measure1="N",
+            measure2="S",
         )
         save_plot(
             partitioner.results_dir,

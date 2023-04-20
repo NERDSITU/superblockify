@@ -7,7 +7,7 @@ from os.path import dirname, join
 
 print(f"Current working directory: {os.getcwd()}")
 
-from superblockify import ResidentialPartitioner
+from superblockify import ResidentialPartitioner, save_to_gpkg
 
 config = ConfigParser()
 config.read(join(dirname(__file__), "..", "..", "config.ini"))
@@ -19,11 +19,8 @@ if __name__ == "__main__":
     # CITY_NAME, SEARCH_STR = PLACES_SMALL[0]
 
     part = ResidentialPartitioner(
-        name=CITY_NAME + "_test", city_name=CITY_NAME, search_str=SEARCH_STR
+        name=CITY_NAME + "_HPC", city_name=CITY_NAME, search_str=SEARCH_STR
     )
-    part.run(make_plots=True)
-    part.save()
-    part = ResidentialPartitioner.load(name=CITY_NAME + "_test")
-
-    part.calculate_metrics(make_plots=True, num_workers=40, chunk_size=4)
-    part.save(save_metrics=True, save_graph_copy=True)
+    part.run(make_plots=True, num_workers=10, chunk_size=1)
+    part.save(save_graph_copy=True)
+    save_to_gpkg(part)
