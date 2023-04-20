@@ -78,6 +78,7 @@ def plot_distance_matrices(metric, name=None):
     fig, axes = plt.subplots(
         1, len(metric.distance_matrix), figsize=(len(metric.distance_matrix) * 5, 5)
     )
+
     # Find maximal, non-inf value for the colorbar
     max_val = max(
         np.max(value[value != np.inf]) for value in metric.distance_matrix.values()
@@ -86,28 +87,40 @@ def plot_distance_matrices(metric, name=None):
     # Subplots with shared colorbar, title, and y-axis label
     for axe, (key, value) in zip(axes, metric.distance_matrix.items()):
         dist_im = axe.imshow(value, vmin=0, vmax=max_val)
-        axe.set_title(f"$d_{key}(i, j)$")
+        axe.set_title(f"$d_{key}(i, j)$", fontsize=14)
         axe.set_xlabel("Node $j$")
         axe.set_aspect("equal")
     # Share y-axis
     axes[0].set_ylabel("Node $i$")
     for axe in axes[1:]:
         axe.get_shared_y_axes().join(axes[0], axe)
+
     # Plot colorbar on the right side of the figure
     fig.colorbar(dist_im, ax=axes, fraction=0.046, pad=0.04)
     # Label colorbar
     unit = (
-        "khops"
+        "hops"
         if metric.weight is None
-        else "km"
+        else "m"
         if metric.weight == "length"
-        else f"k{metric.weight}"
+        else f"{metric.weight}"
     )
-    dist_im.set_label(f"Distance [{unit}]")
+    # dist_im.set_label(f"Distance [{unit}]") not working
+    # Label at the right of the plot, next to colorbar
+    fig.text(
+        0.925,
+        0.5,
+        f"Distance [{unit}]",
+        va="center",
+        rotation="vertical",
+        fontsize=14,
+    )
+
     # Title above all subplots
     fig.suptitle(
         f"Distance matrices for the network measures "
-        f"{'(' + name + ')' if name else ''}"
+        f"{'(' + name + ')' if name else ''}",
+        fontsize=16,
     )
 
     return fig, axes
@@ -230,11 +243,11 @@ def plot_distance_matrices_pairwise_relative_difference(metric, name=None):
     fig.colorbar(diff_im, ax=axes, fraction=0.046, pad=0.04)
     # Label colorbar
     unit = (
-        "khops"
+        "hops"
         if metric.weight is None
-        else "km"
+        else "m"
         if metric.weight == "length"
-        else f"k{metric.weight}"
+        else f"{metric.weight}"
     )
     dist_im.set_label(f"Distance [{unit}]")
     # Title above all subplots
@@ -277,7 +290,7 @@ def plot_component_wise_travel_increase(
     -------
     fig, axes : matplotlib.figure.Figure, matplotlib.axes.Axes
         The figure and axes of the plot.
-    """
+    """  # pylint: disable=too-many-locals
 
     partition_nodes = partitioner.get_partition_nodes()
 
@@ -302,18 +315,42 @@ def plot_component_wise_travel_increase(
         component["rel_increase"] = rel_increase_component
         # Write this to the edges of the subgraph
         for edge in component["subgraph"].edges:
-            partitioner.graph.edges[edge]["rel_increase"] = rel_increase_component
+            partitioner.graph.edges[edge]["rel_increase_comp"] = rel_increase_component
+
+    _, axes = plt.subplots(1, 1, figsize=(10, 10))
+    # Add colorbar
+    sc_mapbl = plt.cm.ScalarMappable(
+        cmap="RdYlGn_r",
+        norm=plt.Normalize(
+            vmin=1,
+            vmax=np.max([component["rel_increase"] for component in partition_nodes]),
+        ),
+    )
+    sc_mapbl._A = []  # pylint: disable=protected-access
+    # add colorbar to the figure
+    cbar = plt.colorbar(
+        sc_mapbl, ax=axes, fraction=0.046, pad=0.04, orientation="vertical"
+    )
+    # Label the colorbar, vertical alignment, latex math mode
+    cbar.ax.set_ylabel(
+        # "Travel distance increase (all to all demand) $d_{S}(i, j)$ / $d_{N}(i, j)$",
+        rf"Part. travel increase $d_{{{measure1}}} (i, j)$ / $d_{{{measure2}}} (i, j)$",
+        rotation=270,
+        labelpad=20,
+        fontsize=17,
+    )
 
     # Plot by attribute
     return plot_by_attribute(
         partitioner.graph,
-        edge_attr="rel_increase",
+        edge_attr="rel_increase_comp",
         edge_attr_types="numerical",
-        edge_cmap="RdYlGn",
+        edge_cmap="RdYlGn_r",
         edge_minmax_val=(
-            np.min([component["rel_increase"] for component in partition_nodes]),
+            1,
             np.max([component["rel_increase"] for component in partition_nodes]),
         ),
+        ax=axes,
         **pg_kwargs,
     )
 
@@ -339,7 +376,7 @@ def plot_relative_difference(metric, key_i, key_j, title=None):
     """
     # Calculate the relative difference
     rel_diff = rel_increase(
-        metric.distance_matrix[key_j], metric.distance_matrix[key_i]
+        metric.distance_matrix[key_i], metric.distance_matrix[key_j]
     )
 
     # Plot the relative difference
@@ -389,6 +426,27 @@ def plot_relative_increase_on_graph(graph, **pg_kwargs):
         The figure and axes of the plot.
     """
 
+    _, axes = plt.subplots(1, 1, figsize=(10, 10))
+    # Add colorbar
+    sc_mapbl = plt.cm.ScalarMappable(
+        cmap="RdYlGn_r",
+        norm=plt.Normalize(
+            vmin=1, vmax=np.max([edge["rel_increase"] for edge in graph.edges.values()])
+        ),
+    )
+    sc_mapbl._A = []  # pylint: disable=protected-access
+    # add colorbar to the figure
+    cbar = plt.colorbar(
+        sc_mapbl, ax=axes, fraction=0.046, pad=0.04, orientation="vertical"
+    )
+    # Label the colorbar, vertical alignment, latex math mode
+    cbar.ax.set_ylabel(
+        "Travel distance increase (all to all demand) $d_{S}(i, j)$ / $d_{N}(i, j)$",
+        rotation=270,
+        labelpad=20,
+        fontsize=17,
+    )
+
     return plot_by_attribute(
         graph,
         edge_attr="rel_increase",
@@ -398,5 +456,6 @@ def plot_relative_increase_on_graph(graph, **pg_kwargs):
             1,
             np.max([edge["rel_increase"] for edge in graph.edges.values()]),
         ),
+        ax=axes,
         **pg_kwargs,
     )

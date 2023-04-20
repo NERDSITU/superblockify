@@ -186,7 +186,7 @@ class Metric:
         )
         fig.show()
         fig, _ = plot_relative_difference(
-            self, "S", "N", title=f"{partitioner.name} - {self.__class__.__name__}"
+            self, "N", "S", title=f"{partitioner.name} - {self.__class__.__name__}"
         )
         save_plot(
             partitioner.results_dir,
@@ -198,8 +198,8 @@ class Metric:
             partitioner,
             self.distance_matrix,
             self.node_list,
-            measure1="S",
-            measure2="N",
+            measure1="N",
+            measure2="S",
         )
         save_plot(
             partitioner.results_dir,
