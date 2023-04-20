@@ -6,8 +6,6 @@ from os.path import dirname, join
 
 import networkx as nx
 import pytest
-from matplotlib import pyplot as plt
-from matplotlib.pyplot import Figure, Axes
 from osmnx import load_graphml
 
 from superblockify.partitioning import BasePartitioner
@@ -52,47 +50,6 @@ class TestPartitioners:
         assert part.name is not None and part.name != ""
         assert part.city_name is not None and part.city_name != ""
 
-    def test_plot_partition_graph(self, test_city_small_precalculated_copy):
-        """Test `plot_partition_graph` by design."""
-        part = test_city_small_precalculated_copy
-        fig, axe = part.plot_partition_graph()
-        assert isinstance(fig, Figure)
-        assert isinstance(axe, Axes)
-        plt.close("all")
-
-    def test_plot_component_graph(self, test_city_all_precalculated):
-        """Test `plot_component_graph` by design."""
-        part = test_city_all_precalculated
-        if part.components is not None:
-            fig, axe = part.plot_component_graph()
-            assert isinstance(fig, Figure)
-            assert isinstance(axe, Axes)
-            plt.close("all")
-
-    def test_plot_partition_graph_unpartitioned(
-        self, test_city_all_preloaded, test_city_all_precalculated
-    ):
-        """Test `plot_partition_graph` exception handling."""
-        part = test_city_all_preloaded
-        with pytest.raises(AssertionError):
-            part.plot_partition_graph()
-        part = test_city_all_precalculated
-        part.attribute_label = None
-        with pytest.raises(AssertionError):
-            part.plot_partition_graph()
-
-    def test_plot_partitions_unpartitioned(
-        self, test_city_all_preloaded, test_city_all_precalculated
-    ):
-        """Test `plot_partition_graph` exception handling."""
-        part = test_city_all_preloaded
-        with pytest.raises(AssertionError):
-            part.plot_partition_graph()
-        part = test_city_all_precalculated
-        part.attribute_label = None
-        with pytest.raises(AssertionError):
-            part.plot_partition_graph()
-
     def test_make_subgraphs_from_attribute(
         self, test_city_all_preloaded, test_city_all_precalculated
     ):
@@ -104,33 +61,6 @@ class TestPartitioners:
         part.attribute_label = None
         with pytest.raises(AssertionError):
             part.make_subgraphs_from_attribute()
-
-    def test_plot_subgraph_component_size(
-        self, test_city_all_preloaded, test_city_all_precalculated
-    ):
-        """Test `plot_subgraph_component_size` by design."""
-        part = test_city_all_preloaded
-        with pytest.raises(AssertionError):
-            part.plot_subgraph_component_size("nodes")
-        part = test_city_all_precalculated
-        part.plot_subgraph_component_size("nodes")
-        part.plot_subgraph_component_size("edges")
-        part.plot_subgraph_component_size("length")
-        part.components = None
-        part.plot_subgraph_component_size("nodes")
-        plt.close("all")
-
-    @pytest.mark.parametrize(
-        "invalid_measure",
-        ["", "invalid", "node", None, 10, 1.0, True, False],
-    )
-    def test_plot_subgraph_component_size_invalid_measure(
-        self, test_city_small_precalculated_copy, invalid_measure
-    ):
-        """Test `plot_subgraph_component_size` with unavailable measure."""
-        part = test_city_small_precalculated_copy
-        with pytest.raises(ValueError):
-            part.plot_subgraph_component_size(invalid_measure)
 
     def test_overwrite_attributes_of_ignored_components_unpartitioned(
         self, test_city_small_precalculated_copy

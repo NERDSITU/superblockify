@@ -9,23 +9,27 @@ from typing import final, Final, List
 
 import osmnx as ox
 from matplotlib import pyplot as plt
-from matplotlib.colors import ListedColormap
 from networkx import (
     weakly_connected_components,
     set_edge_attributes,
     MultiDiGraph,
 )
-from numpy import linspace, array
 from osmnx.stats import edge_length_total
 
 from .checks import is_valid_partitioning
+from .plot import (
+    plot_partition_graph,
+    plot_subgraph_component_size,
+    plot_component_rank_size,
+    plot_component_graph,
+)
 from .representative import set_representative_nodes
 from .utils import (
     show_highway_stats,
     remove_dead_ends_directed,
     split_up_isolated_edges_directed,
 )
-from .. import attribute, plot
+from .. import attribute
 from ..metrics.metric import Metric
 from ..plot import save_plot
 from ..utils import load_graph_from_place
@@ -202,14 +206,17 @@ class BasePartitioner(ABC):
 
         if make_plots:
             if self.partitions:
-                fig, _ = self.plot_partition_graph()
+                fig, _ = plot_partition_graph(self)
                 save_plot(self.results_dir, fig, f"{self.name}_partition_graph.pdf")
                 plt.show()
-            fig, _ = self.plot_subgraph_component_size("length")
+            fig, _ = plot_subgraph_component_size(self, "length")
             save_plot(self.results_dir, fig, f"{self.name}_subgraph_component_size.pdf")
             plt.show()
+            fig, _ = plot_component_rank_size(self, "length")
+            save_plot(self.results_dir, fig, f"{self.name}_component_rank_size.pdf")
+            plt.show()
             if self.components:
-                fig, _ = self.plot_component_graph()
+                fig, _ = plot_component_graph(self)
                 save_plot(self.results_dir, fig, f"{self.name}_component_graph.pdf")
                 plt.show()
 
@@ -306,7 +313,7 @@ class BasePartitioner(ABC):
 
         """
 
-        self.__check_has_been_run()
+        self.check_has_been_run()
 
         # Log making subgraphs
         logger.info(
@@ -506,7 +513,7 @@ class BasePartitioner(ABC):
 
         """
 
-        self.__check_has_been_run()
+        self.check_has_been_run()
 
         if self.components is None:
             raise AssertionError(
@@ -560,7 +567,7 @@ class BasePartitioner(ABC):
 
         """
 
-        self.__check_has_been_run()
+        self.check_has_been_run()
 
         # List of partitions /unignored components
         # Only take `name`, `subgraph` and `representative_node_id` from the components
@@ -621,194 +628,7 @@ class BasePartitioner(ABC):
 
         return node_list
 
-    def plot_partition_graph(self, **pba_kwargs):
-        """Plotting the partitions with color on graph.
-
-        Plots the partitioned graph, just like `plot.paint_streets` but that the
-        *partitions* have a uniform color.
-
-        Parameters
-        ----------
-        pba_kwargs
-            Keyword arguments to pass to `superblockify.plot_by_attribute`.
-
-        Returns
-        -------
-        fig, axe : tuple
-            matplotlib figure, axis
-
-        Raises
-        ------
-        AssertionError
-            If BasePartitioner has not been run yet (the partitions are not defined).
-
-        """
-
-        self.__check_has_been_run()
-
-        # Log plotting
-        logger.info(
-            "Plotting partitions graph for %s with attribute %s",
-            self.name,
-            self.attribute_label,
-        )
-        return plot.plot_by_attribute(
-            self.graph,
-            edge_attr=self.attribute_label,
-            edge_minmax_val=self.attr_value_minmax,
-            **pba_kwargs,
-        )
-
-    def plot_component_graph(self, **pba_kwargs):
-        """Plotting the components with color on graph.
-
-        Plots the graph with the components, just like `plot.paint_streets` but that
-        the *components* have a uniform color.
-
-        Parameters
-        ----------
-        pba_kwargs
-            Keyword arguments to pass to `superblockify.plot_by_attribute`.
-
-        Returns
-        -------
-        fig, axe : tuple
-            matplotlib figure, axis
-
-        Raises
-        ------
-        AssertionError
-            If BasePartitioner has not been run yet (the partitions are not defined).
-        AssertionError
-            If `self.components` is not defined (the subgraphs have not been split
-            into components).
-
-        """
-
-        self.__check_has_been_run()
-
-        if self.components is None:
-            raise AssertionError(
-                f"Components have not been defined for {self.name}. "
-                f"Run `make_subgraphs_from_attribute` with `split_disconnected` "
-                f"set to True."
-            )
-
-        # Log plotting
-        logger.info(
-            "Plotting component graph for %s with attribute %s",
-            self.name,
-            self.attribute_label,
-        )
-        # Bake component labels into graph
-        for component in self.components:
-            if not component["ignore"]:
-                set_edge_attributes(
-                    component["subgraph"],
-                    component["name"],
-                    "component_name",
-                )
-
-        cmap = plt.get_cmap("prism")
-        # So markers for representative nodes are not the same color as the edges,
-        # where they are placed on, construct a new color map from the prism color
-        # map, but which is darker. Same colors as cmap, but all values are
-        # multiplied by 0.75, except the alpha value, which is set to 1.
-        dark_cmap = ListedColormap(
-            array([cmap(i) for i in range(cmap.N)]) * array([0.75, 0.75, 0.75, 1])
-        )
-
-        return plot.plot_by_attribute(
-            self.graph,
-            edge_attr="component_name",
-            edge_attr_types="categorical",
-            edge_cmap=cmap,
-            edge_minmax_val=None,
-            node_attr="representative_node_name",
-            node_attr_types="categorical",
-            node_cmap=dark_cmap,
-            node_minmax_val=None,
-            node_size=40,
-            node_zorder=2,
-            **pba_kwargs,
-        )
-
-    def plot_subgraph_component_size(self, measure, xticks=None, **pcs_kwargs):
-        """Plot the size of the subgraph components of the partitions.
-
-        Scatter plot of the size of the subgraph components of each partition type.
-
-        Parameters
-        ----------
-        measure : str, optional
-            Way to measure component size. Can be 'edges', 'length' or 'nodes'.
-        xticks : list of numbers or strings, optional
-            List of xticks to use. If None, the xticks are seven evely spaced numbers
-            between the self.attr_value_minmax.
-        pcs_kwargs
-            Keyword arguments to pass to `superblockify.plot.plot_component_size`.
-
-        Returns
-        -------
-        fig, axe : tuple
-            matplotlib figure, axis
-
-        Raises
-        ------
-        AssertionError
-            If BasePartitioner has not been run yet (the partitions are not defined).
-        ValueError
-            If measure is not 'edges', 'length' or 'nodes'.
-
-        """
-
-        self.__check_has_been_run()
-
-        if measure not in ["edges", "length", "nodes"]:
-            raise ValueError(
-                f"Measure '{measure}' is not supported, "
-                f"use 'edges', 'length' or 'nodes'."
-            )
-
-        # Find number of edges in each component for each partition
-        key_name = "length_total" if measure == "length" else f"num_{measure}"
-        component_size = []
-        component_values = []
-        ignore = []
-
-        # If subgraphs were split, use components
-        if self.components:
-            logger.debug("Using components for plotting.")
-            for comp in self.components:
-                component_size.append(comp[key_name])
-                component_values.append(comp["value"])
-                ignore.append(comp["ignore"])
-        # Else use partitions
-        else:
-            logger.debug("Using partitions for plotting.")
-            for part in self.partitions:
-                component_size.append(part[key_name])
-                component_values.append(part["value"])
-                ignore = None
-
-        if xticks is None:
-            xticks = list(linspace(*self.attr_value_minmax, 7))
-
-        # Plot
-        return plot.plot_component_size(
-            graph=self.graph,
-            attr=self.attribute_label,
-            component_size=component_size,
-            component_values=component_values,
-            size_measure_label=f"Component size ({measure})",
-            ignore=ignore,
-            title=self.name,
-            minmax_val=self.attr_value_minmax,
-            xticks=xticks,
-            **pcs_kwargs,
-        )
-
-    def __check_has_been_run(self):
+    def check_has_been_run(self):
         """Check if the partitioner has ran.
 
         Raises

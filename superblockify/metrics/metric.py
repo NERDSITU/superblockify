@@ -11,11 +11,9 @@ from .measures import (
     write_relative_increase_to_edges,
     calculate_coverage,
 )
-from ..metrics import (
+from .plot import (
     plot_distance_matrices,
     plot_distance_matrices_pairwise_relative_difference,
-)
-from ..metrics.plot import (
     plot_component_wise_travel_increase,
     plot_relative_difference,
     plot_relative_increase_on_graph,

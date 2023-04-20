@@ -10,6 +10,14 @@ from .streettype import ResidentialPartitioner
 # Further utils.
 from .utils import save_to_gpkg
 
+# Partitioner plotting.
+from .plot import (
+    plot_partition_graph,
+    plot_subgraph_component_size,
+    plot_component_rank_size,
+    plot_component_graph,
+)
+
 # List of all supported partitioners. For all partitioners that are subclasses of
 # BasePartitioner, but not BasePartitioner itself.
 __all_partitioners__ = [
