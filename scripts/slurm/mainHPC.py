@@ -7,7 +7,7 @@ from os.path import dirname, join
 
 print(f"Current working directory: {os.getcwd()}")
 
-from superblockify import ResidentialPartitioner
+from superblockify import ResidentialPartitioner, save_to_gpkg
 
 config = ConfigParser()
 config.read(join(dirname(__file__), "..", "..", "config.ini"))
