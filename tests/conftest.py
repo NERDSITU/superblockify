@@ -139,7 +139,7 @@ def test_city_small_precalculated(test_city_small, partitioner_class):
         city_name=city_name,
         graph=graph.copy(),
     )
-    part.run(calculate_metrics=False)
+    part.run(calculate_metrics=True)
     return part
 
 
