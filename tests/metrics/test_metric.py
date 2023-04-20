@@ -65,7 +65,7 @@ class TestMetric:
             city_name="Adliswil_tmp",
             search_str="Adliswil, Bezirk Horgen, Zürich, Switzerland",
         )
-        part.run(calc_metrics=True, make_plots=False)
+        part.run(calculate_metrics=True, make_plots=False)
         # Save
         part.save(save_graph_copy=False)
         # Load
