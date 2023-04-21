@@ -1,9 +1,8 @@
 """Tests for the metric class."""
 import matplotlib.pyplot as plt
-import pytest
-from requests import ConnectTimeout
 
 from superblockify.metrics.metric import Metric
+from tests.conftest import mark_xfail_flaky_download
 
 
 class TestMetric:
@@ -55,7 +54,7 @@ class TestMetric:
         for dist_matrix in part.metric.distance_matrix.values():
             assert dist_matrix.shape == (part.graph.number_of_nodes(),) * 2
 
-    # Is allowed to fail, as the connection might time out - max retries exceeded /w url
+    @mark_xfail_flaky_download
     def test_saving_and_loading(
         self,
         partitioner_class,
@@ -68,13 +67,10 @@ class TestMetric:
             city_name="Adliswil_tmp",
             search_str="Adliswil, Bezirk Horgen, Zürich, Switzerland",
         )
-        try:
-            part.run(calculate_metrics=True, make_plots=False)
-            # Save
-            part.save(save_graph_copy=False)
-            # Load
-            metric = Metric.load(part.name)
-            # Check if metrics are equal
-            assert part.metric == metric
-        except ConnectTimeout:
-            pytest.xfail("Connection timed out.")
+        part.run(calculate_metrics=True, make_plots=False)
+        # Save
+        part.save(save_graph_copy=False)
+        # Load
+        metric = Metric.load(part.name)
+        # Check if metrics are equal
+        assert part.metric == metric

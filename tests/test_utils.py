@@ -11,11 +11,13 @@ from superblockify.utils import (
     has_pairwise_overlap,
     compare_dicts,
 )
+from tests.conftest import mark_xfail_flaky_download
 
 config = ConfigParser()
 config.read(join(dirname(__file__), "..", "config.ini"))
 
 
+@mark_xfail_flaky_download
 def test_load_graph_from_place():
     """Test that the load_graph_from_place function works."""
 
@@ -45,6 +47,7 @@ def test_load_graph_from_place():
         ("CPH-osmid-list", ["R2192363", "R2186660"]),
     ],
 )
+@mark_xfail_flaky_download
 def test_load_graph_from_place_search_str_types(city, search_string):
     """Test that the load_graph_from_place function works with different search string
     types."""

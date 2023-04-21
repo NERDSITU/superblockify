@@ -7,10 +7,10 @@ from os.path import dirname, join
 import networkx as nx
 import pytest
 from osmnx import load_graphml
-from requests import ConnectTimeout
 
 from superblockify.partitioning import BasePartitioner
 from superblockify.utils import compare_components_and_partitions
+from tests.conftest import mark_xfail_flaky_download
 
 logger = logging.getLogger("superblockify")
 
@@ -183,8 +183,7 @@ class TestPartitioners:
         with pytest.raises(error_type):
             partitioner_class(name, city_name, search_str, graph)
 
-    # Is allowed to fail, as the connection might time out - max retries exceeded /w url
-    @pytest.mark.xfail(raises=ConnectTimeout)
+    @mark_xfail_flaky_download
     @pytest.mark.parametrize(
         "save_graph_copy,delete_before_load",
         [(False, False), (True, False), (False, True)],
