@@ -50,6 +50,11 @@ class TestPartitioners:
         assert part.name is not None and part.name != ""
         assert part.city_name is not None and part.city_name != ""
 
+    def test_run_make_plots(self, test_city_all_preloaded):
+        """Test plotting of partitioning results by design."""
+        part = test_city_all_preloaded
+        part.run(calulate_metrics=False, make_plots=True)
+
     def test_make_subgraphs_from_attribute(
         self, test_city_all_preloaded, test_city_all_precalculated
     ):

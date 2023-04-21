@@ -56,6 +56,19 @@ def test_plot_partitions_unpartitioned(
         plot_partition_graph(part)
 
 
+def test_plot_component_graph_unpartitioned(
+    test_city_all_preloaded, test_city_all_precalculated
+):
+    """Test `plot_component_graph` exception handling."""
+    part = test_city_all_preloaded
+    with pytest.raises(AssertionError):
+        plot_component_graph(part)
+    part = test_city_all_precalculated
+    part.attribute_label = None
+    with pytest.raises(AssertionError):
+        plot_component_graph(part)
+
+
 def test_plot_subgraph_component_size(
     test_city_all_preloaded, test_city_all_precalculated
 ):
