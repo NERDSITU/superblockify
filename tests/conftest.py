@@ -90,7 +90,7 @@ def test_city_all_preloaded_save(
         city_name=city_name,
         graph=graph.copy(),
     )
-    part.save(save_graph_copy=False)
+    part.save(save_graph_copy=True)
     assert exists(join(part.results_dir, part.name + ".partitioner"))
     assert exists(join(part.results_dir, part.name + ".metrics"))
     return part.name, part.__class__

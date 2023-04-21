@@ -3,8 +3,8 @@ import logging
 
 from networkx import weakly_connected_components
 
-from .partitioner import BasePartitioner
-from ..attribute import (
+from ..base import BasePartitioner
+from ...attribute import (
     new_edge_attribute_by_function,
     get_edge_subgraph_with_attribute_value,
 )

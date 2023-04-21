@@ -37,7 +37,7 @@ def is_valid_partitioning(partitioning):
 
     Parameters
     ----------
-    partitioning : partitioning.partitioner.BasePartitioner
+    partitioning : partitioning.base.BasePartitioner
         Partitioning to check.
 
     Returns
@@ -104,7 +104,7 @@ def components_are_connected(partitioning):
 
     Parameters
     ----------
-    partitioning : partitioning.partitioner.BasePartitioner
+    partitioning : partitioning.base.BasePartitioner
         Partitioning to check.
 
     Returns
@@ -153,7 +153,7 @@ def nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
 
     Parameters
     ----------
-    partitioning : partitioning.partitioner.BasePartitioner
+    partitioning : partitioning.base.BasePartitioner
         Partitioning to check.
 
     Returns
@@ -266,7 +266,7 @@ def components_are_connect_sparsified(partitioning):
 
     Parameters
     ----------
-    partitioning : partitioning.partitioner.BasePartitioner
+    partitioning : partitioning.base.BasePartitioner
         Partitioning to check.
 
     Returns
@@ -300,7 +300,7 @@ def representative_nodes_are_contained_in_subgraph(partitioning):
 
     Parameters
     ----------
-    partitioning : partitioning.partitioner.BasePartitioner
+    partitioning : partitioning.base.BasePartitioner
         Partitioning to check.
 
     Returns

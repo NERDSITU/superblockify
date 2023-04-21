@@ -7,6 +7,7 @@ from os.path import dirname, join
 import networkx as nx
 import pytest
 from osmnx import load_graphml
+from requests import ConnectTimeout
 
 from superblockify.partitioning import BasePartitioner
 from superblockify.utils import compare_components_and_partitions
@@ -49,6 +50,10 @@ class TestPartitioners:
         assert part.partitions is not None
         assert part.name is not None and part.name != ""
         assert part.city_name is not None and part.city_name != ""
+
+    def test_run_make_plots(self, test_city_all_preloaded):
+        """Test plotting of partitioning results by design."""
+        test_city_all_preloaded.run(calculate_metrics=False, make_plots=True)
 
     def test_make_subgraphs_from_attribute(
         self, test_city_all_preloaded, test_city_all_precalculated
@@ -178,6 +183,8 @@ class TestPartitioners:
         with pytest.raises(error_type):
             partitioner_class(name, city_name, search_str, graph)
 
+    # Is allowed to fail, as the connection might time out - max retries exceeded /w url
+    @pytest.mark.xfail(raises=ConnectTimeout)
     @pytest.mark.parametrize(
         "save_graph_copy,delete_before_load",
         [(False, False), (True, False), (False, True)],

@@ -11,9 +11,9 @@ from networkx import weakly_connected_components
 from scipy.signal import find_peaks
 from typing_extensions import deprecated
 
-from superblockify import attribute
-from .partitioner import BasePartitioner
-from ..plot import save_plot
+from ..base import BasePartitioner
+from ... import attribute
+from ...plot import save_plot
 
 logger = logging.getLogger("superblockify")
 
