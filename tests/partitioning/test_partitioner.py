@@ -53,7 +53,7 @@ class TestPartitioners:
     def test_run_make_plots(self, test_city_all_preloaded):
         """Test plotting of partitioning results by design."""
         part = test_city_all_preloaded
-        part.run(calulate_metrics=False, make_plots=True)
+        part.run(calculate_metrics=False, make_plots=True)
 
     def test_make_subgraphs_from_attribute(
         self, test_city_all_preloaded, test_city_all_precalculated
