@@ -645,7 +645,7 @@ class BasePartitioner(ABC):
             )
         if self.attribute_label is None:
             raise AssertionError(
-                f"{self.__class__.__name__} has no `attribute_label` yet,"
+                f"{self.__class__.__name__} has no `attribute_label` yet, "
                 f"run before plotting graph."
             )
 
