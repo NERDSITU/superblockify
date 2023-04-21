@@ -2,6 +2,7 @@
 from ast import literal_eval
 from configparser import ConfigParser
 from copy import deepcopy
+from functools import wraps
 from os import listdir, remove
 from os.path import getsize, join, exists, dirname
 from shutil import rmtree
@@ -9,6 +10,8 @@ from shutil import rmtree
 import osmnx as ox
 import pytest
 from networkx import set_node_attributes
+from requests.exceptions import ConnectTimeout
+from urllib3.exceptions import MaxRetryError
 
 from superblockify.partitioning import __all_partitioners__
 
@@ -240,3 +243,18 @@ def _patch_plt_show(monkeypatch):
     tests."""
     monkeypatch.setattr("matplotlib.pyplot.show", lambda: None)
     monkeypatch.setattr("matplotlib.pyplot.Figure.show", lambda _: None)
+
+
+def mark_xfail_flaky_download(test_func):
+    """Decorator to mark flaky tests that download data from OSM as xfail."""
+
+    # https://stackoverflow.com/questions/43937748/wrap-each-pytest-test-function-into-try-except
+    @wraps(test_func)
+    def test_func_wrapper(*args, **kwargs):
+        try:
+            test_func(*args, **kwargs)
+        except (MaxRetryError, ConnectTimeout) as err:
+            pytest.xfail(f"Download failed for {test_func.__name__}: {err}")
+            raise err
+
+    return test_func_wrapper

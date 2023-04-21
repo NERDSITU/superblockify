@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 
 from superblockify.metrics.metric import Metric
+from tests.conftest import mark_xfail_flaky_download
 
 
 class TestMetric:
@@ -53,6 +54,7 @@ class TestMetric:
         for dist_matrix in part.metric.distance_matrix.values():
             assert dist_matrix.shape == (part.graph.number_of_nodes(),) * 2
 
+    @mark_xfail_flaky_download
     def test_saving_and_loading(
         self,
         partitioner_class,
