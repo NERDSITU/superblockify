@@ -1,11 +1,13 @@
-"""Partitioning init, subpackage for the various approaches."""
+"""Partitioning init, subpackage for the base partitioner and all approaches."""
 from inspect import isclass
 
 # Import all partitioners for `__api.py`.
-from .bearing import BearingPartitioner
-from .dummy import DummyPartitioner
-from .partitioner import BasePartitioner
-from .streettype import ResidentialPartitioner
+from .base import BasePartitioner
+from .approaches import (
+    BearingPartitioner,
+    DummyPartitioner,
+    ResidentialPartitioner,
+)
 
 # Further utils.
 from .utils import save_to_gpkg
