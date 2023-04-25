@@ -202,6 +202,9 @@ class BasePartitioner(ABC):
             self.components if self.components else self.partitions
         )
 
+        # Calculate travel times for partitioned graph
+        add_edge_travel_times_restricted(self.graph, self.sparsified)
+
         # Check that the partitions and sparsified graph satisfy the requirements
         is_valid_partitioning(self)
 
