@@ -92,9 +92,18 @@ def load_graph_from_place(save_as, search_string, **gfp_kwargs):
         graph = ox.graph_from_place(search_string, **gfp_kwargs)
 
     graph = ox.distance.add_edge_lengths(graph)
+    graph = ox.add_edge_speeds(graph)  # adds attribute "maxspeed"
+    graph = ox.add_edge_travel_times(graph)  # adds attribute "travel_time"
     graph = extract_attributes(
         graph,
-        edge_attributes={"geometry", "osmid", "length", "highway"},
+        edge_attributes={
+            "geometry",
+            "osmid",
+            "length",
+            "highway",
+            "speed_kph",
+            "travel_time",
+        },
         node_attributes={"y", "x", "osmid"},
     )
     # Add edge bearings - the precision >1 is important for binning

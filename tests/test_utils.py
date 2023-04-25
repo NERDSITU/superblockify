@@ -31,6 +31,12 @@ def test_load_graph_from_place():
     assert len(graph) > 0
     assert graph.size() > 0
 
+    # check that every edge has the attribute 'length', `speed_kph` and `travel_time`
+    for _, _, data in graph.edges(data=True):
+        assert "length" in data
+        assert "speed_kph" in data
+        assert "travel_time" in data
+
 
 @pytest.mark.parametrize(
     "city,search_string",
