@@ -24,6 +24,7 @@ from .plot import (
     plot_component_graph,
 )
 from .representative import set_representative_nodes
+from .speed import add_edge_travel_times_restricted
 from .utils import (
     show_highway_stats,
     remove_dead_ends_directed,
