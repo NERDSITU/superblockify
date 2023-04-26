@@ -1,6 +1,4 @@
 """Approach only based on street type."""
-import logging
-
 from networkx import weakly_connected_components
 
 from ..base import BasePartitioner
@@ -8,8 +6,7 @@ from ...attribute import (
     new_edge_attribute_by_function,
     get_edge_subgraph_with_attribute_value,
 )
-
-logger = logging.getLogger("superblockify")
+from ...config import logger
 
 
 class ResidentialPartitioner(BasePartitioner):

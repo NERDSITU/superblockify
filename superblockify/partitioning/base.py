@@ -1,10 +1,8 @@
 """BasePartitioner parent and dummy."""
-import logging
 import pickle
 from abc import ABC, abstractmethod
-from configparser import ConfigParser
 from os import makedirs
-from os.path import join, exists, dirname
+from os.path import join, exists
 from typing import final, Final, List
 
 import osmnx as ox
@@ -31,16 +29,10 @@ from .utils import (
     split_up_isolated_edges_directed,
 )
 from .. import attribute
+from ..config import logger, GRAPH_DIR, RESULTS_DIR, NETWORK_FILTER
 from ..metrics.metric import Metric
 from ..plot import save_plot
 from ..utils import load_graph_from_place
-
-logger = logging.getLogger("superblockify")
-
-config = ConfigParser()
-config.read(join(dirname(__file__), "..", "..", "config.ini"))
-GRAPH_DIR = config["general"]["graph_dir"]
-RESULTS_DIR = config["general"]["results_dir"]
 
 
 class BasePartitioner(ABC):
@@ -91,11 +83,11 @@ class BasePartitioner(ABC):
             Used so multiple `Partitioner` don't need to download the same city graph.
         search_str : str or list of str, optional
             Search string for OSMnx to download a graph, default is None. Only used if
-            no graph is found under GRAPH_DIR/city_name.graphml.
+            no graph is found under :attr:`GRAPH_DIR`/city_name.graphml.
             For composite cities, a list of search strings can be provided.
         graph : networkx.MultiDiGraph, optional
-            Graph to partition. Used if no graph is found under GRAPH_DIR/name.graphml
-            and `search_str` is None. Default is None.
+            Graph to partition. Used if no graph is found under
+            :attr:`GRAPH_DIR`/name.graphml and `search_str` is None. Default is None.
         reload_graph : bool, optional
             If True, reload the graph from OSMnx, even if a graph with the name
             `name.graphml` is found in the working directory. Default is False.
@@ -113,7 +105,7 @@ class BasePartitioner(ABC):
 
         Notes
         -----
-        GRAPH_DIR is set in the `config.ini` file.
+        :attr:`GRAPH_DIR` is set in :mod:`superblockify.config`.
 
         """
 
@@ -656,8 +648,8 @@ class BasePartitioner(ABC):
     def load_or_find_graph(self, city_name, search_str, reload_graph=False):
         """Load or find graph if it exists.
 
-        If graph GRAPH_DIR/name.graphml exists, load it. Else, find it using
-        `search_str` and save it to GRAPH_DIR/name.graphml.
+        If graph :attr:`GRAPH_DIR`/name.graphml exists, load it. Else, find it using
+        `search_str` and save it to :attr:`GRAPH_DIR`/name.graphml.
 
         Parameters
         ----------
@@ -677,7 +669,7 @@ class BasePartitioner(ABC):
 
         Notes
         -----
-        GRAPH_DIR is set in the `config.ini` file.
+        :attr:`GRAPH_DIR` is set in :mod:`superblockify.config`.
         """
 
         # Check if graph already exists
@@ -690,7 +682,7 @@ class BasePartitioner(ABC):
             graph = load_graph_from_place(
                 save_as=graph_path,
                 search_string=search_str,
-                custom_filter=config["graph"]["network_filter"],
+                custom_filter=NETWORK_FILTER,
                 simplify=True,
             )
             logger.debug("Saving graph to %s", graph_path)
@@ -709,14 +701,14 @@ class BasePartitioner(ABC):
         save_graph_copy : bool, optional
             If True, save the graph to a file. In the case the partitioner was
             initialized with a name and/or search string, the underlying graph is
-            at GRAPH_DIR/name.graphml already. Only use this if you want to save a
-            copy of the graph that has been modified by the partitioner.
+            at :attr:`GRAPH_DIR`/name.graphml already. Only use this if you want to save
+            a copy of the graph that has been modified by the partitioner.
             This is necessary for later plotting partitions, but not for component
             plots.
 
         Notes
         -----
-        `graph_dir` is set in the `config.ini` file.
+        :attr:`GRAPH_DIR` is set in the :mod:`superblockify.config` module.
         """
 
         # Save graph
@@ -780,7 +772,8 @@ class BasePartitioner(ABC):
 
         Notes
         -----
-        The directories RESULTS_DIR and GRAPH_DIR are set in the `config.ini` file.
+        The directories :attr:`GRAPH_DIR` and :attr:`RESULTS_DIR` are set in the
+        :mod:`superblockify.config` module.
 
         """
 

@@ -1,5 +1,4 @@
 """Approach relating using edge bearings."""
-import logging
 from bisect import bisect_right
 from typing import List, Set
 
@@ -13,9 +12,8 @@ from typing_extensions import deprecated
 
 from ..base import BasePartitioner
 from ... import attribute
+from ...config import logger
 from ...plot import save_plot
-
-logger = logging.getLogger("superblockify")
 
 
 @deprecated("BearingPartitioner does not necessarily produce a valid partitioning.")

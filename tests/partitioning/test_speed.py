@@ -1,11 +1,6 @@
 """Tests for the speed submodule of the partitioning module."""
-from configparser import ConfigParser
-from os.path import join, dirname
 
 from superblockify.partitioning.speed import add_edge_travel_times_restricted
-
-config = ConfigParser()
-config.read(join(dirname(__file__), "..", "..", "config.ini"))
 
 
 def test_add_edge_travel_times_restricted(test_city_small_copy):

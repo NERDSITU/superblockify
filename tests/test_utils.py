@@ -1,11 +1,11 @@
 """Tests for the utils module."""
-from configparser import ConfigParser
 from os import remove
-from os.path import exists, join, dirname
+from os.path import exists
 
 import pytest
 from numpy import array, array_equal
 
+from superblockify.config import TEST_DATA_PATH
 from superblockify.utils import (
     load_graph_from_place,
     has_pairwise_overlap,
@@ -13,16 +13,13 @@ from superblockify.utils import (
 )
 from tests.conftest import mark_xfail_flaky_download
 
-config = ConfigParser()
-config.read(join(dirname(__file__), "..", "config.ini"))
-
 
 @mark_xfail_flaky_download
 def test_load_graph_from_place():
     """Test that the load_graph_from_place function works."""
 
     graph = load_graph_from_place(
-        f"{config['tests']['test_data_path']}/cities/Adliswil.graphml",
+        f"{TEST_DATA_PATH}/cities/Adliswil.graphml",
         "Adliswil, Bezirk Horgen, Zürich, Switzerland",
         network_type="drive",
     )
@@ -58,7 +55,7 @@ def test_load_graph_from_place_search_str_types(city, search_string):
     """Test that the load_graph_from_place function works with different search string
     types."""
     graph = load_graph_from_place(
-        save_as=f"{config['tests']['test_data_path']}/cities/{city}_query_test.graphml",
+        save_as=f"{TEST_DATA_PATH}/cities/{city}_query_test.graphml",
         search_string=search_string,
         network_type="drive",
     )
@@ -72,9 +69,7 @@ def _delete_query_test_graphs():
     """Delete the query test graphs."""
     yield
     for city in ["CPH-str", "CPH-list", "CPH-osmid", "CPH-osmid-list"]:
-        filepath = (
-            f"{config['tests']['test_data_path']}/cities/{city}_query_test.graphml"
-        )
+        filepath = f"{TEST_DATA_PATH}/cities/{city}_query_test.graphml"
         if exists(filepath):
             remove(filepath)
 

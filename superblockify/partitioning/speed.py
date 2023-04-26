@@ -1,16 +1,13 @@
 """Speed module for superblockify, used to add speed limits to the edges of a graph."""
-from configparser import ConfigParser
-from os.path import join, dirname
 
-config = ConfigParser()
-config.read(join(dirname(__file__), "..", "..", "config.ini"))
+from ..config import V_MAX_SPARSE, V_MAX_LTN
 
 
 def add_edge_travel_times_restricted(
     graph,
     sparsified,
-    v_s=config["ltn"]["v_max_sparse"],
-    v_ltn=config["ltn"]["v_max_ltn"],
+    v_s=V_MAX_SPARSE,
+    v_ltn=V_MAX_LTN,
 ):
     r"""Add edge travel times (in seconds) to a graph.
 
@@ -44,8 +41,8 @@ def add_edge_travel_times_restricted(
 
     This function modifies the graph in-place, no value is returned.
 
-    :math:`v_{\mathrm{s}}` and :math:`v_{\mathrm{ltn}}` are read from the config file
-    and are handled as km/h.
+    :math:`v_{\mathrm{s}}` and :math:`v_{\mathrm{ltn}}` are read from the
+    :mod:`superblockify.config` module and are handled as km/h.
     """
 
     # units: `length` in m, `v_s` and `v_ltn` in km/h, `travel_time_restricted` in s

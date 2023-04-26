@@ -1,10 +1,9 @@
 """Work with graph attributes."""
-import logging
 
 from networkx import get_edge_attributes, set_edge_attributes, get_node_attributes
 from numpy import amin, amax
 
-logger = logging.getLogger("superblockify")
+from .config import logger
 
 
 def new_edge_attribute_by_function(

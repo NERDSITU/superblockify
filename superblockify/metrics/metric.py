@@ -1,8 +1,6 @@
 """Metric object for the superblockify package."""
-import logging
 import pickle
-from configparser import ConfigParser
-from os.path import dirname, join, exists
+from os.path import join, exists
 
 from .distances import calculate_distance_matrices
 from .measures import (
@@ -18,14 +16,9 @@ from .plot import (
     plot_relative_difference,
     plot_relative_increase_on_graph,
 )
+from ..config import logger, RESULTS_DIR
 from ..plot import save_plot
 from ..utils import compare_dicts
-
-logger = logging.getLogger("superblockify")
-
-config = ConfigParser()
-config.read(join(dirname(__file__), "..", "..", "config.ini"))
-RESULTS_DIR = config["general"]["results_dir"]
 
 
 class Metric:

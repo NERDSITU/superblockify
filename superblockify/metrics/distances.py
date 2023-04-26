@@ -1,5 +1,4 @@
 """Distance calculation for the network metrics."""
-import logging
 from datetime import timedelta
 from itertools import combinations
 from multiprocessing import cpu_count, Pool
@@ -13,9 +12,8 @@ from scipy.sparse.csgraph import dijkstra
 from tqdm import tqdm
 
 from .plot import plot_distance_distributions
+from ..config import logger
 from ..utils import has_pairwise_overlap
-
-logger = logging.getLogger("superblockify")
 
 _AVG_EARTH_RADIUS_M = 6.3781e6  # in meters, arXiv:1510.07674 [astro-ph.SR]
 

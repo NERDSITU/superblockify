@@ -1,5 +1,4 @@
 """Plotting functions."""
-import logging
 from os import path
 
 import networkx as nx
@@ -8,8 +7,7 @@ from matplotlib import patches
 from matplotlib import pyplot as plt
 
 from .attribute import determine_minmax_val, new_edge_attribute_by_function
-
-logger = logging.getLogger("superblockify")
+from .config import logger
 
 
 def paint_streets(graph, cmap="hsv", **pg_kwargs):

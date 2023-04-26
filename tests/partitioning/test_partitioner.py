@@ -1,21 +1,14 @@
 """Tests for the partitioner module."""
-import logging
-from configparser import ConfigParser
 from os import path, remove
-from os.path import dirname, join
 
 import networkx as nx
 import pytest
 from osmnx import load_graphml
 
+from superblockify.config import logger, TEST_DATA_PATH, GRAPH_DIR, RESULTS_DIR
 from superblockify.partitioning import BasePartitioner
 from superblockify.utils import compare_components_and_partitions
 from tests.conftest import mark_xfail_flaky_download
-
-logger = logging.getLogger("superblockify")
-
-config = ConfigParser()
-config.read(join(dirname(__file__), "..", "..", "config.ini"))
 
 
 class TestBasePartitioner:
@@ -91,11 +84,7 @@ class TestPartitioners:
                 "Adliswil_tmp_name",
                 "Adliswil_tmp",
                 None,
-                load_graphml(
-                    path.join(
-                        config["tests"]["test_data_path"], "cities", "Adliswil.graphml"
-                    )
-                ),
+                load_graphml(path.join(TEST_DATA_PATH, "cities", "Adliswil.graphml")),
                 False,
             ),
             (
@@ -208,15 +197,11 @@ class TestPartitioners:
         part.save(save_graph_copy)
         if delete_before_load:
             # Delete graph at GRAPH_DIR/Adliswil_tmp_save_load.graphml
-            remove(
-                path.join(
-                    config["general"]["graph_dir"], "Adliswil_tmp_save_load.graphml"
-                )
-            )
+            remove(path.join(GRAPH_DIR, "Adliswil_tmp_save_load.graphml"))
             # Delete metrics at RESULTS_DIR/.../Adliswil_tmp_save_load_name.metrics
             remove(
                 path.join(
-                    config["general"]["results_dir"],
+                    RESULTS_DIR,
                     "Adliswil_tmp_save_load_name",
                     "Adliswil_tmp_save_load_name.metrics",
                 )

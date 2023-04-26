@@ -1,14 +1,11 @@
 """Plotting functions for the partitioners."""
-import logging
-
 from matplotlib import pyplot as plt
 from matplotlib.colors import ListedColormap
 from networkx import set_edge_attributes
 from numpy import linspace, array
 
 from .. import plot
-
-logger = logging.getLogger("superblockify")
+from ..config import logger
 
 
 def plot_partition_graph(partitioner, **pba_kwargs):
