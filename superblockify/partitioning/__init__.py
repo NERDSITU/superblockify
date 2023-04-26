@@ -18,7 +18,7 @@ from .plot import (
     plot_subgraph_component_size,
     plot_component_rank_size,
     plot_component_graph,
-    plot_speed_un_restricted
+    plot_speed_un_restricted,
 )
 
 # List of all supported partitioners. For all partitioners that are subclasses of
