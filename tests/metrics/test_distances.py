@@ -11,7 +11,7 @@ from superblockify.metrics.distances import (
 )
 
 
-@pytest.mark.parametrize("weight", ["length", None])
+@pytest.mark.parametrize("weight", ["length", "travel_time", None])
 def test_calculate_distance_matrix(test_city_small_copy, weight):
     """Test calculating all pairwise distances for the full graphs."""
     _, graph = test_city_small_copy
