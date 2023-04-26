@@ -140,7 +140,7 @@ def determine_minmax_val(graph, minmax_val, attr, attr_type="edge"):
 
     Parameters
     ----------
-    graph : networkx.MultiDiGraph
+    graph : networkx.Graph
         Input graph
     minmax_val : tuple, None
         Tuple of (min, max) values of the attribute to be plotted or None
@@ -148,6 +148,11 @@ def determine_minmax_val(graph, minmax_val, attr, attr_type="edge"):
         Graph's attribute to select min and max values by
     attr_type : string, optional
         Type of the attribute, either "edge" or "node"
+
+    Returns
+    -------
+    tuple
+        Tuple of (min, max) values.
 
     Raises
     ------
