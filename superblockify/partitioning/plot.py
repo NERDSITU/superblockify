@@ -351,7 +351,6 @@ def plot_speed_un_restricted(
         else:
             graph.edges[edge]["speed_kph_restricted"] = v_ltn
 
-
     # Plot original max speed limits on left side
     plot.plot_by_attribute(
         graph,
