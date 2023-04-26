@@ -20,6 +20,7 @@ from .plot import (
     plot_subgraph_component_size,
     plot_component_rank_size,
     plot_component_graph,
+    plot_speed_un_restricted,
 )
 from .representative import set_representative_nodes
 from .speed import add_edge_travel_times_restricted
@@ -215,6 +216,9 @@ class BasePartitioner(ABC):
                 fig, _ = plot_component_graph(self)
                 save_plot(self.results_dir, fig, f"{self.name}_component_graph.pdf")
                 plt.show()
+            fig, _ = plot_speed_un_restricted(self.graph, self.sparsified)
+            save_plot(self.results_dir, fig, f"{self.name}_speed_un_restricted.pdf")
+            plt.show()
 
         if calculate_metrics:
             self.calculate_metrics(make_plots=make_plots, **kwargs)

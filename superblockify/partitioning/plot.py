@@ -1,11 +1,13 @@
 """Plotting functions for the partitioners."""
 from matplotlib import pyplot as plt
-from matplotlib.colors import ListedColormap
+from matplotlib.cm import ScalarMappable
+from matplotlib.colors import ListedColormap, Normalize
 from networkx import set_edge_attributes
 from numpy import linspace, array
 
 from .. import plot
-from ..config import logger
+from ..attribute import determine_minmax_val
+from ..config import logger, V_MAX_LTN, V_MAX_SPARSE
 
 
 def plot_partition_graph(partitioner, **pba_kwargs):
@@ -297,3 +299,91 @@ def plot_subgraph_component_size(partitioner, measure, xticks=None, **pcs_kwargs
         xticks=xticks,
         **pcs_kwargs,
     )
+
+
+def plot_speed_un_restricted(
+    graph,
+    sparsified,
+    v_s=V_MAX_SPARSE,
+    v_ltn=V_MAX_LTN,
+    cmap="viridis",
+):
+    """Plot the speed limit of the edges of a graph before and after restrictions.
+
+    Side-by-side plot of the speed limits of the edges of a graph, before and after
+    restrictions. Both maps use a shared colorbar.
+
+    Parameters
+    ----------
+    graph : networkx.MultiDiGraph
+        The graph to plot the speed limits of.
+        Needs to have `speed_kph` as the unrestricted speed limit.
+    sparsified : networkx.MultiDiGraph
+        The sparsified graph, optimally a view of the original graph.
+    v_s : float
+        The max speed for the edges of the sparsified graph.
+    v_ltn : float
+        The max speed for the remaining edges.
+    cmap : str
+        The colormap to use.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The figure containing the plot.
+    axe : matplotlib.axes.Axes
+        The axes containing the plot.
+    """
+
+    # Create a wide figure with two subplots and the specified size
+    fig, axes = plt.subplots(1, 2, figsize=(20, 10))
+
+    # Find min and max speed limits
+    minmax_val = determine_minmax_val(graph, None, "speed_kph", attr_type="edge")
+    # include v_s and v_ltn in the minmax_val tuple
+    minmax_val = (min(minmax_val[0], v_s), max(minmax_val[1], v_ltn))
+
+    # Write a new attribute to the graph with the restricted speed limits - all edges in
+    # sparsified graph have speed limit v_s, all other edges have speed limit v_ltn
+    for edge in graph.edges:
+        if edge in sparsified.edges:
+            graph.edges[edge]["speed_kph_restricted"] = v_s
+        else:
+            graph.edges[edge]["speed_kph_restricted"] = v_ltn
+
+
+    # Plot original max speed limits on left side
+    plot.plot_by_attribute(
+        graph,
+        "speed_kph",
+        edge_cmap=cmap,
+        edge_minmax_val=minmax_val,
+        ax=axes[0],
+    )
+
+    # Plot restricted max speed limits on right side
+    plot.plot_by_attribute(
+        graph,
+        "speed_kph_restricted",
+        edge_cmap=cmap,
+        edge_minmax_val=minmax_val,
+        ax=axes[1],
+    )
+
+    # Set titles
+    axes[0].set_title("Original speed limits", fontsize=20)
+    axes[1].set_title("Restricted speed limits", fontsize=20)
+
+    # Set shared colorbar
+    cbar = fig.colorbar(
+        ScalarMappable(
+            norm=Normalize(vmin=minmax_val[0], vmax=minmax_val[1]),
+            cmap=cmap,
+        ),
+        ax=axes,
+    )
+    cbar.set_label("Speed limit (km/h)", fontsize=20, labelpad=20)
+    cbar.ax.yaxis.set_ticks_position("left")
+    cbar.ax.tick_params(labelsize=15)
+
+    return fig, axes

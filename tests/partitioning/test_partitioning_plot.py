@@ -8,6 +8,7 @@ from superblockify.partitioning.plot import (
     plot_subgraph_component_size,
     plot_component_rank_size,
     plot_component_graph,
+    plot_speed_un_restricted,
 )
 
 
@@ -129,3 +130,14 @@ def test_plot_component_rank_size_invalid_measure(
     part = test_city_small_precalculated_copy
     with pytest.raises(ValueError):
         plot_component_rank_size(part, invalid_measure)
+
+
+def test_plot_speed_un_restricted(test_city_small_precalculated_copy):
+    """Test `plot_speed` by design."""
+    part = test_city_small_precalculated_copy
+    fig, axes = plot_speed_un_restricted(part.graph, part.sparsified)
+    assert isinstance(fig, Figure)
+    assert isinstance(axes[0], Axes)
+    assert isinstance(axes[1], Axes)
+    fig.show()
+    plt.close("all")
