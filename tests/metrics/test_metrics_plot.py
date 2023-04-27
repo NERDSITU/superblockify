@@ -43,6 +43,7 @@ def test_plot_component_wise_travel_increase(test_city_small_precalculated_copy)
         part.metric.node_list,
         measure1="N",
         measure2="S",
+        unit=part.metric.unit_symbol(),
     )
     plt.show()
 
@@ -50,7 +51,7 @@ def test_plot_component_wise_travel_increase(test_city_small_precalculated_copy)
 def test_plot_relative_increase_on_graph(test_city_small_precalculated_copy):
     """Test plotting pairwise relative difference."""
     part = test_city_small_precalculated_copy
-    plt, _ = plot_relative_increase_on_graph(part.graph)
+    plt, _ = plot_relative_increase_on_graph(part.graph, part.metric.unit_symbol())
     plt.show()
 
 

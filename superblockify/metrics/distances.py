@@ -19,7 +19,7 @@ _AVG_EARTH_RADIUS_M = 6.3781e6  # in meters, arXiv:1510.07674 [astro-ph.SR]
 
 
 def calculate_distance_matrices(
-    node_list, partitioner, weight, chunk_size, make_plots, num_workers
+    node_list, partitioner, unit, unit_symbol, chunk_size, make_plots, num_workers
 ):
     """Calculate the distance matrices for the partitioning.
 
@@ -29,8 +29,11 @@ def calculate_distance_matrices(
         The list of nodes to calculate the distance matrices for
     partitioner : superblockify.Partitioner
         The partitioner to calculate the distance matrices for
-    weight : str, optional
-        The edge attribute to use as weight, if None count hops
+    unit : str, optional
+        The unit to use for the shortest distance calculation, can be "time",
+        "distance", or None for hops
+    unit_symbol : str, optional
+        The symbol for the unit, e.g. "s" for seconds
     chunk_size : int
         The chunk size for the multiprocessing pool
     make_plots : bool
@@ -50,28 +53,42 @@ def calculate_distance_matrices(
         distance matrices.
     """
 
-    dist_matrix = {
-        # Euclidean distances (E)
-        "E": calculate_euclidean_distance_matrix_projected(
-            partitioner.graph,
-            node_order=node_list,
-            plot_distributions=make_plots,
-        )
-    }
+    dist_matrix = (
+        {
+            # Euclidean distances (E)
+            "E": calculate_euclidean_distance_matrix_projected(
+                partitioner.graph,
+                node_order=node_list,
+                plot_distributions=make_plots,
+            )
+        }
+        if unit == "distance"
+        else {}
+    )
 
     predecessors = {}
 
     # On the full graph (S)
     dist_matrix["S"], predecessors["S"] = calculate_path_distance_matrix(
         partitioner.graph,
-        weight=weight,
+        weight="length"
+        if unit == "distance"
+        else "travel_time"
+        if unit == "time"
+        else unit,
+        unit_symbol=unit_symbol,
         node_order=node_list,
         plot_distributions=make_plots,
     )
     # On the partitioning graph (N)
     dist_matrix["N"], predecessors["N"] = calculate_partitioning_distance_matrix(
         partitioner,
-        weight=weight,
+        weight="length"
+        if unit == "distance"
+        else "travel_time_restricted"
+        if unit == "time"
+        else unit,
+        unit_symbol=unit_symbol,
         node_order=node_list,
         num_workers=num_workers,
         chunk_size=chunk_size,
@@ -84,6 +101,7 @@ def calculate_distance_matrices(
 def calculate_path_distance_matrix(
     graph,
     weight=None,
+    unit_symbol=None,
     node_order=None,
     plot_distributions=False,
     log_debug=True,
@@ -124,6 +142,8 @@ def calculate_path_distance_matrix(
         The graph to calculate the distance matrix for
     weight : str, optional
         The edge attribute to use as weight. If None, all edge weights are 1.
+    unit_symbol : str, optional
+        The unit symbol to use for the distance matrix.
     node_order : list, optional
         The order of the nodes in the distance matrix. If None, the ordering is
         produced by graph.nodes().
@@ -198,11 +218,7 @@ def calculate_path_distance_matrix(
             ),
             coord_title="Coordinates of nodes",
             labels=("x", "y"),
-            distance_unit="khops"
-            if weight is None
-            else "km"
-            if weight == "length"
-            else f"k{weight}",
+            distance_unit=unit_symbol,
         )
 
     return dist_full_graph, predecessors
@@ -380,6 +396,7 @@ def calculate_euclidean_distance_matrix_haversine(
 def calculate_partitioning_distance_matrix(
     partitioner,
     weight=None,
+    unit_symbol=None,
     node_order=None,
     num_workers=None,
     chunk_size=1,
@@ -403,6 +420,8 @@ def calculate_partitioning_distance_matrix(
         The partitioner to calculate the distance matrix for
     weight : str, optional
         The edge attribute to use as weight. If None, all edges have weight 1.
+    unit_symbol : str, optional
+        The unit symbol to use for the weight.
     node_order : list, optional
         The order of the nodes in the distance matrix. If None, the ordering is
         produced by graph.nodes().
@@ -498,11 +517,7 @@ def calculate_partitioning_distance_matrix(
             ),
             coord_title="Coordinates of nodes",
             labels=("x", "y"),
-            distance_unit="hops"
-            if weight is None
-            else "km"
-            if weight == "length"
-            else weight,
+            distance_unit=unit_symbol,
         )
 
     return dist_matrix, pred_matrix

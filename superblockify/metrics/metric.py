@@ -87,9 +87,9 @@ class Metric:
 
         self.coverage = None
         self.num_components = None
-        self.avg_path_length = {"E": None, "S": None, "N": None}
-        self.directness = {"ES": None, "EN": None, "SN": None}
-        self.global_efficiency = {"SE": None, "NE": None, "NS": None}
+        self.avg_path_length = {"S": None, "N": None}
+        self.directness = {"SN": None}
+        self.global_efficiency = {"NS": None}
 
         self.distance_matrix = None
         self.predecessor_matrix = None
@@ -144,6 +144,11 @@ class Metric:
         # pylint: disable=unused-argument
 
         self.unit = unit  # unit attribute
+        if unit == "distance":
+            self.avg_path_length["E"] = None
+            self.directness["ES"], self.directness["EN"] = None, None
+            self.global_efficiency["SE"], self.global_efficiency["NE"] = None, None
+
         self.node_list = partitioner.get_sorted_node_list()  # full node list
 
         self.coverage = calculate_coverage(partitioner, weight="length")
@@ -153,6 +158,7 @@ class Metric:
             self.node_list,
             partitioner,
             unit,
+            self.unit_symbol(),
             chunk_size,
             make_plots,
             num_workers,
@@ -210,13 +216,14 @@ class Metric:
             self.node_list,
             measure1="N",
             measure2="S",
+            unit=self.unit_symbol(),
         )
         save_plot(
             partitioner.results_dir,
             fig,
             f"{partitioner.name}_component_wise_travel_increase.pdf",
         )
-        fig, _ = plot_relative_increase_on_graph(partitioner.graph)
+        fig, _ = plot_relative_increase_on_graph(partitioner.graph, self.unit_symbol())
         save_plot(
             partitioner.results_dir,
             fig,

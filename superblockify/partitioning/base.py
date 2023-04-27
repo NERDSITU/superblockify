@@ -218,7 +218,7 @@ class BasePartitioner(ABC):
                 plt.show()
             fig, _ = plot_speed_un_restricted(self.graph, self.sparsified)
             save_plot(self.results_dir, fig, f"{self.name}_speed_un_restricted.pdf")
-            plt.show()
+            fig.show()
 
         if calculate_metrics:
             self.calculate_metrics(make_plots=make_plots, **kwargs)
@@ -246,7 +246,9 @@ class BasePartitioner(ABC):
             {"name": "one", "value": 1.0},
         ]
 
-    def calculate_metrics(self, make_plots=False, num_workers=None, chunk_size=1):
+    def calculate_metrics(
+        self, make_plots=False, unit="time", num_workers=None, chunk_size=1
+    ):
         """Calculate metrics for the partitioning.
 
         Calculates the metrics for the partitioning and writes them to the
@@ -262,6 +264,9 @@ class BasePartitioner(ABC):
         make_plots : bool, optional
             If True show visualization graphs of the approach. If False only print
             into console. Default is False.
+        unit : str, optional
+            The unit to use for the shortest distance calculation, by default "time",
+            can also be "distance", if ``None`` count hops.
         num_workers : int, optional
             Number of workers to use for parallel processing. Default is None, which
             uses min(32, os.cpu_count() + 4) workers.
@@ -275,6 +280,7 @@ class BasePartitioner(ABC):
         logger.info("Calculating metrics for %s", self.name)
         self.metric.calculate_all(
             partitioner=self,
+            unit=unit,
             make_plots=make_plots,
             num_workers=num_workers,
             chunk_size=chunk_size,
