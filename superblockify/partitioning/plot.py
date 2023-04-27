@@ -341,7 +341,7 @@ def plot_speed_un_restricted(
     # Find min and max speed limits
     minmax_val = determine_minmax_val(graph, None, "speed_kph", attr_type="edge")
     # include v_s and v_ltn in the minmax_val tuple
-    minmax_val = (min(minmax_val[0], v_s), max(minmax_val[1], v_ltn))
+    minmax_val = (min(minmax_val[0], v_s, v_ltn), max(minmax_val[1], v_s, v_ltn))
 
     # Write a new attribute to the graph with the restricted speed limits - all edges in
     # sparsified graph have speed limit v_s, all other edges have speed limit v_ltn
@@ -358,6 +358,7 @@ def plot_speed_un_restricted(
         edge_cmap=cmap,
         edge_minmax_val=minmax_val,
         ax=axes[0],
+        show=False,
     )
 
     # Plot restricted max speed limits on right side
@@ -367,6 +368,7 @@ def plot_speed_un_restricted(
         edge_cmap=cmap,
         edge_minmax_val=minmax_val,
         ax=axes[1],
+        show=False,
     )
 
     # Set titles
