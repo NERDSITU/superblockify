@@ -1,5 +1,6 @@
 """Tests for the metric class."""
 import matplotlib.pyplot as plt
+import pytest
 
 from superblockify.metrics.metric import Metric
 from tests.conftest import mark_xfail_flaky_download
@@ -17,6 +18,25 @@ class TestMetric:
         assert metric.directness == {"ES": None, "EN": None, "SN": None}
         assert metric.global_efficiency == {"SE": None, "NE": None, "NS": None}
         assert metric.distance_matrix is None
+
+    @pytest.mark.parametrize(
+        "unit,expected_symbol",
+        [
+            ("time", "s"),
+            ("distance", "m"),
+            (None, "hops"),
+            ("bla", "(bla)"),
+            (1, "(1)"),
+            (0, "(0)"),
+            (True, "(True)"),
+            (False, "(False)"),
+        ],
+    )
+    def test_unit_symbol(self, unit, expected_symbol):
+        """Test the unit_symbol method."""
+        metric = Metric()
+        metric.unit = unit
+        assert metric.unit_symbol() == expected_symbol
 
     def test_str(self):
         """Test the __str__ method."""

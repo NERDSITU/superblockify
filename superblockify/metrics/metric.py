@@ -93,13 +93,29 @@ class Metric:
 
         self.distance_matrix = None
         self.predecessor_matrix = None
-        self.weight = None
+        self.unit = None
         self.node_list = None
+
+    def unit_symbol(self):
+        """Return unit string represented by the :attr:`unit` attribute.
+
+        Returns
+        -------
+        str
+            The unit symbol, either "s", "m", "hops" or the unit string in brackets.
+        """
+        if self.unit == "time":
+            return "s"
+        if self.unit == "distance":
+            return "m"
+        if self.unit is None:
+            return "hops"
+        return f"({self.unit})"
 
     def calculate_all(
         self,
         partitioner,
-        weight="length",
+        unit="time",
         num_workers=None,
         chunk_size=1,
         make_plots=False,
@@ -113,8 +129,9 @@ class Metric:
         ----------
         partitioner : BasePartitioner
             The partitioner object to calculate the metrics for
-        weight : str, optional
-            The edge attribute to use as weight, by default "length", if None count hops
+        unit : str, optional
+            The unit to use for the shortest distance calculation, by default "time",
+            can also be "distance", if ``None`` count hops.
         num_workers : int, optional
             The number of workers to use for multiprocessing. If None, use
             min(32, os.cpu_count() + 4), by default None
@@ -126,16 +143,16 @@ class Metric:
         """
         # pylint: disable=unused-argument
 
-        self.weight = weight  # weight attribute
+        self.unit = unit  # unit attribute
         self.node_list = partitioner.get_sorted_node_list()  # full node list
 
         self.coverage = calculate_coverage(partitioner, weight="length")
-        logger.debug("Coverage: %s", self.coverage)
+        logger.debug("Coverage (length): %s", self.coverage)
 
         self.distance_matrix, self.predecessor_matrix = calculate_distance_matrices(
             self.node_list,
             partitioner,
-            weight,
+            unit,
             chunk_size,
             make_plots,
             num_workers,

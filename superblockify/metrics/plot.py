@@ -98,19 +98,12 @@ def plot_distance_matrices(metric, name=None):
     # Plot colorbar on the right side of the figure
     fig.colorbar(dist_im, ax=axes, fraction=0.046, pad=0.04)
     # Label colorbar
-    unit = (
-        "hops"
-        if metric.weight is None
-        else "m"
-        if metric.weight == "length"
-        else f"{metric.weight}"
-    )
     # dist_im.set_label(f"Distance [{unit}]") not working
     # Label at the right of the plot, next to colorbar
     fig.text(
         0.925,
         0.5,
-        f"Distance [{unit}]",
+        f"Distance [{metric.unit_symbol()}]",
         va="center",
         rotation="vertical",
         fontsize=14,
@@ -242,14 +235,7 @@ def plot_distance_matrices_pairwise_relative_difference(metric, name=None):
     # Colorbar for the lower triangle
     fig.colorbar(diff_im, ax=axes, fraction=0.046, pad=0.04)
     # Label colorbar
-    unit = (
-        "hops"
-        if metric.weight is None
-        else "m"
-        if metric.weight == "length"
-        else f"{metric.weight}"
-    )
-    dist_im.set_label(f"Distance [{unit}]")
+    dist_im.set_label(f"Distance [{metric.unit_symbol()}]")
     # Title above all subplots
     fig.suptitle(
         f"Pairwise relative difference between the distance matrices "
