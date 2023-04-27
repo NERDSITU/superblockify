@@ -85,8 +85,10 @@ def calculate_distance_matrices(
         partitioner,
         weight="length"
         if unit == "distance"
-        else "travel_time_restricted"
+        else "travel_time"
         if unit == "time"
+        else "travel_time_restricted"
+        if unit == "time_restricted"
         else unit,
         unit_symbol=unit_symbol,
         node_order=node_list,

@@ -116,6 +116,7 @@ class Metric:
         self,
         partitioner,
         unit="time",
+        replace_max_speeds=True,
         num_workers=None,
         chunk_size=1,
         make_plots=False,
@@ -132,6 +133,10 @@ class Metric:
         unit : str, optional
             The unit to use for the shortest distance calculation, by default "time",
             can also be "distance", if ``None`` count hops.
+        replace_max_speeds : bool, optional
+            If True and unit is "time", calculate the quickest paths in the restricted
+            graph with the max speeds :attr:`V_MAX_LTN` and :attr:`V_MAX_SPARSE` set in
+            :mod:`superblockify.config`. Default is True.
         num_workers : int, optional
             The number of workers to use for multiprocessing. If None, use
             min(32, os.cpu_count() + 4), by default None
@@ -157,7 +162,7 @@ class Metric:
         self.distance_matrix, self.predecessor_matrix = calculate_distance_matrices(
             self.node_list,
             partitioner,
-            unit,
+            "time_restricted" if replace_max_speeds and unit == "time" else unit,
             self.unit_symbol(),
             chunk_size,
             make_plots,

@@ -48,6 +48,31 @@ class TestPartitioners:
         """Test plotting of partitioning results by design."""
         test_city_all_preloaded.run(calculate_metrics=False, make_plots=True)
 
+    @pytest.mark.parametrize(
+        "unit,replace_max_speeds",
+        [
+            ("distance", False),
+            ("distance", True),
+            (None, False),
+        ],
+    )
+    def test_ignore_replace_max_speeds(
+        self,
+        test_city_small_preloaded_copy,
+        unit,
+        replace_max_speeds,
+    ):
+        """Test ignoring and replacing max_speeds by design.
+        When unit is not "time", ``replace_max_speeds`` is ignored, warn if
+        ``ignore_max_speeds`` is set anyway.
+        """
+        test_city_small_preloaded_copy.run(
+            calculate_metrics=False,
+            make_plots=False,
+            unit=unit,
+            replace_max_speeds=replace_max_speeds,
+        )
+
     def test_make_subgraphs_from_attribute(
         self, test_city_all_preloaded, test_city_all_precalculated
     ):

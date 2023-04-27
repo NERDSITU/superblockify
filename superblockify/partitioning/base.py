@@ -166,7 +166,14 @@ class BasePartitioner(ABC):
         )
 
     @final
-    def run(self, calculate_metrics=True, make_plots=False, **kwargs):
+    def run(
+        self,
+        calculate_metrics=True,
+        make_plots=False,
+        unit="time",
+        replace_max_speeds=True,
+        **kwargs,
+    ):
         """Run partitioning.
 
         Parameters
@@ -177,7 +184,22 @@ class BasePartitioner(ABC):
         make_plots : bool, optional
             If True, make plots of the partitioning and save them to
             self.results_dir/figures. Default is False.
+        unit : str, optional
+            Unit for the metrics. Default is "time".
+        replace_max_speeds : bool, optional
+            If True and unit is "time", calculate the quickest paths in the restricted
+            graph with the max speeds :attr:`V_MAX_LTN` and :attr:`V_MAX_SPARSE` set in
+            :mod:`superblockify.config`. Default is True.
+
+        Warnings
+        --------
+        If unit is not "time", replace_max_speeds is ignored.
         """
+
+        # Warn if replace_max_speeds is not None when unit is not "time"
+        if unit != "time" and replace_max_speeds is not None:
+            logger.warning("replace_max_speeds is ignored when unit is not 'time'.")
+            replace_max_speeds = None
 
         self.partition_graph(make_plots=make_plots, **kwargs)
 
@@ -216,12 +238,18 @@ class BasePartitioner(ABC):
                 fig, _ = plot_component_graph(self)
                 save_plot(self.results_dir, fig, f"{self.name}_component_graph.pdf")
                 plt.show()
-            fig, _ = plot_speed_un_restricted(self.graph, self.sparsified)
-            save_plot(self.results_dir, fig, f"{self.name}_speed_un_restricted.pdf")
-            fig.show()
+            if replace_max_speeds:
+                fig, _ = plot_speed_un_restricted(self.graph, self.sparsified)
+                save_plot(self.results_dir, fig, f"{self.name}_speed_un_restricted.pdf")
+                fig.show()
 
         if calculate_metrics:
-            self.calculate_metrics(make_plots=make_plots, **kwargs)
+            self.calculate_metrics(
+                make_plots=make_plots,
+                unit=unit,
+                replace_max_speeds=replace_max_speeds,
+                **kwargs,
+            )
 
     @abstractmethod
     def partition_graph(self, make_plots=False, **kwargs):
@@ -247,7 +275,12 @@ class BasePartitioner(ABC):
         ]
 
     def calculate_metrics(
-        self, make_plots=False, unit="time", num_workers=None, chunk_size=1
+        self,
+        make_plots=False,
+        unit="time",
+        replace_max_speeds=True,
+        num_workers=None,
+        chunk_size=1,
     ):
         """Calculate metrics for the partitioning.
 
@@ -267,6 +300,9 @@ class BasePartitioner(ABC):
         unit : str, optional
             The unit to use for the shortest distance calculation, by default "time",
             can also be "distance", if ``None`` count hops.
+        replace_max_speeds : bool, optional
+            If True and unit is "time", replace max speeds set in
+            :mod:`superblockify.config`. Default is True.
         num_workers : int, optional
             Number of workers to use for parallel processing. Default is None, which
             uses min(32, os.cpu_count() + 4) workers.
@@ -281,6 +317,7 @@ class BasePartitioner(ABC):
         self.metric.calculate_all(
             partitioner=self,
             unit=unit,
+            replace_max_speeds=replace_max_speeds,
             make_plots=make_plots,
             num_workers=num_workers,
             chunk_size=chunk_size,

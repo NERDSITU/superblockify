@@ -66,10 +66,23 @@ class TestMetric:
             "avg_path_length: S: 4, N: 11; )"
         )
 
-    def test_calculate_metrics(self, test_city_small_precalculated_copy):
+    @pytest.mark.parametrize(
+        "unit,replace_max_speeds",
+        [
+            ("time", True),
+            ("time", False),
+            ("distance", False),
+            (None, False),
+        ],
+    )
+    def test_calculate_metrics(
+        self, test_city_small_precalculated_copy, unit, replace_max_speeds
+    ):
         """Test the calculate_all method for full metrics."""
         part = test_city_small_precalculated_copy
-        part.calculate_metrics(make_plots=True)
+        part.calculate_metrics(
+            make_plots=True, unit=unit, replace_max_speeds=replace_max_speeds
+        )
         plt.close("all")
         for dist_matrix in part.metric.distance_matrix.values():
             assert dist_matrix.shape == (part.graph.number_of_nodes(),) * 2
