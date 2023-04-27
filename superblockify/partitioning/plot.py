@@ -39,7 +39,7 @@ def plot_partition_graph(partitioner, **pba_kwargs):
 
     # Log plotting
     logger.info(
-        "Plotting partitions graph for %s with attribute %s",
+        "Plotting partitions graph for %s with attribute `%s`",
         partitioner.name,
         partitioner.attribute_label,
     )
@@ -90,7 +90,7 @@ def plot_component_graph(partitioner, **pba_kwargs):
 
     # Log plotting
     logger.info(
-        "Plotting component graph for %s with attribute %s",
+        "Plotting component graph for %s with attribute `%s`",
         partitioner.name,
         partitioner.attribute_label,
     )
@@ -191,7 +191,7 @@ def plot_component_rank_size(partitioner, measure):
 
     # Log plotting
     logger.info(
-        "Plotting component size rank for %s with attribute %s",
+        "Plotting component size rank for %s with attribute `%s`",
         partitioner.name,
         partitioner.attribute_label,
     )
@@ -212,7 +212,7 @@ def plot_component_rank_size(partitioner, measure):
     axe.set_ylabel(f"Component size ({measure} [m])", fontsize=12)
     axe.set_title(
         f"Component size rank for {partitioner.name} with attribute "
-        f"{partitioner.attribute_label}",
+        f"`{partitioner.attribute_label}`",
         fontsize=13,
     )
     axe.set_yscale("log")

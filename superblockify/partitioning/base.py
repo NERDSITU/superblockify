@@ -317,7 +317,7 @@ class BasePartitioner(ABC):
 
         # Log making subgraphs
         logger.info(
-            "Making subgraphs for %s with attribute %s",
+            "Making subgraphs for %s with attribute `%s`",
             self.name,
             self.attribute_label,
         )
