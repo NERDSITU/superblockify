@@ -114,7 +114,8 @@ def _network_measures_filtered_flattened(distance_matrix, measure1, measure2):
 
     # Drop the pairs of distances where at least one is 0 or infinite
     mask = logical_and(dist1 != 0, dist2 != 0)
-    mask = logical_and(mask, isfinite(dist1), isfinite(dist2))
+    mask = logical_and(mask, isfinite(dist1))
+    mask = logical_and(mask, isfinite(dist2))
     dist1 = dist1[mask]
     dist2 = dist2[mask]
 
