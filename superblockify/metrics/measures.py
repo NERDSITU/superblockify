@@ -28,7 +28,7 @@ def calculate_directness(distance_matrix, measure1, measure2):
 
     Notes
     -----
-    .. math:: D_{E/S}=\left\langle\frac{d_E(i, j)}{d_S(i, j)}\right\rangle_{i\neq j}
+    .. math:: D_{E/S}=\left\langle\frac{d_1(i, j)}{d_2(i, j)}\right\rangle_{i\neq j}
     """
 
     dist1, dist2 = _network_measures_filtered_flattened(
