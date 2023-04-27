@@ -14,9 +14,9 @@ class TestMetric:
         metric = Metric()
         assert metric.coverage is None
         assert metric.num_components is None
-        assert metric.avg_path_length == {"E": None, "S": None, "N": None}
-        assert metric.directness == {"ES": None, "EN": None, "SN": None}
-        assert metric.global_efficiency == {"SE": None, "NE": None, "NS": None}
+        assert metric.avg_path_length == {"S": None, "N": None}
+        assert metric.directness == {"SN": None}
+        assert metric.global_efficiency == {"NS": None}
         assert metric.distance_matrix is None
 
     @pytest.mark.parametrize(
