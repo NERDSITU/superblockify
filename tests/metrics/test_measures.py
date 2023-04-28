@@ -164,3 +164,62 @@ def test_calculate_global_efficiency(distance1, distance2, expected):
     """Test calculating directness"""
     dist_matrix = {"S": distance1, "N": distance2}
     assert calculate_global_efficiency(dist_matrix, "S", "N") == expected
+
+
+@pytest.mark.parametrize(
+    "weights_in,weights_out,expected",
+    [
+        ([1], [], 1),
+        ([1, 2], [], 1),
+        ([1], [1], 0.5),
+        ([], [1], 0),
+        ([1], [1, 2], 0.25),
+        ([1, 2], [1], 0.75),
+        ([1, 2], [1, 2], 0.5),
+        ([1, 2, 3], [1, 2], 6 / 9),
+        ([1, 2], [1, 2, 3], 3 / 9),
+        (list(range(1, 10)), list(range(1, 103)), None),
+        ([], [], ValueError),
+        ([1, '1'], [1, 2], TypeError),
+        ([1, 2], [1, '1'], TypeError),
+        ([True, 2], [1, 2], 0.5), # bools are ints 1 and 0
+        ([False, True], [False, False], 1),
+    ],
+)
+def test_calculate_coverage(weights_in, weights_out, expected):
+    """Test calculating coverage"""
+
+    # make path graph with len(weights_in) + len(weights_out) edges
+    graph = path_graph(
+        len(weights_in) + len(weights_out) + 1, create_using=MultiDiGraph
+    )
+    # add weights to edges enumerate weights_in + weights_out in one
+    for i, weight in enumerate(weights_in + weights_out):
+        graph.edges[i, i + 1, 0]["weight"] = weight
+    # sparsified graph is subview of graph with only weights_out edges
+    sparsified = graph.edge_subgraph(
+        [
+            (i, i + 1, 0)
+            for i in range(len(weights_in), len(weights_in) + len(weights_out))
+        ]
+    )
+
+    @dataclass
+    class Part:
+        """Mock class to pass as partitioner"""
+
+        graph: MultiDiGraph
+        sparsified: MultiDiGraph
+
+    # if expected is any type of error, assert that it is raised
+    if isinstance(expected, type) and issubclass(expected, Exception):
+        with pytest.raises(expected):
+            print(calculate_coverage(Part(graph, sparsified), "weight"))
+    else:
+        # otherwise assert that the expected value is returned
+        assert isclose(
+            calculate_coverage(Part(graph, sparsified), "weight"),
+            expected
+            if expected is not None
+            else sum(weights_in) / sum(weights_in + weights_out),
+        )

@@ -135,7 +135,27 @@ def calculate_coverage(partitioner, weight):
         The partitioner to calculate the coverage for
     weight : str
         The edge attribute to use as weight.
+
+    Returns
+    -------
+    float
+        The coverage of the partitioner, between 0 and 1.
+
+    Raises
+    ------
+    ValueError
+        If the partitioner has an empty graph.
     """
+
+    # if there are no edges in the graph, raise an error
+    if partitioner.graph.number_of_edges() == 0:
+        raise ValueError("The graph is empty.")
+
+    # if there are no edges in the sparsified graph, return 1
+    if partitioner.sparsified.number_of_edges() == 0:
+        return 1
+    if partitioner.graph.number_of_edges() == partitioner.sparsified.number_of_edges():
+        return 0
 
     return 1 - npsum(
         d[weight] for u, v, d in partitioner.sparsified.edges(data=True)
