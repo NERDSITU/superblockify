@@ -113,3 +113,54 @@ def test_calculate_directness(distance1, distance2, expected):
     dist_matrix = {"S": distance1, "N": distance2}
     assert calculate_directness(dist_matrix, "S", "N") == expected
 
+
+@pytest.mark.parametrize(
+    "distance1,distance2,expected",
+    [
+        # 0, inf and the diagonal are always excluded
+        (full((3, 3), 1), full((3, 3), 1), 1),
+        (full((3, 3), 1), full((3, 3), 2), 2),
+        (full((1000, 1000), 1), full((1000, 1000), 2), 2),
+        (
+            array([[0, 1, 2], [1, 0, 3], [1, 1, 0]]),
+            array([[0, 2, 3], [1, 0, 1], [1, 6, 0]]),
+            (1 / 1 + 1 / 2 + 1 / 1 + 1 / 3 + 1 / 1 + 1 / 1)
+            / (1 / 2 + 1 / 3 + 1 / 1 + 1 / 1 + 1 / 6 + 1 / 1),
+        ),
+        # check 0 is excluded
+        (array([[0, 1], [0, 0]]), array([[0, 1], [0, 0]]), 1),
+        (array([[0, 20], [0, 0]]), array([[0, 2], [0, 0]]), 0.1),
+        # check inf is excluded
+        (array([[0, inf], [1, 0]]), array([[0, 1], [1, 0]]), 1),
+        (
+            array([[0, 1, 6], [inf, 0, 1], [1, 1, 0]]),
+            array([[0, 1, 1], [1, 0, 1], [1, 1, 0]]),
+            (1 / 1 + 1 / 6 + 1 / 1 + 1 / 1 + 1 / 1)
+            / (1 / 1 + 1 / 1 + 1 / 1 + 1 / 1 + 1 / 1),
+        ),
+        (
+            array([[0, 1, 1], [1, 0, 1], [1, 1, 0]]),
+            array([[0, 1, 2], [inf, 0, 1], [1, 1, 0]]),
+            (1 / 1 + 1 / 1 + 1 / 1 + 1 / 1 + 1 / 1)
+            / (1 / 1 + 1 / 2 + 1 / 1 + 1 / 1 + 1 / 1),
+        ),
+        (
+            array([[0, 2, 3], [1, 0, 1], [1, inf, 0]]),
+            array([[0, 1, 2], [inf, 0, 3], [6, 1, 0]]),
+            (1 / 2 + 1 / 3 + 1 / 1 + 1 / 1) / (1 / 1 + 1 / 2 + 1 / 3 + 1 / 6),
+        ),
+        (
+            array([[0, 1, 2], [1, 0, 3], [1, 1, 0]]),
+            array([[0, 2, 3], [1, 0, 1], [1, inf, 0]]),
+            (1 / 1 + 1 / 2 + 1 / 1 + 1 / 3 + 1 / 1)
+            / (1 / 2 + 1 / 3 + 1 / 1 + 1 / 1 + 1 / 1),
+        ),
+        # check diagonal is excluded
+        (array([[10, 1], [1, 10]]), array([[1, 1], [1, 1]]), 1),
+        (array([[1, 10], [10, 1]]), array([[1, 1], [1, 1]]), 0.1),
+    ],
+)
+def test_calculate_global_efficiency(distance1, distance2, expected):
+    """Test calculating directness"""
+    dist_matrix = {"S": distance1, "N": distance2}
+    assert calculate_global_efficiency(dist_matrix, "S", "N") == expected
