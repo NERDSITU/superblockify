@@ -1,6 +1,9 @@
 """Measures for the metrics module."""
+from datetime import timedelta
+from time import time
+
 import numpy as np
-from numpy import mean, sum as npsum, fill_diagonal, logical_and, isfinite
+from numpy import mean, sum as npsum, fill_diagonal, logical_and, isfinite, zeros_like
 
 
 def calculate_directness(distance_matrix, measure1, measure2):
@@ -216,3 +219,70 @@ def write_relative_increase_to_edges(
         graph.edges[node1, node2, key]["rel_increase"] = np.mean(
             rel_inc_uv[rel_inc_uv != np.inf]
         )
+
+
+def betweenness_centrality(dist_matrix, predecessors, node_list):
+    """Calculate the betweenness centrality of the nodes and edges.
+
+    Uses the predecessors to calculate the betweenness centrality of the nodes and
+    edges. [1]_ [2]_ [3]_
+
+    Parameters
+    ----------
+    dist_matrix : np.ndarray
+        The distance matrix for the network measures, as returned by
+        :func:`superblockify.metrics.distances.calculate_path_distance_matrix`
+    predecessors : np.ndarray
+        Predecessors matrix of the graph, as returned by
+        :func:`superblockify.metrics.distances.calculate_path_distance_matrix`
+    node_list : list
+        Indicating the order of the nodes in the distance matrix
+
+    Returns
+    -------
+    np.ndarray, np.ndarray
+        The betweenness centrality of the nodes, ordered according to node_list, and
+        the betweenness centrality of the edges, ordered according to the edges of the
+        graph.
+
+    Notes
+    -----
+    Does not include endpoints.
+
+    References
+    ----------
+    .. [1] Linton C. Freeman: A Set of Measures of Centrality Based on Betweenness.
+       Sociometry, Vol. 40, No. 1 (Mar., 1977), pp. 35-41
+       https://doi.org/10.2307/3033543
+    .. [2] Brandes, U. (2001). A faster algorithm for betweenness centrality. Journal of
+       Mathematical Sociology, 25(2), 163–177.
+       https://doi.org/10.1080/0022250X.2001.9990249
+    .. [3] Brandes, U. (2008). On variants of shortest-path betweenness centrality and
+       their generic computation. Social Networks, 30(2), 136–145.
+       https://doi.org/10.1016/j.socnet.2007.11.001
+    """
+
+    # Iterate through predecessors matrix and count the times
+    # - each node is used intermediately
+    node_freq = zeros_like(node_list, dtype=np.int64)
+    # - each edge is used intermediately (sparse matrix)
+    edge_freq = zeros_like(dist_matrix, dtype=np.int64)
+
+    # Zip the above loop
+    time0 = time()
+    for start, end in zip(*np.where(predecessors != -9999)):
+        if start == end:
+            continue
+        prev = predecessors[start]
+        curr = prev[end]
+        while curr != start:
+            node_freq[curr] += 1
+            edge_freq[prev[curr], curr] += 1
+            curr = prev[curr]
+    print(f"Time for zip: {timedelta(seconds=time() - time0)}")
+
+    # Norm by dividing by total amount of shortest paths
+    # - using where predectessors != -9999
+    total_shortest_paths = npsum(np.where(predecessors != -9999, 1, 0))
+
+    return node_freq / total_shortest_paths, edge_freq / total_shortest_paths
