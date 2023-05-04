@@ -250,6 +250,13 @@ def colored_predecessors(preds, graph=G, node_order=node_order,
                         columns=node_order_indices).style. \
         applymap(lambda x: f"color: {graph.nodes[node_order[x]]['partition']}"
     if x != -9999 else "")
+
+
+def colored_distances(dists, precision, cmap='Blues', node_order=node_order):
+    return pd.DataFrame(dists, index=node_order, columns=node_order).style. \
+        background_gradient(cmap=cmap, vmin=np.ma.masked_invalid(dists).min(),
+                            vmax=np.ma.masked_invalid(dists).max()). \
+        format(precision=precision)
 ```
 
 ```{code-cell} ipython3
@@ -258,7 +265,7 @@ dist_le = dist_entering.copy()
 pred_le = pred_entering.copy()
 dist_le[min_mask], pred_le[min_mask] = dist_leaving[min_mask], pred_leaving[min_mask]
 
-display(pd.DataFrame(dist_le, index=node_order, columns=node_order),
+display(colored_distances(dist_le, 1),
         colored_predecessors(pred_le))
 ```
 
@@ -315,8 +322,7 @@ for part_idx, part_intersect in zip(n_partition_indices_separate,
             pred_le[i, j] = pred_le[part_intersect[min_idx], j]
 # A vectorized version of the above is much quicker, see implementation
 
-display(pd.DataFrame(dist_le, index=node_order, columns=node_order).style. \
-        background_gradient(cmap='Blues').format(precision=0),
+display(colored_distances(dist_le, 0),
         colored_predecessors(pred_le))
 ```
 
@@ -326,12 +332,12 @@ differences are the following:
 
 ```{code-cell} ipython3
 :tags: [hide-input]
-display(pd.DataFrame(
+display(colored_distances(
     dist_le - dijkstra(nx.to_scipy_sparse_array(G, nodelist=list(G.nodes)),
                        directed=True,
                        return_predecessors=False),
-    index=node_order, columns=node_order).style. \
-        format(precision=1).background_gradient(cmap='Reds'))
+    1, 'Reds')
+)
 ```
 
 To see a difference traversing the sparse graph, we will look at another example
@@ -387,7 +393,14 @@ G_2 = nx.DiGraph(nx.Graph(
         (17, 6, {"weight": 1}),
     ]
 ))
-n_sparse = [0, 1, 2, 3, 4, 5, 6]
+# Isolated node
+G_2.add_node(19)
+# Delete directed edges (1, 9), (6, 17), (10, 1)
+G_2.remove_edges_from([(1, 9), (6, 17), (10, 1)])
+# Add longer edge 0 -> 13
+G_2.add_edge(0, 13, weight=G_2[0][13]["weight"] * 2)
+
+n_sparse = [0, 1, 2, 3, 4, 5, 6, 19]
 partitions = {
     "sparsified":
         {"nodes": n_sparse, "color": "black", "subgraph": G_2.subgraph(n_sparse)},
@@ -428,9 +441,8 @@ from superblockify.metrics.distances import shortest_paths_restricted
 node_order_2 = list(range(len(G_2.nodes)))
 dist, pred = shortest_paths_restricted(G_2, partitions, weight="weight",
                                        node_order=node_order_2)
-display(pd.DataFrame(dist, index=node_order_2, columns=node_order_2).style. \
-        set_table_attributes('style="font-size: 12px"').format(precision=1)
-        .background_gradient(cmap='Blues'),
+display(colored_distances(dist, 1, node_order=node_order_2). \
+        set_table_attributes('style="font-size: 12px"'),
         colored_predecessors(pred, G_2, node_order=node_order_2,
                              node_order_indices=node_order_2). \
         set_table_attributes('style="font-size: 10px"'))
@@ -477,13 +489,13 @@ To finish, the difference between the unrestricted and restricted graph distance
 
 ```{code-cell} ipython3
 :tags: [hide-input]
-display(pd.DataFrame(
+display(colored_distances(
     dist - dijkstra(nx.to_scipy_sparse_array(G_2, nodelist=node_order_2),
                     directed=True,
                     return_predecessors=False),
-    index=node_order_2, columns=node_order_2).style. \
-        format(precision=1).background_gradient(cmap='Reds'). \
-        set_table_attributes('style="font-size: 12px"'))
+    1, 'Reds', node_order=node_order_2). \
+        set_table_attributes('style="font-size: 12px"'),
+        )
 ```
 
 ## Implementation
