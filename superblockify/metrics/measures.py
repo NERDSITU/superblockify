@@ -1,9 +1,9 @@
 """Measures for the metrics module."""
-from datetime import timedelta
-from time import time
-
+import networkx as nx
 import numpy as np
-from numpy import mean, sum as npsum, fill_diagonal, logical_and, isfinite, zeros_like
+from numba import jit, int32, int64, float64
+from numpy import sum as npsum
+from tqdm import tqdm
 
 
 def calculate_directness(distance_matrix, measure1, measure2):
@@ -39,7 +39,7 @@ def calculate_directness(distance_matrix, measure1, measure2):
     )
 
     # Calculate the directness as the mean of the ratios
-    return mean(dist1 / dist2)
+    return np.mean(dist1 / dist2)
 
 
 def calculate_global_efficiency(distance_matrix, measure1, measure2):
@@ -109,16 +109,16 @@ def _network_measures_filtered_flattened(distance_matrix, measure1, measure2):
     dist1 = distance_matrix[measure1]
     dist2 = distance_matrix[measure2]
     # Set the diagonal to 0 so that it is not included in the calculation
-    fill_diagonal(dist1, 0)
-    fill_diagonal(dist2, 0)
+    np.fill_diagonal(dist1, 0)
+    np.fill_diagonal(dist2, 0)
     # Flatten the distance matrices
     dist1 = dist1.flatten()
     dist2 = dist2.flatten()
 
     # Drop the pairs of distances where at least one is 0 or infinite
-    mask = logical_and(dist1 != 0, dist2 != 0)
-    mask = logical_and(mask, isfinite(dist1))
-    mask = logical_and(mask, isfinite(dist2))
+    mask = np.logical_and(dist1 != 0, dist2 != 0)
+    mask = np.logical_and(mask, np.isfinite(dist1))
+    mask = np.logical_and(mask, np.isfinite(dist2))
     dist1 = dist1[mask]
     dist2 = dist2[mask]
 
@@ -221,33 +221,43 @@ def write_relative_increase_to_edges(
         )
 
 
-def betweenness_centrality(dist_matrix, predecessors, node_list):
-    """Calculate the betweenness centrality of the nodes and edges.
+@nx.utils.py_random_state(5)
+def betweenness_centrality(
+    graph, node_order, dist_matrix, predecessors, k=None, seed=None
+):
+    """Calculate several types of betweenness centrality for the nodes and edges.
 
     Uses the predecessors to calculate the betweenness centrality of the nodes and
-    edges. [1]_ [2]_ [3]_
+    edges. The normalized betweenness centrality is calculated, length-scaled, and
+    linearly scaled betweenness centrality are calculated for the nodes and edges. When
+    passing a k, the summation is only done over k random nodes. [1]_ [2]_ [3]_
 
     Parameters
     ----------
+    graph : nx.MultiDiGraph
+        The graph to calculate the betweenness centrality for, distances and
+        predecessors must be calculated for this graph
+    node_order : list
+        Indicating the order of the nodes in the distance matrix
     dist_matrix : np.ndarray
         The distance matrix for the network measures, as returned by
         :func:`superblockify.metrics.distances.calculate_path_distance_matrix`
     predecessors : np.ndarray
         Predecessors matrix of the graph, as returned by
         :func:`superblockify.metrics.distances.calculate_path_distance_matrix`
-    node_list : list
-        Indicating the order of the nodes in the distance matrix
-
-    Returns
-    -------
-    np.ndarray, np.ndarray
-        The betweenness centrality of the nodes, ordered according to node_list, and
-        the betweenness centrality of the edges, ordered according to the edges of the
-        graph.
+    k : int, optional
+        The number of nodes to calculate the betweenness centrality for, by default
+        None
+    seed : int, random_state, or None (default)
+        Indicator of random number generation state. See :ref:`Randomness<randomness>`
 
     Notes
     -----
+    Works in-place on the graph.
+
     Does not include endpoints.
+
+    Modified from :mod:`networkx.algorithms.centrality.betweenness`.
 
     References
     ----------
@@ -262,27 +272,156 @@ def betweenness_centrality(dist_matrix, predecessors, node_list):
        https://doi.org/10.1016/j.socnet.2007.11.001
     """
 
-    # Iterate through predecessors matrix and count the times
-    # - each node is used intermediately
-    node_freq = zeros_like(node_list, dtype=np.int64)
-    # - each edge is used intermediately (sparse matrix)
-    edge_freq = zeros_like(dist_matrix, dtype=np.int64)
+    b_c = _calculate_betweenness(
+        # [
+        #     (node_order.index(u), node_order.index(v))
+        #     for u, v in graph.edges(keys=False)
+        # ],
+        predecessors,
+        dist_matrix,
+        index_subset=seed.sample(range(len(node_order)), k=k) if k else None,
+    )
 
-    # Zip the above loop
-    time0 = time()
-    for start, end in zip(*np.where(predecessors != -9999)):
-        if start == end:
-            continue
-        prev = predecessors[start]
-        curr = prev[end]
-        while curr != start:
-            node_freq[curr] += 1
-            edge_freq[prev[curr], curr] += 1
-            curr = prev[curr]
-    print(f"Time for zip: {timedelta(seconds=time() - time0)}")
+    # Normalize betweenness values and write to graph
+    scale = 1 / ((len(node_order) - 1) * (len(node_order) - 2))
+    for bc_type, node_bc in b_c["node"].items():
+        nx.set_node_attributes(
+            graph,
+            {node_order[node_idx]: bc * scale for node_idx, bc in enumerate(node_bc)},
+            f"node_betweenness_{bc_type}",
+        )
+    # Normalize edge betweenness values and write to graph
+    scale = 1 / (len(node_order) * (len(node_order) - 1))
+    for bc_type, edge_bc in b_c["edge"].items():
+        nx.set_edge_attributes(
+            graph,
+            {
+                (
+                    u_id,
+                    v_id,
+                    min(
+                        graph.get_edge_data(u_id, v_id).items(),
+                        key=lambda item: item[1]["travel_time"],
+                    )[0],
+                ): edge_bc[node_order.index(u_id), node_order.index(v_id)]
+                * scale
+                for (u_id, v_id) in graph.edges(keys=False)
+            },
+            f"edge_betweenness_{bc_type}",
+        )
 
-    # Norm by dividing by total amount of shortest paths
-    # - using where predectessors != -9999
-    total_shortest_paths = npsum(np.where(predecessors != -9999, 1, 0))
 
-    return node_freq / total_shortest_paths, edge_freq / total_shortest_paths
+def _calculate_betweenness(pred, dist, index_subset=None):
+    """Calculate the betweenness centralities for the nodes and edges.
+
+    Parameters
+    ----------
+    # edge_list : list of tuples
+    #     List of edges in the graph, each edge is represented by a tuple of the two
+    #     node indices
+    pred : np.ndarray
+        Predecessors matrix of the graph, as returned by
+        :func:`superblockify.metrics.distances.calculate_path_distance_matrix`
+    dist : np.ndarray
+        Distance matrix of the graph, as returned by
+        :func:`superblockify.metrics.distances.calculate_path_distance_matrix`
+    index_subset : list, optional
+        List of node indices to calculate the betweenness centrality for, by default
+        None. Used to calculate k-betweenness centrality
+    """
+
+    node_indices = np.arange(pred.shape[0])
+
+    betweennesses = np.zeros(
+        (len(node_indices) + 1, len(node_indices), 3), dtype=np.float64
+    )
+    # The first row corresponds to the betweenness of the edges [0, :, :]
+    # The rest are the pairwise node betweennesses [1:, :, :]
+    # The layers correspond to normal, length-scaled, and linearly scaled
+
+    # Loop over nodes to collect betweenness using pair-wise dependencies
+    for s_idx in tqdm(
+        index_subset if index_subset else node_indices, desc="Calculating betweenness"
+    ):
+        betweennesses += __accumulate_bc(
+            s_idx,
+            pred[s_idx],
+            dist[s_idx],
+        )
+    return {
+        "node": {
+            "normal": betweennesses[0, :, 0],
+            "length": betweennesses[0, :, 1],
+            "linear": betweennesses[0, :, 2],
+        },
+        "edge": {
+            "normal": betweennesses[1:, :, 0],
+            "length": betweennesses[1:, :, 1],
+            "linear": betweennesses[1:, :, 2],
+        },
+    }
+
+
+@jit(int64[:](float64[:]), nopython=True)
+def _single_source_given_paths_simplified(dist_row):
+    """Sort nodes, predecessors and distances by distance.
+
+    Parameters
+    ----------
+    dist_row : np.array
+        Distance row un-sorted.
+
+    Returns
+    -------
+    S : np.array
+        List of node indices in order of distance, non-decreasing.
+
+    Notes
+    -----
+    Does not include endpoints.
+    """
+    dist_order = np.argsort(dist_row)
+    # Remove unreachable indices (inf), check from back which is the first
+    # reachable node
+    while dist_row[dist_order[-1]] == np.inf:
+        dist_order = dist_order[:-1]
+    # Remove immediately reachable nodes with distance 0, including s itself
+    while dist_row[dist_order[0]] == 0:
+        dist_order = dist_order[1:]
+    return dist_order
+
+
+@jit(float64[:, :, :](int64, int32[:], float64[:]), nopython=True)
+def __accumulate_bc(
+    s_idx,
+    pred_row,
+    dist_row,
+):
+    betweennesses = np.zeros((len(pred_row) + 1, len(pred_row), 3), dtype=np.float64)
+
+    s_queue_idx = _single_source_given_paths_simplified(dist_row)
+    # delta = dict.fromkeys(node_indices, 0)
+    # delta as 1d-ndarray
+    delta = np.zeros(len(pred_row))
+    delta_len = delta.copy()
+    # s_queue_idx is 1d-ndarray, while not empty
+    for w_idx in s_queue_idx[::-1]:  # flip the array to loop non-increasingly
+        # No while loop over multiple predecessors, only one path per node pair
+        pre_w = pred_row[w_idx]  # P[w_idx]
+        dist_w = dist_row[w_idx]  # D[w_idx]
+        # Calculate dependency contribution
+        coeff = 1 + delta[w_idx]
+        coeff_len = 1 / dist_w + delta[w_idx]
+        # Add edge betweenness contribution
+        betweennesses[pre_w + 1, w_idx, 0] += coeff
+        betweennesses[pre_w + 1, w_idx, 1] += coeff_len
+        betweennesses[pre_w + 1, w_idx, 2] += dist_w * coeff_len
+        # Add to dependency for further nodes/loops
+        delta[pre_w] += coeff
+        delta_len[pre_w] += coeff_len
+        # Add node betweenness contribution
+        if w_idx != s_idx:
+            betweennesses[0, w_idx, 0] += delta[w_idx]
+            betweennesses[0, w_idx, 1] += delta_len[w_idx]
+            betweennesses[0, w_idx, 2] += dist_w * delta_len[w_idx]
+    return betweennesses
