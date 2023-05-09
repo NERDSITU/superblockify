@@ -2,12 +2,17 @@
 import pickle
 from os.path import join, exists
 
-from .distances import calculate_distance_matrices
+from .distances import (
+    calculate_partitioning_distance_matrix,
+    calculate_path_distance_matrix,
+    calculate_euclidean_distance_matrix_projected,
+)
 from .measures import (
     calculate_global_efficiency,
     calculate_directness,
     write_relative_increase_to_edges,
     calculate_coverage,
+    betweenness_centrality,
 )
 from .plot import (
     plot_distance_matrices,
@@ -82,8 +87,15 @@ class Metric:
 
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self):
-        """Construct a metric object."""
+    def __init__(self, unit="time"):
+        """Construct a metric object.
+
+        Parameters
+        ----------
+        unit : str, optional
+            The unit to use for the shortest distance calculation, by default "time",
+            can also be "distance", if ``None`` count hops.
+        """
 
         self.coverage = None
         self.num_components = None
@@ -91,9 +103,9 @@ class Metric:
         self.directness = {"SN": None}
         self.global_efficiency = {"NS": None}
 
-        self.distance_matrix = None
-        self.predecessor_matrix = None
-        self.unit = None
+        self.distance_matrix = {}
+        self.predecessor_matrix = {}
+        self.unit = unit
         self.node_list = None
 
     def unit_symbol(self):
@@ -112,10 +124,59 @@ class Metric:
             return "hops"
         return f"({self.unit})"
 
+    def calculate_before(self, partitioner, make_plots=False):
+        """Calculate metrics on unrestricted graph
+
+        Metrics that should be available to partitioners for use in their
+        partitioning algorithm. This includes
+
+        - Shortest paths and distances on the unrestricted graph
+        - Betweenness centralities on the unrestricted graph
+
+        Parameters
+        ----------
+        partitioner : BasePartitioner
+            The partitioner object to calculate the metrics for
+        """
+        if self.node_list is None:
+            self.node_list = partitioner.get_sorted_node_list()  # full node list
+
+        if self.unit == "distance" and "E" not in self.distance_matrix:
+            self.distance_matrix["E"] = calculate_euclidean_distance_matrix_projected(
+                partitioner.graph,
+                node_order=self.node_list,
+                plot_distributions=make_plots,
+            )
+        # On the full graph (S)
+        weight = (
+            "length"
+            if self.unit == "distance"
+            else "travel_time"
+            if self.unit == "time"
+            else self.unit
+        )
+        (
+            self.distance_matrix["S"],
+            self.predecessor_matrix["S"],
+        ) = calculate_path_distance_matrix(
+            partitioner.graph,
+            weight=weight,
+            unit_symbol=self.unit_symbol(),
+            node_order=self.node_list,
+            plot_distributions=make_plots,
+        )
+        betweenness_centrality(
+            partitioner.graph,
+            self.node_list,
+            self.distance_matrix["S"],
+            self.predecessor_matrix["S"],
+            weight=weight,
+            #  No `attr_suffix` for the full graph
+        )
+
     def calculate_all(
         self,
         partitioner,
-        unit="time",
         replace_max_speeds=True,
         num_workers=None,
         chunk_size=1,
@@ -123,16 +184,13 @@ class Metric:
     ):
         """Calculate all metrics for the partitioning.
 
-        `self.distance_matrix` is used to save the distances for the metrics and should
-        is set to None after calculating the metrics.
+        If :meth:`calculate_before` has been called before partitioning, only the
+        remaining metrics are calculated.
 
         Parameters
         ----------
         partitioner : BasePartitioner
             The partitioner object to calculate the metrics for
-        unit : str, optional
-            The unit to use for the shortest distance calculation, by default "time",
-            can also be "distance", if ``None`` count hops.
         replace_max_speeds : bool, optional
             If True and unit is "time", calculate the quickest paths in the restricted
             graph with the max speeds :attr:`V_MAX_LTN` and :attr:`V_MAX_SPARSE` set in
@@ -148,25 +206,36 @@ class Metric:
         """
         # pylint: disable=unused-argument
 
-        self.unit = unit  # unit attribute
-        if unit == "distance":
+        self.calculate_before(partitioner, make_plots=make_plots)
+
+        if self.unit == "distance":
             self.avg_path_length["E"] = None
             self.directness["ES"], self.directness["EN"] = None, None
             self.global_efficiency["SE"], self.global_efficiency["NE"] = None, None
 
-        self.node_list = partitioner.get_sorted_node_list()  # full node list
-
         self.coverage = calculate_coverage(partitioner, weight="length")
         logger.debug("Coverage (length): %s", self.coverage)
 
-        self.distance_matrix, self.predecessor_matrix = calculate_distance_matrices(
-            self.node_list,
+        weight_restricted = (
+            "length"
+            if self.unit == "distance"
+            else "travel_time"
+            if self.unit == "time" and not replace_max_speeds
+            else "travel_time_restricted"
+            if self.unit == "time" and replace_max_speeds
+            else self.unit
+        )
+        (
+            self.distance_matrix["N"],
+            self.predecessor_matrix["N"],
+        ) = calculate_partitioning_distance_matrix(
             partitioner,
-            "time_restricted" if replace_max_speeds and unit == "time" else unit,
-            self.unit_symbol(),
-            chunk_size,
-            make_plots,
-            num_workers,
+            weight=weight_restricted,
+            unit_symbol=self.unit_symbol(),
+            node_order=self.node_list,
+            num_workers=num_workers,
+            chunk_size=chunk_size,
+            plot_distributions=make_plots,
         )
 
         self.calculate_all_measure_sums()
@@ -175,7 +244,22 @@ class Metric:
             partitioner.graph, self.distance_matrix, self.node_list, "N", "S"
         )
 
+        betweenness_centrality(
+            partitioner.graph,
+            self.node_list,
+            self.distance_matrix["N"],
+            self.predecessor_matrix["N"],
+            weight=weight_restricted,
+            attr_suffix="_restricted",
+        )
+
         if make_plots:
+            # sort distance matrix dictionaries to follow start with E, S, N, ...
+            d_m = self.distance_matrix
+            self.distance_matrix = {}
+            for key in ["E", "S", "N"]:
+                if key in d_m:
+                    self.distance_matrix[key] = d_m[key]
             self.make_all_plots(partitioner)
 
     def make_all_plots(self, partitioner):
@@ -270,7 +354,7 @@ class Metric:
         """
         string = ""
         for key, value in self.__dict__.items():
-            if value is not None:
+            if value is not None or key == "unit":
                 if isinstance(value, dict):
                     if all(v is None for v in value.values()):
                         continue

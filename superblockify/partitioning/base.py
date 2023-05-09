@@ -68,6 +68,7 @@ class BasePartitioner(ABC):
         name="unnamed",
         city_name=None,
         search_str=None,
+        unit="time",
         graph=None,
         reload_graph=False,
     ):
@@ -86,6 +87,9 @@ class BasePartitioner(ABC):
             Search string for OSMnx to download a graph, default is None. Only used if
             no graph is found under :attr:`GRAPH_DIR`/city_name.graphml.
             For composite cities, a list of search strings can be provided.
+        unit : str, optional
+            Unit for the metrics, can be "time", "distance" or any other edge attribute
+            that is present in the graph. Default is "time".
         graph : networkx.MultiDiGraph, optional
             Graph to partition. Used if no graph is found under
             :attr:`GRAPH_DIR`/name.graphml and `search_str` is None. Default is None.
@@ -154,7 +158,7 @@ class BasePartitioner(ABC):
         self.sparsified = None
         self.attribute_label: str | None = None
         self.attr_value_minmax: tuple | None = None
-        self.metric = Metric()
+        self.metric = Metric(unit)
 
         # Log initialization
         logger.info(
@@ -170,7 +174,6 @@ class BasePartitioner(ABC):
         self,
         calculate_metrics=True,
         make_plots=False,
-        unit="time",
         replace_max_speeds=True,
         **kwargs,
     ):
@@ -184,20 +187,18 @@ class BasePartitioner(ABC):
         make_plots : bool, optional
             If True, make plots of the partitioning and save them to
             self.results_dir/figures. Default is False.
-        unit : str, optional
-            Unit for the metrics. Default is "time".
         replace_max_speeds : bool, optional
-            If True and unit is "time", calculate the quickest paths in the restricted
-            graph with the max speeds :attr:`V_MAX_LTN` and :attr:`V_MAX_SPARSE` set in
-            :mod:`superblockify.config`. Default is True.
+            If True and :attr:`self.metric.unit` is "time", calculate the quickest paths
+            in the restricted graph with the max speeds :attr:`V_MAX_LTN` and
+            :attr:`V_MAX_SPARSE` set in :mod:`superblockify.config`. Default is True.
 
         Warnings
         --------
-        If unit is not "time", replace_max_speeds is ignored.
+        If :attr:`self.metric.unit` is not "time", replace_max_speeds is ignored.
         """
 
         # Warn if replace_max_speeds is not None when unit is not "time"
-        if unit != "time" and replace_max_speeds is not None:
+        if self.metric.unit != "time" and replace_max_speeds is not None:
             logger.warning("replace_max_speeds is ignored when unit is not 'time'.")
             replace_max_speeds = None
 
@@ -246,7 +247,6 @@ class BasePartitioner(ABC):
         if calculate_metrics:
             self.calculate_metrics(
                 make_plots=make_plots,
-                unit=unit,
                 replace_max_speeds=replace_max_speeds,
                 **kwargs,
             )
@@ -277,7 +277,6 @@ class BasePartitioner(ABC):
     def calculate_metrics(
         self,
         make_plots=False,
-        unit="time",
         replace_max_speeds=True,
         num_workers=None,
         chunk_size=1,
@@ -288,18 +287,15 @@ class BasePartitioner(ABC):
         metrics dictionary. It includes the network metrics for the partitioned graph.
 
         There are different network measures
-        - d_E(i, j): Euclidean
-        - d_S(i, j): Shortest path on full graph
-        - d_N(i, j): Shortest path with ban through LTNs
+        - :math:`d_E(i, j)`: Euclidean
+        - :math:`d_S(i, j)`: Shortest path on full graph
+        - :math:`d_N(i, j)`: Shortest path with ban through LTNs
 
         Parameters
         ----------
         make_plots : bool, optional
             If True show visualization graphs of the approach. If False only print
             into console. Default is False.
-        unit : str, optional
-            The unit to use for the shortest distance calculation, by default "time",
-            can also be "distance", if ``None`` count hops.
         replace_max_speeds : bool, optional
             If True and unit is "time", replace max speeds set in
             :mod:`superblockify.config`. Default is True.
@@ -316,12 +312,31 @@ class BasePartitioner(ABC):
         logger.info("Calculating metrics for %s", self.name)
         self.metric.calculate_all(
             partitioner=self,
-            unit=unit,
             replace_max_speeds=replace_max_speeds,
             make_plots=make_plots,
             num_workers=num_workers,
             chunk_size=chunk_size,
         )
+
+        logger.debug("Metrics for %s: %s", self.name, self.metric)
+
+    def calculate_metrics_before(self, make_plots=False):
+        """Calculate metrics for the graph before partitioning.
+
+        Calculates the metrics that might be used by a partitioning approach. It
+        includes the network shortest paths :math:`d_S(i, j)` on the full graph and
+        betweenness centralities.
+
+        Parameters
+        ----------
+        make_plots : bool, optional
+            If True show visualization graphs of the approach. If False only print
+            into console. Default is False.
+        """
+
+        # Log calculating metrics
+        logger.info("Calculating metrics for %s before partitioning", self.name)
+        self.metric.calculate_before(partitioner=self, make_plots=make_plots)
 
         logger.debug("Metrics for %s: %s", self.name, self.metric)
 

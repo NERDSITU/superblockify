@@ -18,88 +18,6 @@ from ..utils import has_pairwise_overlap
 _AVG_EARTH_RADIUS_M = 6.3781e6  # in meters, arXiv:1510.07674 [astro-ph.SR]
 
 
-def calculate_distance_matrices(
-    node_list, partitioner, unit, unit_symbol, chunk_size, make_plots, num_workers
-):
-    """Calculate the distance matrices for the partitioning.
-
-    Parameters
-    ----------
-    node_list : list
-        The list of nodes to calculate the distance matrices for
-    partitioner : superblockify.Partitioner
-        The partitioner to calculate the distance matrices for
-    unit : str, optional
-        The unit to use for the shortest distance calculation, can be "time",
-        "distance", or None for hops
-    unit_symbol : str, optional
-        The symbol for the unit, e.g. "s" for seconds
-    chunk_size : int
-        The chunk size for the multiprocessing pool
-    make_plots : bool
-        If True, the distance distributions are plotted
-    num_workers : int
-        The number of workers to use for the multiprocessing pool
-
-    Returns
-    -------
-    dict
-        The distance matrices for the partitioning. The keys are the distance
-        matrix types, the values are the distance matrices, corresponding to the
-        node order in ``node_list``.
-    dict
-        The predecessors for the distance matrices. The keys correspond to the
-        keys of the distance matrices, the values are the predecessors for the
-        distance matrices.
-    """
-
-    dist_matrix = (
-        {
-            # Euclidean distances (E)
-            "E": calculate_euclidean_distance_matrix_projected(
-                partitioner.graph,
-                node_order=node_list,
-                plot_distributions=make_plots,
-            )
-        }
-        if unit == "distance"
-        else {}
-    )
-
-    predecessors = {}
-
-    # On the full graph (S)
-    dist_matrix["S"], predecessors["S"] = calculate_path_distance_matrix(
-        partitioner.graph,
-        weight="length"
-        if unit == "distance"
-        else "travel_time"
-        if unit == "time"
-        else unit,
-        unit_symbol=unit_symbol,
-        node_order=node_list,
-        plot_distributions=make_plots,
-    )
-    # On the partitioning graph (N)
-    dist_matrix["N"], predecessors["N"] = calculate_partitioning_distance_matrix(
-        partitioner,
-        weight="length"
-        if unit == "distance"
-        else "travel_time"
-        if unit == "time"
-        else "travel_time_restricted"
-        if unit == "time_restricted"
-        else unit,
-        unit_symbol=unit_symbol,
-        node_order=node_list,
-        num_workers=num_workers,
-        chunk_size=chunk_size,
-        plot_distributions=make_plots,
-    )
-
-    return dist_matrix, predecessors
-
-
 def calculate_path_distance_matrix(
     graph,
     weight=None,
@@ -145,7 +63,7 @@ def calculate_path_distance_matrix(
     weight : str, optional
         The edge attribute to use as weight. If None, all edge weights are 1.
     unit_symbol : str, optional
-        The unit symbol to use for the distance matrix.
+        The unit symbol to use for the distance matrix, like 's' for seconds.
     node_order : list, optional
         The order of the nodes in the distance matrix. If None, the ordering is
         produced by graph.nodes().

@@ -180,9 +180,9 @@ def test_calculate_global_efficiency(distance1, distance2, expected):
         ([1, 2], [1, 2, 3], 3 / 9),
         (list(range(1, 10)), list(range(1, 103)), None),
         ([], [], ValueError),
-        ([1, '1'], [1, 2], TypeError),
-        ([1, 2], [1, '1'], TypeError),
-        ([True, 2], [1, 2], 0.5), # bools are ints 1 and 0
+        ([1, "1"], [1, 2], TypeError),
+        ([1, 2], [1, "1"], TypeError),
+        ([True, 2], [1, 2], 0.5),  # bools are ints 1 and 0
         ([False, True], [False, False], 1),
     ],
 )

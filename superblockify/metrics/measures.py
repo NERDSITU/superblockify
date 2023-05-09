@@ -1,7 +1,7 @@
 """Measures for the metrics module."""
 import networkx as nx
 import numpy as np
-from numba import jit, int32, int64, float64
+from numba import jit, int32, int64, float32, float64
 from numpy import sum as npsum
 from tqdm import tqdm
 
@@ -221,9 +221,16 @@ def write_relative_increase_to_edges(
         )
 
 
-@nx.utils.py_random_state(5)
+@nx.utils.py_random_state(7)
 def betweenness_centrality(
-    graph, node_order, dist_matrix, predecessors, k=None, seed=None
+    graph,
+    node_order,
+    dist_matrix,
+    predecessors,
+    weight="length",
+    attr_suffix=None,
+    k=None,
+    seed=None,
 ):
     """Calculate several types of betweenness centrality for the nodes and edges.
 
@@ -245,11 +252,23 @@ def betweenness_centrality(
     predecessors : np.ndarray
         Predecessors matrix of the graph, as returned by
         :func:`superblockify.metrics.distances.calculate_path_distance_matrix`
+    weight : str, optional
+        The edge attribute to use as weight to decide which multi-edge to attribute the
+        betweenness centrality to, by default "length". If None, the first edge of the
+        multi-edge is used.
+    attr_suffix : str, optional
+        The suffix to append to the attribute names, by default None
     k : int, optional
         The number of nodes to calculate the betweenness centrality for, by default
         None
     seed : int, random_state, or None (default)
         Indicator of random number generation state. See :ref:`Randomness<randomness>`
+
+    Raises
+    ------
+    ValueError
+        If weight is not None and the graph does not have the weight attribute on all
+        edges.
 
     Notes
     -----
@@ -258,6 +277,10 @@ def betweenness_centrality(
     Does not include endpoints.
 
     Modified from :mod:`networkx.algorithms.centrality.betweenness`.
+
+    The :attr:`weight` attribute is not used to determine the shortest paths, these are
+    taken from the predecessors matrix. It is only used for parallel edges, to decide
+    which edge to attribute the betweenness centrality to.
 
     References
     ----------
@@ -271,6 +294,11 @@ def betweenness_centrality(
        their generic computation. Social Networks, 30(2), 136–145.
        https://doi.org/10.1016/j.socnet.2007.11.001
     """
+    # Check if weight attribute is present on all edges
+    if weight and not all(
+        weight in data for _, _, _, data in graph.edges(keys=True, data=True)
+    ):
+        raise ValueError(f"Weight attribute {weight} not found on all edges")
 
     b_c = _calculate_betweenness(
         # [
@@ -285,10 +313,21 @@ def betweenness_centrality(
     # Normalize betweenness values and write to graph
     scale = 1 / ((len(node_order) - 1) * (len(node_order) - 2))
     for bc_type, node_bc in b_c["node"].items():
+        # Initialize with 0.0 to ensure all edges
         nx.set_node_attributes(
             graph,
-            {node_order[node_idx]: bc * scale for node_idx, bc in enumerate(node_bc)},
-            f"node_betweenness_{bc_type}",
+            0.0,
+            f"node_betweenness_{bc_type}{attr_suffix}",
+        )
+        # Write non-zero values
+        nx.set_node_attributes(
+            graph,
+            {
+                node_order[node_idx]: bc * scale
+                for node_idx, bc in enumerate(node_bc)
+                if bc != 0.0
+            },
+            f"node_betweenness_{bc_type}{attr_suffix}",
         )
     # Normalize edge betweenness values and write to graph
     scale = 1 / (len(node_order) * (len(node_order) - 1))
@@ -301,13 +340,13 @@ def betweenness_centrality(
                     v_id,
                     min(
                         graph.get_edge_data(u_id, v_id).items(),
-                        key=lambda item: item[1]["travel_time"],
+                        key=lambda item: item[1][weight] if weight else 0,
                     )[0],
                 ): edge_bc[node_order.index(u_id), node_order.index(v_id)]
                 * scale
                 for (u_id, v_id) in graph.edges(keys=False)
             },
-            f"edge_betweenness_{bc_type}",
+            f"edge_betweenness_{bc_type}{attr_suffix}",
         )
 
 
@@ -331,6 +370,7 @@ def _calculate_betweenness(pred, dist, index_subset=None):
     """
 
     node_indices = np.arange(pred.shape[0])
+    dist = dist.astype(np.float32)
 
     betweennesses = np.zeros(
         (len(node_indices) + 1, len(node_indices), 3), dtype=np.float64
@@ -362,7 +402,7 @@ def _calculate_betweenness(pred, dist, index_subset=None):
     }
 
 
-@jit(int64[:](float64[:]), nopython=True)
+@jit(int64[:](float32[:]), nopython=True)
 def _single_source_given_paths_simplified(dist_row):
     """Sort nodes, predecessors and distances by distance.
 
@@ -391,7 +431,7 @@ def _single_source_given_paths_simplified(dist_row):
     return dist_order
 
 
-@jit(float64[:, :, :](int64, int32[:], float64[:]), nopython=True)
+@jit(float64[:, :, :](int64, int32[:], float32[:]), nopython=True)
 def __accumulate_bc(
     s_idx,
     pred_row,
