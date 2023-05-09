@@ -112,7 +112,7 @@ def test_plot_by_attribute_minmax_val_faulty(test_city_all_copy, minmax_val_faul
     """Test `plot_by_attribute` with faulty minmax_val."""
     _, graph = test_city_all_copy
     with pytest.raises(ValueError):
-        plot_by_attribute(graph, edge_attr="osmid", node_minmax_val=minmax_val_faulty)
+        plot_by_attribute(graph, edge_attr="osmid", edge_minmax_val=minmax_val_faulty)
 
 
 def test_make_edge_color_list(test_city_all_copy):
