@@ -1,9 +1,10 @@
 """Tests for the measure calculation module."""
 from dataclasses import dataclass
 from math import isclose
+from random import Random
 
 import pytest
-from networkx import MultiDiGraph, path_graph
+from networkx import MultiDiGraph, path_graph, get_edge_attributes
 from numpy import full, array, inf, array_equal
 
 from superblockify.metrics.measures import (
@@ -11,6 +12,7 @@ from superblockify.metrics.measures import (
     _network_measures_filtered_flattened,
     calculate_global_efficiency,
     calculate_coverage,
+    betweenness_centrality,
 )
 
 
@@ -222,4 +224,47 @@ def test_calculate_coverage(weights_in, weights_out, expected):
             expected
             if expected is not None
             else sum(weights_in) / sum(weights_in + weights_out),
+        )
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"attr_suffix": None, "seed": 0},
+        {"attr_suffix": "_test", "seed": Random(7357)},
+    ],
+)
+@pytest.mark.parametrize("half_k", [False, True])
+def test_betweenness_centrality(test_one_city_precalculated_copy, kwargs, half_k):
+    """Test betweenness centrality calculation"""
+    part = test_one_city_precalculated_copy
+    part.calculate_metrics_before()
+    betweenness_centrality(
+        part.graph,
+        part.metric.node_list,
+        part.metric.distance_matrix["S"],
+        part.metric.predecessor_matrix["S"],
+        k=None if half_k else int(part.graph.number_of_nodes() / 2),
+        **kwargs,
+    )
+    # print(f"All node attributes: {part.graph.nodes(data=True)}")
+    # print(f"All edge attributes: {part.graph.edges(data=True)}")
+    for bc_type in ["normal", "length", "linear"]:
+        assert all(
+            data[
+                f"node_betweenness_{bc_type}"
+                f"{kwargs['attr_suffix'] if kwargs['attr_suffix'] is not None else ''}"
+            ]
+            >= 0
+            for data in part.graph.nodes.values()
+        )
+        edge_label = (
+            f"edge_betweenness_{bc_type}"
+            f"{kwargs['attr_suffix'] if kwargs['attr_suffix'] is not None else ''}"
+        )
+        assert len(part.graph.edges()) == len(
+            get_edge_attributes(part.graph, edge_label)
+        )
+        assert all(
+            vals >= 0 for vals in get_edge_attributes(part.graph, edge_label).values()
         )

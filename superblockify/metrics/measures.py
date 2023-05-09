@@ -309,6 +309,7 @@ def betweenness_centrality(
         dist_matrix,
         index_subset=seed.sample(range(len(node_order)), k=k) if k else None,
     )
+    attr_suffix = attr_suffix if attr_suffix else ""
 
     # Normalize betweenness values and write to graph
     scale = 1 / ((len(node_order) - 1) * (len(node_order) - 2))
@@ -332,6 +333,13 @@ def betweenness_centrality(
     # Normalize edge betweenness values and write to graph
     scale = 1 / (len(node_order) * (len(node_order) - 1))
     for bc_type, edge_bc in b_c["edge"].items():
+        # Initialize with 0.0 to ensure all edges
+        nx.set_edge_attributes(
+            graph,
+            0.0,
+            f"edge_betweenness_{bc_type}{attr_suffix}",
+        )
+        # Write non-zero values
         nx.set_edge_attributes(
             graph,
             {
