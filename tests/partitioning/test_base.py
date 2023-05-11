@@ -1,5 +1,6 @@
 """Tests for the partitioner module."""
 from os import path, remove
+from os.path import exists, join
 
 import networkx as nx
 import pytest
@@ -102,7 +103,6 @@ class TestPartitioners:
         sorted_nodes = part.get_sorted_node_list()
         assert set(sorted_nodes) == set(part.graph.nodes())
 
-    @mark_xfail_flaky_download
     @pytest.mark.parametrize(
         "name,city_name,search_str,graph,reload_graph",
         [
@@ -141,9 +141,15 @@ class TestPartitioners:
     ):
         """Test loading and finding of graph files.
         Initialization of partitioner class and `self.load_or_find_graph`."""
-        part = partitioner_class(name, city_name, search_str, graph, reload_graph)
+        part = partitioner_class(
+            name, city_name, search_str, graph=graph, reload_graph=reload_graph
+        )
         assert part.graph is not None
         assert part.name is not None
+        if reload_graph:
+            test_graph = join(GRAPH_DIR, "Adliswil_tmp.graphml")
+            if exists(test_graph):
+                remove(test_graph)
 
     @pytest.mark.parametrize(
         "name,city_name,search_str,graph,error_type",
