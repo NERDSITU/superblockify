@@ -102,6 +102,7 @@ class TestPartitioners:
         sorted_nodes = part.get_sorted_node_list()
         assert set(sorted_nodes) == set(part.graph.nodes())
 
+    @mark_xfail_flaky_download
     @pytest.mark.parametrize(
         "name,city_name,search_str,graph,reload_graph",
         [
