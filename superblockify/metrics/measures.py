@@ -282,6 +282,9 @@ def betweenness_centrality(
     taken from the predecessors matrix. It is only used for parallel edges, to decide
     which edge to attribute the betweenness centrality to.
 
+    If there are <= 2 nodes, node betweenness is 0 for all nodes. If there are <= 1
+    edges, edge betweenness is 0 for all edges.
+
     References
     ----------
     .. [1] Linton C. Freeman: A Set of Measures of Centrality Based on Betweenness.
@@ -312,7 +315,11 @@ def betweenness_centrality(
     attr_suffix = attr_suffix if attr_suffix else ""
 
     # Normalize betweenness values and write to graph
-    scale = 1 / ((len(node_order) - 1) * (len(node_order) - 2))
+    scale = (
+        1 / ((len(node_order) - 1) * (len(node_order) - 2))
+        if len(node_order) > 2
+        else None
+    )
     for bc_type, node_bc in b_c["node"].items():
         # Initialize with 0.0 to ensure all edges
         nx.set_node_attributes(
@@ -331,7 +338,9 @@ def betweenness_centrality(
             f"node_betweenness_{bc_type}{attr_suffix}",
         )
     # Normalize edge betweenness values and write to graph
-    scale = 1 / (len(node_order) * (len(node_order) - 1))
+    scale = (
+        1 / (len(node_order) * (len(node_order) - 1)) if len(node_order) > 1 else None
+    )
     for bc_type, edge_bc in b_c["edge"].items():
         # Initialize with 0.0 to ensure all edges
         nx.set_edge_attributes(

@@ -4,8 +4,19 @@ from math import isclose
 from random import Random
 
 import pytest
-from networkx import MultiDiGraph, path_graph, get_edge_attributes
-from numpy import full, array, inf, array_equal
+from networkx import (
+    MultiDiGraph,
+    path_graph,
+    get_edge_attributes,
+    to_scipy_sparse_array,
+    Graph,
+    set_edge_attributes,
+    star_graph,
+    complete_graph,
+    wheel_graph,
+)
+from numpy import full, array, inf, array_equal, int32, allclose
+from scipy.sparse.csgraph import dijkstra
 
 from superblockify.metrics.measures import (
     calculate_directness,
@@ -13,6 +24,7 @@ from superblockify.metrics.measures import (
     calculate_global_efficiency,
     calculate_coverage,
     betweenness_centrality,
+    _calculate_betweenness,
 )
 
 
@@ -216,7 +228,7 @@ def test_calculate_coverage(weights_in, weights_out, expected):
     # if expected is any type of error, assert that it is raised
     if isinstance(expected, type) and issubclass(expected, Exception):
         with pytest.raises(expected):
-            print(calculate_coverage(Part(graph, sparsified), "weight"))
+            calculate_coverage(Part(graph, sparsified), "weight")
     else:
         # otherwise assert that the expected value is returned
         assert isclose(
@@ -235,7 +247,9 @@ def test_calculate_coverage(weights_in, weights_out, expected):
     ],
 )
 @pytest.mark.parametrize("half_k", [False, True])
-def test_betweenness_centrality(test_one_city_precalculated_copy, kwargs, half_k):
+def test_betweenness_centrality_options(
+    test_one_city_precalculated_copy, kwargs, half_k
+):
     """Test betweenness centrality calculation"""
     part = test_one_city_precalculated_copy
     part.calculate_metrics_before()
@@ -247,8 +261,6 @@ def test_betweenness_centrality(test_one_city_precalculated_copy, kwargs, half_k
         k=None if half_k else int(part.graph.number_of_nodes() / 2),
         **kwargs,
     )
-    # print(f"All node attributes: {part.graph.nodes(data=True)}")
-    # print(f"All edge attributes: {part.graph.edges(data=True)}")
     for bc_type in ["normal", "length", "linear"]:
         assert all(
             data[
@@ -268,3 +280,349 @@ def test_betweenness_centrality(test_one_city_precalculated_copy, kwargs, half_k
         assert all(
             vals >= 0 for vals in get_edge_attributes(part.graph, edge_label).values()
         )
+
+
+@pytest.mark.parametrize(
+    "graph,expected",
+    [
+        (
+            MultiDiGraph(path_graph(1)),
+            {
+                "normal": array([0.0]),
+                "length": array([0.0]),
+                "linear": array([0.0]),
+            },
+        ),
+        (
+            MultiDiGraph(path_graph(2)),
+            {
+                "normal": array([0.0, 0.0]),
+                "length": array([0.0, 0.0]),
+                "linear": array([0.0, 0.0]),
+                "edge_normal": {(0, 1, 0): 0.5, (1, 0, 0): 0.5},
+                "edge_length": {(0, 1, 0): 0.5, (1, 0, 0): 0.5},
+                "edge_linear": {(0, 1, 0): 0.5, (1, 0, 0): 0.5},
+            },
+        ),
+        (
+            MultiDiGraph(path_graph(3)),
+            {
+                "normal": array([0.0, 1.0, 0.0]),
+                "length": array([0.0, 0.5, 0.0]),
+                "linear": array([0.0, 0.5, 0.0]),
+                "edge_normal": {
+                    (0, 1, 0): 1 / 3,
+                    (1, 0, 0): 1 / 3,
+                    (1, 2, 0): 1 / 3,
+                    (2, 1, 0): 1 / 3,
+                },
+                "edge_length": {
+                    (0, 1, 0): 1 / 3,
+                    (1, 0, 0): 1 / 4,
+                    (1, 2, 0): 1 / 4,
+                    (2, 1, 0): 1 / 3,
+                },
+                "edge_linear": {
+                    (0, 1, 0): 1 / 3,
+                    (1, 0, 0): 1 / 3,
+                    (1, 2, 0): 1 / 3,
+                    (2, 1, 0): 1 / 3,
+                },
+            },
+        ),
+        (
+            MultiDiGraph(path_graph(4)),
+            {
+                "normal": array([0.0, 2 / 3, 2 / 3, 0.0]),
+                "length": array([0.0, 7 / 18, 7 / 18, 0.0]),
+                "linear": array([0.0, 4 / 9, 4 / 9, 0.0]),
+            },
+        ),
+        (
+            MultiDiGraph(star_graph(3)),
+            {
+                "normal": array([1.0, 0.0, 0.0, 0.0]),
+                "length": array([0.5, 0.0, 0.0, 0.0]),
+                "linear": array([0.5, 0.0, 0.0, 0.0]),
+                "edge_normal": {
+                    (0, 1, 0): 1 / 4,
+                    (1, 0, 0): 1 / 4,
+                    (0, 2, 0): 1 / 4,
+                    (2, 0, 0): 1 / 4,
+                    (0, 3, 0): 1 / 4,
+                    (3, 0, 0): 1 / 4,
+                },
+                "edge_length": {
+                    (0, 1, 0): 1 / 6,
+                    (1, 0, 0): 1 / 4,
+                    (0, 2, 0): 1 / 6,
+                    (2, 0, 0): 1 / 4,
+                    (0, 3, 0): 1 / 6,
+                    (3, 0, 0): 1 / 4,
+                },
+                "edge_linear": {
+                    (0, 1, 0): 1 / 4,
+                    (1, 0, 0): 1 / 4,
+                    (0, 2, 0): 1 / 4,
+                    (2, 0, 0): 1 / 4,
+                    (0, 3, 0): 1 / 4,
+                    (3, 0, 0): 1 / 4,
+                },
+            },
+        ),
+        (
+            MultiDiGraph(complete_graph(5)),
+            {
+                "normal": array([0.0, 0.0, 0.0, 0.0, 0.0]),
+                "length": array([0.0, 0.0, 0.0, 0.0, 0.0]),
+                "linear": array([0.0, 0.0, 0.0, 0.0, 0.0]),
+            },
+        ),
+        (
+            MultiDiGraph(wheel_graph(5)),
+            {
+                "normal": array([1 / 3, 0.0, 0.0, 0.0, 0.0]),
+                "length": array([1 / 6, 0.0, 0.0, 0.0, 0.0]),
+                "linear": array([1 / 6, 0.0, 0.0, 0.0, 0.0]),
+                "edge_normal": {
+                    (0, 1, 0): 0.1,
+                    (1, 0, 0): 0.1,
+                    (0, 2, 0): 0.1,
+                    (2, 0, 0): 0.1,
+                    (0, 3, 0): 0.1,
+                    (3, 0, 0): 0.1,
+                    (0, 4, 0): 0.1,
+                    (4, 0, 0): 0.1,
+                    (1, 2, 0): 0.05,
+                    (2, 1, 0): 0.05,
+                    (2, 3, 0): 0.05,
+                    (3, 2, 0): 0.05,
+                    (3, 4, 0): 0.05,
+                    (4, 3, 0): 0.05,
+                    (4, 1, 0): 0.05,
+                    (1, 4, 0): 0.05,
+                },
+            },
+        ),
+    ],
+)
+def test_calculate_betweenness_scales(graph, expected):
+    """Test calculation of edge betweenness with scaled results of toy graphs."""
+    set_edge_attributes(graph, 1, "weight")
+    sparse_graph = to_scipy_sparse_array(graph, nodelist=sorted(graph))
+    dist, pred = dijkstra(sparse_graph, return_predecessors=True, directed=True)
+    betweenness_centrality(graph, list(sorted(graph)), dist, pred, weight="weight")
+    assert array_equal(
+        [graph.nodes[node]["node_betweenness_normal"] for node in sorted(graph)],
+        expected["normal"],
+    )
+    assert allclose(
+        [graph.nodes[node]["node_betweenness_length"] for node in sorted(graph)],
+        expected["length"],
+    )
+    assert allclose(
+        [graph.nodes[node]["node_betweenness_linear"] for node in sorted(graph)],
+        expected["linear"],
+    )
+    if "edge_normal" in expected:
+        edge_bc = get_edge_attributes(graph, "edge_betweenness_normal")
+        assert allclose(
+            list(edge_bc.values()),
+            [expected["edge_normal"][edge] for edge in edge_bc.keys()],
+        )
+    if "edge_length" in expected:
+        edge_bc = get_edge_attributes(graph, "edge_betweenness_length")
+        assert allclose(
+            list(edge_bc.values()),
+            [expected["edge_length"][edge] for edge in edge_bc.keys()],
+        )
+    if "edge_linear" in expected:
+        edge_bc = get_edge_attributes(graph, "edge_betweenness_linear")
+        assert allclose(
+            list(edge_bc.values()),
+            [expected["edge_linear"][edge] for edge in edge_bc.keys()],
+        )
+
+
+@pytest.mark.parametrize(
+    "graph,expected",
+    [
+        (
+            MultiDiGraph(Graph([(0, 1)])),
+            {
+                "normal": array([0.0, 0.0]),
+                "length": array([0.0, 0.0]),
+                "linear": array([0.0, 0.0]),
+            },
+        ),
+        (
+            MultiDiGraph(Graph([(0, 1), (1, 0)])),
+            {
+                "normal": array([0.0, 0.0]),
+                "length": array([0.0, 0.0]),
+                "linear": array([0.0, 0.0]),
+            },
+        ),
+        (
+            MultiDiGraph(Graph([(0, 1), (1, 2)])),
+            {
+                "normal": array([0.0, 2.0, 0.0]),
+                "length": array([0.0, 1.0, 0.0]),
+                "linear": array([0.0, 1.0, 0.0]),
+            },
+        ),
+        (
+            MultiDiGraph(Graph([(0, 1), (1, 2), (2, 3)])),
+            {
+                "normal": array([0.0, 4.0, 4.0, 0.0]),
+                "length": array([0.0, 7 / 3, 7 / 3, 0.0]),
+                "linear": array([0.0, 8 / 3, 8 / 3, 0.0]),
+            },
+        ),
+        (
+            MultiDiGraph(Graph([(0, 1), (1, 2), (2, 3), (3, 4)])),
+            {
+                "normal": array([0.0, 6.0, 8.0, 6.0, 0.0]),
+                "length": array([0.0, 43 / 12, 17 / 3, 43 / 12, 0.0]),
+                "linear": array([0.0, 53 / 12, 25 / 3, 53 / 12, 0.0]),
+            },
+        ),
+        (
+            MultiDiGraph(Graph([(0, 1), (0, 2), (0, 3)])),
+            {
+                "normal": array([6.0, 0.0, 0.0, 0.0]),
+                "length": array([3.0, 0.0, 0.0, 0.0]),
+                "linear": array([3.0, 0.0, 0.0, 0.0]),
+            },
+        ),
+        (
+            MultiDiGraph(
+                Graph(
+                    [
+                        (0, 1, {"weight": 2.0}),
+                        (0, 2, {"weight": 2.0}),
+                        (0, 3, {"weight": 2.0}),
+                    ]
+                )
+            ),
+            {
+                "normal": array([6.0, 0.0, 0.0, 0.0]),
+                "length": array([1.5, 0.0, 0.0, 0.0]),
+                "linear": array([3.0, 0.0, 0.0, 0.0]),
+            },
+        ),
+        (
+            MultiDiGraph([(0, 1), (1, 2), (2, 3), (3, 0)]),
+            {
+                "normal": array([3.0, 3.0, 3.0, 3.0]),
+                "length": array([11 / 6, 11 / 6, 11 / 6, 11 / 6]),
+                "linear": array([13 / 6, 13 / 6, 13 / 6, 13 / 6]),
+            },
+        ),
+        (
+            MultiDiGraph(Graph([(0, 1), (0, 2), (0, 3), (1, 2), (1, 3)])),
+            {
+                "normal": array([2.0, 0.0, 0.0, 0.0]),
+                "length": array([1.0, 0.0, 0.0, 0.0]),
+                "linear": array([1.0, 0.0, 0.0, 0.0]),
+            },
+        ),
+    ],
+)
+def test__calculate_betweenness_unscaled(graph, expected):
+    """Test calculation of betweenness centrality graph to dict, unscaled."""
+    sparse_graph = to_scipy_sparse_array(graph, nodelist=sorted(graph))
+    dist, pred = dijkstra(sparse_graph, return_predecessors=True, directed=True)
+    b_c = _calculate_betweenness(pred.astype(int32), dist, index_subset=None)
+    assert array_equal(b_c["node"]["normal"], expected["normal"])
+    assert allclose(b_c["node"]["length"], expected["length"])
+    assert allclose(b_c["node"]["linear"], expected["linear"])
+
+
+@pytest.mark.parametrize(
+    "dist,pred,expected",
+    [
+        (
+            array([[0, 1, 2], [1, 0, 1], [2, 1, 0]]),
+            array([[0, 0, 0], [1, 1, 1], [2, 2, 2]]),
+            {
+                "normal": array([0.0, 0.0, 0.0]),
+                "length": array([0.0, 0.0, 0.0]),
+                "linear": array([0.0, 0.0, 0.0]),
+            },
+        ),
+        (
+            array([[0, 1, 2], [1, 0, 1], [2, 1, 0]]),
+            array([[-9999, 0, 1], [1, -9999, 1], [1, 2, -9999]]),
+            {
+                "normal": array([0.0, 2.0, 0.0]),
+                "length": array([0.0, 1.0, 0.0]),
+                "linear": array([0.0, 1.0, 0.0]),
+            },
+        ),
+        (
+            array([[0, 1, 2, 3], [1, 0, 1, 2], [2, 1, 0, 1], [3, 2, 1, 0]]),
+            array(
+                [[-9999, 0, 1, 2], [1, -9999, 1, 2], [1, 2, -9999, 2], [1, 2, 3, -9999]]
+            ),
+            {
+                "normal": array([0.0, 4.0, 4.0, 0.0]),
+                "length": array([0.0, 7 / 3, 7 / 3, 0.0]),
+                "linear": array([0.0, 8 / 3, 8 / 3, 0.0]),
+            },
+        ),
+        (
+            array(
+                [
+                    [0, 1, 2, 3, 4],
+                    [1, 0, 1, 2, 3],
+                    [2, 1, 0, 1, 2],
+                    [3, 2, 1, 0, 1],
+                    [4, 3, 2, 1, 0],
+                ]
+            ),
+            array(
+                [
+                    [-9999, 0, 1, 2, 3],
+                    [1, -9999, 1, 2, 3],
+                    [1, 2, -9999, 2, 3],
+                    [1, 2, 3, -9999, 3],
+                    [1, 2, 3, 4, -9999],
+                ]
+            ),
+            {
+                "normal": array([0.0, 6.0, 8.0, 6.0, 0.0]),
+                "length": array([0.0, 43 / 12, 17 / 3, 43 / 12, 0.0]),
+                "linear": array([0.0, 53 / 12, 25 / 3, 53 / 12, 0.0]),
+            },
+        ),
+        (
+            array([[0, 1, 1, 1], [1, 0, 2, 2], [1, 2, 0, 2], [1, 2, 2, 0]]),
+            array(
+                [[-9999, 0, 0, 0], [1, -9999, 0, 0], [2, 0, -9999, 0], [3, 0, 0, -9999]]
+            ),
+            {
+                "normal": array([6.0, 0.0, 0.0, 0.0]),
+                "length": array([3.0, 0.0, 0.0, 0.0]),
+                "linear": array([3.0, 0.0, 0.0, 0.0]),
+            },
+        ),
+    ],
+)
+def test__calculate_betweenness_unscaled_paths(dist, pred, expected):
+    """Test calculation of betweenness centrality paths to dict, unscaled."""
+    b_c = _calculate_betweenness(pred.astype(int32), dist, index_subset=None)
+    assert array_equal(b_c["node"]["normal"], expected["normal"])
+    assert allclose(b_c["node"]["length"], expected["length"])
+    assert allclose(b_c["node"]["linear"], expected["linear"])
+
+
+@pytest.mark.parametrize("graph", [path_graph(4), complete_graph(4), star_graph(4)])
+def test_betweenness_centrality_weight_missing(graph):
+    """Test betweenness centrality with missing weight."""
+    set_edge_attributes(graph, 1, "weight")
+    graph = MultiDiGraph(graph)
+    # delete one weight attribute
+    del graph.edges[0, 1, 0]["weight"]
+    with pytest.raises(ValueError):
+        betweenness_centrality(graph, None, None, None, weight="weight")
