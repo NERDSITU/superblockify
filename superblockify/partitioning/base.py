@@ -61,7 +61,7 @@ class BasePartitioner(ABC):
 
     """
 
-    # pylint: disable=too-many-instance-attributes, too-many-lines
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(
         self,
