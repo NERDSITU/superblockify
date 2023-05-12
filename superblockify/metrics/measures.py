@@ -1,9 +1,10 @@
 """Measures for the metrics module."""
 import networkx as nx
 import numpy as np
-from numba import jit, int32, int64, float32, float64
+from numba import njit, int32, float32, float64, prange
+from numba_progress import ProgressBar
+from numba_progress.progress import progressbar_type
 from numpy import sum as npsum
-from tqdm import tqdm
 
 
 def calculate_directness(distance_matrix, measure1, measure2):
@@ -387,24 +388,20 @@ def _calculate_betweenness(pred, dist, index_subset=None):
     """
 
     node_indices = np.arange(pred.shape[0])
+    pred = pred.astype(np.int32)
     dist = dist.astype(np.float32)
 
-    betweennesses = np.zeros(
-        (len(node_indices) + 1, len(node_indices), 3), dtype=np.float64
-    )
-    # The first row corresponds to the betweenness of the edges [0, :, :]
-    # The rest are the pairwise node betweennesses [1:, :, :]
-    # The layers correspond to normal, length-scaled, and linearly scaled
-
-    # Loop over nodes to collect betweenness using pair-wise dependencies
-    for s_idx in tqdm(
-        index_subset if index_subset else node_indices, desc="Calculating betweenness"
-    ):
-        betweennesses += __accumulate_bc(
-            s_idx,
-            pred[s_idx],
-            dist[s_idx],
+    with ProgressBar(
+        total=len(index_subset) if index_subset else len(node_indices),
+        desc="Calculating betweenness centrality",
+    ) as progress:
+        betweennesses = _sum_bc(
+            np.array(index_subset if index_subset else node_indices, dtype=np.int32),
+            pred,
+            dist,
+            progress,
         )
+
     return {
         "node": {
             "normal": betweennesses[0, :, 0],
@@ -419,7 +416,7 @@ def _calculate_betweenness(pred, dist, index_subset=None):
     }
 
 
-@jit(int64[:](float32[:]), nopython=True)
+@njit(int32[:](float32[:]), parallel=False)
 def _single_source_given_paths_simplified(dist_row):
     """Sort nodes, predecessors and distances by distance.
 
@@ -445,10 +442,14 @@ def _single_source_given_paths_simplified(dist_row):
     # Remove immediately reachable nodes with distance 0, including s itself
     while dist_row[dist_order[0]] == 0:
         dist_order = dist_order[1:]
-    return dist_order
+    return dist_order.astype(np.int32)
 
 
-@jit(float64[:, :, :](int64, int32[:], float32[:]), nopython=True)
+@njit(
+    float64[:, :, :](int32, int32[:], float32[:]),
+    parallel=True,
+    fastmath=False,
+)
 def __accumulate_bc(
     s_idx,
     pred_row,
@@ -481,4 +482,26 @@ def __accumulate_bc(
             betweennesses[0, w_idx, 0] += delta[w_idx]
             betweennesses[0, w_idx, 1] += delta_len[w_idx]
             betweennesses[0, w_idx, 2] += dist_w * delta_len[w_idx]
+    return betweennesses
+
+
+@njit(
+    float64[:, :, :](int32[:], int32[:, :], float32[:, :], progressbar_type),
+    parallel=True,
+    fastmath=False,
+)
+def _sum_bc(loop_indices, pred, dist, progress_proxy):
+    betweennesses = np.zeros((len(pred) + 1, len(pred), 3), dtype=np.float64)
+    # The first row corresponds to the betweenness of the edges [0, :, :]
+    # The rest are the pairwise node betweennesses [1:, :, :]
+    # The layers correspond to normal, length-scaled, and linearly scaled
+
+    # Loop over nodes to collect betweenness using pair-wise dependencies
+    for idx in prange(len(loop_indices)):  # pylint: disable=not-an-iterable
+        betweennesses += __accumulate_bc(
+            loop_indices[idx],
+            pred[loop_indices[idx]],
+            dist[loop_indices[idx]],
+        )
+        progress_proxy.update(1)
     return betweennesses

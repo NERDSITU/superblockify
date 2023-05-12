@@ -25,6 +25,7 @@ by executing (`environmentSetupVersionless.sh` in the working directory)
 ```bash
 conda create -n OSMnxPyrLab -c conda-forge --file requirements.txt
 conda activate OSMnxPyrLab
+pip install numba-progress
 conda env export | grep -v "^prefix: " > environment.yml
 ```
 
