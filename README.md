@@ -31,6 +31,11 @@ conda env export | grep -v "^prefix: " > environment.yml
 which does not have explicit versions, but might resolve dependency issues. Using
 `git diff environment.yml` the changes can be inspected.
 
+## Usage
+
+For a quick start there are example scripts in the [`examples/`](scripts/examples/)
+folder and a [minimal working example](scripts/mwe.py).
+
 ## Logging
 
 The logging is done using the `logging` module. The logging level can be set in the
