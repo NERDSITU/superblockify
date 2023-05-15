@@ -1,11 +1,13 @@
 """Measures for the metrics module."""
+from datetime import timedelta
+from time import time
+
 import networkx as nx
 import numpy as np
 from numba import njit, prange, int32, int64, float32, float64
-from numba_progress import ProgressBar
-from numba_progress.progress import progressbar_type
 from numpy import sum as npsum
 
+from ..config import logger
 from ..utils import __edges_to_1d, __edge_to_1d
 
 
@@ -309,7 +311,6 @@ def betweenness_centrality(
     # edge_list in numba compatible format, originally a list of tuples (idx_u, idx_v)
     # -> string of concatenated indices, padded with zeros (based on the max value) to
     # ensure that all strings have the same length and don't collide
-    padding = len(str(len(graph)))
     edges_uv_id = __edges_to_1d(
         np.array(
             [node_order.index(u) for u, _ in graph.edges(keys=False)], dtype=np.int32
@@ -317,16 +318,17 @@ def betweenness_centrality(
         np.array(
             [node_order.index(v) for _, v in graph.edges(keys=False)], dtype=np.int32
         ),
-        padding,
+        len(str(len(graph))),
     )
     # sort inplace to ensure that the edge indices are in ascending order
     edges_uv_id.sort()
 
+    start_time = time()
     b_c = _calculate_betweenness(
         edges_uv_id,
         predecessors,
         dist_matrix,
-        edge_padding=padding,
+        edge_padding=len(str(len(graph))),
         index_subset=seed.sample(range(len(node_order)), k=k) if k else None,
     )
     attr_suffix = attr_suffix if attr_suffix else ""
@@ -382,7 +384,7 @@ def betweenness_centrality(
                         __edge_to_1d(
                             node_order.index(u_id),
                             node_order.index(v_id),
-                            padding,
+                            len(str(len(graph))),
                         ),
                     )
                 ]
@@ -391,6 +393,10 @@ def betweenness_centrality(
             },
             f"edge_betweenness_{bc_type}{attr_suffix}",
         )
+    logger.debug(
+        "Calculated betweenness centrality in %s seconds.",
+        timedelta(seconds=time() - start_time),
+    )
 
 
 def _calculate_betweenness(edges_uv_id, pred, dist, edge_padding, index_subset=None):
@@ -418,18 +424,13 @@ def _calculate_betweenness(edges_uv_id, pred, dist, edge_padding, index_subset=N
     pred = pred.astype(np.int32)
     dist = dist.astype(np.float32)
 
-    with ProgressBar(
-        total=len(index_subset) if index_subset else len(node_indices),
-        desc="Calculating betweenness centrality",
-    ) as progress:
-        betweennesses = _sum_bc(
-            np.array(index_subset if index_subset else node_indices, dtype=np.int32),
-            pred,
-            dist,
-            edges_uv_id,
-            int32(edge_padding),
-            progress,
-        )
+    betweennesses = _sum_bc(
+        np.array(index_subset if index_subset else node_indices, dtype=np.int32),
+        pred,
+        dist,
+        edges_uv_id,
+        int32(edge_padding),
+    )
 
     return {
         "node": {
@@ -539,13 +540,11 @@ def __accumulate_bc(
 
 
 @njit(  # return of two 1d float64 arrays including node and edge betweenness
-    float64[:, :](
-        int32[:], int32[:, :], float32[:, :], int64[:], int32, progressbar_type
-    ),
+    float64[:, :](int32[:], int32[:, :], float32[:, :], int64[:], int32),
     parallel=True,
     fastmath=False,
 )
-def _sum_bc(loop_indices, pred, dist, edges_uv, edge_padding, progress_proxy):
+def _sum_bc(loop_indices, pred, dist, edges_uv, edge_padding):
     """Calculate the betweenness centrality for a single source node.
 
     Parameters
@@ -561,9 +560,6 @@ def _sum_bc(loop_indices, pred, dist, edges_uv, edge_padding, progress_proxy):
     edge_padding : int
         Number of digits to pad edge indices with. Used to convert edge indices
         to 1D indices.
-    progress_proxy : progressbar_type
-        Progress bar proxy.
-
     Returns
     -------
     node_bc : tuple of ndarray
@@ -588,5 +584,4 @@ def _sum_bc(loop_indices, pred, dist, edges_uv, edge_padding, progress_proxy):
             edges_uv,
             edge_padding,
         )
-        progress_proxy.update(1)
     return betweennesses
