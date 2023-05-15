@@ -343,7 +343,7 @@ display(colored_distances(
 To see a difference traversing the sparse graph, we will look at another example
 using the implementation of the algorithm in the package.
 
-## Second Example
+## Second example
 
 With the above described algorithm, the method
 [`shortest_paths_restricted()`](shortest_paths_restricted) is implemented, see
