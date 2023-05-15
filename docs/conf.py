@@ -23,6 +23,7 @@ autodoc_mock_imports = [
     "pandas",
     "geopandas",
     "shapely",
+    "numba",
 ]
 
 # -- Project information -----------------------------------------------------
@@ -101,4 +102,5 @@ intersphinx_mapping = {
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     "geopandas": ("https://geopandas.org/en/stable/", None),
     "shapely": ("https://shapely.readthedocs.io/en/stable", None),
+    "numba": ("https://numba.readthedocs.io/en/stable", None),
 }

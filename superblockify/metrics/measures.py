@@ -287,7 +287,8 @@ def betweenness_centrality(
     taken from the predecessors matrix. It is only used for parallel edges, to decide
     which edge to attribute the betweenness centrality to.
 
-    If there are <= 2 nodes, node betweenness is 0 for all nodes. If there are <= 1
+    If there are :math:`<=` 2 nodes, node betweenness is 0 for all nodes. If there are
+    :math:`<=` 1
     edges, edge betweenness is 0 for all edges.
 
     References
@@ -522,11 +523,8 @@ def __accumulate_bc(
         # edges_uv
         edge_idx = np.searchsorted(edges_uv, __edge_to_1d(pre_w, w_idx, edge_padding))
         # Add edge betweenness contribution
-        # betweennesses[pre_w + 1, w_idx, 0] += coeff
         betweennesses[len(pred_row) + edge_idx, 0] += coeff
-        # betweennesses[pre_w + 1, w_idx, 1] += coeff_len
         betweennesses[len(pred_row) + edge_idx, 1] += coeff_len
-        # betweennesses[pre_w + 1, w_idx, 2] += dist_w * coeff_len
         betweennesses[len(pred_row) + edge_idx, 2] += dist_w * coeff_len
         # Add to dependency for further nodes/loops
         delta[pre_w] += coeff

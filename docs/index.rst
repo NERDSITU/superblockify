@@ -13,7 +13,7 @@ You can also find the `API documentation <api/index.html>`__.
    :maxdepth: 1
    :glob:
 
-   guide/getting_started
+   getting_started
    guide/index
    api/index
    changelog
