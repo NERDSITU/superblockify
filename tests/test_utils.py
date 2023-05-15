@@ -3,13 +3,15 @@ from os import remove
 from os.path import exists
 
 import pytest
-from numpy import array, array_equal
+from numpy import array, array_equal, int32, int64
 
 from superblockify.config import TEST_DATA_PATH
 from superblockify.utils import (
     load_graph_from_place,
     has_pairwise_overlap,
     compare_dicts,
+    __edge_to_1d,
+    __edges_to_1d,
 )
 from tests.conftest import mark_xfail_flaky_download
 
@@ -214,3 +216,42 @@ def test_has_pairwise_overlap_exception(lists):
 def test_compare_dicts(dict1, dict2, expected):
     """Test `compare_dicts`."""
     assert compare_dicts(dict1, dict2) == expected
+
+
+@pytest.mark.parametrize(
+    "u_idx,v_idx,max_len,expected",
+    [
+        (0, 0, 1, "00"),
+        (0, 1, 1, "01"),
+        (1, 0, 1, "10"),
+        (1, 1, 1, "11"),
+        (0, 0, 2, "000"),
+        (12, 34, 2, "1234"),
+        (12, 34, 3, "12034"),
+        (12, 34, 4, "120034"),
+        (789, 12345, 5, "0078912345"),
+        (50, 50, 0, "100"),  # unintended use case
+        (50, 50, 1, "550"),  # unintended use case
+    ],
+)
+def test___edge_to_1d(u_idx, v_idx, max_len, expected):
+    """Test `_edge_to_1d`."""
+    assert __edge_to_1d(u_idx, v_idx, max_len) == int(expected)
+
+
+@pytest.mark.parametrize(
+    "u_idx,v_idx,max_len,expected",
+    [
+        ([0], [0], 1, [0]),
+        ([0], [1], 1, [1]),
+        ([1, 1], [1, 0], 1, [11, 10]),
+        ([12, 9, 8], [34, 7, 6], 2, [1234, 907, 806]),
+        ([787, 789], [12345, 12345], 5, [78712345, 78912345]),
+    ],
+)
+def test___edges_to_1d(u_idx, v_idx, max_len, expected):
+    """Test `_edges_to_1d`."""
+    assert array_equal(
+        __edges_to_1d(array(u_idx, dtype=int32), array(v_idx, dtype=int32), max_len),
+        array(expected, dtype=int64),
+    )

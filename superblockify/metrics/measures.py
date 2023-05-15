@@ -1,10 +1,12 @@
 """Measures for the metrics module."""
 import networkx as nx
 import numpy as np
-from numba import njit, int32, float32, float64, prange
+from numba import njit, prange, int32, int64, float32, float64
 from numba_progress import ProgressBar
 from numba_progress.progress import progressbar_type
 from numpy import sum as npsum
+
+from ..utils import __edges_to_1d, __edge_to_1d
 
 
 def calculate_directness(distance_matrix, measure1, measure2):
@@ -304,13 +306,27 @@ def betweenness_centrality(
     ):
         raise ValueError(f"Weight attribute {weight} not found on all edges")
 
+    # edge_list in numba compatible format, originally a list of tuples (idx_u, idx_v)
+    # -> string of concatenated indices, padded with zeros (based on the max value) to
+    # ensure that all strings have the same length and don't collide
+    padding = len(str(len(graph)))
+    edges_uv_id = __edges_to_1d(
+        np.array(
+            [node_order.index(u) for u, _ in graph.edges(keys=False)], dtype=np.int32
+        ),
+        np.array(
+            [node_order.index(v) for _, v in graph.edges(keys=False)], dtype=np.int32
+        ),
+        padding,
+    )
+    # sort inplace to ensure that the edge indices are in ascending order
+    edges_uv_id.sort()
+
     b_c = _calculate_betweenness(
-        # [
-        #     (node_order.index(u), node_order.index(v))
-        #     for u, v in graph.edges(keys=False)
-        # ],
+        edges_uv_id,
         predecessors,
         dist_matrix,
+        edge_padding=padding,
         index_subset=seed.sample(range(len(node_order)), k=k) if k else None,
     )
     attr_suffix = attr_suffix if attr_suffix else ""
@@ -360,7 +376,16 @@ def betweenness_centrality(
                         graph.get_edge_data(u_id, v_id).items(),
                         key=lambda item: item[1][weight] if weight else 0,
                     )[0],
-                ): edge_bc[node_order.index(u_id), node_order.index(v_id)]
+                ): edge_bc[
+                    np.searchsorted(
+                        edges_uv_id,
+                        __edge_to_1d(
+                            node_order.index(u_id),
+                            node_order.index(v_id),
+                            padding,
+                        ),
+                    )
+                ]
                 * scale
                 for (u_id, v_id) in graph.edges(keys=False)
             },
@@ -368,20 +393,22 @@ def betweenness_centrality(
         )
 
 
-def _calculate_betweenness(pred, dist, index_subset=None):
+def _calculate_betweenness(edges_uv_id, pred, dist, edge_padding, index_subset=None):
     """Calculate the betweenness centralities for the nodes and edges.
 
     Parameters
     ----------
-    # edge_list : list of tuples
-    #     List of edges in the graph, each edge is represented by a tuple of the two
-    #     node indices
+    edges_uv_id : np.ndarray
+        List of edges in the graph, as returned by
+        :func:`superblockify.metrics.measures.__edges_to_1d`
     pred : np.ndarray
         Predecessors matrix of the graph, as returned by
         :func:`superblockify.metrics.distances.calculate_path_distance_matrix`
     dist : np.ndarray
         Distance matrix of the graph, as returned by
         :func:`superblockify.metrics.distances.calculate_path_distance_matrix`
+    edge_padding : int
+        Number of digits to pad the edge indices with, :attr:`max_len` of the nodes
     index_subset : list, optional
         List of node indices to calculate the betweenness centrality for, by default
         None. Used to calculate k-betweenness centrality
@@ -399,19 +426,21 @@ def _calculate_betweenness(pred, dist, index_subset=None):
             np.array(index_subset if index_subset else node_indices, dtype=np.int32),
             pred,
             dist,
+            edges_uv_id,
+            int32(edge_padding),
             progress,
         )
 
     return {
         "node": {
-            "normal": betweennesses[0, :, 0],
-            "length": betweennesses[0, :, 1],
-            "linear": betweennesses[0, :, 2],
+            "normal": betweennesses[: len(node_indices), 0],
+            "length": betweennesses[: len(node_indices), 1],
+            "linear": betweennesses[: len(node_indices), 2],
         },
         "edge": {
-            "normal": betweennesses[1:, :, 0],
-            "length": betweennesses[1:, :, 1],
-            "linear": betweennesses[1:, :, 2],
+            "normal": betweennesses[len(node_indices) :, 0],
+            "length": betweennesses[len(node_indices) :, 1],
+            "linear": betweennesses[len(node_indices) :, 2],
         },
     }
 
@@ -422,12 +451,12 @@ def _single_source_given_paths_simplified(dist_row):
 
     Parameters
     ----------
-    dist_row : np.array
+    dist_row : np.ndarray, 1D
         Distance row un-sorted.
 
     Returns
     -------
-    S : np.array
+    S : np.ndarray, 1D
         List of node indices in order of distance, non-decreasing.
 
     Notes
@@ -445,17 +474,35 @@ def _single_source_given_paths_simplified(dist_row):
     return dist_order.astype(np.int32)
 
 
-@njit(
-    float64[:, :, :](int32, int32[:], float32[:]),
-    parallel=True,
-    fastmath=False,
-)
+@njit(float64[:, :](int32, int32[:], float32[:], int64[:], int32))
 def __accumulate_bc(
     s_idx,
     pred_row,
     dist_row,
+    edges_uv,
+    edge_padding,
 ):
-    betweennesses = np.zeros((len(pred_row) + 1, len(pred_row), 3), dtype=np.float64)
+    """Calculate the betweenness centrality for a single source node.
+
+    Parameters
+    ----------
+    s_idx : int
+        Index of the source node.
+    pred_row : np.ndarray
+        Predecessors row of the graph.
+    dist_row : np.ndarray
+        Distance row of the graph.
+    edges_uv : np.ndarray, 1D
+        Array of concatenated edge indices, sorted in ascending order.
+    edge_padding : int
+        Number of digits to pad the edge indices with, :attr:`max_len` of the nodes.
+
+    Returns
+    -------
+    node_bc : np.ndarray
+        Array of node and edge betweenness centralities.
+    """
+    betweennesses = np.zeros((len(pred_row) + len(edges_uv), 3), dtype=np.float64)
 
     s_queue_idx = _single_source_given_paths_simplified(dist_row)
     # delta = dict.fromkeys(node_indices, 0)
@@ -470,31 +517,67 @@ def __accumulate_bc(
         # Calculate dependency contribution
         coeff = 1 + delta[w_idx]
         coeff_len = 1 / dist_w + delta[w_idx]
+        # Find concatenated edge index (u, v) for edge (pre_w, w_idx) in presorted
+        # edges_uv
+        edge_idx = np.searchsorted(edges_uv, __edge_to_1d(pre_w, w_idx, edge_padding))
         # Add edge betweenness contribution
-        betweennesses[pre_w + 1, w_idx, 0] += coeff
-        betweennesses[pre_w + 1, w_idx, 1] += coeff_len
-        betweennesses[pre_w + 1, w_idx, 2] += dist_w * coeff_len
+        # betweennesses[pre_w + 1, w_idx, 0] += coeff
+        betweennesses[len(pred_row) + edge_idx, 0] += coeff
+        # betweennesses[pre_w + 1, w_idx, 1] += coeff_len
+        betweennesses[len(pred_row) + edge_idx, 1] += coeff_len
+        # betweennesses[pre_w + 1, w_idx, 2] += dist_w * coeff_len
+        betweennesses[len(pred_row) + edge_idx, 2] += dist_w * coeff_len
         # Add to dependency for further nodes/loops
         delta[pre_w] += coeff
         delta_len[pre_w] += coeff_len
         # Add node betweenness contribution
         if w_idx != s_idx:
-            betweennesses[0, w_idx, 0] += delta[w_idx]
-            betweennesses[0, w_idx, 1] += delta_len[w_idx]
-            betweennesses[0, w_idx, 2] += dist_w * delta_len[w_idx]
+            betweennesses[w_idx, 0] += delta[w_idx]
+            betweennesses[w_idx, 1] += delta_len[w_idx]
+            betweennesses[w_idx, 2] += dist_w * delta_len[w_idx]
     return betweennesses
 
 
-@njit(
-    float64[:, :, :](int32[:], int32[:, :], float32[:, :], progressbar_type),
+@njit(  # return of two 1d float64 arrays including node and edge betweenness
+    float64[:, :](
+        int32[:], int32[:, :], float32[:, :], int64[:], int32, progressbar_type
+    ),
     parallel=True,
     fastmath=False,
 )
-def _sum_bc(loop_indices, pred, dist, progress_proxy):
-    betweennesses = np.zeros((len(pred) + 1, len(pred), 3), dtype=np.float64)
-    # The first row corresponds to the betweenness of the edges [0, :, :]
-    # The rest are the pairwise node betweennesses [1:, :, :]
-    # The layers correspond to normal, length-scaled, and linearly scaled
+def _sum_bc(loop_indices, pred, dist, edges_uv, edge_padding, progress_proxy):
+    """Calculate the betweenness centrality for a single source node.
+
+    Parameters
+    ----------
+    loop_indices : np.ndarray
+        Array of node indices to loop over.
+    pred : np.ndarray
+        Predecessors row of the graph.
+    dist : np.ndarray
+        Distance row of the graph.
+    edges_uv : np.ndarray, 1D
+        Array of concatenated edge u and v indices, sorted in ascending order.
+    edge_padding : int
+        Number of digits to pad edge indices with. Used to convert edge indices
+        to 1D indices.
+    progress_proxy : progressbar_type
+        Progress bar proxy.
+
+    Returns
+    -------
+    node_bc : tuple of ndarray
+        Tuple of node betweenness and edge betweenness.
+
+    Notes
+    -----
+    The edges_u and edges_v arrays are sorted together, this way indices can be
+    found using a binary search. This is faster than using np.where.
+    """
+
+    betweennesses = np.zeros((len(pred) + len(edges_uv), 3), dtype=np.float64)
+    # The first len(pred) rows correspond to node betweenness, the rest to edge
+    # The 3 layers correspond to normal, length-scaled, and linearly scaled
 
     # Loop over nodes to collect betweenness using pair-wise dependencies
     for idx in prange(len(loop_indices)):  # pylint: disable=not-an-iterable
@@ -502,6 +585,8 @@ def _sum_bc(loop_indices, pred, dist, progress_proxy):
             loop_indices[idx],
             pred[loop_indices[idx]],
             dist[loop_indices[idx]],
+            edges_uv,
+            edge_padding,
         )
         progress_proxy.update(1)
     return betweennesses
