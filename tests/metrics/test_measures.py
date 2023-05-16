@@ -15,7 +15,7 @@ from networkx import (
     complete_graph,
     wheel_graph,
 )
-from numpy import full, array, inf, array_equal, int32, allclose
+from numpy import full, array, inf, array_equal, int32, int64, allclose
 from scipy.sparse.csgraph import dijkstra
 
 from superblockify.metrics.measures import (
@@ -26,6 +26,7 @@ from superblockify.metrics.measures import (
     betweenness_centrality,
     _calculate_betweenness,
 )
+from superblockify.utils import __edges_to_1d
 
 
 @pytest.mark.parametrize(
@@ -532,26 +533,41 @@ def test_calculate_betweenness_scales(graph, expected):
 def test__calculate_betweenness_unscaled(graph, expected):
     """Test calculation of betweenness centrality graph to dict, unscaled."""
     sparse_graph = to_scipy_sparse_array(graph, nodelist=sorted(graph))
+    padding = len(str(len(graph)))
+    edges = __edges_to_1d(
+        array([u for u, _ in graph.edges(keys=False)], dtype=int32),
+        array([v for _, v in graph.edges(keys=False)], dtype=int32),
+        padding,
+    )
+    edges.sort()
     dist, pred = dijkstra(sparse_graph, return_predecessors=True, directed=True)
-    b_c = _calculate_betweenness(pred.astype(int32), dist, index_subset=None)
+    b_c = _calculate_betweenness(
+        edges_uv_id=edges,
+        pred=pred.astype(int32),
+        dist=dist,
+        edge_padding=padding,
+        index_subset=None,
+    )
     assert array_equal(b_c["node"]["normal"], expected["normal"])
     assert allclose(b_c["node"]["length"], expected["length"])
     assert allclose(b_c["node"]["linear"], expected["linear"])
 
 
 @pytest.mark.parametrize(
-    "dist,pred,expected",
+    "edges_uv_id,dist,pred,expected",
     [
-        (
-            array([[0, 1, 2], [1, 0, 1], [2, 1, 0]]),
-            array([[0, 0, 0], [1, 1, 1], [2, 2, 2]]),
+        (  # fully connected 3 nodes
+            array([1, 2, 10, 12, 20, 21], dtype=int64),
+            array([[0, 1, 1], [1, 0, 1], [1, 1, 0]]),
+            array([[-9999, 0, 0], [1, -9999, 1], [2, 2, -9999]]),
             {
                 "normal": array([0.0, 0.0, 0.0]),
                 "length": array([0.0, 0.0, 0.0]),
                 "linear": array([0.0, 0.0, 0.0]),
             },
         ),
-        (
+        (  # path graph 0-1-2
+            array([1, 10, 12, 21], dtype=int64),
             array([[0, 1, 2], [1, 0, 1], [2, 1, 0]]),
             array([[-9999, 0, 1], [1, -9999, 1], [1, 2, -9999]]),
             {
@@ -560,7 +576,8 @@ def test__calculate_betweenness_unscaled(graph, expected):
                 "linear": array([0.0, 1.0, 0.0]),
             },
         ),
-        (
+        (  # path graph 0-1-2-3
+            array([1, 10, 12, 21, 23, 32], dtype=int64),
             array([[0, 1, 2, 3], [1, 0, 1, 2], [2, 1, 0, 1], [3, 2, 1, 0]]),
             array(
                 [[-9999, 0, 1, 2], [1, -9999, 1, 2], [1, 2, -9999, 2], [1, 2, 3, -9999]]
@@ -571,7 +588,8 @@ def test__calculate_betweenness_unscaled(graph, expected):
                 "linear": array([0.0, 8 / 3, 8 / 3, 0.0]),
             },
         ),
-        (
+        (  # path graph 0-1-2-3-4
+            array([1, 10, 12, 21, 23, 32, 34, 43], dtype=int64),
             array(
                 [
                     [0, 1, 2, 3, 4],
@@ -596,7 +614,8 @@ def test__calculate_betweenness_unscaled(graph, expected):
                 "linear": array([0.0, 53 / 12, 25 / 3, 53 / 12, 0.0]),
             },
         ),
-        (
+        (  # star graph, 0 center
+            array([1, 2, 3, 10, 20, 30], dtype=int64),
             array([[0, 1, 1, 1], [1, 0, 2, 2], [1, 2, 0, 2], [1, 2, 2, 0]]),
             array(
                 [[-9999, 0, 0, 0], [1, -9999, 0, 0], [2, 0, -9999, 0], [3, 0, 0, -9999]]
@@ -609,9 +628,12 @@ def test__calculate_betweenness_unscaled(graph, expected):
         ),
     ],
 )
-def test__calculate_betweenness_unscaled_paths(dist, pred, expected):
+def test__calculate_betweenness_unscaled_paths(edges_uv_id, dist, pred, expected):
     """Test calculation of betweenness centrality paths to dict, unscaled."""
-    b_c = _calculate_betweenness(pred.astype(int32), dist, index_subset=None)
+    padding = len(str(len(dist)))
+    b_c = _calculate_betweenness(
+        edges_uv_id, pred.astype(int32), dist, edge_padding=padding, index_subset=None
+    )
     assert array_equal(b_c["node"]["normal"], expected["normal"])
     assert allclose(b_c["node"]["length"], expected["length"])
     assert allclose(b_c["node"]["linear"], expected["linear"])
