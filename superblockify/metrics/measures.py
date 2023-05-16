@@ -288,8 +288,7 @@ def betweenness_centrality(
     which edge to attribute the betweenness centrality to.
 
     If there are :math:`<=` 2 nodes, node betweenness is 0 for all nodes. If there are
-    :math:`<=` 1
-    edges, edge betweenness is 0 for all edges.
+    :math:`<=` 1 edges, edge betweenness is 0 for all edges.
 
     References
     ----------
@@ -309,29 +308,36 @@ def betweenness_centrality(
     ):
         raise ValueError(f"Weight attribute {weight} not found on all edges")
 
-    # edge_list in numba compatible format, originally a list of tuples (idx_u, idx_v)
-    # -> string of concatenated indices, padded with zeros (based on the max value) to
-    # ensure that all strings have the same length and don't collide
-    edges_uv_id = __edges_to_1d(
-        np.array(
-            [node_order.index(u) for u, _ in graph.edges(keys=False)], dtype=np.int32
-        ),
-        np.array(
-            [node_order.index(v) for _, v in graph.edges(keys=False)], dtype=np.int32
-        ),
-        len(str(len(graph))),
-    )
-    # sort inplace to ensure that the edge indices are in ascending order
-    edges_uv_id.sort()
-
     start_time = time()
-    b_c = _calculate_betweenness(
-        edges_uv_id,
-        predecessors,
-        dist_matrix,
-        edge_padding=len(str(len(graph))),
-        index_subset=seed.sample(range(len(node_order)), k=k) if k else None,
-    )
+    if len(graph) == 1:
+        b_c = {"node": {"normal": [0], "length": [0], "linear": [0]}, "edge": {}}
+    else:
+        # edge_list in numba compatible format, originally a list of tuples
+        # (idx_u, idx_v) -> string of concatenated indices, padded with zeros (based
+        # on the max value) to ensure that all strings have the same length and don't
+        # collide
+        edges_uv_id = __edges_to_1d(
+            np.array(
+                [node_order.index(u) for u, _ in graph.edges(keys=False)],
+                dtype=np.int32,
+            ),
+            np.array(
+                [node_order.index(v) for _, v in graph.edges(keys=False)],
+                dtype=np.int32,
+            ),
+            len(str(len(graph))),
+        )
+        # sort inplace to ensure that the edge indices are in ascending order
+        edges_uv_id.sort()
+
+        b_c = _calculate_betweenness(
+            edges_uv_id,
+            predecessors,
+            dist_matrix,
+            edge_padding=len(str(len(graph))),
+            index_subset=seed.sample(range(len(node_order)), k=k) if k else None,
+        )
+
     attr_suffix = attr_suffix if attr_suffix else ""
 
     # Normalize betweenness values and write to graph
@@ -574,7 +580,7 @@ def _sum_bc(loop_indices, pred, dist, edges_uv, edge_padding):
     # The 3 layers correspond to normal, length-scaled, and linearly scaled
 
     # Loop over nodes to collect betweenness using pair-wise dependencies
-    for idx in prange(len(loop_indices)):  # pylint: disable=not-an-iterable
+    for idx in prange(loop_indices.shape[0]):  # pylint: disable=not-an-iterable
         betweennesses += __accumulate_bc(
             loop_indices[idx],
             pred[loop_indices[idx]],
