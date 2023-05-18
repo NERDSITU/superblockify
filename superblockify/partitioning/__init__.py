@@ -22,11 +22,9 @@ from .plot import (
 )
 
 # List of all supported partitioners. For all partitioners that are subclasses of
-# BasePartitioner, but not BasePartitioner itself.
+# BasePartitioner or its subclasses, but not BasePartitioner itself.
 __all_partitioners__ = [
     part
-    for part in globals().values()
-    if isclass(part)
-    and issubclass(part, BasePartitioner)
-    and part is not BasePartitioner
+    for part in locals().values()
+    if isclass(part) and BasePartitioner in part.mro() and part is not BasePartitioner
 ]

@@ -1,15 +1,11 @@
 """Approach only based on street type."""
-from networkx import weakly_connected_components
 
-from ..base import BasePartitioner
-from ...attribute import (
-    new_edge_attribute_by_function,
-    get_edge_subgraph_with_attribute_value,
-)
+from .attribute import AttributePartitioner
+from ...attribute import new_edge_attribute_by_function
 from ...config import logger
 
 
-class ResidentialPartitioner(BasePartitioner):
+class ResidentialPartitioner(AttributePartitioner, attribute="residential"):
     """Partitioner that only uses street type to partition the graph.
 
     This partitioner groups edges by their street type. Nodes that only connect to
@@ -23,46 +19,17 @@ class ResidentialPartitioner(BasePartitioner):
     partition the graph into meaningful subgraphs.
     """
 
-    def partition_graph(self, make_plots=False, **kwargs):
-        """Group by street type and remove small components.
+    def write_attribute(self, **kwargs):
+        """Group by street type.
 
-        Construct subgraphs for nodes that only contain residential edges around them.
-
-        Parameters
-        ----------
-        make_plots : bool, optional
-            Whether to show and save plots of the partitioning analysis, by default
-            False
+        Write 0 to :attr:`attribute_label` if the edge is or contains a residential
+        street, 1 otherwise.
         """
-
-        self.attribute_label = "residential"
-
-        # Write to 'residential' attribute 1 if edge['highway'] is or contains
-        # 'residential', None otherwise
+        logger.debug("Writing residential attribute to graph.")
         new_edge_attribute_by_function(
             self.graph,
             # check if 'residential' or 'living_street' == highway or in highway
-            lambda h: 1 if h in ["residential", "living_street"] else 0,
+            lambda h: 0 if h in ["residential", "living_street"] else 1,
             source_attribute="highway",
-            destination_attribute=self.attribute_label,
+            destination_attribute=ResidentialPartitioner.attribute_label,
         )
-
-        self.sparsified = get_edge_subgraph_with_attribute_value(
-            self.graph, self.attribute_label, 0
-        )
-        logger.debug(
-            "Found %d edges that are not residential, find LCC of them.",
-            len(self.sparsified.edges),
-        )
-
-        # Find the largest connected component of the non-residential edges
-        # Nodes in of the largest weakly connected component
-        self.sparsified = max(weakly_connected_components(self.sparsified), key=len)
-        # Construct subgraph of nodes in the largest weakly connected component
-        self.sparsified = self.graph.subgraph(self.sparsified)
-        # Graph was spanned with nodes, disregarding edge types
-        self.sparsified = get_edge_subgraph_with_attribute_value(
-            self.sparsified, self.attribute_label, 0
-        )
-
-        self.set_components_from_sparsified()
