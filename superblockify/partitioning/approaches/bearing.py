@@ -23,6 +23,8 @@ class BearingPartitioner(BasePartitioner):
     Partitions based on the edge bearings.
     """
 
+    attribute_label = "bearing_group"
+
     def __init__(self, *args, **kwargs):
         """Construct a BearingPartitioner"""
         super().__init__(*args, **kwargs)
@@ -102,7 +104,6 @@ class BearingPartitioner(BasePartitioner):
             plt.show()
 
         # Write grouping attribute to graph
-        self.attribute_label = "bearing_group"
         group_bearing = nx.get_edge_attributes(self.residential_graph, "bearing_90")
         logger.debug("Writing attribute 'bearing_group' to graph.")
         for edge, bearing in group_bearing.items():
@@ -111,7 +112,9 @@ class BearingPartitioner(BasePartitioner):
             else:
                 i = bisect_right(self._inter_vals["boundaries"], bearing)
                 group_bearing[edge] = self._inter_vals["center_values"][i - 1]
-        nx.set_edge_attributes(self.graph, group_bearing, self.attribute_label)
+        nx.set_edge_attributes(
+            self.graph, group_bearing, self.__class__.attribute_label
+        )
 
         # Write partition dict
         self.partitions = [
@@ -124,12 +127,14 @@ class BearingPartitioner(BasePartitioner):
         ]
 
         # Make subgraphs for each partition
-        # Overwrite `self.attribute_label` so residential edges are not added to
-        # subgraphs.
+        # Overwrite `self.__class__.attribute_label` so residential edges are not added
+        # to subgraphs.
         for node1, node2, key in self.graph.edges(keys=True):
             # check if edge is in self.residential_graph
             if (node1, node2) not in self.residential_graph.edges:
-                self.graph.edges[node1, node2, key][self.attribute_label] = None
+                self.graph.edges[node1, node2, key][
+                    self.__class__.attribute_label
+                ] = None
 
         self.make_subgraphs_from_attribute(
             split_disconnected=True,
