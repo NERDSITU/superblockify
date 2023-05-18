@@ -138,10 +138,12 @@ class Metric:
         partitioner : BasePartitioner
             The partitioner object to calculate the metrics for
         """
-        if self.node_list is None:
-            self.node_list = partitioner.get_sorted_node_list()  # full node list
+        if self.node_list is None and partitioner.partitions is None:
+            self.node_list = list(partitioner.graph.nodes)
+        else:
+            self.node_list = partitioner.get_sorted_node_list()
 
-        if self.unit == "distance" and "E" not in self.distance_matrix:
+        if self.unit == "distance":
             self.distance_matrix["E"] = calculate_euclidean_distance_matrix_projected(
                 partitioner.graph,
                 node_order=self.node_list,
@@ -206,6 +208,7 @@ class Metric:
         """
         # pylint: disable=unused-argument
 
+        #  Calculate also in case it has been called before, as graph might have changed
         self.calculate_before(partitioner, make_plots=make_plots)
 
         if self.unit == "distance":
