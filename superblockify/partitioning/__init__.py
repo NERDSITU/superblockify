@@ -5,6 +5,7 @@ from inspect import isclass
 from .base import BasePartitioner
 from .approaches import (
     BearingPartitioner,
+    BetweennessPartitioner,
     DummyPartitioner,
     ResidentialPartitioner,
 )
