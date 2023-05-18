@@ -14,9 +14,6 @@ class DummyPartitioner(BasePartitioner):
     rest as partitions.
     """
 
-    # The label under which the partition attribute is saved in the `self.graph`.
-    attribute_label = "dummy_attribute"
-
     def partition_graph(self, make_plots=False, **kwargs):
         """Run method. Must be overridden.
 
@@ -24,6 +21,9 @@ class DummyPartitioner(BasePartitioner):
               in the middle fifth of the graph, then the LCC. Partitions are then
               the WCCs of the rest.
         """
+
+        # The label under which the partition attribute is saved in the `self.graph`.
+        self.attribute_label = "dummy_attribute"
 
         id_x_coords = self.graph.nodes(data="x")
 

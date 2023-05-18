@@ -63,9 +63,6 @@ class BasePartitioner(ABC):
 
     # pylint: disable=too-many-instance-attributes
 
-    # Class attributes
-    attribute_label: str | None = None
-
     def __init__(
         self,
         name="unnamed",
@@ -159,6 +156,7 @@ class BasePartitioner(ABC):
         self.partitions: List[dict] | None = None
         self.components: List[dict] | None = None
         self.sparsified = None
+        self.attribute_label: str | None = None
         self.attr_value_minmax: tuple | None = None
         self.metric = Metric(unit)
 
@@ -269,7 +267,7 @@ class BasePartitioner(ABC):
         from the `run` method.
         """
 
-        self.__class__.attribute_label = "example_label"
+        self.attribute_label = "example_label"
         # Define partitions
         self.partitions = [
             {"name": "zero", "value": 0.0},
@@ -348,7 +346,7 @@ class BasePartitioner(ABC):
         """Make component subgraphs from attribute.
 
         Method for child classes to make subgraphs from the attribute
-        `self.__class__.attribute_label`, to analyze (dis-)connected components.
+        `self.attribute_label`, to analyze (dis-)connected components.
         For each partition makes a subgraph with the edges that have the
         attribute value of the partition.
         Writes them to `self.component[i]["subgraph"]` with the name of the
@@ -379,7 +377,7 @@ class BasePartitioner(ABC):
         logger.info(
             "Making subgraphs for %s with attribute `%s`",
             self.name,
-            self.__class__.attribute_label,
+            self.attribute_label,
         )
 
         found_disconnected = False
@@ -389,7 +387,7 @@ class BasePartitioner(ABC):
         for part in self.partitions:
             logger.debug("Making subgraph for partitions %s", part)
             part["subgraph"] = attribute.get_edge_subgraph_with_attribute_value(
-                self.graph, self.__class__.attribute_label, part["value"]
+                self.graph, self.attribute_label, part["value"]
             )
             part["num_edges"] = len(part["subgraph"].edges)
             part["num_nodes"] = len(part["subgraph"].nodes)
@@ -421,7 +419,7 @@ class BasePartitioner(ABC):
                         for u, v, k, d in self.graph.subgraph(component).edges(
                             data=True, keys=True
                         )
-                        if d.get(self.__class__.attribute_label) == part["value"]
+                        if d.get(self.attribute_label) == part["value"]
                     )
                     self.components.append(
                         {
@@ -457,7 +455,7 @@ class BasePartitioner(ABC):
 
         if split_disconnected:
             self.overwrite_attributes_of_ignored_components(
-                attribute_name=self.__class__.attribute_label, attribute_value=None
+                attribute_name=self.attribute_label, attribute_value=None
             )
 
     def set_components_from_sparsified(self):
@@ -549,7 +547,7 @@ class BasePartitioner(ABC):
         of ignored components. Overwrites the attribute `attribute_name` with
         `attribute_value` for all components that have the attribute `ignore` set to
         True.
-        This is useful for example to overwrite the `self.__class__.attribute_label`
+        This is useful for example to overwrite the `self.attribute_label`
         attribute with `None` to make the subgraph invisible in the network plot
         (`self.plot_partition_graph()`).
 
@@ -703,7 +701,7 @@ class BasePartitioner(ABC):
                 f"{self.__class__.__name__} has no partitions, "
                 f"run before plotting graph."
             )
-        if self.__class__.attribute_label is None:
+        if self.attribute_label is None:
             raise AssertionError(
                 f"{self.__class__.__name__} has no `attribute_label` yet, "
                 f"run before plotting graph."

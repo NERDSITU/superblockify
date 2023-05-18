@@ -5,7 +5,7 @@ from ...attribute import new_edge_attribute_by_function
 from ...config import logger
 
 
-class ResidentialPartitioner(AttributePartitioner, attribute="residential"):
+class ResidentialPartitioner(AttributePartitioner):
     """Partitioner that only uses street type to partition the graph.
 
     This partitioner groups edges by their street type. Nodes that only connect to
@@ -25,11 +25,12 @@ class ResidentialPartitioner(AttributePartitioner, attribute="residential"):
         Write 0 to :attr:`attribute_label` if the edge is or contains a residential
         street, 1 otherwise.
         """
+        self.attribute_label = "residential"
         logger.debug("Writing residential attribute to graph.")
         new_edge_attribute_by_function(
             self.graph,
             # check if 'residential' or 'living_street' == highway or in highway
             lambda h: 0 if h in ["residential", "living_street"] else 1,
             source_attribute="highway",
-            destination_attribute=ResidentialPartitioner.attribute_label,
+            destination_attribute=self.attribute_label,
         )

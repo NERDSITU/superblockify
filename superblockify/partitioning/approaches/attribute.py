@@ -21,31 +21,6 @@ class AttributePartitioner(BasePartitioner, ABC):
     nodes. The rest of the graph falls apart into LTNs.
     """
 
-    @classmethod
-    def __init_subclass__(cls, attribute=None, **kwargs):
-        """Initialize the partitioner.
-
-        Parameters
-        ----------
-        attribute : str
-            The attribute name to use for partitioning.
-        **kwargs
-            Keyword arguments passed to the parent class
-            :class:`superblockify.partitioning.base.BasePartitioner`.
-
-        Raises
-        ------
-        ValueError
-            If `attribute` is not a string.
-
-        """
-        if not isinstance(attribute, str):
-            raise ValueError(
-                f"Attribute must be a string, but is of type {type(attribute)}."
-            )
-        super().__init_subclass__(**kwargs)
-        cls.attribute_label = attribute
-
     @abstractmethod
     def write_attribute(self, **kwargs):
         """Write boolean edge attribute :attr:`attribute_label` to the graph.
@@ -70,12 +45,12 @@ class AttributePartitioner(BasePartitioner, ABC):
         self.write_attribute(make_plots=make_plots, **kwargs)
 
         self.sparsified = get_edge_subgraph_with_attribute_value(
-            self.graph, self.__class__.attribute_label, 1
+            self.graph, self.attribute_label, 1
         )
         logger.debug(
             "Found %d edges with attribute %s == 1, find LCC of them.",
             len(self.sparsified.edges),
-            self.__class__.attribute_label,
+            self.attribute_label,
         )
         # Find the largest connected component in the sparsified graph
         # Nodes in of the largest weakly connected component
@@ -84,7 +59,7 @@ class AttributePartitioner(BasePartitioner, ABC):
         self.sparsified = self.graph.subgraph(self.sparsified)
         # Graph was spanned with nodes, disregarding edge types
         self.sparsified = get_edge_subgraph_with_attribute_value(
-            self.sparsified, self.__class__.attribute_label, 1
+            self.sparsified, self.attribute_label, 1
         )
         # Set the components of the graph - LTNs that fall apart
         self.set_components_from_sparsified()

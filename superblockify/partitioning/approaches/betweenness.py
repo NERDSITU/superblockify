@@ -6,7 +6,7 @@ from ...attribute import new_edge_attribute_by_function
 from ...config import logger
 
 
-class BetweennessPartitioner(AttributePartitioner, attribute="betweenness_percentile"):
+class BetweennessPartitioner(AttributePartitioner):
     """Partitioner using betweenness centrality of nodes and edges.
 
     Set sparsified graph from edges or nodes with high betweenness centrality.
@@ -38,6 +38,8 @@ class BetweennessPartitioner(AttributePartitioner, attribute="betweenness_percen
         ValueError
             If `percentile` is not between, 0.0 and 100.0.
         """
+        self.attribute_label = "betweenness_percentile"
+
         logger.debug("Writing edge betweenness attribute to graph.")
         if not isinstance(percentile, (float, int)) or not 0.0 < percentile < 100.0:
             raise ValueError(
@@ -79,5 +81,5 @@ class BetweennessPartitioner(AttributePartitioner, attribute="betweenness_percen
             self.graph,
             lambda x: 0 if x < threshold else 1,
             source_attribute=f"edge_betweenness_{scaling}",
-            destination_attribute=BetweennessPartitioner.attribute_label,
+            destination_attribute=self.attribute_label,
         )

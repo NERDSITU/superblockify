@@ -23,7 +23,7 @@ class TestBetweennessPartitioner:
             percentile=percentile,
             scaling=scaling,
         )
-        part.__class__.attribute_label = "betweenness_percentile"
+        part.attribute_label = "betweenness_percentile"
 
     @pytest.mark.parametrize(
         "key,value",
