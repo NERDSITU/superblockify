@@ -2,6 +2,13 @@
 Changelog
 *********
 
+Version 0.1.2 (2023-05-18)
+**************************
+
+* Added Partitioner based on Betweenness Centrality
+* Fix segfault in betweenness centrality calculation caused by testcase with one node
+  graph
+
 Version 0.1.1 (2023-05-15)
 **************************
 
