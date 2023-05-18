@@ -81,6 +81,21 @@ def test_city_small_copy(test_city_small):
 
 
 @pytest.fixture(scope="session")
+def test_one_city():
+    """Fixture for loading and parametrizing one small city."""
+    return SMALL_CITIES[0][:-8], ox.load_graphml(
+        filepath=f"{TEST_DATA_PATH}cities/" + SMALL_CITIES[0]
+    )
+
+
+@pytest.fixture(scope="function")
+def test_one_city_copy(test_one_city):
+    """Fixture for getting a copy of one small city."""
+    city_name, graph = test_one_city
+    return city_name, graph.copy()
+
+
+@pytest.fixture(scope="session")
 def test_city_all_preloaded_save(
     test_city_all, partitioner_class, _teardown_test_folders
 ):
@@ -153,12 +168,10 @@ def test_city_small_precalculated_copy(test_city_small_precalculated):
 
 
 @pytest.fixture(scope="session")
-def test_one_city_precalculated(partitioner_class):
+def test_one_city_precalculated(partitioner_class, test_one_city):
     """Fixture for loading and parametrizing one small city with bearing and length
     test_data. Without metrics."""
-    city_name, graph = SMALL_CITIES[0][:-8], ox.load_graphml(
-        filepath=f"{TEST_DATA_PATH}cities/" + SMALL_CITIES[0]
-    )
+    city_name, graph = test_one_city
     part = partitioner_class(
         name=f"{city_name}_{partitioner_class.__name__}_precalculated_test",
         city_name=city_name,

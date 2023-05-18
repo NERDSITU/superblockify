@@ -49,7 +49,11 @@ class AttributePartitioner(BasePartitioner, ABC):
     @abstractmethod
     def write_attribute(self, **kwargs):
         """Write boolean edge attribute :attr:`attribute_label` to the graph.
-        Abstract method, needs to be implemented by child class."""
+        Abstract method, needs to be implemented by child class.
+        There need to be both edges with the attribute value `True` and `False`.
+        The case of all edges being `True` or `False` is equivalent to having no
+        restrictions.
+        """
 
     def partition_graph(self, make_plots=False, **kwargs):
         """Group by boolean attribute and remove small components.
