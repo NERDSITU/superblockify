@@ -34,6 +34,10 @@ SMALL_CITIES = [
 # Redefining names for extending fixtures
 # pylint: disable=redefined-outer-name
 
+# *****************************************************
+# Partitioner Fixtures
+# *****************************************************
+
 
 @pytest.fixture(
     scope="session",
@@ -43,13 +47,26 @@ SMALL_CITIES = [
         else pytest.param(part, marks=pytest.mark.xfail(reason=part.__deprecated__))
         for part in __all_partitioners__
     ],
+    # use partitioner name, but cut off "Partitioner"-> "Part" if it is there
+    ids=[part.__name__.replace("Partitioner", "Part") for part in __all_partitioners__],
 )
 def partitioner_class(request):
     """Fixture for parametrizing all partitioners inheriting from BasePartitioner."""
     return request.param
 
 
-@pytest.fixture(scope="session", params=ALL_CITIES_SORTED)
+# *****************************************************
+# City Fixtures
+# *****************************************************
+# All cities
+# **********
+
+
+@pytest.fixture(
+    scope="session",
+    params=ALL_CITIES_SORTED,
+    ids=[city[:-8] for city in ALL_CITIES_SORTED],
+)
 def test_city_all(request):
     """Fixture for loading and parametrizing all city graphs from test_data."""
     # return request.param without .graphml
@@ -62,36 +79,6 @@ def test_city_all(request):
 def test_city_all_copy(test_city_all):
     """Fixture for getting a copy of all city graphs from test_data."""
     city_name, graph = test_city_all
-    return city_name, graph.copy()
-
-
-@pytest.fixture(scope="session", params=SMALL_CITIES)
-def test_city_small(request):
-    """Fixture for loading and parametrizing small city graphs from test_data."""
-    return request.param[:-8], ox.load_graphml(
-        filepath=f"{TEST_DATA_PATH}cities/" + request.param
-    )
-
-
-@pytest.fixture(scope="function")
-def test_city_small_copy(test_city_small):
-    """Fixture for getting a copy of small city graphs from test_data."""
-    city_name, graph = test_city_small
-    return city_name, graph.copy()
-
-
-@pytest.fixture(scope="session")
-def test_one_city():
-    """Fixture for loading and parametrizing one small city."""
-    return SMALL_CITIES[0][:-8], ox.load_graphml(
-        filepath=f"{TEST_DATA_PATH}cities/" + SMALL_CITIES[0]
-    )
-
-
-@pytest.fixture(scope="function")
-def test_one_city_copy(test_one_city):
-    """Fixture for getting a copy of one small city."""
-    city_name, graph = test_one_city
     return city_name, graph.copy()
 
 
@@ -146,6 +133,28 @@ def test_city_all_precalculated(test_city_all_precalculated_save):
     return cls.load(name=name)
 
 
+# ************
+# Small cities
+# ************
+
+
+@pytest.fixture(
+    scope="session", params=SMALL_CITIES, ids=[city[:-8] for city in SMALL_CITIES]
+)
+def test_city_small(request):
+    """Fixture for loading and parametrizing small city graphs from test_data."""
+    return request.param[:-8], ox.load_graphml(
+        filepath=f"{TEST_DATA_PATH}cities/" + request.param
+    )
+
+
+@pytest.fixture(scope="function")
+def test_city_small_copy(test_city_small):
+    """Fixture for getting a copy of small city graphs from test_data."""
+    city_name, graph = test_city_small
+    return city_name, graph.copy()
+
+
 @pytest.fixture(scope="session")
 def test_city_small_precalculated(test_city_small, partitioner_class):
     """Fixture for loading and parametrizing small cities with bearing and length
@@ -156,35 +165,17 @@ def test_city_small_precalculated(test_city_small, partitioner_class):
         city_name=city_name,
         graph=graph.copy(),
     )
-    part.run(calculate_metrics=True)
-    return part
+    part.run(calculate_metrics=False)
+    part.save(save_graph_copy=True)
+    return part.name, part.__class__
 
 
 @pytest.fixture(scope="function")
 def test_city_small_precalculated_copy(test_city_small_precalculated):
     """Return a copy of small cities with bearing and length test_data. Without
-    metrics."""
-    return deepcopy(test_city_small_precalculated)
-
-
-@pytest.fixture(scope="session")
-def test_one_city_precalculated(partitioner_class, test_one_city):
-    """Fixture for loading and parametrizing one small city with bearing and length
-    test_data. Without metrics."""
-    city_name, graph = test_one_city
-    part = partitioner_class(
-        name=f"{city_name}_{partitioner_class.__name__}_precalculated_test",
-        city_name=city_name,
-        graph=graph.copy(),
-    )
-    part.run(calculate_metrics=False)
-    return part
-
-
-@pytest.fixture(scope="function")
-def test_one_city_precalculated_copy(test_one_city_precalculated):
-    """Return a copy of one city with bearing and length test_data. Without metrics."""
-    return deepcopy(test_one_city_precalculated)
+    metrics. Loaded for each test."""
+    name, cls = test_city_small_precalculated
+    return cls.load(name=name)
 
 
 @pytest.fixture(scope="session")
@@ -225,6 +216,75 @@ def test_city_small_osmid_copy(test_city_small_osmid):
     return test_city_small_osmid.copy()
 
 
+# ********
+# One city
+# ********
+
+
+@pytest.fixture(scope="session")
+def test_one_city():
+    """Fixture for loading and parametrizing one small city."""
+    return SMALL_CITIES[0][:-8], ox.load_graphml(
+        filepath=f"{TEST_DATA_PATH}cities/" + SMALL_CITIES[0]
+    )
+
+
+@pytest.fixture(scope="function")
+def test_one_city_copy(test_one_city):
+    """Fixture for getting a copy of one small city."""
+    city_name, graph = test_one_city
+    return city_name, graph.copy()
+
+
+@pytest.fixture(scope="session")
+def test_one_city_precalculated(partitioner_class, test_one_city):
+    """Fixture for loading and parametrizing one small city with bearing and length
+    test_data. Without metrics."""
+    city_name, graph = test_one_city
+    part = partitioner_class(
+        name=f"{city_name}_{partitioner_class.__name__}_precalculated_test",
+        city_name=city_name,
+        graph=graph.copy(),
+    )
+    part.run(calculate_metrics=False)
+    part.save(save_graph_copy=True)
+    return part.name, part.__class__
+
+
+@pytest.fixture(scope="function")
+def test_one_city_precalculated_copy(test_one_city_precalculated):
+    """Return a copy of one city with bearing and length test_data. Without metrics.
+    Loaded for each test."""
+    name, cls = test_one_city_precalculated
+    return cls.load(name=name)
+
+
+@pytest.fixture(scope="session")
+def test_one_city_preloaded(partitioner_class, test_one_city):
+    """Fixture for loading and parametrizing one small city not run yet."""
+    city_name, graph = test_one_city
+    part = partitioner_class(
+        name=f"{city_name}_{partitioner_class.__name__}_preloaded_test",
+        city_name=city_name,
+        graph=graph.copy(),
+    )
+    part.save(save_graph_copy=False)
+    return part
+
+
+@pytest.fixture(scope="function")
+def test_one_city_preloaded_copy(test_one_city_preloaded):
+    """Return a copy of one city not run yet."""
+    return deepcopy(test_one_city_preloaded)
+
+
+# *****************************************************
+# Other Fixtures
+# *****************************************************
+# Clean up test folders after tests are done
+# ******************************************
+
+
 @pytest.fixture(scope="class")
 def _teardown_test_graph_io():
     """Delete Adliswil_tmp.graphml file and directory."""
@@ -249,12 +309,22 @@ def _teardown_test_folders():
             rmtree(join(RESULTS_DIR, folder))
 
 
+# ***********************
+# Hide plots during tests
+# ***********************
+
+
 @pytest.fixture(scope="function", autouse=HIDE_PLOTS)
 def _patch_plt_show(monkeypatch):
     """Patch plt.show() and plt.Figure.show() to prevent plots from showing during
     tests."""
     monkeypatch.setattr("matplotlib.pyplot.show", lambda: None)
     monkeypatch.setattr("matplotlib.pyplot.Figure.show", lambda _: None)
+
+
+# ****************************
+# Mark download tests as xfail
+# ****************************
 
 
 def mark_xfail_flaky_download(test_func):
