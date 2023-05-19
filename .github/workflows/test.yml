@@ -3,8 +3,8 @@ name: Test
 on: [ push, pull_request ]
 
 jobs:
-  run-tests:
-    name: Run test coverage
+  build:
+    name: Setup environment
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -22,13 +22,60 @@ jobs:
           environment-file: environment.yml
           miniconda-version: "latest"
 
-      - name: Show environment infos
+      - name: Show environment info
         run: |
           conda info
           conda list
 
-      - name: Run tests with coverage
-        run: pytest --cov=superblockify tests/
+  run-tests:
+    needs: build
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        submodule:
+          - { name: "Metrics", pytest_args: "tests/metrics/" }
+          - { name: "Approaches", pytest_args: "tests/partitioning/approaches/" }
+          - { name: "Partitioning Base", pytest_args: "tests/partitioning/test_base.py" }
+          - {
+            name: "Partitioning Rest",
+            pytest_args: "tests/partitioning/ --ignore=tests/partitioning/approaches/ --ignore=tests/partitioning/test_base.py"
+          }
+          - { name: "Attribute", pytest_args: "tests/test_attribute.py" }
+          - { name: "Plot", pytest_args: "tests/test_plot.py" }
+          - { name: "Utils", pytest_args: "tests/test_utils.py" }
+
+    name: "Test ${{ matrix.submodule.name }}"
+    defaults:
+      run:
+        shell: bash -el {0}
+
+    steps:
+      - name: "Run tests ${{ matrix.submodule.name }} with coverage"
+        run: |
+          pytest --cov=superblockify ${{ matrix.submodule.pytest_args }}
+          mv .coverage ".coverage.${{ matrix.submodule.name }}"
+        env:
+          COVERAGE_FILE: ".coverage.${{ matrix.submodule.name }}"
+
+      - name: Store coverage file
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: ".coverage.${{ matrix.submodule.name }}"
+
+  coverage:
+    name: Merge Coverage
+    runs-on: ubuntu-latest
+    needs: run-tests
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Merge coverage files
+        run: coverage combine
 
       - name: Coverage comment
         id: coverage_comment
