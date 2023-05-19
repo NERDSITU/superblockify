@@ -80,6 +80,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          activate-environment: OSMnxPyrLab
+          use-mamba: true
+
       - name: Use cache for ${{ matrix.submodule.name }}
         uses: actions/cache@v2
         with:
@@ -90,14 +98,6 @@ jobs:
         env:
           # Increase this value to reset cache if etc/example-environment.yml has not changed
           CACHE_NUMBER: 0
-
-      - name: Setup Mambaforge
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          activate-environment: OSMnxPyrLab
-          use-mamba: true
 
       - name: Update environment
         run: # Install if cache not found
