@@ -92,18 +92,12 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.CONDA }}/envs
+          fail-on-cache-miss: true
           key:
             conda-${{ runner.os }}--${{ runner.arch }}--${{
             hashFiles('environment.yml') }}-${{ env.CACHE_NUMBER }}
         env:
-          # Increase this value to reset cache if etc/example-environment.yml has not changed
-          CACHE_NUMBER: 0
-        id: cache
-
-      - name: Update environment
-        run: # Install if cache not found
-          mamba env update -n OSMnxPyrLab -f environment.yml
-        if: steps.cache.outputs.cache-hit != 'true'
+          CACHE_NUMBER: 0  # Same as in caching job
 
       - name: Show environment info
         run: |
