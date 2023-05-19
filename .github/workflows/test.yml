@@ -108,6 +108,7 @@ jobs:
       - name: "Run tests ${{ matrix.submodule.name }} with coverage"
         run: |
           pytest --cov=superblockify ${{ matrix.submodule.pytest_args }}
+          echo "ls -ahl"
           mv .coverage ".coverage.${{ matrix.submodule.name }}"
         env:
           COVERAGE_FILE: ".coverage.${{ matrix.submodule.name }}"
