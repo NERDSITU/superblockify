@@ -15,9 +15,7 @@ from superblockify.partitioning.utils import (
 
 
 @pytest.mark.parametrize("save_path", [None, "test.gpkg"])
-def test_save_to_gpkg(
-    test_city_small_precalculated_copy, save_path, _teardown_test_folders
-):
+def test_save_to_gpkg(test_city_small_precalculated_copy, save_path):
     """Test saving to geopackage."""
     save_path = (
         None

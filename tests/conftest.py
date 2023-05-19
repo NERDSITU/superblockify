@@ -83,9 +83,7 @@ def test_city_all_copy(test_city_all):
 
 
 @pytest.fixture(scope="session")
-def test_city_all_preloaded_save(
-    test_city_all, partitioner_class, _teardown_test_folders
-):
+def test_city_all_preloaded_save(test_city_all, partitioner_class):
     """Fixture for saving preloaded partitioners for all cities with bearing and
     length test_data. Without metrics. Shared across all tests."""
     city_name, graph = test_city_all
@@ -101,7 +99,7 @@ def test_city_all_preloaded_save(
 
 
 @pytest.fixture(scope="function")
-def test_city_all_preloaded(test_city_all_preloaded_save, _teardown_test_folders):
+def test_city_all_preloaded(test_city_all_preloaded_save):
     """Fixture for preloaded partitioners for all cities with bearing and length.
     Without metrics. Loaded for each test."""
     name, cls = test_city_all_preloaded_save
@@ -109,9 +107,7 @@ def test_city_all_preloaded(test_city_all_preloaded_save, _teardown_test_folders
 
 
 @pytest.fixture(scope="session")
-def test_city_all_precalculated_save(
-    test_city_all, partitioner_class, _teardown_test_folders
-):
+def test_city_all_precalculated_save(test_city_all, partitioner_class):
     """Fixture for saving precalculated partitioners for all cities with bearing and
     length test_data. Without metrics. Shared across all tests."""
     city_name, graph = test_city_all
@@ -304,9 +300,10 @@ def _teardown_test_folders():
     """Delete all test data folders."""
     yield None
     # Delete all folders in RESULTS_DIR that end with _test
-    for folder in listdir(RESULTS_DIR):
-        if folder.endswith("_test"):
-            rmtree(join(RESULTS_DIR, folder))
+    if exists(RESULTS_DIR):
+        for folder in listdir(RESULTS_DIR):
+            if folder.endswith("_test"):
+                rmtree(join(RESULTS_DIR, folder))
 
 
 # ***********************
