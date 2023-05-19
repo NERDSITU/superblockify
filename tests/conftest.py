@@ -154,14 +154,14 @@ def test_city_small_copy(test_city_small):
 @pytest.fixture(scope="session")
 def test_city_small_precalculated(test_city_small, partitioner_class):
     """Fixture for loading and parametrizing small cities with bearing and length
-    test_data. Without metrics."""
+    test_data. With metrics."""
     city_name, graph = test_city_small
     part = partitioner_class(
         name=f"{city_name}_{partitioner_class.__name__}_precalculated_test",
         city_name=city_name,
         graph=graph.copy(),
     )
-    part.run(calculate_metrics=False)
+    part.run(calculate_metrics=True)
     part.save(save_graph_copy=True)
     return part.name, part.__class__
 
