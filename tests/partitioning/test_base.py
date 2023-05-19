@@ -59,7 +59,8 @@ class TestPartitioners:
     )
     def test_ignore_replace_max_speeds(
         self,
-        test_city_small_preloaded_copy,
+        caplog,
+        test_one_city_preloaded_copy,
         unit,
         replace_max_speeds,
     ):
@@ -67,11 +68,16 @@ class TestPartitioners:
         When unit is not "time", ``replace_max_speeds`` is ignored, warn if
         ``ignore_max_speeds`` is set anyway.
         """
-        test_city_small_preloaded_copy.run(
+        caplog.clear()
+        test_one_city_preloaded_copy.metric.unit = unit
+        test_one_city_preloaded_copy.run(
             calculate_metrics=False,
             make_plots=False,
-            unit=unit,
             replace_max_speeds=replace_max_speeds,
+        )
+        assert (
+            caplog.records[0].message
+            == "replace_max_speeds is ignored when unit is not 'time'."
         )
 
     def test_make_subgraphs_from_attribute(
