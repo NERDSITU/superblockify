@@ -68,7 +68,7 @@ class BetweennessPartitioner(AttributePartitioner):
             # set threshold to second-smallest value
             threshold = attr_list[ixd_2nd_smallest]
             # at least one node/edge is outside
-        elif threshold >= attr_list[-1]:
+        elif threshold >= attr_list[-1]:  # improbable case due to betw. distribution
             ixd_2nd_largest = -2
             while attr_list[ixd_2nd_largest] == attr_list[-1]:
                 ixd_2nd_largest -= 1
