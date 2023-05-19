@@ -8,6 +8,8 @@ from superblockify.partitioning.approaches.attribute import AttributePartitioner
 class TestAttributePartitioner:
     """Tests for the abstract attribute-based partitioner."""
 
+    # pylint: disable=too-few-public-methods
+
     def test_write_attribute_not_overwritten(self):
         """If write_attribute is not overwritten, raise a TypeError
         when instantiating the class."""
