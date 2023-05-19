@@ -3,7 +3,6 @@ name: Test
 on: [ push, pull_request ]
 
 jobs:
-
   caching:
     strategy:
       matrix:
@@ -63,7 +62,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
 
   run-tests:
-    needs: build
+    needs: caching
     runs-on: ubuntu-latest
 
     strategy:
