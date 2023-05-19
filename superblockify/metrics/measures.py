@@ -454,7 +454,7 @@ def _calculate_betweenness(edges_uv_id, pred, dist, edge_padding, index_subset=N
 
 
 @njit(int32[:](float32[:]), parallel=False)
-def _single_source_given_paths_simplified(dist_row):
+def _single_source_given_paths_simplified(dist_row):  # pragma: no cover
     """Sort nodes, predecessors and distances by distance.
 
     Parameters
@@ -489,7 +489,7 @@ def __accumulate_bc(
     dist_row,
     edges_uv,
     edge_padding,
-):
+):  # pragma: no cover
     """Calculate the betweenness centrality for a single source node.
 
     Parameters
@@ -548,7 +548,7 @@ def __accumulate_bc(
     parallel=True,
     fastmath=False,
 )
-def _sum_bc(loop_indices, pred, dist, edges_uv, edge_padding):
+def _sum_bc(loop_indices, pred, dist, edges_uv, edge_padding):  # pragma: no cover
     """Calculate the betweenness centrality for a single source node.
 
     Parameters

@@ -245,7 +245,7 @@ def compare_dicts(dict1, dict2):
 
 
 @njit(int64(int32, int32, int64))
-def __edge_to_1d(edge_u, edge_v, max_len):
+def __edge_to_1d(edge_u, edge_v, max_len):  # pragma: no cover
     """Convert edge to 1D representation.
 
     Parameters
@@ -266,7 +266,7 @@ def __edge_to_1d(edge_u, edge_v, max_len):
 
 
 @njit(int64[:](int32[:], int32[:], int64), parallel=True)
-def __edges_to_1d(edge_u, edge_v, max_len):
+def __edges_to_1d(edge_u, edge_v, max_len):  # pragma: no cover
     """Convert edges to 1D representation.
 
     Parameters
