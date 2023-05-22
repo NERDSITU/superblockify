@@ -3,10 +3,12 @@
 # pylint: disable=unused-import
 from .attribute import new_edge_attribute_by_function
 from .partitioning import BearingPartitioner
+from .partitioning import BetweennessPartitioner
 from .partitioning import DummyPartitioner
 from .partitioning import ResidentialPartitioner
 from .partitioning import save_to_gpkg
 from .partitioning import __all_partitioners__
+from .partitioning import plot_speed_un_restricted
 from .plot import paint_streets
 from .plot import plot_by_attribute
 from .plot import plot_road_type_for

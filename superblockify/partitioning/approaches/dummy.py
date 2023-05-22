@@ -24,6 +24,7 @@ class DummyPartitioner(BasePartitioner):
 
         # The label under which the partition attribute is saved in the `self.graph`.
         self.attribute_label = "dummy_attribute"
+        self.attribute_dtype = None
 
         id_x_coords = self.graph.nodes(data="x")
 

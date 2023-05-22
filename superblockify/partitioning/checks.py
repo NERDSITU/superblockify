@@ -1,21 +1,14 @@
 """Checks for the partitioning module."""
-import logging
-from configparser import ConfigParser
 from itertools import chain
-from os.path import dirname, join
 from sys import modules
 
 from networkx import is_weakly_connected
 from numpy import argwhere, fill_diagonal
 from osmnx import plot_graph
 
+from ..config import logger, HIDE_PLOTS
 from ..plot import plot_by_attribute
 from ..utils import has_pairwise_overlap
-
-logger = logging.getLogger("superblockify")
-
-config = ConfigParser()
-config.read(join(dirname(__file__), "..", "..", "config.ini"))
 
 
 def is_valid_partitioning(partitioning):
@@ -133,8 +126,7 @@ def components_are_connected(partitioning):
                 edge_attr_types="numerical",
                 edge_cmap="hsv",
                 edge_minmax_val=(0, 1),
-                show="pytest" not in modules
-                or not config.getboolean("tests", "hide_plots"),
+                show="pytest" not in modules or not HIDE_PLOTS,
             )
             # Reset edge attribute 'highlight'
             for edge in component["subgraph"].edges:
@@ -211,8 +203,7 @@ def nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
                 for node in partitioning.graph.nodes
             ],
             bgcolor="none",
-            show="pytest" not in modules
-            or not config.getboolean("tests", "hide_plots"),
+            show="pytest" not in modules or not HIDE_PLOTS,
         )
         is_valid = False
 

@@ -1,10 +1,9 @@
 """Work with graph attributes."""
-import logging
 
 from networkx import get_edge_attributes, set_edge_attributes, get_node_attributes
 from numpy import amin, amax
 
-logger = logging.getLogger("superblockify")
+from .config import logger
 
 
 def new_edge_attribute_by_function(
@@ -141,7 +140,7 @@ def determine_minmax_val(graph, minmax_val, attr, attr_type="edge"):
 
     Parameters
     ----------
-    graph : networkx.MultiDiGraph
+    graph : networkx.Graph
         Input graph
     minmax_val : tuple, None
         Tuple of (min, max) values of the attribute to be plotted or None
@@ -149,6 +148,11 @@ def determine_minmax_val(graph, minmax_val, attr, attr_type="edge"):
         Graph's attribute to select min and max values by
     attr_type : string, optional
         Type of the attribute, either "edge" or "node"
+
+    Returns
+    -------
+    tuple
+        Tuple of (min, max) values.
 
     Raises
     ------

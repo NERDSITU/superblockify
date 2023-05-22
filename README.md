@@ -23,13 +23,18 @@ activated using `OSMnxPyrLab`. Alternatively a versionless setup can be done
 by executing (`environmentSetupVersionless.sh` in the working directory)
 
 ```bash
-conda create -n OSMnxPyrLab -c conda-forge --file requirements.txt
+conda create -n OSMnxPyrLab -c conda-forge python=3.10 --file requirements.txt
 conda activate OSMnxPyrLab
 conda env export | grep -v "^prefix: " > environment.yml
 ```
 
 which does not have explicit versions, but might resolve dependency issues. Using
 `git diff environment.yml` the changes can be inspected.
+
+## Usage
+
+For a quick start there are example scripts in the [`examples/`](scripts/examples/)
+folder and a [minimal working example](scripts/mwe.py).
 
 ## Logging
 

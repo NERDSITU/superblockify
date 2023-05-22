@@ -23,6 +23,7 @@ autodoc_mock_imports = [
     "pandas",
     "geopandas",
     "shapely",
+    "numba",
 ]
 
 # -- Project information -----------------------------------------------------
@@ -31,7 +32,7 @@ autodoc_mock_imports = [
 project = "superblockify"
 copyright = "2023, Carlson Büth"
 author = "Carlson Büth"
-release = "0.1.0"
+release = "0.1.2"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -101,4 +102,5 @@ intersphinx_mapping = {
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     "geopandas": ("https://geopandas.org/en/stable/", None),
     "shapely": ("https://shapely.readthedocs.io/en/stable", None),
+    "numba": ("https://numba.readthedocs.io/en/stable", None),
 }

@@ -10,7 +10,7 @@ from ..plot import plot_by_attribute
 
 
 def plot_distance_distributions(
-    dist_matrix, dist_title, coords, coord_title, labels, distance_unit="km"
+    dist_matrix, dist_title, coords, coord_title, labels, distance_unit="m"
 ):
     """Plot the distributions of the Euclidean distances and coordinates.
 
@@ -30,11 +30,12 @@ def plot_distance_distributions(
         The labels of the coordinates. labels[0] is the label of the x-coordinate,
         labels[1] is the label of the y-coordinate.
     distance_unit : str, optional
+        The unit of the distance. Defaults to "m".
 
     """
     _, axe = plt.subplots(1, 2, figsize=(10, 5))
     # Plot distribution of distances
-    axe[0].hist(dist_matrix.flatten() / 1000, bins=100)
+    axe[0].hist(dist_matrix.flatten(), bins=100)
     axe[0].set_title(dist_title)
     axe[0].set_xlabel(f"Distance [{distance_unit}]")
     axe[0].set_ylabel("Count")
@@ -98,19 +99,12 @@ def plot_distance_matrices(metric, name=None):
     # Plot colorbar on the right side of the figure
     fig.colorbar(dist_im, ax=axes, fraction=0.046, pad=0.04)
     # Label colorbar
-    unit = (
-        "hops"
-        if metric.weight is None
-        else "m"
-        if metric.weight == "length"
-        else f"{metric.weight}"
-    )
     # dist_im.set_label(f"Distance [{unit}]") not working
     # Label at the right of the plot, next to colorbar
     fig.text(
         0.925,
         0.5,
-        f"Distance [{unit}]",
+        f"Distance [{metric.unit_symbol()}]",
         va="center",
         rotation="vertical",
         fontsize=14,
@@ -118,7 +112,7 @@ def plot_distance_matrices(metric, name=None):
 
     # Title above all subplots
     fig.suptitle(
-        f"Distance matrices for the network measures "
+        f"Distance matrices for the network measures ({metric.unit_symbol()})\n"
         f"{'(' + name + ')' if name else ''}",
         fontsize=16,
     )
@@ -242,25 +236,18 @@ def plot_distance_matrices_pairwise_relative_difference(metric, name=None):
     # Colorbar for the lower triangle
     fig.colorbar(diff_im, ax=axes, fraction=0.046, pad=0.04)
     # Label colorbar
-    unit = (
-        "hops"
-        if metric.weight is None
-        else "m"
-        if metric.weight == "length"
-        else f"{metric.weight}"
-    )
-    dist_im.set_label(f"Distance [{unit}]")
+    dist_im.set_label(f"Distance [{metric.unit_symbol()}]")
     # Title above all subplots
     fig.suptitle(
         f"Pairwise relative difference between the distance matrices "
-        f"{'(' + name + ')' if name else ''}"
+        f"({metric.unit_symbol()}) {'(' + name + ')' if name else ''}"
     )
 
     return fig, axes
 
 
 def plot_component_wise_travel_increase(
-    partitioner, distance_matrix, node_list, measure1, measure2, **pg_kwargs
+    partitioner, distance_matrix, node_list, measure1, measure2, unit, **pg_kwargs
 ):
     """Calculate and plot the component-wise travel increase.
 
@@ -283,6 +270,8 @@ def plot_component_wise_travel_increase(
         The name of the first measure. Key for the distance matrix.
     measure2 : str
         The name of the second measure. Key for the distance matrix.
+    unit : str
+        The unit of the distance matrices.
     pg_kwargs : dict
         Keyword arguments for the plot_graph function.
 
@@ -333,8 +322,8 @@ def plot_component_wise_travel_increase(
     )
     # Label the colorbar, vertical alignment, latex math mode
     cbar.ax.set_ylabel(
-        # "Travel distance increase (all to all demand) $d_{S}(i, j)$ / $d_{N}(i, j)$",
-        rf"Part. travel increase $d_{{{measure1}}} (i, j)$ / $d_{{{measure2}}} (i, j)$",
+        rf"Part. increase ({unit}) "
+        rf"$d_{{{measure1}}} (i, j)$ / $d_{{{measure2}}} (i, j)$",
         rotation=270,
         labelpad=20,
         fontsize=17,
@@ -395,7 +384,10 @@ def plot_relative_difference(metric, key_i, key_j, title=None):
             vmax=np.max(rel_diff[~np.isinf(rel_diff)]),
         ),
     )
-    axe.set_title(f"{title} $\\frac{{d_{{{key_j}}}(i, j)}}{{d_{{{key_i}}}(i, j)}}$")
+    axe.set_title(
+        f"{title} ({metric.unit_symbol()}) | "
+        f"$\\frac{{d_{{{key_j}}}(i, j)}}{{d_{{{key_i}}}(i, j)}}$"
+    )
     axe.set_xlabel("Node $j$")
     axe.set_ylabel("Node $i$")
     axe.set_aspect("equal")
@@ -406,7 +398,7 @@ def plot_relative_difference(metric, key_i, key_j, title=None):
     return fig, axe
 
 
-def plot_relative_increase_on_graph(graph, **pg_kwargs):
+def plot_relative_increase_on_graph(graph, unit_symbol, **pg_kwargs):
     """Plot the relative increase edge wise from attribute `rel_increase`.
 
     Use `:func:metric.measures.write_relative_increase_to_edges` to write the relative
@@ -417,6 +409,8 @@ def plot_relative_increase_on_graph(graph, **pg_kwargs):
     graph : networkx.Graph
         The graph to plot the relative increase on, must have the attribute
         `rel_increase` on the edges.
+    unit_symbol : str
+        The unit symbol of the metric.
     pg_kwargs : dict
         Keyword arguments for the plot_graph function.
 
@@ -441,10 +435,11 @@ def plot_relative_increase_on_graph(graph, **pg_kwargs):
     )
     # Label the colorbar, vertical alignment, latex math mode
     cbar.ax.set_ylabel(
-        "Travel distance increase (all to all demand) $d_{S}(i, j)$ / $d_{N}(i, j)$",
+        f"Travel distance increase ({unit_symbol}) "
+        "(all to all demand) $d_{S}(i, j)$ / $d_{N}(i, j)$",
         rotation=270,
         labelpad=20,
-        fontsize=17,
+        fontsize=15,
     )
 
     return plot_by_attribute(

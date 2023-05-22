@@ -31,23 +31,40 @@ jobs:
     defaults:
       run:
         shell: bash -el {0}
-
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v3
 
-      - name: Setup and activate Anaconda environment
+      - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v2
         with:
-          auto-update-conda: true
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
           activate-environment: OSMnxPyrLab
-          environment-file: environment.yml
-          miniconda-version: "latest"
+          use-mamba: true
 
-      - name: Show environment infos
+      - name: Use cache for ${{ matrix.submodule.name }}
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.CONDA }}/envs
+          key:
+            conda-${{ runner.os }}--${{ runner.arch }}--${{
+            hashFiles('environment.yml') }}-${{ env.CACHE_NUMBER }}
+        env:
+          # Increase this value to reset cache if etc/example-environment.yml has not changed
+          CACHE_NUMBER: 0
+        id: cache
+
+      - name: Update environment
+        run: # Install if cache not found
+          mamba env update -n OSMnxPyrLab -f environment.yml
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Show environment info
         run: |
           conda info
           conda list
+          conda config --show
 
       - name: Generating .rst files
         run: sphinx-apidoc -o docs superblockify/

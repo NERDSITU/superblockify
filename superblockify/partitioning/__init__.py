@@ -5,6 +5,7 @@ from inspect import isclass
 from .base import BasePartitioner
 from .approaches import (
     BearingPartitioner,
+    BetweennessPartitioner,
     DummyPartitioner,
     ResidentialPartitioner,
 )
@@ -18,14 +19,13 @@ from .plot import (
     plot_subgraph_component_size,
     plot_component_rank_size,
     plot_component_graph,
+    plot_speed_un_restricted,
 )
 
 # List of all supported partitioners. For all partitioners that are subclasses of
-# BasePartitioner, but not BasePartitioner itself.
+# BasePartitioner or its subclasses, but not BasePartitioner itself.
 __all_partitioners__ = [
     part
-    for part in globals().values()
-    if isclass(part)
-    and issubclass(part, BasePartitioner)
-    and part is not BasePartitioner
+    for part in locals().values()
+    if isclass(part) and BasePartitioner in part.mro() and part is not BasePartitioner
 ]

@@ -1,17 +1,7 @@
 """Example of saving a partitioner to a geopackage."""
-import logging
-from ast import literal_eval
-from configparser import ConfigParser
 
 import superblockify as sb
-
-logger = logging.getLogger("superblockify")
-
-config = ConfigParser()
-config.read("config.ini")
-PLACES_GENERAL = literal_eval(config["tests"]["places_general"])
-PLACES_SMALL = literal_eval(config["tests"]["places_small"])
-PLACES_OTHER = literal_eval(config["tests"]["places_other"])
+from superblockify.config import logger, PLACES_GENERAL, PLACES_SMALL, PLACES_OTHER
 
 if __name__ == "__main__":
     # CITY_NAME, SEARCH_STR = PLACES_GENERAL[2]

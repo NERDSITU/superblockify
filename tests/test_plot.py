@@ -1,10 +1,8 @@
 """Tests for the plot module."""
-from configparser import ConfigParser
-from os.path import join, dirname
-
 import pytest
 from matplotlib import pyplot as plt
 
+from superblockify.config import TEST_DATA_PATH
 from superblockify.plot import (
     paint_streets,
     plot_by_attribute,
@@ -13,9 +11,6 @@ from superblockify.plot import (
     make_node_color_list,
     plot_road_type_for,
 )
-
-config = ConfigParser()
-config.read(join(dirname(__file__), "..", "config.ini"))
 
 
 @pytest.mark.parametrize("e_l,n_a", [(0.5, 0.5), (1, 0)])
@@ -28,7 +23,7 @@ def test_paint_streets(test_city_all_copy, e_l, n_a, save):
         edge_linewidth=e_l,
         node_alpha=n_a,
         save=save,
-        filepath=f"{config['tests']['test_data_path']}output/{city_path}.pdf",
+        filepath=f"{TEST_DATA_PATH}output/{city_path}.pdf",
     )
     plt.close()
 
@@ -117,7 +112,7 @@ def test_plot_by_attribute_minmax_val_faulty(test_city_all_copy, minmax_val_faul
     """Test `plot_by_attribute` with faulty minmax_val."""
     _, graph = test_city_all_copy
     with pytest.raises(ValueError):
-        plot_by_attribute(graph, edge_attr="osmid", node_minmax_val=minmax_val_faulty)
+        plot_by_attribute(graph, edge_attr="osmid", edge_minmax_val=minmax_val_faulty)
 
 
 def test_make_edge_color_list(test_city_all_copy):

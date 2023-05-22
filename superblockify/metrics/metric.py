@@ -1,15 +1,18 @@
 """Metric object for the superblockify package."""
-import logging
 import pickle
-from configparser import ConfigParser
-from os.path import dirname, join, exists
+from os.path import join, exists
 
-from .distances import calculate_distance_matrices
+from .distances import (
+    calculate_partitioning_distance_matrix,
+    calculate_path_distance_matrix,
+    calculate_euclidean_distance_matrix_projected,
+)
 from .measures import (
     calculate_global_efficiency,
     calculate_directness,
     write_relative_increase_to_edges,
     calculate_coverage,
+    betweenness_centrality,
 )
 from .plot import (
     plot_distance_matrices,
@@ -18,14 +21,9 @@ from .plot import (
     plot_relative_difference,
     plot_relative_increase_on_graph,
 )
+from ..config import logger, RESULTS_DIR
 from ..plot import save_plot
 from ..utils import compare_dicts
-
-logger = logging.getLogger("superblockify")
-
-config = ConfigParser()
-config.read(join(dirname(__file__), "..", "..", "config.ini"))
-RESULTS_DIR = config["general"]["results_dir"]
 
 
 class Metric:
@@ -89,39 +87,116 @@ class Metric:
 
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self):
-        """Construct a metric object."""
+    def __init__(self, unit="time"):
+        """Construct a metric object.
+
+        Parameters
+        ----------
+        unit : str, optional
+            The unit to use for the shortest distance calculation, by default "time",
+            can also be "distance", if ``None`` count hops.
+        """
 
         self.coverage = None
         self.num_components = None
-        self.avg_path_length = {"E": None, "S": None, "N": None}
-        self.directness = {"ES": None, "EN": None, "SN": None}
-        self.global_efficiency = {"SE": None, "NE": None, "NS": None}
+        self.avg_path_length = {"S": None, "N": None}
+        self.directness = {"SN": None}
+        self.global_efficiency = {"NS": None}
 
-        self.distance_matrix = None
-        self.predecessor_matrix = None
-        self.weight = None
+        self.distance_matrix = {}
+        self.predecessor_matrix = {}
+        self.unit = unit
         self.node_list = None
+
+    def unit_symbol(self):
+        """Return unit string represented by the :attr:`unit` attribute.
+
+        Returns
+        -------
+        str
+            The unit symbol, either "s", "m", "hops" or the unit string in brackets.
+        """
+        if self.unit == "time":
+            return "s"
+        if self.unit == "distance":
+            return "m"
+        if self.unit is None:
+            return "hops"
+        return f"({self.unit})"
+
+    def calculate_before(self, partitioner, make_plots=False):
+        """Calculate metrics on unrestricted graph
+
+        Metrics that should be available to partitioners for use in their
+        partitioning algorithm. This includes
+
+        - Shortest paths and distances on the unrestricted graph
+        - Betweenness centralities on the unrestricted graph
+
+        Parameters
+        ----------
+        partitioner : BasePartitioner
+            The partitioner object to calculate the metrics for
+        """
+        if self.node_list is None and partitioner.partitions is None:
+            self.node_list = list(partitioner.graph.nodes)
+        else:
+            self.node_list = partitioner.get_sorted_node_list()
+
+        if self.unit == "distance":
+            self.distance_matrix["E"] = calculate_euclidean_distance_matrix_projected(
+                partitioner.graph,
+                node_order=self.node_list,
+                plot_distributions=make_plots,
+            )
+        # On the full graph (S)
+        weight = (
+            "length"
+            if self.unit == "distance"
+            else "travel_time"
+            if self.unit == "time"
+            else self.unit
+        )
+        (
+            self.distance_matrix["S"],
+            self.predecessor_matrix["S"],
+        ) = calculate_path_distance_matrix(
+            partitioner.graph,
+            weight=weight,
+            unit_symbol=self.unit_symbol(),
+            node_order=self.node_list,
+            plot_distributions=make_plots,
+        )
+        betweenness_centrality(
+            partitioner.graph,
+            self.node_list,
+            self.distance_matrix["S"],
+            self.predecessor_matrix["S"],
+            weight=weight,
+            #  No `attr_suffix` for the full graph
+        )
 
     def calculate_all(
         self,
         partitioner,
-        weight="length",
+        replace_max_speeds=True,
         num_workers=None,
         chunk_size=1,
         make_plots=False,
     ):
         """Calculate all metrics for the partitioning.
 
-        `self.distance_matrix` is used to save the distances for the metrics and should
-        is set to None after calculating the metrics.
+        If :meth:`calculate_before` has been called before partitioning, only the
+        remaining metrics are calculated.
 
         Parameters
         ----------
         partitioner : BasePartitioner
             The partitioner object to calculate the metrics for
-        weight : str, optional
-            The edge attribute to use as weight, by default "length", if None count hops
+        replace_max_speeds : bool, optional
+            If True and unit is "time", calculate the quickest paths in the restricted
+            graph with the max speeds :attr:`V_MAX_LTN` and :attr:`V_MAX_SPARSE` set in
+            :mod:`superblockify.config`. Default is True.
         num_workers : int, optional
             The number of workers to use for multiprocessing. If None, use
             min(32, os.cpu_count() + 4), by default None
@@ -133,19 +208,37 @@ class Metric:
         """
         # pylint: disable=unused-argument
 
-        self.weight = weight  # weight attribute
-        self.node_list = partitioner.get_sorted_node_list()  # full node list
+        #  Calculate also in case it has been called before, as graph might have changed
+        self.calculate_before(partitioner, make_plots=make_plots)
+
+        if self.unit == "distance":
+            self.avg_path_length["E"] = None
+            self.directness["ES"], self.directness["EN"] = None, None
+            self.global_efficiency["SE"], self.global_efficiency["NE"] = None, None
 
         self.coverage = calculate_coverage(partitioner, weight="length")
-        logger.debug("Coverage: %s", self.coverage)
+        logger.debug("Coverage (length): %s", self.coverage)
 
-        self.distance_matrix, self.predecessor_matrix = calculate_distance_matrices(
-            self.node_list,
+        weight_restricted = (
+            "length"
+            if self.unit == "distance"
+            else "travel_time"
+            if self.unit == "time" and not replace_max_speeds
+            else "travel_time_restricted"
+            if self.unit == "time" and replace_max_speeds
+            else self.unit
+        )
+        (
+            self.distance_matrix["N"],
+            self.predecessor_matrix["N"],
+        ) = calculate_partitioning_distance_matrix(
             partitioner,
-            weight,
-            chunk_size,
-            make_plots,
-            num_workers,
+            weight=weight_restricted,
+            unit_symbol=self.unit_symbol(),
+            node_order=self.node_list,
+            num_workers=num_workers,
+            chunk_size=chunk_size,
+            plot_distributions=make_plots,
         )
 
         self.calculate_all_measure_sums()
@@ -154,7 +247,22 @@ class Metric:
             partitioner.graph, self.distance_matrix, self.node_list, "N", "S"
         )
 
+        betweenness_centrality(
+            partitioner.graph,
+            self.node_list,
+            self.distance_matrix["N"],
+            self.predecessor_matrix["N"],
+            weight=weight_restricted,
+            attr_suffix="_restricted",
+        )
+
         if make_plots:
+            # sort distance matrix dictionaries to follow start with E, S, N, ...
+            d_m = self.distance_matrix
+            self.distance_matrix = {}
+            for key in ["E", "S", "N"]:
+                if key in d_m:
+                    self.distance_matrix[key] = d_m[key]
             self.make_all_plots(partitioner)
 
     def make_all_plots(self, partitioner):
@@ -200,13 +308,14 @@ class Metric:
             self.node_list,
             measure1="N",
             measure2="S",
+            unit=self.unit_symbol(),
         )
         save_plot(
             partitioner.results_dir,
             fig,
             f"{partitioner.name}_component_wise_travel_increase.pdf",
         )
-        fig, _ = plot_relative_increase_on_graph(partitioner.graph)
+        fig, _ = plot_relative_increase_on_graph(partitioner.graph, self.unit_symbol())
         save_plot(
             partitioner.results_dir,
             fig,
@@ -248,7 +357,7 @@ class Metric:
         """
         string = ""
         for key, value in self.__dict__.items():
-            if value is not None:
+            if value is not None or key == "unit":
                 if isinstance(value, dict):
                     if all(v is None for v in value.values()):
                         continue

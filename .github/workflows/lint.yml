@@ -1,6 +1,11 @@
 name: Lint
 
-on: push
+on:
+  push:
+    paths:
+      - 'superblockify/**.py'
+      - 'tests/**.py'
+
 
 jobs:
   run-black:

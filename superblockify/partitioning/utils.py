@@ -1,5 +1,4 @@
 """Utility functions for Partitioners."""
-import logging
 from os import remove
 from os.path import exists, join
 from uuid import uuid4
@@ -9,7 +8,7 @@ from osmnx import graph_to_gdfs, get_undirected
 from shapely import Point
 from shapely.ops import substring
 
-logger = logging.getLogger("superblockify")
+from ..config import logger
 
 
 def save_to_gpkg(partitioner, save_path=None):

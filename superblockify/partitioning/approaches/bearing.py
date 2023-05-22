@@ -1,5 +1,4 @@
 """Approach relating using edge bearings."""
-import logging
 from bisect import bisect_right
 from typing import List, Set
 
@@ -13,9 +12,8 @@ from typing_extensions import deprecated
 
 from ..base import BasePartitioner
 from ... import attribute
+from ...config import logger
 from ...plot import save_plot
-
-logger = logging.getLogger("superblockify")
 
 
 @deprecated("BearingPartitioner does not necessarily produce a valid partitioning.")
@@ -23,7 +21,7 @@ class BearingPartitioner(BasePartitioner):
     """Bearing partitioner.
 
     Partitions based on the edge bearings.
-    """
+    """  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, *args, **kwargs):
         """Construct a BearingPartitioner"""
@@ -105,6 +103,7 @@ class BearingPartitioner(BasePartitioner):
 
         # Write grouping attribute to graph
         self.attribute_label = "bearing_group"
+        self.attribute_dtype = str
         group_bearing = nx.get_edge_attributes(self.residential_graph, "bearing_90")
         logger.debug("Writing attribute 'bearing_group' to graph.")
         for edge, bearing in group_bearing.items():

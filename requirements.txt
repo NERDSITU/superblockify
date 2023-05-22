@@ -1,6 +1,7 @@
 # Dependencies
 osmnx
 pyrosm
+numba
 tqdm
 contextily
 

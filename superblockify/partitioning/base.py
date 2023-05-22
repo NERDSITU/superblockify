@@ -1,10 +1,8 @@
 """BasePartitioner parent and dummy."""
-import logging
 import pickle
 from abc import ABC, abstractmethod
-from configparser import ConfigParser
 from os import makedirs
-from os.path import join, exists, dirname
+from os.path import join, exists
 from typing import final, Final, List
 
 import osmnx as ox
@@ -22,24 +20,20 @@ from .plot import (
     plot_subgraph_component_size,
     plot_component_rank_size,
     plot_component_graph,
+    plot_speed_un_restricted,
 )
 from .representative import set_representative_nodes
+from .speed import add_edge_travel_times_restricted
 from .utils import (
     show_highway_stats,
     remove_dead_ends_directed,
     split_up_isolated_edges_directed,
 )
 from .. import attribute
+from ..config import logger, GRAPH_DIR, RESULTS_DIR, NETWORK_FILTER
 from ..metrics.metric import Metric
 from ..plot import save_plot
 from ..utils import load_graph_from_place
-
-logger = logging.getLogger("superblockify")
-
-config = ConfigParser()
-config.read(join(dirname(__file__), "..", "..", "config.ini"))
-GRAPH_DIR = config["general"]["graph_dir"]
-RESULTS_DIR = config["general"]["results_dir"]
 
 
 class BasePartitioner(ABC):
@@ -67,13 +61,14 @@ class BasePartitioner(ABC):
 
     """
 
-    # pylint: disable=too-many-instance-attributes, too-many-lines
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(
         self,
         name="unnamed",
         city_name=None,
         search_str=None,
+        unit="time",
         graph=None,
         reload_graph=False,
     ):
@@ -90,11 +85,14 @@ class BasePartitioner(ABC):
             Used so multiple `Partitioner` don't need to download the same city graph.
         search_str : str or list of str, optional
             Search string for OSMnx to download a graph, default is None. Only used if
-            no graph is found under GRAPH_DIR/city_name.graphml.
+            no graph is found under :attr:`GRAPH_DIR`/city_name.graphml.
             For composite cities, a list of search strings can be provided.
+        unit : str, optional
+            Unit for the metrics, can be "time", "distance" or any other edge attribute
+            that is present in the graph. Default is "time".
         graph : networkx.MultiDiGraph, optional
-            Graph to partition. Used if no graph is found under GRAPH_DIR/name.graphml
-            and `search_str` is None. Default is None.
+            Graph to partition. Used if no graph is found under
+            :attr:`GRAPH_DIR`/name.graphml and `search_str` is None. Default is None.
         reload_graph : bool, optional
             If True, reload the graph from OSMnx, even if a graph with the name
             `name.graphml` is found in the working directory. Default is False.
@@ -112,7 +110,7 @@ class BasePartitioner(ABC):
 
         Notes
         -----
-        GRAPH_DIR is set in the `config.ini` file.
+        :attr:`GRAPH_DIR` is set in :mod:`superblockify.config`.
 
         """
 
@@ -159,8 +157,9 @@ class BasePartitioner(ABC):
         self.components: List[dict] | None = None
         self.sparsified = None
         self.attribute_label: str | None = None
+        self.attribute_dtype: type | None = None
         self.attr_value_minmax: tuple | None = None
-        self.metric = Metric()
+        self.metric = Metric(unit)
 
         # Log initialization
         logger.info(
@@ -172,7 +171,13 @@ class BasePartitioner(ABC):
         )
 
     @final
-    def run(self, calculate_metrics=True, make_plots=False, **kwargs):
+    def run(
+        self,
+        calculate_metrics=True,
+        make_plots=False,
+        replace_max_speeds=True,
+        **kwargs,
+    ):
         """Run partitioning.
 
         Parameters
@@ -183,7 +188,20 @@ class BasePartitioner(ABC):
         make_plots : bool, optional
             If True, make plots of the partitioning and save them to
             self.results_dir/figures. Default is False.
+        replace_max_speeds : bool, optional
+            If True and :attr:`self.metric.unit` is "time", calculate the quickest paths
+            in the restricted graph with the max speeds :attr:`V_MAX_LTN` and
+            :attr:`V_MAX_SPARSE` set in :mod:`superblockify.config`. Default is True.
+
+        Warnings
+        --------
+        If :attr:`self.metric.unit` is not "time", replace_max_speeds is ignored.
         """
+
+        # Warn if replace_max_speeds is not None when unit is not "time"
+        if self.metric.unit != "time" and replace_max_speeds is not None:
+            logger.warning("replace_max_speeds is ignored when unit is not 'time'.")
+            replace_max_speeds = None
 
         self.partition_graph(make_plots=make_plots, **kwargs)
 
@@ -200,6 +218,9 @@ class BasePartitioner(ABC):
         set_representative_nodes(
             self.components if self.components else self.partitions
         )
+
+        # Calculate travel times for partitioned graph
+        add_edge_travel_times_restricted(self.graph, self.sparsified)
 
         # Check that the partitions and sparsified graph satisfy the requirements
         is_valid_partitioning(self)
@@ -219,9 +240,17 @@ class BasePartitioner(ABC):
                 fig, _ = plot_component_graph(self)
                 save_plot(self.results_dir, fig, f"{self.name}_component_graph.pdf")
                 plt.show()
+            if replace_max_speeds:
+                fig, _ = plot_speed_un_restricted(self.graph, self.sparsified)
+                save_plot(self.results_dir, fig, f"{self.name}_speed_un_restricted.pdf")
+                fig.show()
 
         if calculate_metrics:
-            self.calculate_metrics(make_plots=make_plots, **kwargs)
+            self.calculate_metrics(
+                make_plots=make_plots,
+                replace_max_speeds=replace_max_speeds,
+                **kwargs,
+            )
 
     @abstractmethod
     def partition_graph(self, make_plots=False, **kwargs):
@@ -246,22 +275,31 @@ class BasePartitioner(ABC):
             {"name": "one", "value": 1.0},
         ]
 
-    def calculate_metrics(self, make_plots=False, num_workers=None, chunk_size=1):
+    def calculate_metrics(
+        self,
+        make_plots=False,
+        replace_max_speeds=True,
+        num_workers=None,
+        chunk_size=1,
+    ):
         """Calculate metrics for the partitioning.
 
         Calculates the metrics for the partitioning and writes them to the
         metrics dictionary. It includes the network metrics for the partitioned graph.
 
         There are different network measures
-        - d_E(i, j): Euclidean
-        - d_S(i, j): Shortest path on full graph
-        - d_N(i, j): Shortest path with ban through LTNs
+        - :math:`d_E(i, j)`: Euclidean
+        - :math:`d_S(i, j)`: Shortest path on full graph
+        - :math:`d_N(i, j)`: Shortest path with ban through LTNs
 
         Parameters
         ----------
         make_plots : bool, optional
             If True show visualization graphs of the approach. If False only print
             into console. Default is False.
+        replace_max_speeds : bool, optional
+            If True and unit is "time", replace max speeds set in
+            :mod:`superblockify.config`. Default is True.
         num_workers : int, optional
             Number of workers to use for parallel processing. Default is None, which
             uses min(32, os.cpu_count() + 4) workers.
@@ -275,10 +313,31 @@ class BasePartitioner(ABC):
         logger.info("Calculating metrics for %s", self.name)
         self.metric.calculate_all(
             partitioner=self,
+            replace_max_speeds=replace_max_speeds,
             make_plots=make_plots,
             num_workers=num_workers,
             chunk_size=chunk_size,
         )
+
+        logger.debug("Metrics for %s: %s", self.name, self.metric)
+
+    def calculate_metrics_before(self, make_plots=False):
+        """Calculate metrics for the graph before partitioning.
+
+        Calculates the metrics that might be used by a partitioning approach. It
+        includes the network shortest paths :math:`d_S(i, j)` on the full graph and
+        betweenness centralities.
+
+        Parameters
+        ----------
+        make_plots : bool, optional
+            If True show visualization graphs of the approach. If False only print
+            into console. Default is False.
+        """
+
+        # Log calculating metrics
+        logger.info("Calculating metrics for %s before partitioning", self.name)
+        self.metric.calculate_before(partitioner=self, make_plots=make_plots)
 
         logger.debug("Metrics for %s: %s", self.name, self.metric)
 
@@ -317,7 +376,7 @@ class BasePartitioner(ABC):
 
         # Log making subgraphs
         logger.info(
-            "Making subgraphs for %s with attribute %s",
+            "Making subgraphs for %s with attribute `%s`",
             self.name,
             self.attribute_label,
         )
@@ -489,8 +548,8 @@ class BasePartitioner(ABC):
         of ignored components. Overwrites the attribute `attribute_name` with
         `attribute_value` for all components that have the attribute `ignore` set to
         True.
-        This is useful for example to overwrite the `self.attribute_label` attribute
-        with `None` to make the subgraph invisible in the network plot
+        This is useful for example to overwrite the `self.attribute_label`
+        attribute with `None` to make the subgraph invisible in the network plot
         (`self.plot_partition_graph()`).
 
         Also it will affect `self.graph`, as the component's subgraph is a view of the
@@ -652,8 +711,8 @@ class BasePartitioner(ABC):
     def load_or_find_graph(self, city_name, search_str, reload_graph=False):
         """Load or find graph if it exists.
 
-        If graph GRAPH_DIR/name.graphml exists, load it. Else, find it using
-        `search_str` and save it to GRAPH_DIR/name.graphml.
+        If graph :attr:`GRAPH_DIR`/name.graphml exists, load it. Else, find it using
+        `search_str` and save it to :attr:`GRAPH_DIR`/name.graphml.
 
         Parameters
         ----------
@@ -673,7 +732,7 @@ class BasePartitioner(ABC):
 
         Notes
         -----
-        GRAPH_DIR is set in the `config.ini` file.
+        :attr:`GRAPH_DIR` is set in :mod:`superblockify.config`.
         """
 
         # Check if graph already exists
@@ -686,7 +745,7 @@ class BasePartitioner(ABC):
             graph = load_graph_from_place(
                 save_as=graph_path,
                 search_string=search_str,
-                custom_filter=config["graph"]["network_filter"],
+                custom_filter=NETWORK_FILTER,
                 simplify=True,
             )
             logger.debug("Saving graph to %s", graph_path)
@@ -705,14 +764,14 @@ class BasePartitioner(ABC):
         save_graph_copy : bool, optional
             If True, save the graph to a file. In the case the partitioner was
             initialized with a name and/or search string, the underlying graph is
-            at GRAPH_DIR/name.graphml already. Only use this if you want to save a
-            copy of the graph that has been modified by the partitioner.
+            at :attr:`GRAPH_DIR`/name.graphml already. Only use this if you want to save
+            a copy of the graph that has been modified by the partitioner.
             This is necessary for later plotting partitions, but not for component
             plots.
 
         Notes
         -----
-        `graph_dir` is set in the `config.ini` file.
+        :attr:`GRAPH_DIR` is set in the :mod:`superblockify.config` module.
         """
 
         # Save graph
@@ -776,7 +835,8 @@ class BasePartitioner(ABC):
 
         Notes
         -----
-        The directories RESULTS_DIR and GRAPH_DIR are set in the `config.ini` file.
+        The directories :attr:`GRAPH_DIR` and :attr:`RESULTS_DIR` are set in the
+        :mod:`superblockify.config` module.
 
         """
 
@@ -818,7 +878,19 @@ class BasePartitioner(ABC):
         graph_path = join(RESULTS_DIR, name, name + ".graphml")
         if exists(graph_path):
             logger.debug("Loading graph from %s", graph_path)
-            partitioner.graph = ox.load_graphml(graph_path)
+            partitioner.graph = ox.load_graphml(
+                graph_path,
+                node_dtypes={},
+                edge_dtypes={
+                    "bearing": float,
+                    "length": float,
+                    "speed_kph": float,
+                    "travel_time": float,
+                    "travel_time_restricted": float,
+                    "rel_increase": float,
+                    partitioner.attribute_label: partitioner.attribute_dtype,
+                },
+            )
         else:
             graph_path = join(GRAPH_DIR, partitioner.city_name + ".graphml")
             if exists(graph_path):

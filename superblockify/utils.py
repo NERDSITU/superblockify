@@ -5,7 +5,16 @@ from re import match
 
 import osmnx as ox
 from networkx import Graph, is_isomorphic
-from numpy import zeros, array, fill_diagonal, ndarray, array_equal
+from numba import njit, int64, int32, prange
+from numpy import (
+    zeros,
+    array,
+    fill_diagonal,
+    ndarray,
+    array_equal,
+    empty,
+    int64 as np_int64,
+)
 
 
 def extract_attributes(graph, edge_attributes, node_attributes):
@@ -92,9 +101,18 @@ def load_graph_from_place(save_as, search_string, **gfp_kwargs):
         graph = ox.graph_from_place(search_string, **gfp_kwargs)
 
     graph = ox.distance.add_edge_lengths(graph)
+    graph = ox.add_edge_speeds(graph)  # adds attribute "maxspeed"
+    graph = ox.add_edge_travel_times(graph)  # adds attribute "travel_time"
     graph = extract_attributes(
         graph,
-        edge_attributes={"geometry", "osmid", "length", "highway"},
+        edge_attributes={
+            "geometry",
+            "osmid",
+            "length",
+            "highway",
+            "speed_kph",
+            "travel_time",
+        },
         node_attributes={"y", "x", "osmid"},
     )
     # Add edge bearings - the precision >1 is important for binning
@@ -224,3 +242,48 @@ def compare_dicts(dict1, dict2):
         return array_equal(dict1, dict2)
 
     return dict1 == dict2
+
+
+@njit(int64(int32, int32, int64))
+def __edge_to_1d(edge_u, edge_v, max_len):  # pragma: no cover
+    """Convert edge to 1D representation.
+
+    Parameters
+    ----------
+    edge_u : int
+        First node index
+    edge_v : int
+        Second node index
+    max_len : int
+        Maximum length of the node indices
+
+    Returns
+    -------
+    int
+        1D representation of the edge
+    """
+    return edge_u * 10**max_len + edge_v
+
+
+@njit(int64[:](int32[:], int32[:], int64), parallel=True)
+def __edges_to_1d(edge_u, edge_v, max_len):  # pragma: no cover
+    """Convert edges to 1D representation.
+
+    Parameters
+    ----------
+    edge_u : np.ndarray
+        First node indices
+    edge_v : np.ndarray
+        Second node indices
+    max_len : int
+        Maximum length of the node indices
+
+    Returns
+    -------
+    ndarray
+        1D representation of the edges
+    """
+    edges = empty(len(edge_u), dtype=np_int64)
+    for i in prange(len(edge_u)):  # pylint: disable=not-an-iterable
+        edges[i] = __edge_to_1d(edge_u[i], edge_v[i], max_len)
+    return edges
