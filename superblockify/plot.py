@@ -390,9 +390,7 @@ def make_color_list(
         minmax_val = determine_minmax_val(graph, minmax_val, attr, attr_type=obj_type)
         if obj_type == "edge":
             return [
-                cmap(
-                    (float(attr_val) - minmax_val[0]) / (minmax_val[1] - minmax_val[0])
-                )
+                cmap((attr_val - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
                 if attr_val is not None
                 else none_color
                 for u, v, k, attr_val in graph.edges(keys=True, data=attr)

@@ -157,6 +157,7 @@ class BasePartitioner(ABC):
         self.components: List[dict] | None = None
         self.sparsified = None
         self.attribute_label: str | None = None
+        self.attribute_dtype: type | None = None
         self.attr_value_minmax: tuple | None = None
         self.metric = Metric(unit)
 
@@ -877,7 +878,19 @@ class BasePartitioner(ABC):
         graph_path = join(RESULTS_DIR, name, name + ".graphml")
         if exists(graph_path):
             logger.debug("Loading graph from %s", graph_path)
-            partitioner.graph = ox.load_graphml(graph_path)
+            partitioner.graph = ox.load_graphml(
+                graph_path,
+                node_dtypes={},
+                edge_dtypes={
+                    "bearing": float,
+                    "length": float,
+                    "speed_kph": float,
+                    "travel_time": float,
+                    "travel_time_restricted": float,
+                    "rel_increase": float,
+                    partitioner.attribute_label: partitioner.attribute_dtype,
+                },
+            )
         else:
             graph_path = join(GRAPH_DIR, partitioner.city_name + ".graphml")
             if exists(graph_path):

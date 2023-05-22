@@ -26,6 +26,7 @@ class ResidentialPartitioner(AttributePartitioner):
         street, 1 otherwise.
         """
         self.attribute_label = "residential"
+        self.attribute_dtype = int
         logger.debug("Writing residential attribute to graph.")
         new_edge_attribute_by_function(
             self.graph,

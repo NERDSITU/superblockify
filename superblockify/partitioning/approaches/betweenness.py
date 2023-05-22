@@ -39,6 +39,7 @@ class BetweennessPartitioner(AttributePartitioner):
             If `percentile` is not between, 0.0 and 100.0.
         """
         self.attribute_label = "betweenness_percentile"
+        self.attribute_dtype = int
 
         logger.debug("Writing edge betweenness attribute to graph.")
         if not isinstance(percentile, (float, int)) or not 0.0 < percentile < 100.0:
