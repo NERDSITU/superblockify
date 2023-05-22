@@ -124,8 +124,31 @@ jobs:
     permissions:
       pull-requests: write
       contents: write
+    defaults:
+      run:
+        shell: bash -el {0}
+
     steps:
       - uses: actions/checkout@v3
+
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          activate-environment: OSMnxPyrLab
+          use-mamba: true
+
+      - name: Use cache for ${{ matrix.submodule.name }}
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.CONDA }}/envs
+          fail-on-cache-miss: true
+          key:
+            conda-${{ runner.os }}--${{ runner.arch }}--${{
+            hashFiles('environment.yml') }}-${{ env.CACHE_NUMBER }}
+        env:
+          CACHE_NUMBER: 0  # Same as in caching job
 
       - name: Merge coverage files
         run: coverage combine
