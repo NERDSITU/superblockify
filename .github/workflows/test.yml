@@ -72,7 +72,7 @@ jobs:
           - { name: "Plot", pytest_args: "tests/test_plot.py" }
           - { name: "Utils", pytest_args: "tests/test_utils.py" }
 
-    name: "Test ${{ matrix.submodule.name }}"
+    name: ${{ matrix.submodule.name }}
     defaults:
       run:
         shell: bash -el {0}
