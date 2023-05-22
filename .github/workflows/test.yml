@@ -129,7 +129,8 @@ jobs:
         shell: bash -el {0}
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v2
@@ -149,6 +150,12 @@ jobs:
             hashFiles('environment.yml') }}-${{ env.CACHE_NUMBER }}
         env:
           CACHE_NUMBER: 0  # Same as in caching job
+
+      - name: Load coverages
+        uses: actions/download-artifact@v3
+        id: download
+        with:
+          name: 'coverage'
 
       - name: Merge coverage files
         run: coverage combine
