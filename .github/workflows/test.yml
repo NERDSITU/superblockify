@@ -1,6 +1,18 @@
 name: Test
 
-on: [ push, pull_request ]
+on:
+  push:
+    branches:
+      - '**'
+    paths-ignore:
+      - 'docs/**'
+      - 'scripts/**'
+      - 'data/**'
+      - '.git*'
+      - 'README.md'
+  pull_request:
+    branches:
+      - '**'
 
 jobs:
   caching:
