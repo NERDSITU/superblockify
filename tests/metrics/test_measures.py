@@ -694,7 +694,9 @@ def test___calculate_high_bc_clustering_faulty(coord_bc, threshold_idx):
         __calculate_high_bc_clustering(coord_bc, threshold_idx)
 
 
-def test___calculate_high_bc_anisotropy(clustering_data):  # pylint: disable=redefined-outer-name
+def test___calculate_high_bc_anisotropy(
+    clustering_data,
+):  # pylint: disable=redefined-outer-name
     """Test calculation of betweenness centrality anisotropy."""
     coord_high_bc = clustering_data[0][clustering_data[1] :, :2]
     anisotropy = __calculate_high_bc_anisotropy(coord_high_bc)
