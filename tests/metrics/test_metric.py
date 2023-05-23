@@ -22,6 +22,8 @@ class TestMetric:
         assert not metric.predecessor_matrix
         assert metric.unit == unit
         assert metric.node_list is None
+        assert metric.high_bc_clustering is None
+        assert metric.high_bc_anisotropy is None
 
     @pytest.mark.parametrize(
         "unit,expected_symbol",
@@ -93,6 +95,8 @@ class TestMetric:
         plt.close("all")
         for dist_matrix in part.metric.distance_matrix.values():
             assert dist_matrix.shape == (part.graph.number_of_nodes(),) * 2
+        assert 0.0 < part.metric.high_bc_clustering < 1.0
+        assert 1.0 <= part.metric.high_bc_anisotropy
 
     @pytest.mark.parametrize("unit", ["time", "distance"])
     def test_calculate_metrics_before(self, test_one_city_precalculated_copy, unit):
@@ -124,6 +128,16 @@ class TestMetric:
                 len(part.graph.edges(data=f"edge_betweenness_{bc_type}"))
                 == part.graph.number_of_edges()
             )
+
+    @pytest.mark.parametrize("percentile", [0.0, 0, 100.0, 100, -1.0, 101.0, None, "p"])
+    def test_calculate_high_bc_clustering_faulty_percentile(
+        self, test_one_city_preloaded_copy, percentile
+    ):
+        """Test calculate_high_bc_clustering with faulty percentile.
+        Not 0.0 < percentile < 100.0."""
+        part = test_one_city_preloaded_copy
+        with pytest.raises(ValueError):
+            part.metric.calculate_high_bc_clustering(part.graph, percentile=percentile)
 
     @mark_xfail_flaky_download
     def test_saving_and_loading(
