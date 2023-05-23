@@ -13,6 +13,7 @@ from .measures import (
     write_relative_increase_to_edges,
     calculate_coverage,
     betweenness_centrality,
+    calculate_high_bc_clustering,
 )
 from .plot import (
     plot_distance_matrices,
@@ -21,7 +22,7 @@ from .plot import (
     plot_relative_difference,
     plot_relative_increase_on_graph,
 )
-from ..config import logger, RESULTS_DIR
+from ..config import logger, RESULTS_DIR, CLUSTERING_PERCENTILE
 from ..plot import save_plot
 from ..utils import compare_dicts
 
@@ -102,6 +103,8 @@ class Metric:
         self.avg_path_length = {"S": None, "N": None}
         self.directness = {"SN": None}
         self.global_efficiency = {"NS": None}
+        self.high_bc_clustering = None
+        self.high_bc_anisotropy = None
 
         self.distance_matrix = {}
         self.predecessor_matrix = {}
@@ -176,6 +179,8 @@ class Metric:
             #  No `attr_suffix` for the full graph
         )
 
+        self.calculate_high_bc_clustering(partitioner.graph, CLUSTERING_PERCENTILE)
+
     def calculate_all(
         self,
         partitioner,
@@ -241,12 +246,6 @@ class Metric:
             plot_distributions=make_plots,
         )
 
-        self.calculate_all_measure_sums()
-
-        write_relative_increase_to_edges(
-            partitioner.graph, self.distance_matrix, self.node_list, "N", "S"
-        )
-
         betweenness_centrality(
             partitioner.graph,
             self.node_list,
@@ -254,6 +253,12 @@ class Metric:
             self.predecessor_matrix["N"],
             weight=weight_restricted,
             attr_suffix="_restricted",
+        )
+
+        self.calculate_all_measure_sums()
+
+        write_relative_increase_to_edges(
+            partitioner.graph, self.distance_matrix, self.node_list, "N", "S"
         )
 
         if make_plots:
@@ -346,6 +351,42 @@ class Metric:
                 self.distance_matrix, key[0], key[1]
             )
             logger.debug("Global efficiency %s: %s", key, self.global_efficiency[key])
+
+    def calculate_high_bc_clustering(self, graph, percentile):
+        """Calculate the high betweenness node clustering and anisotropy.
+
+        High betweenness nodes are the nodes above the given percentile of the
+        betweenness centrality distribution.
+
+        Parameters
+        ----------
+        graph : networkx.Graph
+            The graph to calculate the high betweenness node clustering for, needs to
+            have x, y, and node_betweenness_normal attribute for each node.
+        percentile : float
+            The percentile of the betweenness centrality to use as a threshold for high
+            betweenness nodes. 0.0 < percentile < 100.0.
+
+        Raises
+        ------
+        ValueError
+            If percentile is not a float between 0.0 and 100.0.
+        """
+        if not isinstance(percentile, float):
+            raise ValueError(f"percentile needs to be a float, not {type(percentile)}")
+        if not 0.0 < percentile < 100.0:
+            raise ValueError(
+                f"percentile needs to be between 0.0 and 100.0, not {percentile}"
+            )
+
+        self.high_bc_clustering, self.high_bc_anisotropy = calculate_high_bc_clustering(
+            node_x=[graph.nodes[node]["x"] for node in self.node_list],
+            node_y=[graph.nodes[node]["y"] for node in self.node_list],
+            node_betweenness=[
+                graph.nodes[node]["node_betweenness_normal"] for node in self.node_list
+            ],
+            percentile=percentile / 100,
+        )
 
     def __str__(self):
         """Return a string representation of the metric object.

@@ -125,6 +125,16 @@ class TestMetric:
                 == part.graph.number_of_edges()
             )
 
+    @pytest.mark.parametrize("percentile", [0.0, 0, 100.0, 100, -1.0, 101.0, None, "p"])
+    def test_calculate_high_bc_clustering_faulty_percentile(
+        self, test_one_city_preloaded_copy, percentile
+    ):
+        """Test calculate_high_bc_clustering with faulty percentile.
+        Not 0.0 < percentile < 100.0."""
+        part = test_one_city_preloaded_copy
+        with pytest.raises(ValueError):
+            part.metric.calculate_high_bc_clustering(part.graph, percentile=percentile)
+
     @mark_xfail_flaky_download
     def test_saving_and_loading(
         self,

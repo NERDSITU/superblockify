@@ -24,6 +24,10 @@ NETWORK_FILTER
     The filter used to filter the OSM data for the graph. This is a string that is
     passed to the :func:`osmnx.graph_from_place` function.
 
+CLUSTERING_PERCENTILE
+    The percentile used to determine the betweenness centrality threshold for the
+    spatial clustering and anisotropy nodes.
+
 logger
     The logger for this module. This is used to log information, warnings and errors
     throughout the package.
@@ -72,6 +76,9 @@ NETWORK_FILTER = (
     '["service"!~"alley|driveway|emergency_access|parking|parking_aisle|private"]'
 )
 
+# Metrics
+CLUSTERING_PERCENTILE = 0.9
+
 # Logging configuration using the setup.cfg file
 logging.config.fileConfig(join(dirname(__file__), "..", "setup.cfg"))
 # Get the logger for this module
@@ -79,7 +86,7 @@ logger = logging.getLogger("superblockify")
 
 # Tests
 TEST_DATA_PATH = "./tests/test_data/"
-HIDE_PLOTS = False
+HIDE_PLOTS = True
 
 PLACES_GENERAL = [
     ("Barcelona", "Barcelona, Catalonia, Spain"),

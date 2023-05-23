@@ -16,6 +16,7 @@ from networkx import (
     wheel_graph,
 )
 from numpy import full, array, inf, array_equal, int32, int64, allclose
+from numpy.random import default_rng
 from scipy.sparse.csgraph import dijkstra
 
 from superblockify.metrics.measures import (
@@ -25,6 +26,7 @@ from superblockify.metrics.measures import (
     calculate_coverage,
     betweenness_centrality,
     _calculate_betweenness,
+    __calculate_high_bc_clustering,
 )
 from superblockify.utils import __edges_to_1d
 
@@ -648,3 +650,25 @@ def test_betweenness_centrality_weight_missing(graph):
     del graph.edges[0, 1, 0]["weight"]
     with pytest.raises(ValueError):
         betweenness_centrality(graph, None, None, None, weight="weight")
+
+
+@pytest.mark.parametrize("length", [10, 100, 1000, 60000])
+def test___calculate_high_bc_clustering(length):
+    """Test calculation of betweenness centrality clustering."""
+    rng = default_rng(29384)
+    coord_bc = array(
+        [
+            (  # x-coord
+                rng.uniform(low=-10, high=10, size=length)
+                + rng.uniform(low=-180, high=180)
+            ),
+            (  # y-coord
+                rng.uniform(low=-10, high=10, size=length)
+                + rng.uniform(low=-90, high=90)
+            ),  # betweenness centrality
+            rng.uniform(low=0, high=1, size=length),
+        ]
+    ).T
+    coord_bc = coord_bc[coord_bc[:, 2].argsort()]
+    threshold_idx = rng.integers(low=0, high=length)
+    assert 0.0 < __calculate_high_bc_clustering(coord_bc, threshold_idx) < 1.0
