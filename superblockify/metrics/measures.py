@@ -634,7 +634,9 @@ def calculate_high_bc_clustering(node_x, node_y, node_betweenness, percentile):
     coord_bc = coord_bc[coord_bc[:, 2].argsort()]
     # Threshold betweenness
     threshold_idx = int(len(coord_bc) * percentile)
-    return __calculate_high_bc_clustering(coord_bc, threshold_idx), None
+    return __calculate_high_bc_clustering(
+        coord_bc, threshold_idx
+    ), __calculate_high_bc_anisotropy(coord_bc[threshold_idx:, :2])
 
 
 def __calculate_high_bc_clustering(coord_bc, threshold_idx):
@@ -669,7 +671,18 @@ def __calculate_high_bc_clustering(coord_bc, threshold_idx):
     -------
     high_bc_clustering : float
         Clustering coefficient for the nodes with the highest betweenness.
+
+    Raises
+    ------
+    ValueError
+        If the coordinate array is has less than two nodes.
+    ValueError
+        If the threshold index is greater than the number of nodes.
     """
+    if len(coord_bc) < 2:
+        raise ValueError("Coordinate array must have at least two nodes.")
+    if threshold_idx >= len(coord_bc):
+        raise ValueError("Threshold index must be less than the number of nodes.")
     # Center of mass of high betweenness nodes
     high_bc_cm = np.mean(coord_bc[threshold_idx:, :2], axis=0)
     # Average distance to center of mass
@@ -678,3 +691,48 @@ def __calculate_high_bc_clustering(coord_bc, threshold_idx):
     )
     # Norm by average distance of all nodes
     return avg_dist / np.mean(np.linalg.norm(coord_bc[:, :2] - high_bc_cm, axis=1))
+
+
+def __calculate_high_bc_anisotropy(coord_high_bc):
+    r"""High betweenness nodes anisotropy.
+
+    The high betweenness anisotropy is the ratio
+    :math:`A_{\theta}=\lambda_1/\lambda_2`, where :math:`\lambda_i` are the positive
+    eigenvalues of the covariance matrix of the high betweenness nodes, and
+    :math:`\lambda_1 \geq \lambda_2`. [1]_
+
+    Parameters
+    ----------
+    coord_high_bc : np.ndarray
+        Array of node coordinates of the high betweenness nodes.
+
+    Returns
+    -------
+    high_bc_anisotropy : float
+        Anisotropy for the nodes with the highest betweenness.
+
+    Raises
+    ------
+    ValueError
+        If the number of high betweenness nodes is less than 2.
+
+    References
+    ----------
+    .. [1] Kirkley, A., Barbosa, H., Barthelemy, M. & Ghoshal, G. From the betweenness
+           centrality in street networks to structural invariants in random planar
+           graphs. Nat Commun 9, 2501 (2018).
+           https://www.nature.com/articles/s41467-018-04978-z
+    """
+    if len(coord_high_bc) < 2:
+        raise ValueError(
+            "High betweenness nodes must be at least 2, for less the anisotropy is "
+            "not defined."
+        )
+    # Covariance matrix
+    cov = np.cov(coord_high_bc.T)
+    # Eigenvalues
+    eigvals = np.linalg.eigvals(cov)
+    # Sort eigenvalues
+    eigvals = np.sort(eigvals)[::-1]
+    # Anisotropy
+    return eigvals[0] / eigvals[1]

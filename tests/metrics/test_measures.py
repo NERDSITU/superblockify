@@ -27,6 +27,7 @@ from superblockify.metrics.measures import (
     betweenness_centrality,
     _calculate_betweenness,
     __calculate_high_bc_clustering,
+    __calculate_high_bc_anisotropy,
 )
 from superblockify.utils import __edges_to_1d
 
@@ -652,23 +653,77 @@ def test_betweenness_centrality_weight_missing(graph):
         betweenness_centrality(graph, None, None, None, weight="weight")
 
 
-@pytest.mark.parametrize("length", [10, 100, 1000, 60000])
-def test___calculate_high_bc_clustering(length):
-    """Test calculation of betweenness centrality clustering."""
+@pytest.fixture(scope="module", params=[10, 100, 1000, 60000])
+def clustering_data(request):
+    """Generate random data for clustering tests."""
     rng = default_rng(29384)
-    coord_bc = array(
+    coord = array(
         [
             (  # x-coord
-                rng.uniform(low=-10, high=10, size=length)
+                rng.uniform(low=-10, high=10, size=request.param)
                 + rng.uniform(low=-180, high=180)
             ),
             (  # y-coord
-                rng.uniform(low=-10, high=10, size=length)
+                rng.uniform(low=-10, high=10, size=request.param)
                 + rng.uniform(low=-90, high=90)
             ),  # betweenness centrality
-            rng.uniform(low=0, high=1, size=length),
+            rng.uniform(low=0, high=1, size=request.param),
         ]
     ).T
-    coord_bc = coord_bc[coord_bc[:, 2].argsort()]
-    threshold_idx = rng.integers(low=0, high=length)
-    assert 0.0 < __calculate_high_bc_clustering(coord_bc, threshold_idx) < 1.0
+    return coord[coord[:, 2].argsort()], rng.integers(low=0, high=request.param)
+
+
+def test___calculate_high_bc_clustering(
+    clustering_data,
+):  # pylint: disable=redefined-outer-name
+    """Test calculation of betweenness centrality clustering."""
+    assert 0.0 < __calculate_high_bc_clustering(*clustering_data) < 1.0
+
+
+@pytest.mark.parametrize(
+    "coord_bc,threshold_idx",
+    [
+        (array([]), 0),  # length 0
+        (array([[0, 0, 0]]), 1),  # length 1
+        (array([[0, 0, 0], [1, 1, 1]]), 2),  # index out of bounds
+    ],
+)
+def test___calculate_high_bc_clustering_faulty(coord_bc, threshold_idx):
+    """Test error catching for betweenness centrality clustering."""
+    with pytest.raises(ValueError):
+        __calculate_high_bc_clustering(coord_bc, threshold_idx)
+
+
+def test___calculate_high_bc_anisotropy(clustering_data):  # pylint: disable=redefined-outer-name
+    """Test calculation of betweenness centrality anisotropy."""
+    coord_high_bc = clustering_data[0][clustering_data[1] :, :2]
+    anisotropy = __calculate_high_bc_anisotropy(coord_high_bc)
+    assert 1.0 <= anisotropy
+    # check invariance to x and y coordinate swap
+    assert __calculate_high_bc_anisotropy(coord_high_bc[:, ::-1]) == anisotropy
+
+
+@pytest.mark.parametrize(
+    "coords,expected",
+    [
+        ([[0, 0], [1, 0], [0, 1], [1, 1]], 1.0),  # square, round distribution
+        ([[-20, 10], [-10, 10], [-20, 20], [-10, 20]], 1.0),  # square, round distr.
+        ([[1, 0], [0, 1], [1, 2], [2, 1]], 1.0),  # diamond, round distribution
+        ([[0, 0], [1, 0], [0, 1], [1, 1], [0.5, 0.5]], 1.0),  # square + center
+        ([[0, 0], [1, 0], [0, 2], [1, 2]], 4.0),  # 2:1 rectangle, long distr.
+        ([[0, 0], [2, 0], [0, 1], [2, 1]], 4.0),  # 1:2 rectangle, long distr.
+        ([[0, 0], [1, 0], [0, 2], [1, 2], [0.5, 1]], 4.0),  # 2:1 rect. + center
+        ([[0, 0], [0, 1]], inf),  # vertical line, infinite anisotropy
+        ([[0, 0], [1, 0]], inf),  # horizontal line, infinite anisotropy
+    ],
+)
+def test___calculate_high_bc_anisotropy_special_cases(coords, expected):
+    """Test calculation of betweenness centrality anisotropy."""
+    assert __calculate_high_bc_anisotropy(array(coords)) == expected
+
+
+@pytest.mark.parametrize("coords", [[], [[0, 0]], [[1, 1]]])
+def test___test___calculate_high_bc_anisotropy_faulty(coords):
+    """Test error catching of betweenness centrality anisotropy."""
+    with pytest.raises(ValueError):
+        __calculate_high_bc_anisotropy(array(coords))
