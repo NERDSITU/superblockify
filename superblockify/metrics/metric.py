@@ -363,7 +363,7 @@ class Metric:
         graph : networkx.Graph
             The graph to calculate the high betweenness node clustering for, needs to
             have x, y, and node_betweenness_normal attribute for each node.
-        percentile : float
+        percentile : float or int
             The percentile of the betweenness centrality to use as a threshold for high
             betweenness nodes. 0.0 < percentile < 100.0.
 
@@ -372,8 +372,10 @@ class Metric:
         ValueError
             If percentile is not a float between 0.0 and 100.0.
         """
-        if not isinstance(percentile, float):
-            raise ValueError(f"percentile needs to be a float, not {type(percentile)}")
+        if not isinstance(percentile, (float, int)):
+            raise ValueError(
+                f"percentile needs to be a float or int, not {type(percentile)}"
+            )
         if not 0.0 < percentile < 100.0:
             raise ValueError(
                 f"percentile needs to be between 0.0 and 100.0, not {percentile}"

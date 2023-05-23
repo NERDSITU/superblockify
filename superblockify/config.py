@@ -77,7 +77,7 @@ NETWORK_FILTER = (
 )
 
 # Metrics
-CLUSTERING_PERCENTILE = 0.9
+CLUSTERING_PERCENTILE = 90
 
 # Logging configuration using the setup.cfg file
 logging.config.fileConfig(join(dirname(__file__), "..", "setup.cfg"))
