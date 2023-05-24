@@ -132,9 +132,9 @@ class TestMetric:
                 == part.graph.number_of_edges()
             )
 
-    def test_calculate_general_stats(self, test_city_small_preloaded):
+    def test_calculate_general_stats(self, test_city_small_preloaded_copy):
         """Test calculating basic graph stats"""
-        part = test_city_small_preloaded
+        part = test_city_small_preloaded_copy
         part.metric.calculate_general_stats(part.graph)
         assert len(part.metric.graph_stats) >= 15
         assert 0 <= part.metric.graph_stats["street_orientation_order"] <= 1
