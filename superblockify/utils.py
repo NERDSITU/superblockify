@@ -4,7 +4,7 @@ from itertools import chain
 from re import match
 
 import osmnx as ox
-from networkx import Graph, is_isomorphic
+from networkx import Graph, is_isomorphic, set_node_attributes
 from numba import njit, int64, int32, prange
 from numpy import (
     zeros,
@@ -15,6 +15,7 @@ from numpy import (
     empty,
     int64 as np_int64,
 )
+from osmnx.stats import count_streets_per_node
 
 
 def extract_attributes(graph, edge_attributes, node_attributes):
@@ -103,6 +104,9 @@ def load_graph_from_place(save_as, search_string, **gfp_kwargs):
     graph = ox.distance.add_edge_lengths(graph)
     graph = ox.add_edge_speeds(graph)  # adds attribute "maxspeed"
     graph = ox.add_edge_travel_times(graph)  # adds attribute "travel_time"
+    # count the number of streets per node / degree
+    street_count = count_streets_per_node(graph)
+    set_node_attributes(graph, values=street_count, name="street_count")
     graph = extract_attributes(
         graph,
         edge_attributes={
@@ -113,7 +117,7 @@ def load_graph_from_place(save_as, search_string, **gfp_kwargs):
             "speed_kph",
             "travel_time",
         },
-        node_attributes={"y", "x", "osmid"},
+        node_attributes={"y", "x", "osmid", "street_count"},
     )
     # Add edge bearings - the precision >1 is important for binning
     graph = ox.add_edge_bearings(graph, precision=2)

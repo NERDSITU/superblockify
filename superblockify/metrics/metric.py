@@ -7,6 +7,7 @@ from .distances import (
     calculate_path_distance_matrix,
     calculate_euclidean_distance_matrix_projected,
 )
+from .graph_stats import basic_graph_stats
 from .measures import (
     calculate_global_efficiency,
     calculate_directness,
@@ -83,7 +84,25 @@ class Metric:
     local_efficiency : dict
         The local efficiency of the graph for each network measure
         {"SE": float, "NE": float, "NS": float}
+    high_bc_clustering : float
+        The clustering coefficient of the nodes with the highest betweenness centrality
+    high_bc_anisotropy : float
+        The anisotropy of the nodes with the highest betweenness centrality
 
+    distance_matrix : dict
+        The distance matrices for each network measure
+    predecessor_matrix : dict
+        The predecessor matrices for each network measure
+    unit : str
+        The unit to use for the shortest distance calculation, either "time",
+        "distance", ``None`` for hops, or a custom unit string found as edge attribute
+        in the graph
+    node_list : list
+        The list of nodes in the graph, used for the distance matrices
+
+    graph_stats : dict
+        The general graph statistics, see
+        :func:`superblockify.metrics.graph_stats.basic_graph_stats`
     """
 
     # pylint: disable=too-many-instance-attributes
@@ -98,6 +117,7 @@ class Metric:
             can also be "distance", if ``None`` count hops.
         """
 
+        # Partitioning metrics
         self.coverage = None
         self.num_components = None
         self.avg_path_length = {"S": None, "N": None}
@@ -106,10 +126,14 @@ class Metric:
         self.high_bc_clustering = None
         self.high_bc_anisotropy = None
 
+        # Intermediate results
         self.distance_matrix = {}
         self.predecessor_matrix = {}
         self.unit = unit
         self.node_list = None
+
+        # General graph metrics
+        self.graph_stats = None
 
     def unit_symbol(self):
         """Return unit string represented by the :attr:`unit` attribute.
@@ -126,6 +150,22 @@ class Metric:
         if self.unit is None:
             return "hops"
         return f"({self.unit})"
+
+    def calculate_general_stats(self, graph):
+        """Calculate general graph metrics
+
+        Parameters
+        ----------
+        graph : Graph
+            The graph to calculate the metrics for
+
+        Notes
+        -----
+        These metrics are only dependent on the graph, not on the partitioning. This way
+        it is not necessary to calculate them for each partitioning, but only once per
+        graph/city.
+        """
+        self.graph_stats = basic_graph_stats(graph)
 
     def calculate_before(self, partitioner, make_plots=False):
         """Calculate metrics on unrestricted graph

@@ -18,12 +18,15 @@ class TestMetric:
         assert metric.avg_path_length == {"S": None, "N": None}
         assert metric.directness == {"SN": None}
         assert metric.global_efficiency == {"NS": None}
+        assert metric.high_bc_clustering is None
+        assert metric.high_bc_anisotropy is None
+
         assert not metric.distance_matrix
         assert not metric.predecessor_matrix
         assert metric.unit == unit
         assert metric.node_list is None
-        assert metric.high_bc_clustering is None
-        assert metric.high_bc_anisotropy is None
+
+        assert metric.graph_stats is None
 
     @pytest.mark.parametrize(
         "unit,expected_symbol",
@@ -128,6 +131,19 @@ class TestMetric:
                 len(part.graph.edges(data=f"edge_betweenness_{bc_type}"))
                 == part.graph.number_of_edges()
             )
+
+    def test_calculate_general_stats(self, test_city_small_preloaded_copy):
+        """Test calculating basic graph stats"""
+        part = test_city_small_preloaded_copy
+        part.metric.calculate_general_stats(part.graph)
+        assert len(part.metric.graph_stats) >= 15
+        assert 0 <= part.metric.graph_stats["street_orientation_order"] <= 1
+        for val in part.metric.graph_stats.values():
+            if isinstance(val, (int, float)):
+                assert 0 <= val
+            elif isinstance(val, dict):
+                for subval in val.values():
+                    assert 0 <= subval
 
     @pytest.mark.parametrize("percentile", [0.0, 0, 100.0, 100, -1.0, 101.0, None, "p"])
     def test_calculate_high_bc_clustering_faulty_percentile(
