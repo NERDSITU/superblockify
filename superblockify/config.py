@@ -27,6 +27,8 @@ NETWORK_FILTER
 CLUSTERING_PERCENTILE
     The percentile used to determine the betweenness centrality threshold for the
     spatial clustering and anisotropy nodes.
+NUM_BINS
+    The number of bins used for the histograms in the entropy calculation.
 
 logger
     The logger for this module. This is used to log information, warnings and errors
@@ -78,6 +80,7 @@ NETWORK_FILTER = (
 
 # Metrics
 CLUSTERING_PERCENTILE = 90
+NUM_BINS = 36
 
 # Logging configuration using the setup.cfg file
 logging.config.fileConfig(join(dirname(__file__), "..", "setup.cfg"))
