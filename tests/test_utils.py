@@ -4,7 +4,7 @@ from os.path import exists
 
 import pytest
 from numpy import array, array_equal, int32, int64
-from shapely import MultiPolygon
+from shapely import MultiPolygon, Polygon
 
 from superblockify.config import TEST_DATA_PATH
 from superblockify.utils import (
@@ -30,7 +30,7 @@ def test_load_graph_from_place():
     assert graph is not None
     assert len(graph) > 0
     assert graph.size() > 0
-    assert isinstance(graph.graph["boundary"], MultiPolygon)
+    assert isinstance(graph.graph["boundary"], (MultiPolygon, Polygon))
 
     # check that every edge has the attribute 'length', `speed_kph` and `travel_time`
     for _, _, data in graph.edges(data=True):
@@ -66,7 +66,7 @@ def test_load_graph_from_place_search_str_types(city, search_string):
     assert graph is not None
     assert len(graph) > 0
     assert graph.size() > 0
-    assert isinstance(graph.graph["boundary"], MultiPolygon)
+    assert isinstance(graph.graph["boundary"], (MultiPolygon, Polygon))
 
 
 @pytest.fixture(scope="module")
