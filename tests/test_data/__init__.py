@@ -2,7 +2,7 @@
 
 import osmnx as ox
 
-from superblockify.config import logger, PLACES_GENERAL, PLACES_SMALL
+from superblockify.config import logger, PLACES_GENERAL, PLACES_SMALL, NETWORK_FILTER
 from superblockify.utils import load_graph_from_place
 
 # turn on logging
@@ -18,5 +18,5 @@ if __name__ == "__main__":
         load_graph_from_place(
             f"./tests/test_data/cities/{place[0]}.graphml",
             place[1],
-            network_type="drive",
+            custom_filter=NETWORK_FILTER,
         )
