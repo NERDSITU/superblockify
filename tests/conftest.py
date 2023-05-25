@@ -183,7 +183,6 @@ def test_city_small_preloaded(test_city_small, partitioner_class):
         city_name=city_name,
         graph=graph.copy(),
     )
-    part.save(save_graph_copy=False)
     return part
 
 
@@ -264,7 +263,6 @@ def test_one_city_preloaded(partitioner_class, test_one_city):
         city_name=city_name,
         graph=graph.copy(),
     )
-    part.save(save_graph_copy=False)
     return part
 
 
