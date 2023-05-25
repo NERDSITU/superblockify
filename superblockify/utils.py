@@ -87,19 +87,18 @@ def load_graph_from_place(save_as, search_string, **gfp_kwargs):
 
     # check the format of the search string, match to regex R\d+, str or list of str
     # use re.match(r"R\d+", search_string) or to all elements in list
-    if (
-        isinstance(search_string, str)
+    mult_polygon = ox.geocode_to_gdf(
+        search_string,
+        by_osmid=isinstance(search_string, str)
         and match(r"R\d+", search_string)
         or isinstance(search_string, list)
-        and all(isinstance(s, str) and match(r"R\d+", s) for s in search_string)
-    ):
-        mult_polygon = ox.geocode_to_gdf(search_string, by_osmid=True)
-        # geopandas.GeoDataFrame, every column is polygon
-        # make shapely.geometry.MultiPolygon from all polygons
-        mult_polygon = mult_polygon["geometry"].unary_union
-        graph = ox.graph_from_polygon(mult_polygon, **gfp_kwargs)
-    else:
-        graph = ox.graph_from_place(search_string, **gfp_kwargs)
+        and all(isinstance(s, str) and match(r"R\d+", s) for s in search_string),
+    )
+
+    # geopandas.GeoDataFrame, every column is polygon
+    # make shapely.geometry.MultiPolygon from all polygons
+    mult_polygon = ox.project_gdf(mult_polygon, to_crs="epsg:4326")
+    graph = ox.graph_from_polygon(mult_polygon.geometry.unary_union, **gfp_kwargs)
 
     graph = ox.distance.add_edge_lengths(graph)
     graph = ox.add_edge_speeds(graph)  # adds attribute "maxspeed"
@@ -122,6 +121,11 @@ def load_graph_from_place(save_as, search_string, **gfp_kwargs):
     # Add edge bearings - the precision >1 is important for binning
     graph = ox.add_edge_bearings(graph, precision=2)
     graph = ox.project_graph(graph)
+
+    # Add boundary of union of all polygons as attribute - in UTM crs of centroid
+    mult_polygon = ox.project_gdf(mult_polygon)
+    graph.graph["boundary"] = mult_polygon.geometry.unary_union
+
     ox.save_graphml(graph, filepath=save_as)
     return graph
 
