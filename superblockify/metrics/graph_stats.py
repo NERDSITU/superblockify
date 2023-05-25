@@ -37,7 +37,7 @@ def street_orientation_order(graph, num_bins):
     Where :math:`H_o` is the orientation entropy of the graph, :math:`H_g` is the
     minimal plausible entropy of a grid like city :math:`H_g \approx 1.386`, and
     :math:`H_{\max}` is the maximal entropy of a city where the streets are
-    uniformly distributed :math:`H_{\max} = \log(\text{num\_bins=36}) \approx 3.584`.
+    uniformly distributed :math:`H_{\max} = \log(\text{num_bins=36}) \approx 3.584`.
     To make an order parameter of this from total disorder to order, :math:`\phi` is
     designed to reach from 0 to 1. [1]_ [2]_
 
