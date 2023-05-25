@@ -40,6 +40,7 @@ release = "0.1.2"
 extensions = [
     "myst_nb",
     "sphinx.ext.autodoc",
+    "numpydoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",

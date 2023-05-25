@@ -85,7 +85,7 @@ def calculate_path_distance_matrix(
         path length from node i to node j.
     predecessors : ndarray
         The predecessors for the distance matrix. predecessors[i, j] is the node
-        before node j on the shortest path from node i to node j. [3]_
+        before node j on the shortest path from node i to node j. [1]_
 
     References
     ----------
