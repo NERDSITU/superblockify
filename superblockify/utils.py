@@ -16,6 +16,7 @@ from numpy import (
     int64 as np_int64,
 )
 from osmnx.stats import count_streets_per_node
+from shapely import wkt
 
 
 def extract_attributes(graph, edge_attributes, node_attributes):
@@ -124,7 +125,9 @@ def load_graph_from_place(save_as, search_string, **gfp_kwargs):
 
     # Add boundary of union of all polygons as attribute - in UTM crs of centroid
     mult_polygon = ox.project_gdf(mult_polygon)
+    graph.graph["boundary_crs"] = mult_polygon.crs
     graph.graph["boundary"] = mult_polygon.geometry.unary_union
+    graph.graph["area"] = graph.graph["boundary"].area
 
     ox.save_graphml(graph, filepath=save_as)
     return graph
@@ -295,3 +298,43 @@ def __edges_to_1d(edge_u, edge_v, max_len):  # pragma: no cover
     for i in prange(len(edge_u)):  # pylint: disable=not-an-iterable
         edges[i] = __edge_to_1d(edge_u[i], edge_v[i], max_len)
     return edges
+
+
+def load_graphml_dtypes(filepath=None, attribute_label=None, attribute_dtype=None):
+    """Load a graphml file with custom dtypes.
+
+    Parameters
+    ----------
+    filepath : str
+        Path to the graphml file.
+    attribute_label : str, optional
+        The attribute label to convert to the specified dtype.
+    attribute_dtype : type, optional
+        The dtype to convert the attribute to.
+
+    Returns
+    -------
+    networkx.MultiDiGraph
+        The graph.
+    """
+
+    node_dtypes = {}
+    edge_dtypes = {
+        "bearing": float,
+        "length": float,
+        "speed_kph": float,
+        "travel_time": float,
+        "travel_time_restricted": float,
+        "rel_increase": float,
+    }
+
+    graph_dtypes = {"boundary": wkt.loads, "area": float}
+    if attribute_label is not None and attribute_dtype is not None:
+        edge_dtypes[attribute_label] = attribute_dtype
+    graph = ox.load_graphml(
+        filepath=filepath,
+        node_dtypes=node_dtypes,
+        edge_dtypes=edge_dtypes,
+        graph_dtypes=graph_dtypes,
+    )
+    return graph

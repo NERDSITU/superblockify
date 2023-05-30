@@ -136,7 +136,7 @@ class TestMetric:
         """Test calculating basic graph stats"""
         part = test_city_small_preloaded_copy
         part.metric.calculate_general_stats(part.graph)
-        assert len(part.metric.graph_stats) >= 15
+        assert len(part.metric.graph_stats) == 19
         assert 0 <= part.metric.graph_stats["street_orientation_order"] <= 1
         for val in part.metric.graph_stats.values():
             if isinstance(val, (int, float)):

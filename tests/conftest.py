@@ -5,7 +5,6 @@ from os import listdir, remove
 from os.path import getsize, join, exists
 from shutil import rmtree
 
-import osmnx as ox
 import pytest
 from networkx import set_node_attributes
 from requests.exceptions import ConnectTimeout
@@ -19,6 +18,7 @@ from superblockify.config import (
     HIDE_PLOTS,
 )
 from superblockify.partitioning import __all_partitioners__
+from superblockify.utils import load_graphml_dtypes
 
 ALL_CITIES_SORTED = sorted(
     [city for city in listdir(f"{TEST_DATA_PATH}cities/") if city.endswith(".graphml")],
@@ -70,8 +70,8 @@ def partitioner_class(request):
 def test_city_all(request):
     """Fixture for loading and parametrizing all city graphs from test_data."""
     # return request.param without .graphml
-    return request.param[:-8], ox.load_graphml(
-        filepath=f"{TEST_DATA_PATH}cities/" + request.param
+    return request.param[:-8], load_graphml_dtypes(
+        f"{TEST_DATA_PATH}cities/" + request.param
     )
 
 
@@ -139,8 +139,8 @@ def test_city_all_precalculated(test_city_all_precalculated_save):
 )
 def test_city_small(request):
     """Fixture for loading and parametrizing small city graphs from test_data."""
-    return request.param[:-8], ox.load_graphml(
-        filepath=f"{TEST_DATA_PATH}cities/" + request.param
+    return request.param[:-8], load_graphml_dtypes(
+        f"{TEST_DATA_PATH}cities/" + request.param
     )
 
 
@@ -219,8 +219,8 @@ def test_city_small_osmid_copy(test_city_small_osmid):
 @pytest.fixture(scope="session")
 def test_one_city():
     """Fixture for loading and parametrizing one small city."""
-    return SMALL_CITIES[0][:-8], ox.load_graphml(
-        filepath=f"{TEST_DATA_PATH}cities/" + SMALL_CITIES[0]
+    return SMALL_CITIES[0][:-8], load_graphml_dtypes(
+        f"{TEST_DATA_PATH}cities/" + SMALL_CITIES[0]
     )
 
 

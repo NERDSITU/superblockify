@@ -33,7 +33,7 @@ from .. import attribute
 from ..config import logger, GRAPH_DIR, RESULTS_DIR, NETWORK_FILTER
 from ..metrics.metric import Metric
 from ..plot import save_plot
-from ..utils import load_graph_from_place
+from ..utils import load_graph_from_place, load_graphml_dtypes
 
 
 class BasePartitioner(ABC):
@@ -739,7 +739,7 @@ class BasePartitioner(ABC):
         graph_path = join(GRAPH_DIR, city_name + ".graphml")
         if exists(graph_path) and not reload_graph:
             logger.debug("Loading graph from %s", graph_path)
-            graph = ox.load_graphml(graph_path)
+            graph = load_graphml_dtypes(graph_path)
         else:
             logger.debug("Finding graph with search string %s", search_str)
             graph = load_graph_from_place(
@@ -878,24 +878,16 @@ class BasePartitioner(ABC):
         graph_path = join(RESULTS_DIR, name, name + ".graphml")
         if exists(graph_path):
             logger.debug("Loading graph from %s", graph_path)
-            partitioner.graph = ox.load_graphml(
-                graph_path,
-                node_dtypes={},
-                edge_dtypes={
-                    "bearing": float,
-                    "length": float,
-                    "speed_kph": float,
-                    "travel_time": float,
-                    "travel_time_restricted": float,
-                    "rel_increase": float,
-                    partitioner.attribute_label: partitioner.attribute_dtype,
-                },
+            partitioner.graph = load_graphml_dtypes(
+                graph_path, partitioner.attribute_label, partitioner.attribute_dtype
             )
         else:
             graph_path = join(GRAPH_DIR, partitioner.city_name + ".graphml")
             if exists(graph_path):
                 logger.debug("Loading graph from %s", graph_path)
-                partitioner.graph = ox.load_graphml(graph_path)
+                partitioner.graph = load_graphml_dtypes(
+                    graph_path, partitioner.attribute_label, partitioner.attribute_dtype
+                )
             else:
                 logger.debug("Graph not found in %s, keeping empty", graph_path)
                 return partitioner

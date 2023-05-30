@@ -168,7 +168,7 @@ class Metric:
         it is not necessary to calculate them for each partitioning, but only once per
         graph/city.
         """
-        self.graph_stats = basic_graph_stats(graph)
+        self.graph_stats = basic_graph_stats(graph, area=graph.graph["area"])
 
     def calculate_before(self, partitioner, make_plots=False):
         """Calculate metrics on unrestricted graph
