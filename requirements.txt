@@ -4,6 +4,7 @@ pyrosm
 numba
 tqdm
 contextily
+rasterstats
 
 # Editor
 jupyterlab
