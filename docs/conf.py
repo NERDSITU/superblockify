@@ -104,4 +104,5 @@ intersphinx_mapping = {
     "geopandas": ("https://geopandas.org/en/stable/", None),
     "shapely": ("https://shapely.readthedocs.io/en/stable", None),
     "numba": ("https://numba.readthedocs.io/en/stable", None),
+    "rasterstats": ("https://pythonhosted.org/rasterstats/", None),
 }
