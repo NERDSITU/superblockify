@@ -123,7 +123,7 @@ def load_graph_from_place(save_as, search_string, **gfp_kwargs):
     graph = ox.add_edge_bearings(graph, precision=2)
     graph = ox.project_graph(graph)
 
-    # Add boundary of union of all polygons as attribute - in UTM crs of centroid
+    # Add boundary as union of all polygons as attribute - in UTM crs of centroid
     mult_polygon = ox.project_gdf(mult_polygon)
     graph.graph["boundary_crs"] = mult_polygon.crs
     graph.graph["boundary"] = mult_polygon.geometry.unary_union
