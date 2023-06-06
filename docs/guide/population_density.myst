@@ -78,8 +78,9 @@ meridian at Greenwich (EPSG:4326)) for the 100m and 1km resolution, and in WGS84
 (EPSG:4326) for the 3 and 30 arcsec resolutions.
 
 Another option is to directly download the whole dataset
-`/V1-0/GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0.zip`.
-In 100m resolution, the file is 4.9 GB (compressed).
+[`/V1-0/GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0.zip`](https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2025_GLOBE_R2023A_54009_100/V1-0/GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0.zip).
+In 100m resolution, the file is 4.9 GB (compressed). This way, we do not need to worry
+about the tiling.
 
 
 [^1]: Schiavina, M., Freire, S. & MacManus, K. GHS-POP R2023A - GHS population grid
@@ -223,7 +224,7 @@ def resample_load_window(file, resample_factor=1, window=None, res_stategy=Resam
     Parameters
     -----------
     file : str
-        Path to the raster file.
+        Path to the raster file. It Can be a tile or the whole raster.
     resample_factor : float, optional
         Factor to resample the window by. Values > 1 increase the resolution
         of the raster, values < 1 decrease the resolution of the raster by that
