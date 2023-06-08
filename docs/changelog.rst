@@ -5,6 +5,9 @@ Changelog
 Version 0.1.3 (2023-05-
 **************************
 
+* Automated population data download and preprocessing of the GHS-POP - R2023A dataset
+  <https://ghsl.jrc.ec.europa.eu/ghs_pop2023.php>.
+* Added graph attribute `boundary`, used for calculating the total area of the city.
 * Added general graph statistics :mod:`superblockify.metric.graph_stats`.
   Including spatial clustering and anisotropy.
 

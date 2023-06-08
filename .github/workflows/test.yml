@@ -80,6 +80,7 @@ jobs:
             name: "Partitioning Rest",
             pytest_args: "tests/partitioning/ --ignore=tests/partitioning/approaches/ --ignore=tests/partitioning/test_base.py"
           }
+          - { name: "Population", pytest_args: "tests/population/" }
           - { name: "Attribute", pytest_args: "tests/test_attribute.py" }
           - { name: "Plot", pytest_args: "tests/test_plot.py" }
           - { name: "Utils", pytest_args: "tests/test_utils.py" }

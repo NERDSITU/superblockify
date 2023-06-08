@@ -13,6 +13,8 @@ GRAPH_DIR
     The directory where the graphs are stored.
 RESULTS_DIR
     The directory where the results are stored.
+GHSL_DIR
+    The directory where the GHSL population data is stored when downloaded.
 
 V_MAX_LTN
     The maximum speed in km/h for the restricted calculation of travel times.
@@ -29,6 +31,14 @@ CLUSTERING_PERCENTILE
     spatial clustering and anisotropy nodes.
 NUM_BINS
     The number of bins used for the histograms in the entropy calculation.
+
+FULL_RASTER
+    The path and filename of the full GHSL raster.
+    If None, tiles of the needed area are downloaded from the JRC FTP server and
+    stored in the GHSL_DIR directory.
+    <https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2025_GLOBE_R2023A_54009_100/V1-0/GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0.zip>
+DOWNLOAD_TIMEOUT
+    The timeout in seconds for downloading the GHSL raster tiles.
 
 logger
     The logger for this module. This is used to log information, warnings and errors
@@ -62,6 +72,7 @@ from os.path import join, dirname
 WORK_DIR = "./"
 GRAPH_DIR = "./data/graphs/"
 RESULTS_DIR = "./data/results/"
+GHSL_DIR = "./data/ghsl/"
 
 # LTN
 # Max speeds in km/h for the restricted calculation of travel times
@@ -81,6 +92,10 @@ NETWORK_FILTER = (
 # Metrics
 CLUSTERING_PERCENTILE = 90
 NUM_BINS = 36
+
+# Population data (GHSL)
+FULL_RASTER = GHSL_DIR + "GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0.tif"
+DOWNLOAD_TIMEOUT = 60
 
 # Logging configuration using the setup.cfg file
 logging.config.fileConfig(join(dirname(__file__), "..", "setup.cfg"))
