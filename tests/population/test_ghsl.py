@@ -6,7 +6,7 @@ from affine import Affine
 from geopandas import GeoDataFrame
 from numpy import ndarray
 
-from superblockify.config import TEST_DATA_PATH, FULL_RASTER
+from superblockify.config import TEST_DATA_PATH
 from superblockify.population import ghsl
 
 
@@ -297,7 +297,7 @@ def test_get_ghsl(full_raster, bbox_moll, expected, monkeypatch, _delete_ghsl_ti
     "full_raster, bbox_moll",
     [
         (  # faulty full_raster
-            FULL_RASTER + "non-existent",
+            "non-existent",
             None,
         ),
         (  # no rasters
