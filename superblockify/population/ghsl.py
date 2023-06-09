@@ -1,6 +1,6 @@
 """GHSL IO functions for the population submodule of the superblockify package."""
 from io import BytesIO
-from os import path
+from os import path, mkdir
 from zipfile import ZipFile
 
 import requests
@@ -233,7 +233,7 @@ def download_ghsl(urls, save_dir=GHSL_DIR, timeout=DOWNLOAD_TIMEOUT):
     """Download the GHSL population raster tile.
 
     Check if the raster tiles are already downloaded, and if not, download and unpack
-    them.
+    them. Create the save directory if it does not exist.
 
     Parameters
     ----------
@@ -253,8 +253,6 @@ def download_ghsl(urls, save_dir=GHSL_DIR, timeout=DOWNLOAD_TIMEOUT):
     Raises
     ------
     ValueError
-        If the folder does not exist.
-    ValueError
         A given URL does not exist.
     ValueError
         A given URL does not return a zip file.
@@ -265,7 +263,8 @@ def download_ghsl(urls, save_dir=GHSL_DIR, timeout=DOWNLOAD_TIMEOUT):
     The sum of all tiles is 4.9G.
     """
     if not path.exists(save_dir):
-        raise ValueError(f"The folder {save_dir} does not exist.")
+        logger.debug("Creating GHSL directory at %s...", save_dir)
+        mkdir(save_dir)
     files = []
     for url in urls if isinstance(urls, (list, tuple)) else [urls]:
         # Check if file already exists at the save_dir

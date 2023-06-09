@@ -1,5 +1,6 @@
 """Tests for the ghsl module."""
 from os.path import join, isfile
+from shutil import rmtree
 
 import pytest
 from affine import Affine
@@ -212,11 +213,6 @@ BASE_PATH = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/"
             "GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0_R18_C27.zip",
             TEST_DATA_PATH,
         ),
-        (  # non-existent folder
-            "GHS_POP_GLOBE_R2023A/GHS_POP_E2025_GLOBE_R2023A_54009_100/V1-0/tiles/"
-            "GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0_R18_C26.zip",
-            join(TEST_DATA_PATH, "non-existent"),
-        ),
         (  # non-zip file
             "copyright.txt",
             TEST_DATA_PATH,
@@ -227,6 +223,25 @@ def test_download_ghsl_invalid_urls(url, save_dir):
     """Test the download_ghsl function with invalid urls."""
     with pytest.raises(ValueError):
         ghsl.download_ghsl(BASE_PATH + url, save_dir=save_dir)
+
+
+def test_download_ghsl_create_save_dir(_delete_ghsl_tifs):
+    """Test the download_ghsl function with non-existent save_dir."""
+    url = BASE_PATH + (
+        "GHS_POP_GLOBE_R2023A/GHS_POP_E2025_GLOBE_R2023A_54009_100/V1-0/tiles/"
+        "GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0_R18_C26.zip"
+    )
+    ghsl.download_ghsl(url, save_dir=join(TEST_DATA_PATH, "non-existent-dir"))
+    # Check files exist in save_dir
+    assert isfile(
+        join(
+            TEST_DATA_PATH,
+            "non-existent-dir",
+            "GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0_R18_C26.tif",
+        )
+    )
+    # Delete folder
+    rmtree(join(TEST_DATA_PATH, "non-existent-dir"))
 
 
 def test_download_ghsl_connection_error():
