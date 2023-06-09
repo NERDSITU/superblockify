@@ -1,6 +1,7 @@
 """Module for test fixtures available for all test files"""
 from copy import deepcopy
 from functools import wraps
+from glob import glob
 from os import listdir, remove
 from os.path import getsize, join, exists
 from shutil import rmtree
@@ -302,6 +303,14 @@ def _teardown_test_folders():
         for folder in listdir(RESULTS_DIR):
             if folder.endswith("_test"):
                 rmtree(join(RESULTS_DIR, folder))
+
+
+@pytest.fixture(scope="module")
+def _delete_ghsl_tifs():
+    """Delete GHSL tifs."""
+    yield
+    for filepath in glob(join(TEST_DATA_PATH, "GHS_POP*.tif")):
+        remove(filepath)
 
 
 # ***********************
