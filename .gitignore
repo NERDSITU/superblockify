@@ -17,6 +17,8 @@ docs/api/*
 
 # GHSL population data
 data/ghsl/*
+*.tif
+*.xlsx
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -26,3 +28,9 @@ data/*
 tests/test_data/output/*
 public/*
 jupyter_execute/*
+# logs
+*.log
+# graphs
+*.graphml
+# plots
+*.pdf
