@@ -5,6 +5,7 @@ numba
 tqdm
 contextily
 rasterstats
+momepy  # only used in one reference notebook
 
 # Editor
 jupyterlab
