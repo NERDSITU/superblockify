@@ -102,7 +102,10 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     "geopandas": ("https://geopandas.org/en/stable/", None),
+    "pyproj": ("https://pyproj4.github.io/pyproj/stable/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
     "shapely": ("https://shapely.readthedocs.io/en/stable", None),
     "numba": ("https://numba.readthedocs.io/en/stable", None),
     "rasterstats": ("https://pythonhosted.org/rasterstats/", None),
+    "momepy": ("https://docs.momepy.org/en/stable", None),
 }

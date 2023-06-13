@@ -12,6 +12,10 @@ from .partitioning import plot_speed_un_restricted
 from .plot import paint_streets
 from .plot import plot_by_attribute
 from .plot import plot_road_type_for
+from .population import get_ghsl
+from .population import resample_load_window
+from .population import add_edge_cells
+from .population import get_edge_cells
 
 # Filter deprecated partitioners from `__all_partitioners__` if they have the
 # `__deprecated__` attribute.
