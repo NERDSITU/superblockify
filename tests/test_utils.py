@@ -1,6 +1,6 @@
 """Tests for the utils module."""
 from os import remove
-from os.path import exists
+from os.path import exists, join
 
 import pytest
 from numpy import array, array_equal, int32, int64
@@ -22,7 +22,7 @@ def test_load_graph_from_place():
     """Test that the load_graph_from_place function works."""
 
     graph = load_graph_from_place(
-        f"{TEST_DATA_PATH}/cities/Adliswil.graphml",
+        join(TEST_DATA_PATH, "cities", "Adliswil.graphml"),
         "Adliswil, Bezirk Horgen, Zürich, Switzerland",
         network_type="drive",
     )
@@ -59,7 +59,7 @@ def test_load_graph_from_place_search_str_types(city, search_string):
     """Test that the load_graph_from_place function works with different search string
     types."""
     graph = load_graph_from_place(
-        save_as=f"{TEST_DATA_PATH}/cities/{city}_query_test.graphml",
+        save_as=join(TEST_DATA_PATH, "cities", f"{city}_query_test.graphml"),
         search_string=search_string,
         network_type="drive",
     )
@@ -74,7 +74,7 @@ def _delete_query_test_graphs():
     """Delete the query test graphs."""
     yield
     for city in ["CPH-str", "CPH-list", "CPH-osmid", "CPH-osmid-list"]:
-        filepath = f"{TEST_DATA_PATH}/cities/{city}_query_test.graphml"
+        filepath = join(TEST_DATA_PATH, "cities", f"{city}_query_test.graphml")
         if exists(filepath):
             remove(filepath)
 

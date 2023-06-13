@@ -8,7 +8,8 @@ Attributes
 
 WORK_DIR
     The working directory of the package. This is used to store the graphs and results
-    in subdirectories of this directory.
+    in subdirectories of this directory. By default, this is the directory where the
+    package is installed.
 GRAPH_DIR
     The directory where the graphs are stored.
 RESULTS_DIR
@@ -69,10 +70,10 @@ import logging.config
 from os.path import join, dirname
 
 # General
-WORK_DIR = "./"
-GRAPH_DIR = "./data/graphs/"
-RESULTS_DIR = "./data/results/"
-GHSL_DIR = "./data/ghsl/"
+WORK_DIR = join(dirname(__file__), "..")  # Change this to your working directory
+GRAPH_DIR = join(WORK_DIR, "data", "graphs")
+RESULTS_DIR = join(WORK_DIR, "data", "results")
+GHSL_DIR = join(WORK_DIR, "data", "ghsl")
 
 # LTN
 # Max speeds in km/h for the restricted calculation of travel times
@@ -103,7 +104,7 @@ logging.config.fileConfig(join(dirname(__file__), "..", "setup.cfg"))
 logger = logging.getLogger("superblockify")
 
 # Tests
-TEST_DATA_PATH = "./tests/test_data/"
+TEST_DATA_PATH = join(dirname(__file__), "..", "tests", "test_data")
 HIDE_PLOTS = True
 
 PLACES_GENERAL = [

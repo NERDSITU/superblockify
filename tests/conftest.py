@@ -21,13 +21,14 @@ from superblockify.config import (
 from superblockify.partitioning import __all_partitioners__
 from superblockify.utils import load_graphml_dtypes
 
+TEST_CITY_PATH = join(TEST_DATA_PATH, "cities")
 ALL_CITIES_SORTED = sorted(
-    [city for city in listdir(f"{TEST_DATA_PATH}cities/") if city.endswith(".graphml")],
-    key=lambda city: getsize(f"{TEST_DATA_PATH}cities/" + city),
+    [city for city in listdir(TEST_CITY_PATH) if city.endswith(".graphml")],
+    key=lambda city: getsize(join(TEST_CITY_PATH, city)),
 )
 SMALL_CITIES = [
     city
-    for city in listdir(f"{TEST_DATA_PATH}cities/")
+    for city in listdir(TEST_CITY_PATH)
     if city in [city[0] + ".graphml" for city in PLACES_SMALL]
 ]
 
@@ -71,9 +72,7 @@ def partitioner_class(request):
 def test_city_all(request):
     """Fixture for loading and parametrizing all city graphs from test_data."""
     # return request.param without .graphml
-    return request.param[:-8], load_graphml_dtypes(
-        f"{TEST_DATA_PATH}cities/" + request.param
-    )
+    return request.param[:-8], load_graphml_dtypes(join(TEST_CITY_PATH, request.param))
 
 
 @pytest.fixture(scope="function")
@@ -140,9 +139,7 @@ def test_city_all_precalculated(test_city_all_precalculated_save):
 )
 def test_city_small(request):
     """Fixture for loading and parametrizing small city graphs from test_data."""
-    return request.param[:-8], load_graphml_dtypes(
-        f"{TEST_DATA_PATH}cities/" + request.param
-    )
+    return request.param[:-8], load_graphml_dtypes(join(TEST_CITY_PATH, request.param))
 
 
 @pytest.fixture(scope="function")
@@ -221,7 +218,7 @@ def test_city_small_osmid_copy(test_city_small_osmid):
 def test_one_city():
     """Fixture for loading and parametrizing one small city."""
     return SMALL_CITIES[0][:-8], load_graphml_dtypes(
-        f"{TEST_DATA_PATH}cities/" + SMALL_CITIES[0]
+        join(TEST_CITY_PATH, SMALL_CITIES[0])
     )
 
 
