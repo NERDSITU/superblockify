@@ -25,7 +25,7 @@ and modified from {external+networkx:mod}`networkx.algorithms.centrality.between
 ````{sidebar} Pair-Wise Dependencies
 "... the cubic number of pair-wise dependencies
 $\delta(s, t \mid v)=\sigma(s, t \mid v) / \sigma(s, t)$
-can be aggregated without computing all of the explicitly."y
+can be aggregated without computing all of the explicitly."
 
 One-sided dependencies:
 $\delta(s \mid v)=\sum_{t \in V} \delta(s, t \mid v)$
