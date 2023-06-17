@@ -2,8 +2,9 @@
 from datetime import timedelta, datetime
 
 from geopandas import GeoDataFrame
+from matplotlib import pyplot as plt
 from numpy import vstack, linspace
-from osmnx import graph_to_gdfs
+from osmnx import graph_to_gdfs, plot_graph
 from osmnx.projection import is_projected
 from pandas import Series
 from scipy.spatial import Voronoi  # pylint: disable=no-name-in-module
@@ -12,7 +13,7 @@ from shapely import Polygon, get_coordinates, line_interpolate_point, polygons
 from ..config import logger
 
 
-def add_edge_cells(graph, limit=None, segment=10):
+def add_edge_cells(graph, **tess_kwargs):
     """Add edge tessellation cells to edge attributes in the graph.
 
     Tessellates the graph into plane using a Voronoi cell approach.
@@ -25,12 +26,9 @@ def add_edge_cells(graph, limit=None, segment=10):
     ----------
     graph : networkx.MultiDiGraph
         The graph to tessellate.
-    limit : shapely.geometry.Polygon or None
-        The limit of the tessellation. Must be in the same CRS as the graph.
-        If None, it will be calculated as the exterior of the 100m buffered unary
-        union of the graph's edges.
-    segment : float
-        The maximum distance for the point interpolation. Default is 10.
+    **tess_kwargs
+        Keyword arguments for the
+        :func:`superblockify.population.tessellation.add_edge_cells` function.
 
     Raises
     ------
@@ -43,7 +41,7 @@ def add_edge_cells(graph, limit=None, segment=10):
     -----
     The graph must be in a projected coordinate system.
     """
-    edge_cells = get_edge_cells(graph, limit=limit, segment=segment)
+    edge_cells = get_edge_cells(graph, **tess_kwargs)
     # Add cells to graph (in-place)
     logger.debug("Adding cells to graph.")
     for edge_keys, polygon in edge_cells.geometry.items():
@@ -51,7 +49,7 @@ def add_edge_cells(graph, limit=None, segment=10):
             graph.edges[edge_key]["cell"] = polygon
 
 
-def get_edge_cells(graph, limit=None, segment=10):
+def get_edge_cells(graph, limit=None, segment=10, show_plot=False):
     """Get edge tessellation cells for the graph.
 
     Tessellates the graph into plane using a Voronoi cell approach.
@@ -69,6 +67,8 @@ def get_edge_cells(graph, limit=None, segment=10):
         union of the graph's edges.
     segment : float
         The maximum distance for the point interpolation. Default is 10.
+    show_plot : bool
+        If True, a plot of the tessellation will be shown. Default is False.
 
     Returns
     -------
@@ -135,6 +135,18 @@ def get_edge_cells(graph, limit=None, segment=10):
     edge_cells = reconstruct_edge_cells(
         edge_voronoi_diagram, edge_indices, graph.graph["crs"]
     )
+
+    # Plot tessellation
+    if show_plot:
+        fig, axe = plt.subplots(figsize=(8, 8))
+        edge_cells.to_crs(graph.graph["crs"]).plot(
+            ax=axe, cmap="tab20", edgecolor="white", alpha=0.5
+        )
+        plot_graph(graph, ax=axe, node_size=0, edge_color="black", edge_linewidth=0.5)
+        axe.set_axis_off()
+        axe.set_title("Edge tessellation")
+        fig.tight_layout()
+        plt.show()
 
     logger.info(
         "Tessellated %d edge cells in %s.",

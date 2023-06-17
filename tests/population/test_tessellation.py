@@ -8,7 +8,7 @@ from superblockify.population.tessellation import add_edge_cells
 def test_add_edge_cells(test_city_small_copy):
     """Test the `add_edge_cells` function by design."""
     _, graph = test_city_small_copy
-    add_edge_cells(graph)
+    add_edge_cells(graph, show_plot=True)
     # Check all edges have the `cell` attribute for Polygons
     for _, _, data in graph.edges(data=True):
         assert isinstance(data["cell"], (Polygon, MultiPolygon))
