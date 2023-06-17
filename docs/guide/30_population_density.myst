@@ -504,9 +504,12 @@ cities = [
 ]
 for city in cities:
     print(f"{city[0]}, {city[1]}: {city[2]}")
-    city.append(get_population_from_query(f"{city[0]}, {city[1]}"))
-    # Append relative difference
-    city.append((city[2] - city[3]) / city[2] * 100)
+    try:
+        city.append(get_population_from_query(f"{city[0]}, {city[1]}"))
+        # Append relative difference
+        city.append((city[2] - city[3]) / city[2] * 100)
+    except:
+        cities.remove(city)
 ```
 
 ```{code-cell} ipython3
