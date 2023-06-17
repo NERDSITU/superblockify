@@ -1,10 +1,13 @@
 # Dependencies
 osmnx
+geopandas
+rasterio
+shapely
 pyrosm
 numba
 tqdm
 contextily
-rasterstats
+rasterstats  # only used in one reference notebook
 momepy  # only used in one reference notebook
 
 # Editor
