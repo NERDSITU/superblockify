@@ -12,9 +12,12 @@ kernelspec:
   name: python
 ---
 
-# Population Density
+# Population Data
 
-Population density calculation, parametrized to work globally for any place.
+In this project we want to be able to determine the population density of
+neighbourhoods, independent of the place.
+Goal ist to write parametrized code to work globally for any place. But first we need to
+find out how to work with the data.
 This is split up into two parts:
 
 1. Get the boundary for each place and calculate its area.
