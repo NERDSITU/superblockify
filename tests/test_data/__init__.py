@@ -18,5 +18,6 @@ if __name__ == "__main__":
         load_graph_from_place(
             f"./tests/test_data/cities/{place[0]}.graphml",
             place[1],
+            add_population=True,
             custom_filter=NETWORK_FILTER,
         )
