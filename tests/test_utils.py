@@ -24,6 +24,7 @@ def test_load_graph_from_place():
     graph = load_graph_from_place(
         join(TEST_DATA_PATH, "cities", "Adliswil.graphml"),
         "Adliswil, Bezirk Horgen, Zürich, Switzerland",
+        add_population=True,
         network_type="drive",
     )
 

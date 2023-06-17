@@ -18,6 +18,8 @@ from numpy import (
 from osmnx.stats import count_streets_per_node
 from shapely import wkt
 
+from .population.approximation import add_edge_population
+
 
 def extract_attributes(graph, edge_attributes, node_attributes):
     """Extract only the specified attributes from a graph.
@@ -62,7 +64,7 @@ def extract_attributes(graph, edge_attributes, node_attributes):
     return graph
 
 
-def load_graph_from_place(save_as, search_string, **gfp_kwargs):
+def load_graph_from_place(save_as, search_string, add_population=False, **gfp_kwargs):
     """Load a graph from a place and save it to a file.
 
     The method filters the attributes of the graph to only include the ones that
@@ -77,6 +79,8 @@ def load_graph_from_place(save_as, search_string, **gfp_kwargs):
         https://nominatim.openstreetmap.org/
         Can otherwise be OSM relation ID or a list of those. They have the format
         "R1234567". Not mixed with place names.
+    add_population : bool, optional
+        Whether to add population data to the graph. Default is False.
     **gfp_kwargs
         Keyword arguments to pass to osmnx.graph_from_place.
 
@@ -122,6 +126,9 @@ def load_graph_from_place(save_as, search_string, **gfp_kwargs):
     # Add edge bearings - the precision >1 is important for binning
     graph = ox.add_edge_bearings(graph, precision=2)
     graph = ox.project_graph(graph)
+    # Add edge population and area
+    if add_population:
+        add_edge_population(graph)
 
     # Add boundary as union of all polygons as attribute - in UTM crs of centroid
     mult_polygon = ox.project_gdf(mult_polygon)
@@ -326,9 +333,12 @@ def load_graphml_dtypes(filepath=None, attribute_label=None, attribute_dtype=Non
         "travel_time": float,
         "travel_time_restricted": float,
         "rel_increase": float,
+        "population": float,
+        "area": float,
+        "cell_id": int,
     }
+    graph_dtypes = {"boundary": wkt.loads, "area": float, "edge_population": bool}
 
-    graph_dtypes = {"boundary": wkt.loads, "area": float}
     if attribute_label is not None and attribute_dtype is not None:
         edge_dtypes[attribute_label] = attribute_dtype
     graph = ox.load_graphml(
