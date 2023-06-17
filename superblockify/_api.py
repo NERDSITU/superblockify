@@ -16,6 +16,9 @@ from .population import get_ghsl
 from .population import resample_load_window
 from .population import add_edge_cells
 from .population import get_edge_cells
+from .population import add_edge_population
+from .population import get_edge_population
+from .population import get_population_area
 
 # Filter deprecated partitioners from `__all_partitioners__` if they have the
 # `__deprecated__` attribute.
