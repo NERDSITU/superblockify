@@ -18,6 +18,8 @@ def add_edge_cells(graph, **tess_kwargs):
 
     Tessellates the graph into plane using a Voronoi cell approach.
     Function writes to edge attribute `cells` of the graph in-place.
+    Furthermore, `cell_id` is added to the edge attributes, for easier summary of
+    statistics later.
 
     The approach war developed inspired by the :class:`momepy.Tessellation` class.
     and tessellates with :class:`scipy.spatial.Voronoi`.
@@ -47,6 +49,7 @@ def add_edge_cells(graph, **tess_kwargs):
     for edge_keys, polygon in edge_cells.geometry.items():
         for edge_key in edge_keys:
             graph.edges[edge_key]["cell"] = polygon
+            graph.edges[edge_key]["cell_id"] = edge_cells.index.get_loc(edge_keys)
 
 
 def get_edge_cells(graph, limit=None, segment=10, show_plot=False):
