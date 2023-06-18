@@ -16,7 +16,7 @@ def resample_load_window(file, resample_factor=1, window=None, res_strategy=None
     """Load and resample a window of a raster file.
 
     Parameters
-    -----------
+    ----------
     file : str
         Path to the raster file. It Can be a tile or the whole raster.
     resample_factor : float, optional
