@@ -209,7 +209,9 @@ def split_up_isolated_edges_directed(graph, sparsified):
     if their geometries equal.
 
     These nodes are inserted at a middle point of the edge(s) geometry,
-    the geometry split up, but the further attributes are kept the same.
+    the geometry split up.
+    Attributes `population` and `area` split, but the further attributes are kept
+    the same.
 
     Parameters
     ----------
@@ -230,7 +232,7 @@ def split_up_isolated_edges_directed(graph, sparsified):
     -----
     The graph is modified in place.
     The function generates the new node ids `get_new_node_id`.
-    """
+    """  # pylint: disable=too-many-locals
 
     if not graph.is_directed():
         raise ValueError("Graph must be directed.")
@@ -256,15 +258,18 @@ def split_up_isolated_edges_directed(graph, sparsified):
         # For one-way-street, only one edge
         if rest.degree(u_isol) == 1 and rest.degree(v_isol) == 1:
             edges = [
-                (  # single edge with an unknown direction and key
-                    list(rest.edges(v_isol, keys=True, data=True))
-                    + list(rest.edges(u_isol, keys=True, data=True))
-                )[0]
+                (
+                    *(  # single edge with an unknown direction and key
+                        list(rest.edges(v_isol, keys=True, data=True))
+                        + list(rest.edges(u_isol, keys=True, data=True))
+                    )[0],
+                    u_isol,
+                )
             ]
         # For two-way-street, two edges
         elif rest.degree(u_isol) == 2 and rest.degree(v_isol) == 2:
-            edges = list(rest.edges(v_isol, keys=True, data=True))
-            edges += list(rest.edges(u_isol, keys=True, data=True))
+            edges = [(*list(rest.edges(v_isol, keys=True, data=True))[0], u_isol)]
+            edges += [(*list(rest.edges(u_isol, keys=True, data=True))[0], v_isol)]
         else:
             raise NotImplementedError(
                 f"Parallel edges of degree {rest.degree(u_isol)} and "
@@ -289,10 +294,39 @@ def split_up_isolated_edges_directed(graph, sparsified):
         graph.add_node(middle_id, x=middle.x, y=middle.y, split=True)
 
         # Add the edges
-        for u_parallel, v_parallel, k, data_p in edges:
+        for u_parallel, v_parallel, k, data_p, start_node in edges:
+            # `population` and `area` need to be split up, `cell_id` assigned separately
+            # This is what the start_node is for,
+            # if the inserted node is the start_node, the cell_id is kept,
+            # otherwise it is inverted (usually cell_ids are positive)
+            if "population" in data_p:
+                data_p["population"] = data_p["population"] / 2
+                data_p["area"] = data_p["area"] / 2
+            cell_id = data_p.pop("cell_id", None)
             if geom is None:
-                graph.add_edge(u_parallel, middle_id, k, **data_p)
-                graph.add_edge(middle_id, v_parallel, k, **data_p)
+                graph.add_edge(
+                    u_parallel,
+                    middle_id,
+                    k,
+                    **data_p,
+                    cell_id=cell_id
+                    if cell_id is None
+                    else cell_id
+                    if u_parallel == start_node
+                    else -cell_id,
+                )
+                graph.add_edge(
+                    middle_id,
+                    v_parallel,
+                    k,
+                    **data_p,
+                    cell_id=cell_id
+                    if cell_id is None
+                    else cell_id
+                    if v_parallel == start_node
+                    else -cell_id,
+                )
+
             else:
                 data_p.pop("geometry")
                 graph.add_edge(
@@ -301,6 +335,11 @@ def split_up_isolated_edges_directed(graph, sparsified):
                     k,
                     **data_p,
                     geometry=substring(geom, 0, geom.project(middle)),
+                    cell_id=cell_id
+                    if cell_id is None
+                    else cell_id
+                    if u_parallel == start_node
+                    else -cell_id,
                 )
                 graph.add_edge(
                     middle_id,
@@ -308,6 +347,11 @@ def split_up_isolated_edges_directed(graph, sparsified):
                     k,
                     **data_p,
                     geometry=substring(geom, geom.project(middle), geom.length),
+                    cell_id=cell_id
+                    if cell_id is None
+                    else cell_id
+                    if v_parallel == start_node
+                    else -cell_id,
                 )
             # Remove the original edge
             graph.remove_edge(u_parallel, v_parallel, k)
