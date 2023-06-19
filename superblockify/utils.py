@@ -102,8 +102,13 @@ def load_graph_from_place(save_as, search_string, add_population=False, **gfp_kw
 
     # geopandas.GeoDataFrame, every column is polygon
     # make shapely.geometry.MultiPolygon from all polygons
+    # Project to WGS84 to query OSM
     mult_polygon = ox.project_gdf(mult_polygon, to_crs="epsg:4326")
     graph = ox.graph_from_polygon(mult_polygon.geometry.unary_union, **gfp_kwargs)
+    # Add edge bearings - the precision >1 is important for binning
+    graph = ox.add_edge_bearings(graph, precision=2)
+    # Project to local UTM - coordinates can be used as
+    graph = ox.project_graph(graph)
 
     graph = ox.distance.add_edge_lengths(graph)
     graph = ox.add_edge_speeds(graph)  # adds attribute "maxspeed"
@@ -120,12 +125,10 @@ def load_graph_from_place(save_as, search_string, add_population=False, **gfp_kw
             "highway",
             "speed_kph",
             "travel_time",
+            "bearing",
         },
         node_attributes={"y", "x", "osmid", "street_count"},
     )
-    # Add edge bearings - the precision >1 is important for binning
-    graph = ox.add_edge_bearings(graph, precision=2)
-    graph = ox.project_graph(graph)
     # Add edge population and area
     if add_population:
         add_edge_population(graph)
