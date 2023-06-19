@@ -8,3 +8,5 @@ Reference
    10_dist_calc_restricted
    20_betweenness_centrality
    30_population_density
+   31_tessellation
+   32_edge_population

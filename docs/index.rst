@@ -6,7 +6,9 @@ Superblockify documentation
 
 On these pages you can find documentation for Superblockify.
 
-You can also find the `API documentation <api/index.html>`__.
+To set up Superblockify, see the `Getting started <getting_started>`__ page, more on
+the details of the inner workings can be found on the `Reference pages <guide>`__.
+Furthermore, you can also find the `API documentation <api/index.html>`__.
 
 .. toctree::
    :caption: Overview

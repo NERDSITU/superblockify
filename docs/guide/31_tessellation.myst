@@ -1,0 +1,483 @@
+---
+jupytext:
+  formats: ipynb,md:myst
+  text_representation:
+    extension: .myst
+    format_name: myst
+    format_version: 0.12
+    jupytext_version: 1.8.2
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python
+---
+
+# Street Tessellation
+
+In this notebook we show how the street tesselation is working and some of the process
+how we got there.
+See [](Implementation) for a usage example and the function stubs. How the population is
+distributed is explained in the next notebook
+[Street Population Density](32_edge_population.myst).
+
+
+```{code-cell} ipython3
+:tags: [remove-input]
+# Import path of superblockify, from here two directories up
+import sys, os
+os.environ['USE_PYGEOS'] = '0'
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir, os.pardir)))
+```
+
+```{code-cell} ipython3
+:tags: [hide-input]
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import osmnx as ox
+import shapely as shp
+
+import superblockify as sb
+from superblockify.config import logger, PLACES_SMALL
+```
+
+First we will get a partitioned city, namely Scheveningen. We can do this easily with
+a `superblockify` partitioner.
+
+```{code-cell} ipython3
+:tags: [hide-input, hide-output]
+CITY_NAME, SEARCH_STR = PLACES_SMALL[2]
+logger.info(
+    "Running partitioner for %s with search string %s.", CITY_NAME, SEARCH_STR
+)
+part = sb.ResidentialPartitioner(
+    name=CITY_NAME + "_main", city_name=CITY_NAME, search_str=SEARCH_STR
+)
+part.run(calculate_metrics=False, make_plots=True)
+```
+
+The partitioner has been run and for each LTN it produces a partition, inclusing a
+subgraph object, which includes the nodes and edges of the LTN. One of them looks like
+this:
+
+```{code-cell} ipython3
+subgraph = part.partitions[6]["subgraph"]
+subgraph_edges = ox.graph_to_gdfs(subgraph, nodes=False, edges=True)
+subgraph_edges.explore(style_kwds={"weight": 4})
+```
+
+As edges are represented by linestrings, the area is not clearly defined. The first idea
+that might come to one's mind is the convex hull of the linestrings.
+
+```{code-cell} ipython3
+# From subgraph_edges we want to get a hull that encloses all edges
+convex_hull = subgraph_edges.unary_union.convex_hull
+# Make gdf from convex hull with the same crs as the subgraph
+convex_hull_gdf = gpd.GeoDataFrame(
+    geometry=[convex_hull], crs=subgraph_edges.crs
+)
+# plot both gdfs together
+ax = subgraph_edges.plot()
+convex_hull_gdf.plot(ax=ax, color="lightgray")
+plt.axis("off")
+plt.show()
+```
+
+This approach is quick and easy, but it has some drawbacks. It might be larger than
+we are looking for. For example, a star shaped neighborhood would result in a hull
+spanning around all areas between the streets, even if it might include areas that
+belong to another LTN. Also, it might be smaller than we are looking for. For example,
+a neighborhood that is linear, one long street with houses on both sides, would result
+in a hull that is just a line, which is not what we are looking for.
+The latter problem can be solved by buffering the edges before taking the convex hull.
+The former problem has multiple solutions summarized under the term concave hull.
+{py:mod}`shapely` provides the function
+{py:func}`concave_hull <shapely.ops.concave_hull>` for this purpose. It takes a ratio
+parameter, which determines how concave the hull is. A ratio of 1 results in the convex
+hull, a ratio of 0 results in only a line between the nearest points in the geometry.
+
+```{code-cell} ipython3
+:tags: [hide-input]
+from numpy import linspace
+
+def plot_concave_hull(ax, subgraph_edges, ratio=0.4, allow_holes=False,
+                      color="crimson"):
+    concave_hull = shp.concave_hull(
+        subgraph_edges.unary_union,
+        ratio=ratio,
+        allow_holes=allow_holes,
+    )
+    # Make gdf from convex hull with the same crs as the subgraph
+    convex_hull_gdf = gpd.GeoDataFrame(
+        geometry=[concave_hull], crs=subgraph_edges.crs
+    )
+    # plot both gdfs together
+    convex_hull_gdf.plot(ax=ax, color=color)
+
+# Figure different ratios
+fig = plt.figure(layout="constrained", figsize=(10, 8))
+subfigs = fig.subfigures(2, 1, hspace=0.07, height_ratios=[2., 1.])
+# Overlaying
+axs0 = subfigs[0].subplots(1, 1)
+for ratio in linspace(1, 1/10, 10):
+    color = plt.cm.coolwarm(ratio)
+    plot_concave_hull(axs0, subgraph_edges, ratio=ratio, color=color)
+subgraph_edges.plot(ax=axs0, color="black", linewidth=3)
+axs0.set_axis_off()
+colorbar = plt.cm.ScalarMappable(cmap=plt.cm.coolwarm,
+                           norm=plt.Normalize(vmin=1, vmax=0.1))
+# vertically oriented colorbar with title Ratio of Alpha Shape
+cbar = fig.colorbar(colorbar, ax=axs0, orientation="vertical", shrink=0.8)
+cbar.set_label("Ratio of Alpha Shape", rotation=270, labelpad=20)
+cbar.ax.get_yaxis().labelpad = 20
+
+# Side by side
+axs1 = subfigs[1].subplots(1, 7)
+for i, ratio in enumerate(linspace(1, 1/10, 7)):
+    color = plt.cm.coolwarm(ratio)
+    plot_concave_hull(axs1[i], subgraph_edges, ratio=ratio, color=color)
+    subgraph_edges.plot(ax=axs1[i], color="black", linewidth=3)
+    axs1[i].set_axis_off()
+
+plt.show()
+```
+
+The function works with the points in the linestrings, so it is highly dependent on
+the point density. The ratio determines the maximum edge length, rescaled between the
+greatest and smallest distance between al pairs of points. This results in the fact,
+that a shape with lower ratio is not necessarily fully included in a shape with a
+higher ratio, see the two lowest ratios on the bottom right. This solution still does
+not satisfy us.
+
+Optimally all LTN cells would not overlap each other and form a tiling, also called
+tesselation, of the city.
+
+## Morphological Tessellation
+
+There is a solution satisfying our requirements. Okabe and Sugihara define the
+line Network Voronoi Diagram (line N-VD) [Equation 4.7]. It is basically a Voronoi
+diagram (also called Thiessen polygons in some fields) where lines are made up of
+multiple points[^2].
+Araldi and Fusco use this idea to do geostatistical analysis. Fleischmann et al.
+implement this idea in the {py:mod}`momepy` package for building footprints [^3].
+With list of footprint geometries, the {py:class}`Tessellation <momepy.Tessellation>`
+class returns a `GeoDataFrame` with a cell corresponding to each input geometry that was
+given.
+
+![momepy tessellation](../_static/momepy_footprint_tessellation.png)
+
+[^1]: Okabe, A. & Sugihara, K. Network Voronoi Diagrams. in Spatial Analysis along
+Networks: Statistical and Computational Methods 81–100 (John Wiley & Sons, Ltd, 2012).
+[doi:10.1002/9781119967101.ch4](https://doi.org/10.1002/9781119967101.ch4)
+[^2]: Araldi, A. & Fusco, G. From the street to the metropolitan region: Pedestrian
+perspective in urban fabric analysis. Environment and Planning B: Urban Analytics and
+City Science 46, 1243–1263 (2019).
+[^3]: Fleischmann, M., Feliciotti, A., Romice, O. & Porta, S. Morphological tessellation
+as a way of partitioning space: Improving consistency in urban morphology at the plot
+scale. Computers, Environment and Urban Systems 80, 101441 (2020).
+
+In our case the input geometries can be the smaller neighborhood boundaries, and the
+tesselation fills up the gaps. For the LTNs we will use an union of the edges of the
+subgraphs and buffer them a small bit. As we do not want the polygons to overlap wich
+each other, we'll buffer using a flat cap style.
+
+```{code-cell} ipython3
+ def border_from_subgraph_shrinked(subgraph, buffer=1):
+    """Shrinked subgraph borders, to avoid overlap between partitions.
+    Does work well with small buffer values."""
+    edges = ox.graph_to_gdfs(subgraph, nodes=False, edges=True)
+    # First buffer with flat cap style to avoid self-intersections
+    polygon = shp.Polygon(edges.unary_union.buffer(2 * buffer, cap_style='flat')
+                          .exterior)
+    # Simplify the polygon to remove small artifacts of flat cap style at curved edges
+    # polygon = polygon.simplify(buffer*2, preserve_topology=True)
+    # geos::simplify::PolygonHullSimplifier would do the job. No bindings yet.
+    # https://libgeos.org/doxygen/classgeos_1_1simplify_1_1PolygonHullSimplifier.html
+    # http://lin-ear-th-inking.blogspot.com/2022/04/outer-and-inner-concave-polygon-hulls.html
+    # http://lin-ear-th-inking.blogspot.com/2022/05/using-outer-hulls-for-smoothing.html
+    # Secondly, erode the polygon to avoid overlap between partitions
+    return polygon.buffer(-buffer, cap_style='round')
+
+border_from_subgraph_shrinked(part.partitions[6]["subgraph"], buffer=1)
+```
+
+We would like to simplify the polygon before buffering down, but as we use a flat
+cap style, the line connection have small artifacts when choosing larger buffers.
+The Ramer–Douglas–Peucker algorithm does not suffice our needs, because the result can
+split the polygon up and does not inherently enclose the original polygon.
+The `geos::simplify::PolygonHullSimplifier` would do the job, but it got added in GEOS
+3.11, and no python package has any bindings, yet.
+
+Now, when using the {py:class}`momepy.Tessellation` class, we get:
+
+```{code-cell} ipython3
+from momepy import Tessellation
+
+borders = gpd.GeoDataFrame(
+    geometry=[border_from_subgraph_shrinked(p["subgraph"], buffer=1) for p in part
+    .partitions],
+    crs=part.partitions[0]["subgraph"].graph["crs"],
+    data=[p["name"] for p in part.partitions],
+    columns=["partition_id"]
+)
+# Morphological tessellation around given buildings ``gdf`` within set ``limit``.
+tessellation = Tessellation(borders, unique_id="partition_id",
+                               limit=part.graph.graph["boundary"],
+                               shrink=0.0)
+# Plot on our map
+tessellation_gdf = tessellation.tessellation
+fig, axe = plt.subplots(figsize=(10, 10))
+tessellation_gdf.plot(ax=axe, edgecolor="white", column="partition_id", legend=True,
+                      cmap="tab20")
+borders.plot(ax=axe, color="white", alpha=0.5, facecolor="white")
+ox.plot_graph(part.sparsified, ax=axe, node_size=0, edge_color="black",
+              edge_linewidth=1)
+axe.set_axis_off()
+plt.show()
+```
+
+This is much more what we want. Another way to make it even better it so take the
+sparsified network at cell borders, but at the same time, the sparsified network should
+also have a volume as there might be people living on it. Finally, we will implement our
+own method, inspired by this technique, a solution sewed to our needs.
+
+## Indepentent Tessellation
+
+When looking into the code, {py:mod}`momepy` uses {py:class}`scipy.spatial.Voronoi`
+to generate the tessellation for every enclosure. This is done with a dense point array
+for the geometry boundaries (borders in our case).
+
+As we want to calculate area and population for each Partition, we can save time by
+calculating the Voronoi diagram once for the whole graph/city, and save `area` and
+`population` for each edge. Later we can use this data to calculate the area and
+population for each Partition.
+
+```{code-cell} ipython3
+:tags: [hide-input]
+import pandas as pd
+import numpy as np
+from scipy.spatial import Voronoi, voronoi_plot_2d
+```
+
+Now, we will create Voronoi cells for each edge, so we can later dissolve them to
+LTN cells. As we are working in a `MultiDiGraph` two way streets are represented by two
+directed edges with the same geometry, both should share the same cell, so grouping the
+edges is a crucial part. First we will group the edges connecting the same nodes `u` and
+`v` and then we will merge the edges with the same or reverse geometry.
+
+```{code-cell} ipython3
+edges = ox.graph_to_gdfs(part.graph,
+                         nodes=False,
+                         edges=True,
+                         node_geometry=False,
+                         fill_edge_geometry=True)
+# `edges` is a pandas dataframe with the multiindex (u, v, key)
+# Merge two columns, when the geometry of one is equal or the reverse of the other
+# 1. Group if u==u and v==v or u==v and v==u (match for hashed index (u, v) where u<v)
+# get flat index of the first match
+edges["edge_id"] = edges.index.to_flat_index()
+# sort the edge_id tuples
+edges["node_pair"] = edges["edge_id"].apply(lambda x: tuple(sorted(x[:2])))
+# 2. Aggregate if the geometry is equal or the reverse of the other
+# Merge columns if geometry_1 == geometry_2 or geometry_1 == geometry_2.reverse()
+# reverse geometry if x_start >= x_end
+edges["geometry"] = edges["geometry"].apply(
+    lambda x: x if x.coords[0] < x.coords[-1] else x.reverse())
+# 3. Group by node_pair and geometry
+edges = edges.groupby(["node_pair", "geometry"]).agg({
+    "edge_id": tuple,
+    "component_name": "first",
+}).reset_index()
+edges.set_index("edge_id", inplace=True)
+
+edges = gpd.GeoDataFrame(edges, geometry="geometry", crs=part.graph.graph["crs"])
+edges.explore()
+```
+
+For each geometry we will interpolate the lines into points of equal distance of 10m.
+
+```{code-cell} ipython3
+# get multiindex of first row
+distance = 10
+# The maximum distance between points after discretization.
+edge_points = []
+edge_indices = []
+# iterate over street_id, geometry
+for idx, geometry in edges["geometry"].items():
+    if geometry.length < 2 * distance:
+        # for edges that would result in no point, take the middle
+        pts = [shp.line_interpolate_point(geometry, 0.5, normalized=True)]
+    else:
+        # interpolate points along the line with at least distance between them
+        # start and end 0.1 from the ends to avoid edge effects
+        pts = shp.line_interpolate_point(
+                geometry,
+                np.linspace(
+                    0.1,
+                    geometry.length - 0.1,
+                    num=int((geometry.length - 0.1) // distance),
+                ),
+            )  # offset to keep nodes out
+    edge_points.append(shp.get_coordinates(pts))
+    # Append multiindices for this geometry
+    edge_indices += [idx] * len(pts)
+
+points = np.vstack(edge_points)
+```
+
+Now we know for each point, which edge it belongs to. We can use this to calculate the
+Voronoi diagram.
+
+Before we continue, let's also introduce a hull around the points, so that the outer
+edge cells are not infinite or too large. As a hull we can use the boundary polygon
+of the graph from OSM, as used in the node approach, or a buffered union of the edge
+geometries. Then we can also split up the hull into points and add them to the points
+array.
+
+```{code-cell} ipython3
+hull = shp.Polygon(edges.unary_union.buffer(100).exterior)
+# interpolate points along the hull - double the distance
+hull_points = shp.line_interpolate_point(
+    hull.boundary,
+    np.linspace(0.1, hull.length - 0.1, num=int(hull.length // (2 * distance))),
+)
+# add hull points to the points array
+points = np.vstack([points, shp.get_coordinates(hull_points)])
+# add edge indices to the edge_indices array
+edge_indices += [-1] * len(hull_points)
+```
+
+For the `points` array we can now calculate the Voronoi diagram.
+
+```{code-cell} ipython3
+edge_voronoi_diagram = Voronoi(points)
+```
+
+```{code-cell} ipython3
+:tags: [hide-input]
+from matplotlib.patches import Rectangle, ConnectionPatch
+
+# Plot with inset axes
+fig, axe = plt.subplots(figsize=(10, 10))
+zoom_window = (587000, 587500, 5772000, 5772500)
+
+edges.plot(ax=axe, color="black", linewidth=0.5)
+voronoi_plot_2d(edge_voronoi_diagram, ax=axe, show_vertices=False, line_colors='orange',
+                line_width=1, line_alpha=0.6, point_size=2)
+axe.set_title("Voronoi diagram of dense edge points")
+# Create inset axes
+axins = axe.inset_axes([0.6, 0.01, 0.45, 0.45])
+edges.plot(ax=axins, color="black", linewidth=2)
+voronoi_plot_2d(edge_voronoi_diagram, ax=axins, show_vertices=False,
+                line_colors='orange',
+                line_width=2, line_alpha=0.6, point_size=4)
+axins.set_xlim(*zoom_window[:2])
+axins.set_ylim(*zoom_window[2:])
+axins.set_xticks([])
+axins.set_yticks([])
+# Indicate zoom window
+rect = Rectangle((zoom_window[0], zoom_window[2]), zoom_window[1] - zoom_window[0],
+                 zoom_window[3] - zoom_window[2], linewidth=1, edgecolor='r',
+                 facecolor='none', zorder=10)
+axe.add_patch(rect)
+# Connect zoom window to inset
+axe.add_artist(
+    ConnectionPatch(xyA=(zoom_window[0], zoom_window[2]),
+                    xyB=(zoom_window[0], zoom_window[2]),
+                    coordsA="data", coordsB="data", axesA=axe, axesB=axins,
+                    linewidth=1, zorder=10))
+axe.add_artist(
+    ConnectionPatch(xyA=(zoom_window[1], zoom_window[3]),
+                    xyB=(zoom_window[1], zoom_window[3]),
+                    coordsA="data", coordsB="data", axesA=axe, axesB=axins,
+                    linewidth=1, zorder=10))
+plt.show()
+```
+
+Let's see how the cells look like for the Partitioner `part`.
+
+```{code-cell} ipython3
+# Construct cell polygons for each of the dense points
+point_vertices = pd.Series(edge_voronoi_diagram.regions).take(
+    edge_voronoi_diagram.point_region)
+point_polygons = []
+for region in point_vertices:
+    if -1 not in region:
+        point_polygons.append(
+            shp.polygons(edge_voronoi_diagram.vertices[region]))
+    else:
+        point_polygons.append(None)
+
+# Create GeoDataFrame with cells and index
+edge_poly_gdf = gpd.GeoDataFrame(
+    geometry=point_polygons,
+    index=edge_indices,
+    crs=part.graph.graph["boundary_crs"],
+)
+# Drop cells that are outside the boundary
+edge_poly_gdf = edge_poly_gdf.loc[edge_poly_gdf.index != -1]
+# Dissolve cells by index
+edge_poly_gdf = edge_poly_gdf.dissolve(by=edge_poly_gdf.index)
+# delete index_str
+edge_poly_gdf
+```
+
+The `GeoDataFrame` now includes the cell geometries for each edge tuple.
+
+```{code-cell} ipython3
+edge_poly_gdf["component_name"] = edges.loc[edge_poly_gdf.index, "component_name"]
+# Set NaNs to "sparse"
+edge_poly_gdf["component_name"] = edge_poly_gdf["component_name"].fillna("sparse")
+# Plot with color by edge label
+fig, axe = plt.subplots(figsize=(10, 10))
+edge_poly_gdf.plot(column="component_name", ax=axe, legend=True, cmap="tab20")
+ox.plot_graph(part.graph, ax=axe, node_size=8, edge_color="black", edge_linewidth=0.5,
+              node_color="black")
+```
+
+When dissolving the cells grouped by the `component_name` we get the wanted regions.
+
+```{code-cell} ipython3
+# Interactive explore map with unions of partitions
+edge_poly_gdf.dissolve(by="component_name", as_index=False).explore(
+    column="component_name", cmap="tab20")
+```
+
+## Implementation
+
+We implemented a function that does this and more for us in one function call.
+[`add_edge_cells`](add_edge_cells) accepts a graph and adds a `cell` attribute with the
+cell geometry to every edge.
+
+```{code-cell} ipython3
+ky_graph = ox.graph_from_place("Kyiv, Ukraine", network_type="drive")
+ky_graph = ox.project_graph(ky_graph)
+```
+
+For a graph as big as Kyiv, 7th largest European city as of 1st of January 2021, this
+takes about a minute. This graph has more than 23k edges, resulting in about 130k points
+for the Voronoi diagram (10m interpolation).
+
+```{code-cell} ipython3
+sb.add_edge_cells(graph)
+```
+
+```{code-cell} ipython3
+:tags: [hide-input]
+# Get polygons from edges and plot
+edge_poly_gdf = gpd.GeoDataFrame(
+    geometry=[data["cell"] for _, _, data in ky_graph.edges(data=True)],
+    crs=ky_graph.graph["crs"],
+    index=ky_graph.edges(),
+    columns=["geometry"],
+)
+fig, axe = plt.subplots(figsize=(10, 10))
+edge_poly_gdf.plot(ax=axe, color="orange", alpha=0.5, edgecolor="black", linewidth=0.5)
+ox.plot_graph(ky_graph, ax=axe, node_size=0, edge_color="black", edge_linewidth=0.5,
+              node_color="black")
+```
+
+(add_edge_cells)=
+```{eval-rst}
+.. autofunction:: superblockify.population.tessellation.add_edge_cells
+    :noindex:
+```

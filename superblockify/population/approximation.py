@@ -1,6 +1,6 @@
 """Population approximation for the superblockify package.
 
-See 20230608-cell_population.ipynb notebook for details.
+See reference notebook for a detailed description of the population approximation.
 """
 from geopandas import GeoDataFrame
 from numpy import float32, sum as npsum

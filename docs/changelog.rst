@@ -2,9 +2,14 @@
 Changelog
 *********
 
-Version 0.1.3 (2023-05-
+Version 0.1.3 (2023-06-19)
 **************************
 
+* Documented approaches in reference notebooks :ref:`Population Data`,
+  :ref:`Street Tessellation`, and :ref:`Street Population Density`.
+* Added population preprocessing for for every tesselated edge. This enables an
+  efficient population density aggregation for any given superblock.
+  See modules in :mod:`superblockify.population`.
 * Automated population data download and preprocessing of the GHS-POP - R2023A dataset
   <https://ghsl.jrc.ec.europa.eu/ghs_pop2023.php>.
 * Added graph attribute `boundary`, used for calculating the total area of the city.
@@ -22,7 +27,7 @@ Version 0.1.1 (2023-05-15)
 **************************
 
 * Added Betweenness Centrality Calculation in measures, precompiled version works quick
-  on metropolian sized city networks.
+  on metropolitan sized city networks.
 * Added speed limit: Routing and low traffic speed overwriting. Unit can be passed
   when initializing a partitioner.
 

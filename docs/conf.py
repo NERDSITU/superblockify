@@ -14,17 +14,9 @@ import sys
 
 sys.path.insert(0, os.path.abspath(".."))
 
-autodoc_mock_imports = [
-    "networkx",
-    "osmnx",
-    "numpy",
-    "scipy",
-    "matplotlib",
-    "pandas",
-    "geopandas",
-    "shapely",
-    "numba",
-]
+# autodoc_mock_imports = [
+#     "modules that are not installed but referenced in the docs",
+# ]
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -45,6 +37,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
+    "sphinx.ext.autosectionlabel",
 ]
 
 templates_path = ["_templates"]
