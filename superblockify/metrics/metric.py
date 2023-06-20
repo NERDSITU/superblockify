@@ -7,7 +7,6 @@ from .distances import (
     calculate_path_distance_matrix,
     calculate_euclidean_distance_matrix_projected,
 )
-from .graph_stats import basic_graph_stats
 from .measures import (
     calculate_global_efficiency,
     calculate_directness,
@@ -26,19 +25,20 @@ from .plot import (
 from ..config import logger, RESULTS_DIR, CLUSTERING_PERCENTILE
 from ..plot import save_plot
 from ..utils import compare_dicts
+from ..graph_stats import basic_graph_stats
 
 
 class Metric:
-    """Metric object to be used with partitioners.
+    r"""Metric object to be used with partitioners.
 
     A metric object is used to calculate the quality of a partitioning.
     It holds the information on several network metrics, which can be read,
     and can be used to calculate them when passing a Partitioner object.
 
     There are different network measures
-    - d_E(i, j): Euclidean
-    - d_S(i, j): Shortest path on full graph
-    - d_N(i, j): Shortest path with ban through LTNs
+    - :math:`d_E(i, j)`: Euclidean
+    - :math:`d_S(i, j)`: Shortest path on full graph
+    - :math:`d_N(i, j)`: Shortest path with ban through LTNs
 
     We define several types of combinations of these metrics:
     (i, j are nodes in the graph)
@@ -46,25 +46,28 @@ class Metric:
     The network metrics are the following:
 
     - Coverage (fraction of network covered by a partition):
-      C = sum(1 if i in partition else 0) / len(graph.nodes)
+        C = sum(1 if i in partition else 0) / len(graph.nodes)
 
     - Components (number of connected components):
-      C = len(graph.components)
+        C = len(graph.components)
 
     - Average path length:
-        - A(E) = mean(d_E(i, j)) where i <> j
-        - A(S) = mean(d_S(i, j)) where i <> j
-        - A(N) = mean(d_N(i, j)) where i <> j
+        - :math:`A(E) = \mathrm{mean}(d_E(i, j))` where :math:`i \neq j`
+        - :math:`A(S) = \mathrm{mean}(d_S(i, j))` where :math:`i \neq j`
+        - :math:`A(N) = \mathrm{mean}(d_N(i, j))` where :math:`i \neq j`
 
     - Directness:
-        - D(E, S) = mean(d_E(i, j) / d_S(i, j)) where i <> j
-        - D(E, N) = mean(d_E(i, j) / d_N(i, j)) where i <> j
-        - D(S, N) = mean(d_S(i, j) / d_N(i, j)) where i <> j
+        - :math:`D(E, S) = \mathrm{mean}(d_E(i, j) / d_S(i, j))` where :math:`i \neq j`
+        - :math:`D(E, N) = \mathrm{mean}(d_E(i, j) / d_N(i, j))` where :math:`i \neq j`
+        - :math:`D(S, N) = \mathrm{mean}(d_S(i, j) / d_N(i, j))` where :math:`i \neq j`
 
     - Global efficiency:
-        - G(i; S/E) = sum(1/d_S(i, j)) / sum(1/d_E(i, j)) where for each sum i <> j
-        - G(i; N/E) = sum(1/d_N(i, j)) / sum(1/d_E(i, j)) where for each sum i <> j
-        - G(i; N/S) = sum(1/d_N(i, j)) / sum(1/d_S(i, j)) where for each sum i <> j
+        - :math:`G(i; S/E) = \sum(1/d_S(i, j)) / \sum(1/d_E(i, j))` where for each sum
+          :math:`i \neq j`
+        - :math:`G(i; N/E) = \sum(1/d_N(i, j)) / \sum(1/d_E(i, j))` where for each sum
+          :math:`i \neq j`
+        - :math:`G(i; N/S) = \sum(1/d_N(i, j)) / \sum(1/d_S(i, j))` where for each sum
+          :math:`i \neq j`
 
     Attributes
     ----------
@@ -165,7 +168,7 @@ class Metric:
         it is not necessary to calculate them for each partitioning, but only once per
         graph/city.
         """
-        self.graph_stats = basic_graph_stats(graph)
+        self.graph_stats = basic_graph_stats(graph, area=graph.graph["area"])
 
     def calculate_before(self, partitioner, make_plots=False):
         """Calculate metrics on unrestricted graph

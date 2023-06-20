@@ -1,9 +1,14 @@
 # Dependencies
 osmnx
+geopandas
+rasterio
+shapely
 pyrosm
 numba
 tqdm
 contextily
+rasterstats  # only used in one reference notebook
+momepy  # only used in one reference notebook
 
 # Editor
 jupyterlab

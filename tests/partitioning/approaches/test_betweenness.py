@@ -9,7 +9,7 @@ class TestBetweennessPartitioner:
     """Tests for the BetweennessPartitioner"""
 
     # pylint: disable=protected-access
-    @pytest.mark.parametrize("percentile", [100.0 - 1e-8, 90.0, 80.0, 10.0, 1e-8])
+    @pytest.mark.parametrize("percentile", [99.9, 90.0, 80.0, 10.0, 1e-8])
     @pytest.mark.parametrize("scaling", ["normal", "length", "linear"])
     def test_run(self, test_one_city_copy, percentile, scaling):
         """Test the run method of the BetweennessPartitioner."""

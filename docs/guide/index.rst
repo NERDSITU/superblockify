@@ -4,6 +4,9 @@ Reference
 .. toctree::
    :maxdepth: 2
 
-   partition_requirements.ipynb
-   dist_calc_restricted
-   betweenness_centrality
+   00_partition_requirements
+   10_dist_calc_restricted
+   20_betweenness_centrality
+   30_population_density
+   31_tessellation
+   32_edge_population

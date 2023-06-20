@@ -32,8 +32,9 @@ from .utils import (
 from .. import attribute
 from ..config import logger, GRAPH_DIR, RESULTS_DIR, NETWORK_FILTER
 from ..metrics.metric import Metric
+from ..graph_stats import calculate_component_metrics
 from ..plot import save_plot
-from ..utils import load_graph_from_place
+from ..utils import load_graph_from_place, load_graphml_dtypes
 
 
 class BasePartitioner(ABC):
@@ -77,12 +78,15 @@ class BasePartitioner(ABC):
         Parameters
         ----------
         name : str, optional
-            Name of the graph's city. Will be used as folder name for results and
-            plot titles. Default is "unnamed".
+            Name of the graph's city.
+            It Will be used as a folder name for results and plot titles.
+            Default is "unnamed".
         city_name : str
-            Name of the city, for looking up the graph. If graph is not found,
-            it will be downloaded from OSMnx using the `search_str`. Default is None.
-            Used so multiple `Partitioner` don't need to download the same city graph.
+            Name of the city, for looking up the graph.
+            If the graph is not found, it will be downloaded from OSMnx using the
+            `search_str`.
+            Default is None.
+            Used, so multiple `Partitioner` don't need to download the same city graph.
         search_str : str or list of str, optional
             Search string for OSMnx to download a graph, default is None. Only used if
             no graph is found under :attr:`GRAPH_DIR`/city_name.graphml.
@@ -251,6 +255,9 @@ class BasePartitioner(ABC):
                 replace_max_speeds=replace_max_speeds,
                 **kwargs,
             )
+            calculate_component_metrics(
+                self.components if self.components else self.partitions
+            )
 
     @abstractmethod
     def partition_graph(self, make_plots=False, **kwargs):
@@ -290,12 +297,12 @@ class BasePartitioner(ABC):
         There are different network measures
         - :math:`d_E(i, j)`: Euclidean
         - :math:`d_S(i, j)`: Shortest path on full graph
-        - :math:`d_N(i, j)`: Shortest path with ban through LTNs
+        - :math:`d_N(i, j)`: Shortest path with a ban through LTNs
 
         Parameters
         ----------
         make_plots : bool, optional
-            If True show visualization graphs of the approach. If False only print
+            If True show visualization graphs of the approach. If False, only print
             into console. Default is False.
         replace_max_speeds : bool, optional
             If True and unit is "time", replace max speeds set in
@@ -331,7 +338,7 @@ class BasePartitioner(ABC):
         Parameters
         ----------
         make_plots : bool, optional
-            If True show visualization graphs of the approach. If False only print
+            If True show visualization graphs of the approach. If False, only print
             into console. Default is False.
         """
 
@@ -350,7 +357,7 @@ class BasePartitioner(ABC):
         `self.attribute_label`, to analyze (dis-)connected components.
         For each partition makes a subgraph with the edges that have the
         attribute value of the partition.
-        Writes them to `self.component[i]["subgraph"]` with the name of the
+        Write them to `self.component[i]["subgraph"]` with the name of the
         partition+`_component_`+`j`. Where `j` is the index of the component.
 
         Parameters
@@ -402,7 +409,7 @@ class BasePartitioner(ABC):
         for part in self.partitions:
             # Split disconnected components
             connected_components = weakly_connected_components(part["subgraph"])
-            # Make list of generator of connected components
+            # Make a list of connected components
             connected_components = list(connected_components)
             logger.debug(
                 "Partition %s has %d conn. comp. In total %d nodes and %d edges.",
@@ -548,7 +555,7 @@ class BasePartitioner(ABC):
         of ignored components. Overwrites the attribute `attribute_name` with
         `attribute_value` for all components that have the attribute `ignore` set to
         True.
-        This is useful for example to overwrite the `self.attribute_label`
+        This is useful, for example, to overwrite the `self.attribute_label`
         attribute with `None` to make the subgraph invisible in the network plot
         (`self.plot_partition_graph()`).
 
@@ -602,16 +609,17 @@ class BasePartitioner(ABC):
 
         Returns list of dict with name of partition and list of nodes in partition.
         If partitions were split up into components with `make_subgraphs_from_attribute`
-        with `split_disconnected` set to True, the nodes of the components are returned.
+        and `split_disconnected` is set to True,
+        the nodes of the components are returned.
 
         Per default, nodes are considered to be inside a partition if they are in the
         subgraph of the partition and not in the sparsified subgraph. Also, `ignored`
         components are left out.
 
-        Nodes inside the sparsified graph are not considered to be inside a partition.
+        Nodes inside the sparsified graph are never inside a partition.
 
         Method can be overwritten by child classes to change the definition of
-        which nodes are considered to be inside a partition.
+        which nodes to consider to be inside a partition.
 
         Returns
         -------
@@ -641,7 +649,7 @@ class BasePartitioner(ABC):
             if not (part.get("ignore") is True)
         ]
 
-        # Add list of nodes "inside" each partitions
+        # Add a list of nodes "inside" each partition
         #  - nodes that are not shared with the sparsified graph are considered to be
         #    inside the partition
         #  - from these the distances are calculated
@@ -657,11 +665,11 @@ class BasePartitioner(ABC):
         return partitions
 
     def get_sorted_node_list(self):
-        """Get sorted list of nodes.
+        """Get a sorted list of nodes.
 
-        Sorted after the amount of nodes in the partition, followed by the
+        Sorted after the number of nodes in the partition, followed by the
         unpartitioned nodes.
-        Uses `get_partition_nodes` to return a list of nodes.
+        Use `get_partition_nodes` to return a list of nodes.
 
         Returns
         -------
@@ -670,9 +678,9 @@ class BasePartitioner(ABC):
             unpartitioned nodes.
         """
 
-        # Get node list for fixed order - sorted by partition name
+        # Get a node list for fixed order - sorted by partition name
         node_list = self.get_partition_nodes()
-        # node_list is list of dicts, which all have a "name" and "nodes" key
+        # node_list is a list of dicts, which all have a "name" and "nodes" key
 
         # Make one long list out of all the nodes,
         # sorted by number of nodes in "subgraph"
@@ -717,8 +725,8 @@ class BasePartitioner(ABC):
         Parameters
         ----------
         city_name : str
-            Name of the graph. Can be the name of the place and also be descriptive.
-            Not to confuse with the name of an instance of the class.
+            Name of the graph. It Can be the name of the place and also be descriptive.
+            Not to confuse with the name of a class instance.
         search_str : str or list of str
             String to search for in OSM. Can be a list of strings to combine multiple
             search terms. Use nominatim to find the right search string.
@@ -735,16 +743,17 @@ class BasePartitioner(ABC):
         :attr:`GRAPH_DIR` is set in :mod:`superblockify.config`.
         """
 
-        # Check if graph already exists
+        # Check if the graph already exists
         graph_path = join(GRAPH_DIR, city_name + ".graphml")
         if exists(graph_path) and not reload_graph:
             logger.debug("Loading graph from %s", graph_path)
-            graph = ox.load_graphml(graph_path)
+            graph = load_graphml_dtypes(graph_path)
         else:
             logger.debug("Finding graph with search string %s", search_str)
             graph = load_graph_from_place(
                 save_as=graph_path,
                 search_string=search_str,
+                add_population=True,
                 custom_filter=NETWORK_FILTER,
                 simplify=True,
             )
@@ -757,7 +766,7 @@ class BasePartitioner(ABC):
         """Save the partitioner.
 
         Pickle the partitioner and save it to file. Metric object will be saved in
-        separate file.
+        a separate file.
 
         Parameters
         ----------
@@ -791,7 +800,7 @@ class BasePartitioner(ABC):
         else:
             logger.debug("Saving partitioner to %s", partitioner_path)
         with open(partitioner_path, "wb") as file:
-            # Convert subgraph views to MultiDiGraphs for pickling, if they exist
+            # Convert subgraph views to MultiDiGraphs for pickling if they exist
             if self.partitions is not None:
                 for i, partition in enumerate(self.partitions):
                     self.partitions[i]["subgraph"] = MultiDiGraph(partition["subgraph"])
@@ -878,24 +887,16 @@ class BasePartitioner(ABC):
         graph_path = join(RESULTS_DIR, name, name + ".graphml")
         if exists(graph_path):
             logger.debug("Loading graph from %s", graph_path)
-            partitioner.graph = ox.load_graphml(
-                graph_path,
-                node_dtypes={},
-                edge_dtypes={
-                    "bearing": float,
-                    "length": float,
-                    "speed_kph": float,
-                    "travel_time": float,
-                    "travel_time_restricted": float,
-                    "rel_increase": float,
-                    partitioner.attribute_label: partitioner.attribute_dtype,
-                },
+            partitioner.graph = load_graphml_dtypes(
+                graph_path, partitioner.attribute_label, partitioner.attribute_dtype
             )
         else:
             graph_path = join(GRAPH_DIR, partitioner.city_name + ".graphml")
             if exists(graph_path):
                 logger.debug("Loading graph from %s", graph_path)
-                partitioner.graph = ox.load_graphml(graph_path)
+                partitioner.graph = load_graphml_dtypes(
+                    graph_path, partitioner.attribute_label, partitioner.attribute_dtype
+                )
             else:
                 logger.debug("Graph not found in %s, keeping empty", graph_path)
                 return partitioner

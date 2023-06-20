@@ -14,17 +14,9 @@ import sys
 
 sys.path.insert(0, os.path.abspath(".."))
 
-autodoc_mock_imports = [
-    "networkx",
-    "osmnx",
-    "numpy",
-    "scipy",
-    "matplotlib",
-    "pandas",
-    "geopandas",
-    "shapely",
-    "numba",
-]
+# autodoc_mock_imports = [
+#     "modules that are not installed but referenced in the docs",
+# ]
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -32,7 +24,7 @@ autodoc_mock_imports = [
 project = "superblockify"
 copyright = "2023, Carlson Büth"
 author = "Carlson Büth"
-release = "0.1.2"
+release = "0.2.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -40,10 +32,12 @@ release = "0.1.2"
 extensions = [
     "myst_nb",
     "sphinx.ext.autodoc",
+    "numpydoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
+    "sphinx.ext.autosectionlabel",
 ]
 
 templates_path = ["_templates"]
@@ -101,6 +95,10 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     "geopandas": ("https://geopandas.org/en/stable/", None),
+    "pyproj": ("https://pyproj4.github.io/pyproj/stable/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
     "shapely": ("https://shapely.readthedocs.io/en/stable", None),
     "numba": ("https://numba.readthedocs.io/en/stable", None),
+    "rasterstats": ("https://pythonhosted.org/rasterstats/", None),
+    "momepy": ("https://docs.momepy.org/en/stable", None),
 }

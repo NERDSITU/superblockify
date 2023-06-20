@@ -1,11 +1,11 @@
 """Module for test fixtures available for all test files"""
 from copy import deepcopy
 from functools import wraps
+from glob import glob
 from os import listdir, remove
 from os.path import getsize, join, exists
 from shutil import rmtree
 
-import osmnx as ox
 import pytest
 from networkx import set_node_attributes
 from requests.exceptions import ConnectTimeout
@@ -19,14 +19,16 @@ from superblockify.config import (
     HIDE_PLOTS,
 )
 from superblockify.partitioning import __all_partitioners__
+from superblockify.utils import load_graphml_dtypes
 
+TEST_CITY_PATH = join(TEST_DATA_PATH, "cities")
 ALL_CITIES_SORTED = sorted(
-    [city for city in listdir(f"{TEST_DATA_PATH}cities/") if city.endswith(".graphml")],
-    key=lambda city: getsize(f"{TEST_DATA_PATH}cities/" + city),
+    [city for city in listdir(TEST_CITY_PATH) if city.endswith(".graphml")],
+    key=lambda city: getsize(join(TEST_CITY_PATH, city)),
 )
 SMALL_CITIES = [
     city
-    for city in listdir(f"{TEST_DATA_PATH}cities/")
+    for city in listdir(TEST_CITY_PATH)
     if city in [city[0] + ".graphml" for city in PLACES_SMALL]
 ]
 
@@ -70,9 +72,7 @@ def partitioner_class(request):
 def test_city_all(request):
     """Fixture for loading and parametrizing all city graphs from test_data."""
     # return request.param without .graphml
-    return request.param[:-8], ox.load_graphml(
-        filepath=f"{TEST_DATA_PATH}cities/" + request.param
-    )
+    return request.param[:-8], load_graphml_dtypes(join(TEST_CITY_PATH, request.param))
 
 
 @pytest.fixture(scope="function")
@@ -139,9 +139,7 @@ def test_city_all_precalculated(test_city_all_precalculated_save):
 )
 def test_city_small(request):
     """Fixture for loading and parametrizing small city graphs from test_data."""
-    return request.param[:-8], ox.load_graphml(
-        filepath=f"{TEST_DATA_PATH}cities/" + request.param
-    )
+    return request.param[:-8], load_graphml_dtypes(join(TEST_CITY_PATH, request.param))
 
 
 @pytest.fixture(scope="function")
@@ -183,7 +181,6 @@ def test_city_small_preloaded(test_city_small, partitioner_class):
         city_name=city_name,
         graph=graph.copy(),
     )
-    part.save(save_graph_copy=False)
     return part
 
 
@@ -220,8 +217,8 @@ def test_city_small_osmid_copy(test_city_small_osmid):
 @pytest.fixture(scope="session")
 def test_one_city():
     """Fixture for loading and parametrizing one small city."""
-    return SMALL_CITIES[0][:-8], ox.load_graphml(
-        filepath=f"{TEST_DATA_PATH}cities/" + SMALL_CITIES[0]
+    return SMALL_CITIES[0][:-8], load_graphml_dtypes(
+        join(TEST_CITY_PATH, SMALL_CITIES[0])
     )
 
 
@@ -264,7 +261,6 @@ def test_one_city_preloaded(partitioner_class, test_one_city):
         city_name=city_name,
         graph=graph.copy(),
     )
-    part.save(save_graph_copy=False)
     return part
 
 
@@ -304,6 +300,14 @@ def _teardown_test_folders():
         for folder in listdir(RESULTS_DIR):
             if folder.endswith("_test"):
                 rmtree(join(RESULTS_DIR, folder))
+
+
+@pytest.fixture(scope="module")
+def _delete_ghsl_tifs():
+    """Delete GHSL tifs."""
+    yield
+    for filepath in glob(join(TEST_DATA_PATH, "GHS_POP*.tif")):
+        remove(filepath)
 
 
 # ***********************

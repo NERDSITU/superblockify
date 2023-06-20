@@ -1,5 +1,5 @@
 """Utility functions for superblockify."""
-
+from ast import literal_eval
 from itertools import chain
 from re import match
 
@@ -16,6 +16,10 @@ from numpy import (
     int64 as np_int64,
 )
 from osmnx.stats import count_streets_per_node
+from shapely import wkt
+
+from .graph_stats import basic_graph_stats
+from .population.approximation import add_edge_population
 
 
 def extract_attributes(graph, edge_attributes, node_attributes):
@@ -61,7 +65,7 @@ def extract_attributes(graph, edge_attributes, node_attributes):
     return graph
 
 
-def load_graph_from_place(save_as, search_string, **gfp_kwargs):
+def load_graph_from_place(save_as, search_string, add_population=False, **gfp_kwargs):
     """Load a graph from a place and save it to a file.
 
     The method filters the attributes of the graph to only include the ones that
@@ -76,6 +80,8 @@ def load_graph_from_place(save_as, search_string, **gfp_kwargs):
         https://nominatim.openstreetmap.org/
         Can otherwise be OSM relation ID or a list of those. They have the format
         "R1234567". Not mixed with place names.
+    add_population : bool, optional
+        Whether to add population data to the graph. Default is False.
     **gfp_kwargs
         Keyword arguments to pass to osmnx.graph_from_place.
 
@@ -87,19 +93,23 @@ def load_graph_from_place(save_as, search_string, **gfp_kwargs):
 
     # check the format of the search string, match to regex R\d+, str or list of str
     # use re.match(r"R\d+", search_string) or to all elements in list
-    if (
-        isinstance(search_string, str)
+    mult_polygon = ox.geocode_to_gdf(
+        search_string,
+        by_osmid=isinstance(search_string, str)
         and match(r"R\d+", search_string)
         or isinstance(search_string, list)
-        and all(isinstance(s, str) and match(r"R\d+", s) for s in search_string)
-    ):
-        mult_polygon = ox.geocode_to_gdf(search_string, by_osmid=True)
-        # geopandas.GeoDataFrame, every column is polygon
-        # make shapely.geometry.MultiPolygon from all polygons
-        mult_polygon = mult_polygon["geometry"].unary_union
-        graph = ox.graph_from_polygon(mult_polygon, **gfp_kwargs)
-    else:
-        graph = ox.graph_from_place(search_string, **gfp_kwargs)
+        and all(isinstance(s, str) and match(r"R\d+", s) for s in search_string),
+    )
+
+    # geopandas.GeoDataFrame, every column is polygon
+    # make shapely.geometry.MultiPolygon from all polygons
+    # Project to WGS84 to query OSM
+    mult_polygon = ox.project_gdf(mult_polygon, to_crs="epsg:4326")
+    graph = ox.graph_from_polygon(mult_polygon.geometry.unary_union, **gfp_kwargs)
+    # Add edge bearings - the precision >1 is important for binning
+    graph = ox.add_edge_bearings(graph, precision=2)
+    # Project to local UTM - coordinates can be used as
+    graph = ox.project_graph(graph)
 
     graph = ox.distance.add_edge_lengths(graph)
     graph = ox.add_edge_speeds(graph)  # adds attribute "maxspeed"
@@ -116,12 +126,22 @@ def load_graph_from_place(save_as, search_string, **gfp_kwargs):
             "highway",
             "speed_kph",
             "travel_time",
+            "bearing",
         },
-        node_attributes={"y", "x", "osmid", "street_count"},
+        node_attributes={"y", "x", "lat", "lon", "osmid", "street_count"},
     )
-    # Add edge bearings - the precision >1 is important for binning
-    graph = ox.add_edge_bearings(graph, precision=2)
-    graph = ox.project_graph(graph)
+    # Add edge population and area
+    if add_population:
+        add_edge_population(graph)
+
+    # Add boundary as union of all polygons as attribute - in UTM crs of centroid
+    mult_polygon = ox.project_gdf(mult_polygon)
+    graph.graph["boundary_crs"] = mult_polygon.crs
+    graph.graph["boundary"] = mult_polygon.geometry.unary_union
+    graph.graph["area"] = graph.graph["boundary"].area
+    # update graph attributes with basic graph stats
+    graph.graph.update(basic_graph_stats(graph, area=graph.graph["area"]))
+
     ox.save_graphml(graph, filepath=save_as)
     return graph
 
@@ -291,3 +311,70 @@ def __edges_to_1d(edge_u, edge_v, max_len):  # pragma: no cover
     for i in prange(len(edge_u)):  # pylint: disable=not-an-iterable
         edges[i] = __edge_to_1d(edge_u[i], edge_v[i], max_len)
     return edges
+
+
+def load_graphml_dtypes(filepath=None, attribute_label=None, attribute_dtype=None):
+    """Load a graphml file with custom dtypes.
+
+    Parameters
+    ----------
+    filepath : str
+        Path to the graphml file.
+    attribute_label : str, optional
+        The attribute label to convert to the specified dtype.
+    attribute_dtype : type, optional
+        The dtype to convert the attribute to.
+
+    Returns
+    -------
+    networkx.MultiDiGraph
+        The graph.
+    """
+
+    node_dtypes = {}
+    edge_dtypes = {
+        "bearing": float,
+        "length": float,
+        "speed_kph": float,
+        "travel_time": float,
+        "travel_time_restricted": float,
+        "rel_increase": float,
+        "population": float,
+        "area": float,
+        "cell_id": int,
+    }
+    graph_dtypes = {
+        "simplified": bool,
+        "edge_population": bool,
+        "boundary": wkt.loads,
+        "area": float,
+        "n": int,
+        "m": int,
+        "k_avg": float,
+        "edge_length_total": float,
+        "edge_length_avg": float,
+        "streets_per_node_avg": float,
+        "streets_per_node_counts": literal_eval,
+        "streets_per_node_proportions": literal_eval,
+        "intersection_count": int,
+        "street_length_total": float,
+        "street_segment_count": int,
+        "street_length_avg": float,
+        "circuity_avg": float,
+        "self_loop_proportion": float,
+        "node_density_km": float,
+        "intersection_density_km": float,
+        "edge_density_km": float,
+        "street_density_km": float,
+        "street_orientation_order": float,
+    }
+
+    if attribute_label is not None and attribute_dtype is not None:
+        edge_dtypes[attribute_label] = attribute_dtype
+    graph = ox.load_graphml(
+        filepath=filepath,
+        node_dtypes=node_dtypes,
+        edge_dtypes=edge_dtypes,
+        graph_dtypes=graph_dtypes,
+    )
+    return graph

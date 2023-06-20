@@ -1,4 +1,6 @@
 """Tests for the plot module."""
+from os.path import join
+
 import pytest
 from matplotlib import pyplot as plt
 
@@ -23,7 +25,7 @@ def test_paint_streets(test_city_all_copy, e_l, n_a, save):
         edge_linewidth=e_l,
         node_alpha=n_a,
         save=save,
-        filepath=f"{TEST_DATA_PATH}output/{city_path}.pdf",
+        filepath=join(TEST_DATA_PATH, "output", f"{city_path}.pdf"),
     )
     plt.close()
 

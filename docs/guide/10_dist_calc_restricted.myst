@@ -1,0 +1,513 @@
+---
+jupytext:
+  formats: ipynb,md:myst
+  text_representation:
+    extension: .myst
+    format_name: myst
+    format_version: 0.12
+    jupytext_version: 1.8.2
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python
+---
+
+# Restricted Distance Calculation
+
+````{sidebar} [Partition Requirements](./partition_requirements)
+Our street network graph $G = (V, E, v)$ has a partition
+$v: G \rightarrow (G_s, G_1 \ldots G_k)$ and for every node.
+````
+
+For a valid partitioning we want to calculate the **distances and predecessors** between 
+all nodes while respecting the restrictions of the partitioning. The restrictions 
+are that on a path it is only allowed once to leave and enter a partition.
+
+We will guide through the idea of the algorithm in the following sections.
+
+## Small example
+
+```{code-cell} ipython3
+from itertools import combinations
+
+import networkx as nx
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
+from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import dijkstra
+```
+
+Imagine we have a directed graph with $G_s, G_1, G_2$ as partitions and the following 
+edges:
+
+```{code-cell} ipython3
+:tags: [hide-input]
+# Create graph
+G = nx.DiGraph(
+    [
+        (1, 2, {"weight": 1}),
+        (2, 1, {"weight": 1}),
+        (2, 3, {"weight": 1}),
+        (3, 2, {"weight": 1}),
+        (1, 4, {"weight": 1}),
+        (4, 1, {"weight": 1}),
+        (2, 5, {"weight": 1}),
+        (5, 2, {"weight": 1}),
+        (5, 4, {"weight": 4}),
+        (2, 4, {"weight": 1}),
+        (3, 6, {"weight": 2}),
+        (6, 3, {"weight": 2}),
+        (6, 1, {"weight": 1}),
+        (6, 2, {"weight": 6}),
+        (6, 7, {"weight": 1}),
+        (7, 6, {"weight": 1}),
+        (6, 4, {"weight": 1.5}),
+        (4, 6, {"weight": 1.5}),
+    ]
+)
+# Draw a scaled down version of the graph
+nx.draw(
+    G,
+    with_labels=True,
+    font_color="white",
+    pos=nx.kamada_kawai_layout(G),
+    ax=plt.figure(figsize=(8, 3)).gca(),
+)
+```
+The sparse graph $G_s$ is the subgraph of $G$ with nodes $1, 2, 3$.
+```{code-cell} ipython3
+n_sparse = [1, 2, 3]
+```
+The partitions $G_1$ and $G_2$ are the subgraphs of $G$ with nodes $4, 5$ and $6$
+respectively.
+```{code-cell} ipython3
+partitions = {
+    "G_s": {"nodes": n_sparse, "color": "black", "subgraph": G.subgraph(n_sparse)},
+    "G_1": {"nodes": [4, 5], "color": "mediumseagreen"},
+    "G_2": {"nodes": [6, 7], "color": "crimson"},
+}
+```
+To each dictionary add a subgraph view, including all edges connecting to the nodes, 
+and a node list with the connected nodes. Color the nodes according to the partition.
+```{code-cell} ipython3
+for name, part in partitions.items():
+    if "subgraph" not in part:
+        # subgraph for all edges from or to nodes in partition
+        part["subgraph"] = G.edge_subgraph(
+            [(u, v) for u, v in G.edges if u in part["nodes"] or v in part["nodes"]]
+        )
+    part["nodelist"] = part["subgraph"].nodes
+    for node in part["nodes"]:
+        G.nodes[node]["partition"] = part["color"]
+
+nx.draw(G, with_labels=True, node_color=[G.nodes[n]["partition"] for n in G.nodes],
+        font_color="white",
+        pos=nx.kamada_kawai_layout(G),
+        ax=plt.figure(figsize=(8,3)).gca(),
+        )
+```
+
+To check the subgraphs are correct, draw these separately.
+
+```{code-cell} ipython3
+# Copy subgraphs, relabel them, merge them into one graph
+composite_graph = nx.DiGraph()
+for name, part in partitions.items():
+    subgraph = part["subgraph"].copy()
+    subgraph = nx.relabel_nodes(subgraph, {n: f"{name}_{n}" for n in subgraph.nodes})
+    composite_graph = nx.compose(composite_graph, subgraph)
+nx.draw(
+    composite_graph,
+    node_color=[composite_graph.nodes[n]["partition"] for n in composite_graph.nodes],
+    with_labels=True,
+    font_color="white",
+    labels={n: n.split("_")[-1] for n in composite_graph.nodes},
+    pos=nx.planar_layout(composite_graph),
+    ax=plt.figure(figsize=(8, 3)).gca(),
+)
+```
+## Distance calculation
+
+To make the restricted calculation we use two passes of Dijsktra's algorithm.
+One pass where it is only possible to leave the sparse graph and one
+pass where it is only possible to enter the sparse graph.
+Going between two partitions is always prohibited.
+
+### 1. Leaving
+
+Calculate all-pairs shortest paths on graph where we cut the edges that lead us
+outside a partition. This way we find all the shortest paths on the sparse graph, to
+one partition and inside all the partitions, without exiting. Also the edges between
+two different partitions are all cut.
+
+### 2. Entering
+
+Analogous to the first pass, but now we cut the edges that lead us into a partition.
+Here we will find the paths from partition nodes to the sparse graph nodes.
+
+For finding the shortest paths we could use
+:func:`nx.floyd_warshall_predecessor_and_distance`, but as we'll use this approach
+for larger graphs, we'll use :func:`scipy.sparse.csgraph.dijkstra`.
+
+We will convert the graph to a sparse representation (csr) and filter out the
+concerning edges.
+
+```{code-cell} ipython3
+:tags: [hide-input]
+# sorted node order (names)
+node_order = list(sorted(G.nodes))
+# node_order indices
+node_order_indices = list(range(len(node_order)))
+# filtered indices: sparse/partition
+n_sparse_indices = [node_order.index(n) for n in n_sparse]
+part_name_order = [name for name in partitions.keys() if name != "G_s"]
+n_partition_indices_separate = [
+    [node_order.index(n) for n in partitions[name]["nodes"]] for name in part_name_order
+]
+n_partition_indices = [n for part in n_partition_indices_separate for n in part]
+# Semipermeable graphs
+G_leaving = G.copy()
+# Construct Compressed Sparse Row matrix
+# https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_matrix.html
+G_leaving = nx.to_scipy_sparse_array(G_leaving, nodelist=node_order, format="coo")
+data, row, col = G_leaving.data, G_leaving.row, G_leaving.col
+
+# Remove edges between different partitions
+# (col, row in separate n_partition_indices_separate)
+for n_ind_1, n_ind_2 in combinations(n_partition_indices_separate, 2):
+    mask = np.logical_and(np.isin(row, n_ind_1), np.isin(col, n_ind_2))
+    mask = np.logical_or(mask,
+                         np.logical_and(np.isin(row, n_ind_2), np.isin(col, n_ind_1)))
+    data, row, col = data[~mask], row[~mask], col[~mask]
+G_entering = (data, (row, col))
+
+# Remove edges from partition to sparse
+mask = np.logical_and(np.isin(row, n_partition_indices),
+                      np.isin(col, n_sparse_indices))
+data, row, col = data[~mask], row[~mask], col[~mask]
+G_leaving = csr_matrix((data, (row, col)), shape=(len(node_order), len(node_order)))
+# Remove edges from sparse to partition
+data, (row, col) = G_entering
+mask = np.logical_and(np.isin(row, n_sparse_indices),
+                      np.isin(col, n_partition_indices))
+data, row, col = data[~mask], row[~mask], col[~mask]
+G_entering = csr_matrix((data, (row, col)), shape=(len(node_order), len(node_order)))
+```
+
+This will make the graph break up like so:
+
+```{code-cell} ipython3
+:tags: [hide-input]
+G_leaving_nx = nx.from_scipy_sparse_array(G_leaving, create_using=nx.DiGraph)
+G_leaving_nx = nx.relabel_nodes(G_leaving_nx,
+                                {i: n for i, n in enumerate(node_order)})
+nx.draw(G_leaving_nx,
+        with_labels=True,
+        node_color=[G.nodes[n]["partition"] for n in G.nodes],
+        font_color="white",
+        pos=nx.kamada_kawai_layout(G_leaving_nx),
+        ax=plt.figure(figsize=(8, 3)).gca(),
+        )
+```
+
+```{code-cell} ipython3
+:tags: [hide-input]
+G_entering_nx = nx.from_scipy_sparse_array(G_entering, create_using=nx.DiGraph)
+G_entering_nx = nx.relabel_nodes(G_entering_nx,
+                                 {i: n for i, n in enumerate(node_order)})
+nx.draw(G_entering_nx,
+        with_labels=True,
+        node_color=[G.nodes[n]["partition"] for n in G.nodes],
+        font_color="white",
+        pos=nx.kamada_kawai_layout(G_entering_nx),
+        ax=plt.figure(figsize=(8, 3)).gca(),
+        )
+```
+
+The distances on both these graphs are the following:
+
+```{code-cell} ipython3
+# Calculate distances on this graph
+dist_leaving, pred_leaving = dijkstra(G_leaving, directed=True,
+                                      return_predecessors=True)
+dist_entering, pred_entering = dijkstra(G_entering, directed=True,
+                                        return_predecessors=True)
+
+display(pd.DataFrame(dist_leaving, index=node_order, columns=node_order),
+        pd.DataFrame(dist_entering, index=node_order, columns=node_order))
+```
+
+## Merge results
+
+We can merge the distances and predecessors taking the minimum of the two distances.
+
+```{code-cell} ipython3
+:tags: [hide-input]
+def colored_predecessors(preds, graph=G, node_order=node_order,
+                         node_order_indices=node_order_indices):
+    return pd.DataFrame(preds, index=node_order_indices,
+                        columns=node_order_indices).style. \
+        applymap(lambda x: f"color: {graph.nodes[node_order[x]]['partition']}"
+    if x != -9999 else "")
+
+
+def colored_distances(dists, precision, cmap='Blues', node_order=node_order):
+    return pd.DataFrame(dists, index=node_order, columns=node_order).style. \
+        background_gradient(cmap=cmap, vmin=np.ma.masked_invalid(dists).min(),
+                            vmax=np.ma.masked_invalid(dists).max()). \
+        format(precision=precision)
+```
+
+```{code-cell} ipython3
+min_mask = dist_leaving < dist_entering
+dist_le = dist_entering.copy()
+pred_le = pred_entering.copy()
+dist_le[min_mask], pred_le[min_mask] = dist_leaving[min_mask], pred_leaving[min_mask]
+
+display(colored_distances(dist_le, 1),
+        colored_predecessors(pred_le))
+```
+
+````{sidebar} Predecessor Matrix
+The predecessor matrix is used to reconstruct the shortest paths.
+Predecessor of $i$ to $j$ is the node with index $k$ that is on the shortest path
+from $i$ to $j$. So the predecessor of $i$ to $j$ is $k$ if $d_{ij} = d_{ik} + d_{kj}$.
+````
+
+Now we know all the distances and paths if we only allow crossing to/from the
+sparsified graph once. The lower right corner of the matrices is still empty, as
+these are the paths between the partitions, which need to cross twice.
+
+## Fill up distances
+
+For these all we will need to find the minimum of
+
+$$ d_{ij} = \min_{k_n \in V_s\cup V_n, l_m \in V_s\cup V_m} \left(d_{ik} + d_{kl} +
+d_{lj}\right), \quad i \in V_n \Leftrightarrow j \in V_m$$
+
+and the corresponding predecessor. But as we already now all the paths $d_{ik} +
+d_{kl}$ entering, and $d_{kl} + d_{lj}$ leaving, we can reduce the search to one
+node $k_n$ or $l_m$.
+
+We will go with $k_n$.
+
+```{code-cell} ipython3
+:tags: [hide-input]
+n_partition_intersect_indices = [
+    list(set(n_sparse).intersection(partitions[name]["nodelist"]))
+    for name in part_name_order
+]
+n_partition_intersect_indices = [
+    [node_order.index(n) for n in part_indices]
+    for part_indices in n_partition_intersect_indices
+]
+```
+
+```{code-cell} ipython3
+# Loop, for didactic purposes
+for part_idx, part_intersect in zip(n_partition_indices_separate,
+                                    n_partition_intersect_indices):
+    for i in part_idx:
+        for j in n_partition_indices:
+            if i == j:
+                continue
+            # distances from i to j, over all possible k in part_intersect
+            dists = dist_le[i, part_intersect] + dist_le[part_intersect, j]
+            # index of minimum distance for predecessor
+            min_idx = np.argmin(dists)
+            if dists[min_idx] >= dist_le[i, j]:
+                continue
+            dist_le[i, j] = dists[min_idx]
+            pred_le[i, j] = pred_le[part_intersect[min_idx], j]
+# A vectorized version of the above is much quicker, see implementation
+
+display(colored_distances(dist_le, 0),
+        colored_predecessors(pred_le))
+```
+
+And there we already got our result. In this case the only difference results
+through the edge between $6$ and $4$, which is restricted. The shortest path
+differences are the following:
+
+```{code-cell} ipython3
+:tags: [hide-input]
+display(colored_distances(
+    dist_le - dijkstra(nx.to_scipy_sparse_array(G, nodelist=list(G.nodes)),
+                       directed=True,
+                       return_predecessors=False),
+    1, 'Reds')
+)
+```
+
+To see a difference traversing the sparse graph, we will look at another example
+using the implementation of the algorithm in the package.
+
+## Second example
+
+With the above described algorithm, the method
+[`shortest_paths_restricted()`](shortest_paths_restricted) is implemented, see
+[Implementation](#implementation). It takes a graph and partitions as the input and
+returns the distance matrix and the predecessor matrix. Now we define the Graph `G_2`:
+
+```{code-cell} ipython3
+:tags: [remove-input]
+# Import path of superblockify, from here two directories up
+import sys, os
+os.environ['USE_PYGEOS'] = '0'
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir, os.pardir)))
+```
+
+```{code-cell} ipython3
+:tags: [hide-input]
+# Create planar graph, similar to a street network
+G_2 = nx.DiGraph(nx.Graph(
+    [
+        (10, 11, {"weight": 1}),
+        (11, 12, {"weight": 1}),
+        (12, 13, {"weight": 1}),
+        (13, 0, {"weight": 1.5}),
+        (13, 14, {"weight": 1}),
+        (14, 0, {"weight": 1}),
+        (0, 10, {"weight": 1}),
+        (0, 1, {"weight": 1}),
+        (10, 1, {"weight": 1}),
+        (1, 2, {"weight": 1}),
+        (2, 3, {"weight": 1}),
+        (3, 4, {"weight": 1.5}),
+        (4, 5, {"weight": 1}),
+        (5, 9, {"weight": 1}),
+        (5, 6, {"weight": 1}),
+        (7, 2, {"weight": 1}),
+        (8, 7, {"weight": 0.5}),
+        (7, 1, {"weight": 1}),
+        (8, 9, {"weight": 0.7}),
+        (6, 9, {"weight": 1}),
+        (8, 4, {"weight": 1}),
+        (9, 1, {"weight": 1}),
+        (0, 18, {"weight": 0.4}),
+        (18, 2, {"weight": 0.4}),
+        (6, 15, {"weight": 0.8}),
+        (15, 16, {"weight": 1}),
+        (16, 17, {"weight": 1}),
+        (17, 6, {"weight": 1}),
+    ]
+))
+# Isolated node
+G_2.add_node(19)
+# Delete directed edges (1, 9), (6, 17), (10, 1)
+G_2.remove_edges_from([(1, 9), (6, 17), (10, 1)])
+# Add longer edge 0 -> 13
+G_2.add_edge(0, 13, weight=G_2[0][13]["weight"] * 2)
+
+n_sparse = [0, 1, 2, 3, 4, 5, 6, 19]
+partitions = {
+    "sparsified":
+        {"nodes": n_sparse, "color": "black", "subgraph": G_2.subgraph(n_sparse)},
+    "G_r": {"nodes": [7, 8, 9], "color": "crimson"},
+    "G_g": {"nodes": [10, 11, 12, 13, 14], "color": "mediumseagreen"},
+    "G_b": {"nodes": [15, 16, 17], "color": "dodgerblue"},
+    "G_o": {"nodes": [18], "color": "darkorange"},
+}
+for name, part in partitions.items():
+    if "subgraph" not in part:
+        # subgraph for all edges from or to nodes in partition
+        part["subgraph"] = G_2.edge_subgraph(
+            [(u, v) for u, v in G_2.edges if u in part["nodes"] or v in part["nodes"]]
+        )
+    part["nodelist"] = part["subgraph"].nodes
+    for node in part["nodes"]:
+        G_2.nodes[node]["partition"] = part["color"]
+
+nx.draw(G_2, with_labels=True, node_color=[G_2.nodes[n]["partition"] for n in G_2
+        .nodes],
+        font_color="white",
+        pos=nx.kamada_kawai_layout(G_2),
+        ax=plt.figure(figsize=(8, 5)).gca(),
+        )
+```
+
+Two notes to this graph. The distance between $0$ and $2$ is $0.8$ on the unrestricted
+graph $0 \overset{0.4}{\rightarrow} 18 \overset{0.4}{\rightarrow} 2$, instead of $2$
+with restrictions $0 \overset{1}{\rightarrow} 1 \overset{1}{\rightarrow} 2$.
+Getting from $1$ to $6$ would also be far shorter than taking the shortest path on the
+sparsified graph. The calculation using
+[`shortest_paths_restricted(G_2)`](shortest_paths_restricted) gives the following
+results.
+
+```{code-cell} ipython3
+from superblockify.metrics.distances import shortest_paths_restricted
+
+node_order_2 = list(range(len(G_2.nodes)))
+dist, pred = shortest_paths_restricted(G_2, partitions, weight="weight",
+                                       node_order=node_order_2)
+display(colored_distances(dist, 1, node_order=node_order_2). \
+        set_table_attributes('style="font-size: 12px"'),
+        colored_predecessors(pred, G_2, node_order=node_order_2,
+                             node_order_indices=node_order_2). \
+        set_table_attributes('style="font-size: 10px"'))
+```
+
+At first glance the predecessor matrix looks correct. The yellow $18$ is only
+predecessor coming from itself. Also for the red partition $7$, $8$, $9$ we see that
+they are only being visited for the columns or rows corresponding to themselves. The
+same can be said for the other partitions. When going from or to sparsified nodes, no
+colorful nodes are visited.
+
+From here one could reconstruct the shortest paths. A direct implementation
+for a single path would be the following.
+
+```{code-cell} ipython3
+def reconstruct_path(pred, start, end):
+    """Reconstruct path from predecessor matrix."""
+    if start == end:
+        return []
+    prev = pred[start]
+    curr = prev[end]
+    path = [end, curr]
+    while curr != start:
+        curr = prev[curr]
+        path.append(curr)
+    return list(reversed(path))
+
+reconstruct_path(pred, 0, 2), reconstruct_path(pred, 0, 6), \
+    reconstruct_path(pred, 14, 7), reconstruct_path(pred, 12, 16), \
+    reconstruct_path(pred, 7, 18)
+```
+
+```{code-cell} ipython3
+:tags: [hide-input]
+nx.draw(G_2, with_labels=True, node_color=[G_2.nodes[n]["partition"] for n in G_2
+        .nodes],
+        font_color="white",
+        pos=nx.kamada_kawai_layout(G_2),
+        ax=plt.figure(figsize=(8, 5)).gca(),
+        )
+```
+
+To finish, the difference between the unrestricted and restricted graph distances.
+
+```{code-cell} ipython3
+:tags: [hide-input]
+display(colored_distances(
+    dist - dijkstra(nx.to_scipy_sparse_array(G_2, nodelist=node_order_2),
+                    directed=True,
+                    return_predecessors=False),
+    1, 'Reds', node_order=node_order_2). \
+        set_table_attributes('style="font-size: 12px"'),
+        )
+```
+
+## Implementation
+
+```{eval-rst}
+.. autofunction:: superblockify.metrics.distances.calculate_partitioning_distance_matrix
+    :noindex:
+```
+
+(shortest_paths_restricted)=
+```{eval-rst}
+.. autofunction:: superblockify.metrics.distances.shortest_paths_restricted
+    :noindex:
+```
+

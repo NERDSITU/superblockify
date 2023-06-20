@@ -1,8 +1,14 @@
 """Load this module to fetch test data needed for certain tests."""
+# pylint: disable=wrong-import-position
+import sys
+from os import path
 
 import osmnx as ox
 
-from superblockify.config import logger, PLACES_GENERAL, PLACES_SMALL
+# Add the package folder to python path, so this module can be run from anywhere
+sys.path.append(path.join(path.dirname(__file__), "..", ".."))
+
+from superblockify.config import logger, PLACES_GENERAL, PLACES_SMALL, NETWORK_FILTER
 from superblockify.utils import load_graph_from_place
 
 # turn on logging
@@ -18,5 +24,6 @@ if __name__ == "__main__":
         load_graph_from_place(
             f"./tests/test_data/cities/{place[0]}.graphml",
             place[1],
-            network_type="drive",
+            add_population=True,
+            custom_filter=NETWORK_FILTER,
         )

@@ -8,11 +8,14 @@ Attributes
 
 WORK_DIR
     The working directory of the package. This is used to store the graphs and results
-    in subdirectories of this directory.
+    in subdirectories of this directory. By default, this is the directory where the
+    package is installed.
 GRAPH_DIR
     The directory where the graphs are stored.
 RESULTS_DIR
     The directory where the results are stored.
+GHSL_DIR
+    The directory where the GHSL population data is stored when downloaded.
 
 V_MAX_LTN
     The maximum speed in km/h for the restricted calculation of travel times.
@@ -29,6 +32,14 @@ CLUSTERING_PERCENTILE
     spatial clustering and anisotropy nodes.
 NUM_BINS
     The number of bins used for the histograms in the entropy calculation.
+
+FULL_RASTER
+    The path and filename of the full GHSL raster.
+    If None, tiles of the needed area are downloaded from the JRC FTP server and
+    stored in the GHSL_DIR directory.
+    <https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2025_GLOBE_R2023A_54009_100/V1-0/GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0.zip>
+DOWNLOAD_TIMEOUT
+    The timeout in seconds for downloading the GHSL raster tiles.
 
 logger
     The logger for this module. This is used to log information, warnings and errors
@@ -59,9 +70,10 @@ import logging.config
 from os.path import join, dirname
 
 # General
-WORK_DIR = "./"
-GRAPH_DIR = "./data/graphs/"
-RESULTS_DIR = "./data/results/"
+WORK_DIR = join(dirname(__file__), "..")  # Change this to your working directory
+GRAPH_DIR = join(WORK_DIR, "data", "graphs")
+RESULTS_DIR = join(WORK_DIR, "data", "results")
+GHSL_DIR = join(WORK_DIR, "data", "ghsl")
 
 # LTN
 # Max speeds in km/h for the restricted calculation of travel times
@@ -82,13 +94,17 @@ NETWORK_FILTER = (
 CLUSTERING_PERCENTILE = 90
 NUM_BINS = 36
 
+# Population data (GHSL)
+FULL_RASTER = None  # GHSL_DIR + "GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0.tif"
+DOWNLOAD_TIMEOUT = 60
+
 # Logging configuration using the setup.cfg file
 logging.config.fileConfig(join(dirname(__file__), "..", "setup.cfg"))
 # Get the logger for this module
 logger = logging.getLogger("superblockify")
 
 # Tests
-TEST_DATA_PATH = "./tests/test_data/"
+TEST_DATA_PATH = join(dirname(__file__), "..", "tests", "test_data")
 HIDE_PLOTS = True
 
 PLACES_GENERAL = [

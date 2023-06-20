@@ -21,7 +21,7 @@ jobs:
       - name: Run Black
         uses: psf/black@stable
         with:
-          options: ''
+          src: './superblockify ./tests ./scripts'
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:

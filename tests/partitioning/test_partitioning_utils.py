@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from networkx import gnp_random_graph
+from osmnx import graph_to_gdfs
 
 from superblockify.partitioning.utils import (
     show_highway_stats,
@@ -89,6 +90,12 @@ def test_split_up_isolated_edges_directed(test_city_small_precalculated_copy):
     split_up_isolated_edges_directed(part.graph, part.sparsified)
     assert len(part.graph.edges) >= num_edges
     assert len(part.graph.nodes) >= num_nodes
+    # Check that for each edge with the same geometry, the cell_id is the same
+    edges = graph_to_gdfs(part.graph, nodes=False, fill_edge_geometry=True)
+    # group by geometry
+    edges = edges.groupby("geometry")
+    for _, group in edges:
+        assert len(group["cell_id"].unique()) == 1
 
 
 @pytest.mark.parametrize("to_directed", ["graph", "sparsified"])
