@@ -1,5 +1,5 @@
 """Utility functions for superblockify."""
-
+from ast import literal_eval
 from itertools import chain
 from re import match
 
@@ -343,7 +343,31 @@ def load_graphml_dtypes(filepath=None, attribute_label=None, attribute_dtype=Non
         "area": float,
         "cell_id": int,
     }
-    graph_dtypes = {"boundary": wkt.loads, "area": float, "edge_population": bool}
+    graph_dtypes = {
+        "simplified": bool,
+        "edge_population": bool,
+        "boundary": wkt.loads,
+        "area": float,
+        "n": int,
+        "m": int,
+        "k_avg": float,
+        "edge_length_total": float,
+        "edge_length_avg": float,
+        "streets_per_node_avg": float,
+        "streets_per_node_counts": literal_eval,
+        "streets_per_node_proportions": literal_eval,
+        "intersection_count": int,
+        "street_length_total": float,
+        "street_segment_count": int,
+        "street_length_avg": float,
+        "circuity_avg": float,
+        "self_loop_proportion": float,
+        "node_density_km": float,
+        "intersection_density_km": float,
+        "edge_density_km": float,
+        "street_density_km": float,
+        "street_orientation_order": float,
+    }
 
     if attribute_label is not None and attribute_dtype is not None:
         edge_dtypes[attribute_label] = attribute_dtype

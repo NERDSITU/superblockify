@@ -1,4 +1,4 @@
-"""Spatial graph order measures for the metrics module."""
+"""Spatial graph order measures for the superblockify package."""
 from numpy import log
 from osmnx import orientation_entropy
 from osmnx.projection import is_projected, project_graph

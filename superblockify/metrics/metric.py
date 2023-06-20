@@ -7,7 +7,6 @@ from .distances import (
     calculate_path_distance_matrix,
     calculate_euclidean_distance_matrix_projected,
 )
-from .graph_stats import basic_graph_stats
 from .measures import (
     calculate_global_efficiency,
     calculate_directness,
@@ -26,6 +25,7 @@ from .plot import (
 from ..config import logger, RESULTS_DIR, CLUSTERING_PERCENTILE
 from ..plot import save_plot
 from ..utils import compare_dicts
+from ..graph_stats import basic_graph_stats
 
 
 class Metric:
