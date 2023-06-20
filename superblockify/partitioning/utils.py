@@ -295,6 +295,7 @@ def split_up_isolated_edges_directed(graph, sparsified):
 
         # Add the edges
         for u_parallel, v_parallel, k, data_p, start_node in edges:
+            data_p["length"] = data_p["length"] / 2
             # `population` and `area` need to be split up, `cell_id` assigned separately
             # This is what the start_node is for,
             # if the inserted node is the start_node, the cell_id is kept,
