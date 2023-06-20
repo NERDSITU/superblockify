@@ -6,6 +6,7 @@ from numpy import float32
 from superblockify.population.approximation import (
     add_edge_population,
     get_population_area,
+    get_edge_population,
 )
 
 
@@ -52,3 +53,11 @@ def test_get_population_area_no_edge_population(test_city_small_copy):
     del graph.graph["edge_population"]
     with pytest.raises(ValueError):
         get_population_area(graph)
+
+
+@pytest.mark.parametrize("batch_size", [-1, 0, 1e8, None, "1", (1, 2), [1], {1, 2}])
+def test_get_edge_population_faulty_batch_size(test_city_small_copy, batch_size):
+    """Test the `get_edge_population` function for faulty batch sizes."""
+    _, graph = test_city_small_copy
+    with pytest.raises(ValueError):
+        get_edge_population(graph, batch_size=batch_size)

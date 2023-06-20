@@ -2,12 +2,16 @@
 
 See reference notebook for a detailed description of the population approximation.
 """
+from functools import partial
+from multiprocessing import Pool
+
 from geopandas import GeoDataFrame
-from numpy import float32, sum as npsum
+from numpy import float32, sum as npsum, zeros
 from rasterio import open as rasopen
 from rasterio.features import shapes
 from shapely import STRtree
 from shapely.geometry import shape
+from tqdm import tqdm
 
 from .ghsl import get_ghsl, resample_load_window
 from .tessellation import get_edge_cells
@@ -119,16 +123,22 @@ def get_population_area(graph):
     return npsum(population), npsum(area)
 
 
-def get_edge_population(graph, **tess_kwargs):
+def get_edge_population(graph, batch_size=1000, **tess_kwargs):
     """Get edge population for the graph.
 
     Calculates the population and area of the edge. First tessellates the edges
     and then determines the population with GHSL data.
+    The population distribution process is parallelized with multiprocessing in
+    batches of edges.
 
     Parameters
     ----------
     graph : networkx.MultiDiGraph
         The graph to tessellate.
+    batch_size : int, optional
+        Number of edges to process in one batch. By default, 1000.
+        It must be greater than 0. If it is greater than the number of edges,
+        all edges are processed in one batch.
     **tess_kwargs
         Keyword arguments for the
         :func:`superblockify.population.tessellation.add_edge_cells` function.
@@ -143,6 +153,8 @@ def get_edge_population(graph, **tess_kwargs):
 
     Raises
     ------
+    ValueError
+        If the batch size is not greater than 0.
     ValueError
         If the graph is not in a projected coordinate system.
     ValueError
@@ -161,13 +173,14 @@ def get_edge_population(graph, **tess_kwargs):
        R-Tree Packing".
        https://ia600900.us.archive.org/27/items/nasa_techdoc_19970016975/19970016975.pdf
     """
+    if not isinstance(batch_size, (float, int)):
+        raise ValueError(f"Batch size must be numeric, but is {batch_size}.")
+    if batch_size <= 0:
+        raise ValueError(f"Batch size must be greater than 0, but is {batch_size}.")
 
     edge_cells = get_edge_cells(graph, **tess_kwargs)
     # Project to World Mollweide
     edge_cells = edge_cells.to_crs("World Mollweide")
-    # Build STRtree index
-    logger.debug("Building STRtree index.")
-    edge_cells_index = STRtree(edge_cells.geometry)
     bbox_moll = edge_cells.unary_union.buffer(100).bounds
     ghsl_file = get_ghsl(bbox_moll)
 
@@ -175,29 +188,137 @@ def get_edge_population(graph, **tess_kwargs):
         load_window = src.window(*bbox_moll)
 
     ghsl_polygons = load_ghsl_as_polygons(ghsl_file, window=load_window)
+    # Build STRtree index
+    logger.debug("Building STRtree index.")
+    ghsl_polygons_index = STRtree(ghsl_polygons.geometry)
 
-    # Distributing the population over the road cells
-    # Initializing population column
+    # Add columns for population and area
     edge_cells["population"] = 0
-    # Query all geometries at once edge_cells_sindex.query(ghsl_polygons["geometry"])
-    edge_cells_loc_pop = edge_cells.columns.get_loc("population")
-    logger.debug("Distributing population over road cells.")
-    for pop_cell_idx, road_cell_idx in edge_cells_index.query(
-        ghsl_polygons["geometry"]
-    ).T:
-        # get the intersection of the road cell and the polygon
-        intersection = edge_cells.iloc[road_cell_idx]["geometry"].intersection(
-            ghsl_polygons.iloc[pop_cell_idx]["geometry"]
+    batch_size = int(min(batch_size, len(edge_cells)))
+    with Pool() as pool:
+        slices = (
+            slice(
+                n_batch * batch_size, min((n_batch + 1) * batch_size, len(edge_cells))
+            )
+            for n_batch in range(0, len(edge_cells) // batch_size + 1)
         )
-        # get the population of the polygon
-        population = ghsl_polygons.iloc[pop_cell_idx]["population"]
-        # query by row number of edge_cells, as edge_cells has different index
-        edge_cells.iat[road_cell_idx, edge_cells_loc_pop] += (
-            population
-            * intersection.area
-            / ghsl_polygons.iloc[pop_cell_idx]["geometry"].area
+
+        population_sums = list(
+            tqdm(
+                pool.imap_unordered(
+                    partial(
+                        _population_fraction_list_sliced,
+                        ghsl_polygons["geometry"].values,
+                        ghsl_polygons["population"].values,
+                        ghsl_polygons_index,
+                        edge_cells["geometry"].values,
+                    ),
+                    slices,
+                ),
+                desc="Distributing population over road cells",
+                total=len(ghsl_polygons) // batch_size + 1,
+                unit="Cells",
+                unit_scale=batch_size,
+                unit_divisor=batch_size,
+            )
         )
+
+        # write the results to the dataframe
+        for _, (cell_slice, population) in enumerate(population_sums):
+            edge_cells.loc[edge_cells.index[cell_slice], "population"] = population
+
     return edge_cells
+
+
+def population_fraction(ghsl_polygon, population, road_cell):
+    """Function returns fractional population count between road_cell and
+    ghsl_polygon.
+
+    Parameters
+    ----------
+    ghsl_polygon : shapely.geometry.Polygon
+        Polygon of GHSL cell.
+    population : float
+        Population of GHSL cell.
+    road_cell : shapely.geometry.Polygon
+        Polygon of road cell.
+
+    Returns
+    -------
+    float
+        Fractional population count between road_cell and ghsl_polygon.
+    """
+    intersection = road_cell.intersection(ghsl_polygon)
+    return population * intersection.area / ghsl_polygon.area
+
+
+def _population_fraction_list(
+    ghsl_polygons, ghsl_populations, overlap_index_pairs, road_cell_geometries
+):
+    """Function returns population count for each road cell in road_cell_geometries
+
+    Parameters
+    ----------
+    ghsl_polygons : list of shapely.geometry.Polygon
+        List of GHSL cells.
+    ghsl_populations : list of float
+        List of GHSL populations.
+    overlap_index_pairs : ndarray with shape (2, n)
+        Array of indices of overlapping road cells and GHSL cells.
+        The first row contains the indices of the road cells, and the second row
+        contains the indices of the GHSL cells.
+    road_cell_geometries : list of shapely.geometry.Polygon
+
+    Returns
+    -------
+    ndarray with shape (n,)
+        Array of population counts for each road cell in road_cell_geometries.
+    """
+    population = zeros(len(road_cell_geometries))
+    for road_cell_idx, pop_cell_idx in overlap_index_pairs:
+        population[road_cell_idx] += population_fraction(
+            ghsl_polygons[pop_cell_idx],
+            ghsl_populations[pop_cell_idx],
+            road_cell_geometries[road_cell_idx],
+        )
+    return population
+
+
+def _population_fraction_list_sliced(
+    ghsl_polygons, ghsl_populations, ghsl_polygons_index, road_cell_geometries, slice_n
+):
+    """Function for the parallelization of _population_fraction_list.
+
+    Works like :func:`_population_fraction_list`, but takes all the road cells
+    and only determines the population for the road cells in slice_n.
+
+    Parameters
+    ----------
+    ghsl_polygons : list of shapely.geometry.Polygon
+        List of GHSL cells.
+    ghsl_populations : list of float
+        List of GHSL populations.
+    ghsl_polygons_index : shapely.strtree.STRtree
+        STRtree index of ghsl_polygons.
+    road_cell_geometries : list of shapely.geometry.Polygon
+        List of road cells.
+    slice_n : slice
+        Slice of road cells to determine the population for.
+
+    Returns
+    -------
+    slice, ndarray with shape (n,)
+        Slice of road cells and array of population counts for each road cell in
+        road_cell_geometries[slice_n].
+    """
+    return slice_n, _population_fraction_list(
+        ghsl_polygons,
+        ghsl_populations,
+        ghsl_polygons_index.query(
+            road_cell_geometries[slice_n], predicate="intersects"
+        ).T,
+        road_cell_geometries[slice_n],
+    )
 
 
 def load_ghsl_as_polygons(file, window=None):
