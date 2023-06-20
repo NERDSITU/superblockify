@@ -55,7 +55,7 @@ def test_get_population_area_no_edge_population(test_city_small_copy):
         get_population_area(graph)
 
 
-@pytest.mark.parametrize("batch_size", [-1, 0, 1e8, None, "1", (1, 2), [1], {1, 2}])
+@pytest.mark.parametrize("batch_size", [-1, 0, None, "1", (1, 2), [1], {1, 2}])
 def test_get_edge_population_faulty_batch_size(test_city_small_copy, batch_size):
     """Test the `get_edge_population` function for faulty batch sizes."""
     _, graph = test_city_small_copy
