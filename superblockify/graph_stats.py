@@ -5,7 +5,8 @@ from osmnx.projection import is_projected, project_graph
 from osmnx.stats import basic_stats
 from scipy.stats import entropy
 
-from ..config import logger, NUM_BINS
+from .population.approximation import get_population_area
+from .config import logger, NUM_BINS
 
 
 def basic_graph_stats(graph, area=None):
@@ -100,3 +101,33 @@ def street_orientation_order(graph, num_bins):
         - ((o_entropy - perfect_grid_entropy) / (max_entropy - perfect_grid_entropy))
         ** 2
     )
+
+
+def calculate_component_metrics(components):
+    """Calculate metrics for the components.
+
+    Calculates the metrics for the components and writes them to each component
+    dictionary.
+
+
+
+    Parameters
+    ----------
+    components : list of dicts
+        List of dictionaries containing the components.
+
+    Notes
+    -----
+    Works in-place on the components if they are defined, otherwise on the
+    partitions.
+    """
+    for part in components:
+        part["population"], part["area"] = get_population_area(part["subgraph"])
+        part["population_density"] = part["population"] / part["area"]
+
+        # Add basic_stats to the component
+        part.update(
+            basic_graph_stats(part["subgraph"], area=part["area"]),
+            population=part["population"],
+            population_density=part["population_density"],
+        )

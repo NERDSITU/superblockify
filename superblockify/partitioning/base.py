@@ -32,6 +32,7 @@ from .utils import (
 from .. import attribute
 from ..config import logger, GRAPH_DIR, RESULTS_DIR, NETWORK_FILTER
 from ..metrics.metric import Metric
+from ..graph_stats import calculate_component_metrics
 from ..plot import save_plot
 from ..utils import load_graph_from_place, load_graphml_dtypes
 
@@ -253,6 +254,9 @@ class BasePartitioner(ABC):
                 make_plots=make_plots,
                 replace_max_speeds=replace_max_speeds,
                 **kwargs,
+            )
+            calculate_component_metrics(
+                self.components if self.components else self.partitions
             )
 
     @abstractmethod
