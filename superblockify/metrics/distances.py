@@ -114,8 +114,8 @@ def calculate_path_distance_matrix(
         graph_matrix, directed=True, return_predecessors=True, unweighted=False
     )
 
-    # Convert to half-precision to save memory
-    dist_full_graph = dist_full_graph.astype(np.half)
+    # Convert to single-precision - half-precision would encounter overflow
+    dist_full_graph = dist_full_graph.astype(np.float32)
 
     if log_debug:
         logger.debug(
@@ -202,8 +202,8 @@ def calculate_euclidean_distance_matrix_projected(
         np.square(x_coord[:, np.newaxis] - x_coord[np.newaxis, :])
         + np.square(y_coord[:, np.newaxis] - y_coord[np.newaxis, :])
     )
-    # Convert to half-precision to save memory
-    dist_matrix = dist_matrix.astype(np.half)
+    # Convert to single-precision
+    dist_matrix = dist_matrix.astype(np.float32)
 
     if plot_distributions:
         plot_distance_distributions(
