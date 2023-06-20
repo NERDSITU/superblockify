@@ -749,6 +749,7 @@ class BasePartitioner(ABC):
             graph = load_graph_from_place(
                 save_as=graph_path,
                 search_string=search_str,
+                add_population=True,
                 custom_filter=NETWORK_FILTER,
                 simplify=True,
             )

@@ -18,6 +18,7 @@ from numpy import (
 from osmnx.stats import count_streets_per_node
 from shapely import wkt
 
+from .graph_stats import basic_graph_stats
 from .population.approximation import add_edge_population
 
 
@@ -127,7 +128,7 @@ def load_graph_from_place(save_as, search_string, add_population=False, **gfp_kw
             "travel_time",
             "bearing",
         },
-        node_attributes={"y", "x", "osmid", "street_count"},
+        node_attributes={"y", "x", "lat", "lon", "osmid", "street_count"},
     )
     # Add edge population and area
     if add_population:
@@ -138,6 +139,8 @@ def load_graph_from_place(save_as, search_string, add_population=False, **gfp_kw
     graph.graph["boundary_crs"] = mult_polygon.crs
     graph.graph["boundary"] = mult_polygon.geometry.unary_union
     graph.graph["area"] = graph.graph["boundary"].area
+    # update graph attributes with basic graph stats
+    graph.graph.update(basic_graph_stats(graph, area=graph.graph["area"]))
 
     ox.save_graphml(graph, filepath=save_as)
     return graph
