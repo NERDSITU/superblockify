@@ -2,6 +2,14 @@
 Changelog
 *********
 
+Version 0.2.0 (2023-06-20)
+**************************
+
+* Sped up population distribution in
+  :func:`superblockify.population.approximation.get_edge_population`.
+* Add population and density to LTNs
+* Fix: Graph import projection order. Un-skewed distance attribute.
+
 Version 0.1.3 (2023-06-19)
 **************************
 
