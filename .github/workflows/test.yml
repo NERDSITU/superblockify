@@ -135,8 +135,7 @@ jobs:
     name: Merge Coverage
     runs-on: ubuntu-latest
     needs: run-tests
-    permissions:
-      pull-requests: write-all
+    permissions: write-all
     defaults:
       run:
         shell: bash -el {0}
