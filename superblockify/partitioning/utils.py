@@ -6,6 +6,7 @@ from uuid import uuid4
 from geopandas import GeoDataFrame
 from networkx import set_edge_attributes, strongly_connected_components
 from osmnx import graph_to_gdfs, get_undirected
+from pandas import DataFrame
 from shapely import Point
 from shapely.ops import substring
 
@@ -269,6 +270,37 @@ def show_highway_stats(graph):
             "The dtype of the 'highway' attribute is not 'str' in %d%% of the edges.",
             (1 - dtype_counts.loc[dtype_counts.index == str, "proportion"]) * 100,
         )
+
+
+def show_graph_stats(graph):
+    """Show selected graph statistics.
+
+    Parameters
+    ----------
+    graph : networkx.classes.multidigraph.MultiDiGraph
+        Graph to show statistics for.
+
+    Notes
+    -----
+    Graph must have basic graph stats added by means of
+    :func:`superblockify.graph_stats.basic_graph_stats`.
+    """
+    logger.info(
+        "Graph stats: \n%s",
+        DataFrame.from_dict(
+            {
+                "Number of nodes": graph.graph["n"],
+                "Number of edges": graph.graph["m"],
+                "Average degree": graph.graph["k_avg"],
+                "Circuity average": graph.graph["circuity_avg"],
+                "Street orientation order": graph.graph["street_orientation_order"],
+                "Date created": graph.graph["created_date"],
+                "Projection": graph.graph["crs"],
+                "Area by OSM boundary (m²)": graph.graph["area"],
+            },
+            orient="index",
+        ).to_string(),
+    )
 
 
 def remove_dead_ends_directed(graph):

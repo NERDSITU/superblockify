@@ -8,6 +8,7 @@ from osmnx import graph_to_gdfs
 
 from superblockify.partitioning.utils import (
     show_highway_stats,
+    show_graph_stats,
     save_to_gpkg,
     remove_dead_ends_directed,
     split_up_isolated_edges_directed,
@@ -69,6 +70,12 @@ def test_show_highway_stats(test_city_all_copy):
     """Test showing highway stats by design."""
     _, graph = test_city_all_copy
     show_highway_stats(graph)
+
+
+def test_show_graph_stats(test_city_all_copy):
+    """Test showing graph stats by design."""
+    _, graph = test_city_all_copy
+    show_graph_stats(graph)
 
 
 def test_remove_dead_ends_directed(test_city_all_copy):

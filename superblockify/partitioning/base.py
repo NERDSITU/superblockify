@@ -26,13 +26,14 @@ from .representative import set_representative_nodes
 from .speed import add_edge_travel_times_restricted
 from .utils import (
     show_highway_stats,
+    show_graph_stats,
     remove_dead_ends_directed,
     split_up_isolated_edges_directed,
 )
 from .. import attribute
 from ..config import logger, GRAPH_DIR, RESULTS_DIR, NETWORK_FILTER
-from ..metrics.metric import Metric
 from ..graph_stats import calculate_component_metrics
+from ..metrics.metric import Metric
 from ..population.tessellation import add_edge_cells
 from ..plot import save_plot
 from ..utils import load_graph_from_place, load_graphml_dtypes
@@ -149,6 +150,7 @@ class BasePartitioner(ABC):
 
         remove_dead_ends_directed(self.graph)
         show_highway_stats(self.graph)
+        show_graph_stats(self.graph)
 
         # Create results directory
         self.results_dir = join(RESULTS_DIR, name)
