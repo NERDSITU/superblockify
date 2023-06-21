@@ -454,11 +454,11 @@ ky_graph = ox.project_graph(ky_graph)
 ```
 
 For a graph as big as Kyiv, 7th largest European city as of 1st of January 2021, this
-takes about a minute. This graph has more than 23k edges, resulting in about 130k points
-for the Voronoi diagram (10m interpolation).
+takes about a minute. This graph has more than 23k edges, resulting in about 300k points
+for the Voronoi diagram (10m interpolation) ans 13k edge cells.
 
 ```{code-cell} ipython3
-sb.add_edge_cells(graph)
+sb.add_edge_cells(ky_graph)
 ```
 
 ```{code-cell} ipython3

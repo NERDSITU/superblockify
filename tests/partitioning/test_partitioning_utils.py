@@ -17,7 +17,8 @@ from superblockify.partitioning.utils import (
 
 
 @pytest.mark.parametrize("save_path", [None, "test.gpkg"])
-def test_save_to_gpkg(test_city_small_precalculated_copy, save_path):
+@pytest.mark.parametrize("ltn_boundary", [True, False])
+def test_save_to_gpkg(test_city_small_precalculated_copy, save_path, ltn_boundary):
     """Test saving to geopackage."""
     save_path = (
         None
@@ -27,7 +28,11 @@ def test_save_to_gpkg(test_city_small_precalculated_copy, save_path):
             test_city_small_precalculated_copy.name + "-filepath.gpkg",
         )
     )
-    save_to_gpkg(test_city_small_precalculated_copy, save_path=save_path)
+    save_to_gpkg(
+        test_city_small_precalculated_copy,
+        save_path=save_path,
+        ltn_boundary=ltn_boundary,
+    )
     # Check that the file exists
     assert exists(
         join(

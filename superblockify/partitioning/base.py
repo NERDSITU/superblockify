@@ -34,6 +34,7 @@ from .. import attribute
 from ..config import logger, GRAPH_DIR, RESULTS_DIR, NETWORK_FILTER
 from ..graph_stats import calculate_component_metrics
 from ..metrics.metric import Metric
+from ..population.tessellation import add_edge_cells
 from ..plot import save_plot
 from ..utils import load_graph_from_place, load_graphml_dtypes
 
@@ -605,6 +606,28 @@ class BasePartitioner(ABC):
                     set_edge_attributes(
                         component["subgraph"], attribute_value, attribute_name
                     )
+
+    def add_component_tessellation(self, **tess_kwargs):
+        """Add `cell` geometry to components.
+
+        The population and area are determined independently.
+        To visualize the cells anyway, this method adds a `cell` geometry,
+        dissolving all edges of the component's `subgraph`.
+
+        Parameters
+        ----------
+        **tess_kwargs
+            Keyword arguments for the
+            :func:`superblockify.population.tessellation.get_edge_cells` function.
+        """
+        # Tessellate graph
+        add_edge_cells(self.graph, **tess_kwargs)
+        for comp in self.components if self.components else self.partitions:
+            cells = ox.graph_to_gdfs(comp["subgraph"], nodes=False, edges=True)
+            # Move cells to geometry column for diss
+            cells["geometry"] = cells["cell"]
+            del cells["cell"]
+            comp["cell"] = cells.dissolve()["geometry"].iloc[0]
 
     def get_partition_nodes(self):
         """Get the nodes of the partitioned graph.

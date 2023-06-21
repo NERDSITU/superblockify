@@ -30,7 +30,7 @@ def add_edge_cells(graph, **tess_kwargs):
         The graph to tessellate.
     **tess_kwargs
         Keyword arguments for the
-        :func:`superblockify.population.tessellation.add_edge_cells` function.
+        :func:`superblockify.population.tessellation.get_edge_cells` function.
 
     Raises
     ------
