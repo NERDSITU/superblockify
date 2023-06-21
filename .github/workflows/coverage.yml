@@ -10,6 +10,10 @@ jobs:
   test:
     name: Run tests & display coverage
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+      actions: read
     if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
     steps:
       # DO NOT run actions/checkout@v2 here, for security reasons
