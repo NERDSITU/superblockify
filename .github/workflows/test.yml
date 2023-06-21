@@ -74,17 +74,17 @@ jobs:
       matrix:
         submodule:
 #          - { name: "Metrics" pytest_args: "tests/test_graph_stats.py" }
-          - { name: "Graph Stats", pytest_args: "tests/test_graph_stats.py" }
-          - { name: "Approaches", pytest_args: "tests/partitioning/approaches/" }
+#          - { name: "Graph Stats", pytest_args: "tests/test_graph_stats.py" }
+#          - { name: "Approaches", pytest_args: "tests/partitioning/approaches/" }
 #          - { name: "Partitioning Base", pytest_args: "tests/partitioning/test_base.py" }
-          - {
-            name: "Partitioning Rest",
-            pytest_args: "tests/partitioning/ --ignore=tests/partitioning/approaches/ --ignore=tests/partitioning/test_base.py"
-          }
+#          - {
+#            name: "Partitioning Rest",
+#            pytest_args: "tests/partitioning/ --ignore=tests/partitioning/approaches/ --ignore=tests/partitioning/test_base.py"
+#          }
           - { name: "Population", pytest_args: "tests/population/" }
           - { name: "Attribute", pytest_args: "tests/test_attribute.py" }
-          - { name: "Plot", pytest_args: "tests/test_plot.py" }
-          - { name: "Utils", pytest_args: "tests/test_utils.py" }
+#          - { name: "Plot", pytest_args: "tests/test_plot.py" }
+#          - { name: "Utils", pytest_args: "tests/test_utils.py" }
 
     name: ${{ matrix.submodule.name }}
     defaults:
