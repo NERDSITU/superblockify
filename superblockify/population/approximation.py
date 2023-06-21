@@ -38,7 +38,7 @@ def add_edge_population(graph, overwrite=False, **tess_kwargs):
         the graph attribute `edge_population` and not on the actual attributes.
     **tess_kwargs
         Keyword arguments for the
-        :func:`superblockify.population.tessellation.add_edge_cells` function.
+        :func:`superblockify.population.tessellation.get_edge_cells` function.
 
     Raises
     ------
@@ -141,7 +141,7 @@ def get_edge_population(graph, batch_size=1000, **tess_kwargs):
         all edges are processed in one batch.
     **tess_kwargs
         Keyword arguments for the
-        :func:`superblockify.population.tessellation.add_edge_cells` function.
+        :func:`superblockify.population.tessellation.get_edge_cells` function.
 
     Returns
     -------
