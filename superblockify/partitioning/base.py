@@ -622,8 +622,10 @@ class BasePartitioner(ABC):
         add_edge_cells(self.graph, **tess_kwargs)
         for comp in self.components if self.components else self.partitions:
             cells = ox.graph_to_gdfs(comp["subgraph"], nodes=False, edges=True)
-            cells.set_geometry("cell")
-            comp["cell"] = cells.dissolve()["cell"].iloc[0]
+            # Move cells to geometry column for diss
+            cells["geometry"] = cells["cell"]
+            del cells["cell"]
+            comp["cell"] = cells.dissolve()["geometry"].iloc[0]
 
     def get_partition_nodes(self):
         """Get the nodes of the partitioned graph.
