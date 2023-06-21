@@ -3,6 +3,7 @@ from os import remove
 from os.path import exists, join
 from uuid import uuid4
 
+from geopandas import GeoDataFrame
 from networkx import set_edge_attributes, strongly_connected_components
 from osmnx import graph_to_gdfs, get_undirected
 from shapely import Point
@@ -11,7 +12,11 @@ from shapely.ops import substring
 from ..config import logger
 
 
-def save_to_gpkg(partitioner, save_path=None):
+def save_to_gpkg(
+    partitioner,
+    save_path=None,
+    ltn_boundary=False,
+):
     """Save the partitioner's graph and LTNs to a geodatapackage.
 
     The name of the components (/partitions) is saved into a "classification" edge
@@ -25,6 +30,9 @@ def save_to_gpkg(partitioner, save_path=None):
     save_path : str, optional
         The path to save the geodatapackage to. If None, it will be saved to the
         partitioners folder at (part.results_dir, part.name + ".gpkg")
+    ltn_boundary : bool, optional
+        If True, the boundary of the LTNs will be saved as a polygon into the `cell`
+        attribute of the LTNs layer. For this, the tessellation needs to be calculated.
 
     Raises
     ------
@@ -37,15 +45,23 @@ def save_to_gpkg(partitioner, save_path=None):
     -----
     The geopackage will contain the following layers:
     - nodes
-        - representative_node_name
-        - missing_nodes: if node is not in any component/partition or sparsified graph
+        - `representative_node_name`
+        - `missing_nodes`: if node is not in any component/partition or sparsified graph
         - y, x, lat, lon, geometry
     - edges
-        - classification
-        - osmid, highway, length, geometry
+        - `classification`
+        - `osmid`, `highway`, `length`, `geometry`
         - (bearing: the bearing of the edge, bearing_90: mod(bearing, 90))
         - (residential: 1 if edge['highway'] is or contains 'residential',
           None otherwise)
+    - ltns
+        - `classification`
+        - `cell`: if `ltn_boundary` is True
+        - else `representative_node_point`
+        - `population_density` (in people/m^2)
+        - `area` (in m^2)
+        - `population` (in people)
+        - see :func:`osmnx.stats.basic_stats` for more
     """
 
     if partitioner.sparsified is None:
@@ -104,21 +120,27 @@ def save_to_gpkg(partitioner, save_path=None):
     set_edge_attributes(partitioner.sparsified, "SPARSE", "classification")
 
     nodes, edges = graph_to_gdfs(partitioner.graph, nodes=True, fill_edge_geometry=True)
-    # For attributes that are lists, we need to convert them to strings
-    for col in edges.columns:
-        if edges[col].dtype == "object":
-            logger.debug("Converting column %s of type %s to str.", col, type(col))
-            edges[col] = edges[col].astype(str)
+
+    # Components/Partitions
+    ltns = _get_ltns(partitioner, nodes, ltn_boundary)
 
     # list attributes in nodes and edges
     logger.info("Node attributes: %s", nodes.columns)
     logger.info("Edge attributes: %s", edges.columns)
+    logger.info("LTN attributes: %s", ltns.columns)
 
-    # Remove certain attributes from nodes and edges
+    # Remove certain attributes
     # nodes = nodes.drop(columns=[])
     edges = edges.drop(
-        columns=[attr for attr in edges.columns if attr in ["component_name", "length"]]
+        columns=[attr for attr in edges.columns if attr in ["component_name"]]
     )
+
+    # For attributes that are lists or other objects, we need to convert them to strings
+    for gdfs in [edges, ltns]:
+        for col in gdfs.columns:
+            if gdfs[col].dtype == "object":
+                logger.debug("Converting column %s of type %s to str.", col, type(col))
+                gdfs[col] = gdfs[col].astype(str)
 
     # Save nodes and edges to separate layers/geodataframes of the same geodatapackage
     # if file already exists, remove it
@@ -128,6 +150,54 @@ def save_to_gpkg(partitioner, save_path=None):
     logger.info("Saved %d nodes to %s", len(nodes), filepath)
     edges.to_file(filepath, layer="edges", index=False, mode="w")
     logger.info("Saved %d edges to %s", len(edges), filepath)
+    ltns.to_file(filepath, layer="ltns", index=False, mode="w")
+    logger.info("Saved %d LTNs to %s", len(ltns), filepath)
+
+
+def _get_ltns(partitioner, nodes, ltn_boundary):
+    """Prepare ltn geodataframe for the geopackage export.
+
+    If `ltn_boundary` is True, the ltns are the cells of the tessellation.
+    If `ltn_boundary` is False, the ltns are the representative nodes of the
+    components/partitions.
+
+    Parameters
+    ----------
+    partitioner : superblockify.partitioning.BasePartitioner
+        The partitioner to get the ltns from.
+    nodes : geopandas.GeoDataFrame
+        The nodes of the graph.
+    ltn_boundary : bool
+        Whether to use the cells of the tessellation as ltns or the
+        representative nodes of the components/partitions.
+
+    Returns
+    -------
+    ltns : geopandas.GeoDataFrame
+        The ltns as a geodataframe.
+    """
+
+    if ltn_boundary:
+        partitioner.add_component_tessellation()
+    else:
+        # add node geometry for representative node from nodes layer
+        for _, part in enumerate(
+            partitioner.components if partitioner.components else partitioner.partitions
+        ):
+            part["representative_node_point"] = nodes.loc[
+                part["representative_node_id"], "geometry"
+            ]
+    ltns = GeoDataFrame.from_dict(
+        partitioner.components if partitioner.components else partitioner.partitions,
+        geometry="cell" if ltn_boundary else "representative_node_point",
+        orient="columns",
+        crs=partitioner.graph.graph["crs"],
+    )
+    ltns.rename(columns={"name": "classification"}, inplace=True)
+    ltns.drop(
+        columns=[attr for attr in ltns.columns if attr in ["subgraph"]], inplace=True
+    )
+    return ltns
 
 
 def show_highway_stats(graph):
