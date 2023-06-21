@@ -74,7 +74,7 @@ jobs:
       matrix:
         submodule:
           - {
-            name: "Metrics & Graph Stats",
+            name: "Metrics and Graph Stats",
             pytest_args: "tests/metrics/ tests/test_graph_stats.py" }
           - { name: "Approaches", pytest_args: "tests/partitioning/approaches/" }
           - { name: "Partitioning Base", pytest_args: "tests/partitioning/test_base.py" }
