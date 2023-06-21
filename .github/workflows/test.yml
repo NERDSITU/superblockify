@@ -145,33 +145,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          lfs: true
-
-      - name: Setup Mambaforge
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          activate-environment: OSMnxPyrLab
-          use-mamba: true
-
-      - name: Use cache for ${{ matrix.submodule.name }}
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.CONDA }}/envs
-          fail-on-cache-miss: true
-          key:
-            conda-${{ runner.os }}--${{ runner.arch }}--${{
-            hashFiles('environment.yml') }}-${{ env.CACHE_NUMBER }}
-        env:
-          CACHE_NUMBER: 0  # Same as in caching job
 
       - name: Load coverages
         uses: actions/download-artifact@v3
         id: download
         with:
           name: 'coverage'
+
+      - name: Install coverage
+        run: pip install coverage
 
       - name: Merge coverage files
         run: coverage combine
