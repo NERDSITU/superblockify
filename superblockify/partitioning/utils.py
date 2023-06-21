@@ -62,6 +62,13 @@ def save_to_gpkg(
         - `area` (in m^2)
         - `population` (in people)
         - see :func:`osmnx.stats.basic_stats` for more
+    - graph_meta
+        - `boundary` (by OSM relation)
+        - `boundary_crs`
+        - `area` (in m^2)
+        - `street_orientation_order`
+        - `circuity_avg`
+        - see :func:`osmnx.stats.basic_stats` for more
     """
 
     if partitioner.sparsified is None:
@@ -124,10 +131,14 @@ def save_to_gpkg(
     # Components/Partitions
     ltns = _get_ltns(partitioner, nodes, ltn_boundary)
 
+    # Graph meta
+    graph_meta = _get_graph_meta(partitioner)
+
     # list attributes in nodes and edges
     logger.info("Node attributes: %s", nodes.columns)
     logger.info("Edge attributes: %s", edges.columns)
     logger.info("LTN attributes: %s", ltns.columns)
+    logger.info("Graph meta attributes: %s", graph_meta.columns)
 
     # Remove certain attributes
     # nodes = nodes.drop(columns=[])
@@ -136,7 +147,7 @@ def save_to_gpkg(
     )
 
     # For attributes that are lists or other objects, we need to convert them to strings
-    for gdfs in [edges, ltns]:
+    for gdfs in [edges, ltns, graph_meta]:
         for col in gdfs.columns:
             if gdfs[col].dtype == "object":
                 logger.debug("Converting column %s of type %s to str.", col, type(col))
@@ -152,6 +163,8 @@ def save_to_gpkg(
     logger.info("Saved %d edges to %s", len(edges), filepath)
     ltns.to_file(filepath, layer="ltns", index=False, mode="w")
     logger.info("Saved %d LTNs to %s", len(ltns), filepath)
+    graph_meta.to_file(filepath, layer="graph_meta", index=False, mode="w")
+    logger.info("Saved graph meta to %s", filepath)
 
 
 def _get_ltns(partitioner, nodes, ltn_boundary):
@@ -198,6 +211,27 @@ def _get_ltns(partitioner, nodes, ltn_boundary):
         columns=[attr for attr in ltns.columns if attr in ["subgraph"]], inplace=True
     )
     return ltns
+
+
+def _get_graph_meta(partitioner):
+    """Prepare metadata for the graph for the geopackage export.
+
+    Parameters
+    ----------
+    partitioner : superblockify.partitioning.BasePartitioner
+        The partitioner to get the graph metadata from.
+
+    Returns
+    -------
+    graph_meta : geopandas.GeoDataFrame
+        One line gdf with the graph boundary and all graph attributes.
+    """
+    return GeoDataFrame.from_dict(
+        partitioner.graph.graph,
+        orient="columns",
+        geometry="boundary",
+        crs=partitioner.graph.graph["crs"],
+    )
 
 
 def show_highway_stats(graph):
