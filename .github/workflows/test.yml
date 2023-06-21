@@ -74,7 +74,7 @@ jobs:
       matrix:
         submodule:
           - {
-            name: "Metrics and Graph Stats",
+            name: "Metrics & Graph Stats",
             pytest_args: "tests/metrics/ tests/test_graph_stats.py" }
           - { name: "Approaches", pytest_args: "tests/partitioning/approaches/" }
           - { name: "Partitioning Base", pytest_args: "tests/partitioning/test_base.py" }
@@ -136,10 +136,6 @@ jobs:
     name: Merge Coverage
     runs-on: ubuntu-latest
     needs: run-tests
-    permissions:
-      pull-requests: write
-      contents: write
-      actions: read
     defaults:
       run:
         shell: bash -el {0}
@@ -148,43 +144,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Mambaforge
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          activate-environment: OSMnxPyrLab
-          use-mamba: true
-
-      - name: Use cache for ${{ matrix.submodule.name }}
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.CONDA }}/envs
-          fail-on-cache-miss: true
-          key:
-            conda-${{ runner.os }}--${{ runner.arch }}--${{
-            hashFiles('environment.yml') }}-${{ env.CACHE_NUMBER }}
-        env:
-          CACHE_NUMBER: 0  # Same as in caching job
-
       - name: Load coverages
         uses: actions/download-artifact@v3
         id: download
         with:
           name: 'coverage'
 
+      - name: Install coverage
+        run: pip install coverage
+
       - name: Merge coverage files
         run: coverage combine
 
-      - name: Coverage comment
-        id: coverage_comment
-        uses: py-cov-action/python-coverage-comment-action@v3
-        with:
-          GITHUB_TOKEN: ${{ github.token }}
-
-      - name: Store Pull Request comment to be posted
-        uses: actions/upload-artifact@v3
-        if: steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true'
-        with:
-          name: python-coverage-comment-action
-          path: python-coverage-comment-action.txt
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
