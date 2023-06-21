@@ -136,9 +136,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: run-tests
     permissions:
-      pull-requests: write
-      contents: write
-      actions: read
+      pull-requests: write-all
     defaults:
       run:
         shell: bash -el {0}
