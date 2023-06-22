@@ -342,6 +342,12 @@ def load_graphml_dtypes(filepath=None, attribute_label=None, attribute_dtype=Non
         "population": float,
         "area": float,
         "cell_id": int,
+        "edge_betweenness_normal": float,
+        "edge_betweenness_length": float,
+        "edge_betweenness_linear": float,
+        "edge_betweenness_normal_restricted": float,
+        "edge_betweenness_length_restricted": float,
+        "edge_betweenness_linear_restricted": float,
     }
     graph_dtypes = {
         "simplified": bool,

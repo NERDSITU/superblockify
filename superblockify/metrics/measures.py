@@ -7,6 +7,7 @@ import numpy as np
 from numba import njit, prange, int32, int64, float32, float64
 from numpy import sum as npsum
 
+from ..attribute import aggregate_edge_attr
 from ..config import logger
 from ..utils import __edges_to_1d, __edge_to_1d
 
@@ -736,3 +737,28 @@ def __calculate_high_bc_anisotropy(coord_high_bc):
     eigvals = np.sort(eigvals)[::-1]
     # Anisotropy
     return eigvals[0] / eigvals[1]
+
+
+def add_ltn_means(components, edge_attr):
+    """Add mean of attributes to each LTN.
+
+    Writes the mean of the specified edge attribute(s) to each LTN in the list of
+    components. The mean is calculated as the mean of each attribute in the LTN
+    subgraph.
+    Works in-place and adds `mean_{attr}` to each LTN.
+
+    Parameters
+    ----------
+    components : list of dict
+        List of dictionaries of LTN components.
+    edge_attr : key or list of keys
+        Edge attribute(s) to calculate the mean of.
+    """
+    # Loop over LTNs
+    for component in components:
+        # Loop over attributes
+        for attr in edge_attr if isinstance(edge_attr, list) else [edge_attr]:
+            # Calculate mean
+            component[f"mean_{attr}"] = aggregate_edge_attr(
+                component["subgraph"], attr, np.mean, dismiss_none=True
+            )
