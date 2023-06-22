@@ -222,9 +222,7 @@ class BasePartitioner(ABC):
             self.set_sparsified_from_components()
 
         # Set representative nodes
-        set_representative_nodes(
-            self.components if self.components else self.partitions
-        )
+        set_representative_nodes(self.get_ltns())
 
         # Calculate travel times for partitioned graph
         add_edge_travel_times_restricted(self.graph, self.sparsified)
@@ -258,9 +256,7 @@ class BasePartitioner(ABC):
                 replace_max_speeds=replace_max_speeds,
                 **kwargs,
             )
-            calculate_component_metrics(
-                self.components if self.components else self.partitions
-            )
+            calculate_component_metrics(self.get_ltns())
 
     @abstractmethod
     def partition_graph(self, make_plots=False, **kwargs):
@@ -540,7 +536,7 @@ class BasePartitioner(ABC):
         # list of edges in partitions, use components if not None, else partitions
         edges_in_partitions = {
             edge
-            for component in (self.components if self.components else self.partitions)
+            for component in self.get_ltns()
             for edge in component["subgraph"].edges(keys=True)
         }
         self.sparsified = self.graph.edge_subgraph(
@@ -622,12 +618,22 @@ class BasePartitioner(ABC):
         """
         # Tessellate graph
         add_edge_cells(self.graph, **tess_kwargs)
-        for comp in self.components if self.components else self.partitions:
+        for comp in self.get_ltns():
             cells = ox.graph_to_gdfs(comp["subgraph"], nodes=False, edges=True)
             # Move cells to geometry column for diss
             cells["geometry"] = cells["cell"]
             del cells["cell"]
             comp["cell"] = cells.dissolve()["geometry"].iloc[0]
+
+    def get_ltns(self):
+        """Get LTN list.
+
+        Returns
+        -------
+        list
+            Reference to self.components, if it is used, otherwise self.partitions
+        """
+        return self.components if self.components else self.partitions
 
     def get_partition_nodes(self):
         """Get the nodes of the partitioned graph.
@@ -669,7 +675,7 @@ class BasePartitioner(ABC):
                 "subgraph": part["subgraph"],
                 "rep_node": part["representative_node_id"],
             }
-            for part in (self.components if self.components else self.partitions)
+            for part in self.get_ltns()
             # if there is the key "ignore" and it is True, ignore the partition
             if not (part.get("ignore") is True)
         ]

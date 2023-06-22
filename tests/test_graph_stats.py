@@ -33,7 +33,7 @@ def test_calculate_component_metrics(test_city_small_precalculated_copy):
     """Test calculate_component_metrics.
     Should have been called in the test_city_small_precalculated_copy fixture."""
     part = test_city_small_precalculated_copy
-    for comp in part.components if part.components else part.partitions:
+    for comp in part.get_ltns():
         assert comp["population"] >= 0
         assert comp["area"] >= 0
         assert comp["population_density"] >= 0
