@@ -21,7 +21,7 @@ def add_edge_cells(graph, **tess_kwargs):
     Furthermore, `cell_id` is added to the edge attributes, for easier summary of
     statistics later.
 
-    The approach war developed inspired by the :class:`momepy.Tessellation` class.
+    The approach was developed inspired by the :class:`momepy.Tessellation` class
     and tessellates with :class:`scipy.spatial.Voronoi`.
 
     Parameters
@@ -57,7 +57,7 @@ def get_edge_cells(graph, limit=None, segment=10, show_plot=False):
 
     Tessellates the graph into plane using a Voronoi cell approach.
 
-    The approach was developed inspired by the :class:`momepy.Tessellation` class.
+    The approach was developed inspired by the :class:`momepy.Tessellation` class
     and tessellates with :class:`scipy.spatial.Voronoi`.
 
     Parameters
