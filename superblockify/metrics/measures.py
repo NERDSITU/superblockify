@@ -9,7 +9,7 @@ from numpy import sum as npsum
 
 from ..attribute import aggregate_edge_attr
 from ..config import logger
-from ..utils import __edges_to_1d, __edge_to_1d
+from ..utils import __edges_to_1d, __edge_to_1d, percentual_increase
 
 
 def calculate_directness(distance_matrix, measure1, measure2):
@@ -762,3 +762,44 @@ def add_ltn_means(components, edge_attr):
             component[f"mean_{attr}"] = aggregate_edge_attr(
                 component["subgraph"], attr, np.mean, dismiss_none=True
             )
+
+
+def add_relative_changes(components, attr_pairs):
+    """Add relative difference of attributes to each LTN.
+
+    Measured in terms of percentual increase using
+    :func:`superblockify.utils.percentual_increase`.
+
+    Write the relative percentual change of the specified edge attribute(s) to each
+    LTN in the list of components. The relative change is the percentual change of
+    the first to the second attribute.
+    Works in-place and adds `change_{attr1}` to each LTN.
+    If `attr1` has a value of 2 and `attr2` has a value of 1, the relative change is
+    -0.5, a 50% decrease. If `attr1` has a value of 4 and `attr2` has a value of 6,
+    the relative change is 0.5, a 50% increase.
+
+    Parameters
+    ----------
+    components : list of dict
+        List of dictionaries of LTN components.
+    attr_pairs : list of tuples with two keys
+        List of attribute pairs to calculate the relative change of.
+
+    Raises
+    ------
+    KeyError
+        If any key cannot be found in the LTNs.
+    """
+    # Loop over LTNs
+    for component in components:
+        # Loop over attribute pairs
+        for attr1, attr2 in (
+            attr_pairs if isinstance(attr_pairs, list) else [attr_pairs]
+        ):
+            # Calculate relative change
+            try:
+                component[f"change_{attr1}"] = percentual_increase(
+                    component[attr1], component[attr2]
+                )
+            except KeyError as err:
+                raise KeyError(f"Key {err} not found in LTNs.") from err
