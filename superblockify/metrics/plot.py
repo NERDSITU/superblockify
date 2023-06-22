@@ -289,7 +289,11 @@ def plot_component_wise_travel_increase(
         # Calculate mean of the relative travel increase: Take all increases from inside
         # the component to all other nodes and reverse. All rows and columns with
         # Indices in the component
-        nodes_idx = [node_list.index(node) for node in component["subgraph"].nodes]
+        nodes_idx = [
+            node_list.index(node)
+            for node in component["subgraph"].nodes
+            if node not in partitioner.sparsified.nodes
+        ]
         # column from nodes to all other nodes
         col = rel_incr[:, nodes_idx]
         # row from all other nodes to nodes
