@@ -195,14 +195,12 @@ def _get_ltns(partitioner, nodes, ltn_boundary):
         partitioner.add_component_tessellation()
     else:
         # add node geometry for representative node from nodes layer
-        for _, part in enumerate(
-            partitioner.components if partitioner.components else partitioner.partitions
-        ):
+        for _, part in enumerate(partitioner.get_ltns()):
             part["representative_node_point"] = nodes.loc[
                 part["representative_node_id"], "geometry"
             ]
     ltns = GeoDataFrame.from_dict(
-        partitioner.components if partitioner.components else partitioner.partitions,
+        partitioner.get_ltns(),
         geometry="cell" if ltn_boundary else "representative_node_point",
         orient="columns",
         crs=partitioner.graph.graph["crs"],

@@ -1,4 +1,6 @@
 """Tests for the attribute module."""
+from inspect import isclass
+
 import pytest
 from networkx import (
     set_edge_attributes,
@@ -7,11 +9,13 @@ from networkx import (
     Graph,
     set_node_attributes,
 )
+from numpy import sum as npsum
 
 from superblockify.attribute import (
     new_edge_attribute_by_function,
     get_edge_subgraph_with_attribute_value,
     determine_minmax_val,
+    aggregate_edge_attr,
 )
 
 
@@ -184,3 +188,34 @@ def test_determine_minmax_val_invalid_input(minmax_val, attr, attr_type):
     set_edge_attributes(graph, {edge: {"attr": edge[0]} for edge in graph.edges})
     with pytest.raises(ValueError):
         determine_minmax_val(graph, minmax_val, attr, attr_type)
+
+
+@pytest.mark.parametrize(
+    "key,func,dismiss_none,expected",
+    [
+        ("attr", sum, True, 6),
+        ("attr", sum, False, TypeError),
+        ("non_attr", sum, True, KeyError),
+        ("attr", max, True, 3),
+        ("attr", min, True, 0),
+        ("attr", lambda x: x, True, [0, 1, 2, 3]),
+        ("attr", lambda x: x, False, [0, None, 1, 2, 3]),
+        ("attr", npsum, True, 6),
+        ("attr", npsum, False, TypeError),
+        ("attr", lambda x: sum(x) / len(x), True, 1.5),
+        ("attr", lambda x: sum(x) / len(x), False, TypeError),
+    ],
+)
+def test_aggregate_edge_attr(key, func, dismiss_none, expected):
+    """Test `aggregate_edge_attr` by design.
+    `g_path` is loop 0-1-2-3-4-0 with weights 0-1-2-3-None.
+    """
+    g_path = path_graph(5)
+    set_edge_attributes(g_path, {edge: {"attr": edge[0]} for edge in g_path.edges})
+    g_path.add_edge(0, 4, attr=None)
+    # check if expected is child class of Exception
+    if isclass(expected) and issubclass(expected, Exception):
+        with pytest.raises(expected):
+            aggregate_edge_attr(g_path, key, func, dismiss_none)
+    else:
+        assert aggregate_edge_attr(g_path, key, func, dismiss_none) == expected

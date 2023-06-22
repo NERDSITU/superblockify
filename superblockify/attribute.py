@@ -232,3 +232,56 @@ def determine_minmax_val(graph, minmax_val, attr, attr_type="edge"):
             f"but the first value must be smaller than the second."
         )
     return minmax_val
+
+
+def aggregate_edge_attr(graph, key, func, dismiss_none=True):
+    """Aggregate edge attributes by function.
+
+    Parameters
+    ----------
+    graph : networkx.Graph
+        Input graph, subgraph or view
+    key : immutable
+        Edge attribute key
+    func : function
+        Function to aggregate values. Able to handle lists.
+    dismiss_none : bool, optional
+        If True, dismiss None values. Default: True
+
+    Returns
+    -------
+    dict
+        Dictionary of aggregated edge attributes
+
+    Raises
+    ------
+    KeyError
+        If there are no edge attributes for the given key.
+
+    Examples
+    --------
+    >>> G = nx.Graph()
+    >>> G.add_edge(1, 2, weight=1)
+    >>> G.add_edge(2, 3, weight=2)
+    >>> G.add_edge(3, 4, weight=3)
+    >>> G.add_edge(4, 1, weight=None)
+    >>> aggregate_edge_attr(G, 'weight', sum)
+    6
+    >>> aggregate_edge_attr(G, 'weight', lambda x: sum(x)/len(x))
+    2.0
+    >>> aggregate_edge_attr(G, 'weight', lambda x: x)
+    [1, 2, 3]
+    """
+    # Get edge attributes
+    edge_attr = get_edge_attributes(graph, key)
+    # Check if there are any
+    if not bool(edge_attr):
+        raise KeyError(
+            f"Graph with {len(graph)} node(s) has no edge attributes for "
+            f"the key '{key}'."
+        )
+    # Dismiss None values
+    if dismiss_none:
+        edge_attr = {k: v for k, v in edge_attr.items() if v is not None}
+    # Aggregate
+    return func(list(edge_attr.values()))

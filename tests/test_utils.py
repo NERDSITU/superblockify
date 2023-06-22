@@ -3,7 +3,7 @@ from os import remove
 from os.path import exists, join
 
 import pytest
-from numpy import array, array_equal, int32, int64
+from numpy import array, array_equal, int32, int64, inf, nan, isnan
 from shapely import MultiPolygon, Polygon
 
 from superblockify.config import TEST_DATA_PATH
@@ -13,6 +13,7 @@ from superblockify.utils import (
     compare_dicts,
     __edge_to_1d,
     __edges_to_1d,
+    percentual_increase,
 )
 from tests.conftest import mark_xfail_flaky_download
 
@@ -259,3 +260,47 @@ def test___edges_to_1d(u_idx, v_idx, max_len, expected):
         __edges_to_1d(array(u_idx, dtype=int32), array(v_idx, dtype=int32), max_len),
         array(expected, dtype=int64),
     )
+
+
+@pytest.mark.parametrize(
+    "val_1,val_2,expected",
+    [
+        (0, 0, 0),
+        (0, 1, inf),
+        (1, 0, -inf),
+        (1, 1, 0),
+        (1, 2, 1),
+        (2, 1, -1 / 2),
+        (2, 2, 0),
+        (2, 3, 1 / 2),
+        (3, 2, -1 / 3),
+        (-1, 1, -2),
+        (1, -1, -2),
+        (-1, -1, 0),
+        (30, 87, 87 / 30 - 1),
+        (40, 60, 1 / 2),
+        (0, inf, inf),
+        (1, inf, inf),
+        (-1, inf, -inf),
+        (inf, 0, -inf),
+        (inf, 1, -inf),
+        (inf, -1, -inf),
+        (inf, inf, 0),
+        (0, -inf, -inf),
+        (1, -inf, -inf),
+        (-1, -inf, inf),
+        (-inf, 0, -inf),
+        (-inf, 1, -inf),
+        (-inf, -1, -inf),
+        (-inf, -inf, 0),
+        (inf, -inf, nan),
+        (-inf, inf, nan),
+    ],
+)
+def test_percentual_increase(val_1, val_2, expected):
+    """Test `percentual_increase` by design."""
+
+    if expected is nan:
+        assert isnan(percentual_increase(val_1, val_2))
+    else:
+        assert pytest.approx(percentual_increase(val_1, val_2), 1e-6) == expected

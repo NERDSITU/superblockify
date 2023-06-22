@@ -7,8 +7,9 @@ import numpy as np
 from numba import njit, prange, int32, int64, float32, float64
 from numpy import sum as npsum
 
+from ..attribute import aggregate_edge_attr
 from ..config import logger
-from ..utils import __edges_to_1d, __edge_to_1d
+from ..utils import __edges_to_1d, __edge_to_1d, percentual_increase
 
 
 def calculate_directness(distance_matrix, measure1, measure2):
@@ -736,3 +737,69 @@ def __calculate_high_bc_anisotropy(coord_high_bc):
     eigvals = np.sort(eigvals)[::-1]
     # Anisotropy
     return eigvals[0] / eigvals[1]
+
+
+def add_ltn_means(components, edge_attr):
+    """Add mean of attributes to each LTN.
+
+    Writes the mean of the specified edge attribute(s) to each LTN in the list of
+    components. The mean is calculated as the mean of each attribute in the LTN
+    subgraph.
+    Works in-place and adds `mean_{attr}` to each LTN.
+
+    Parameters
+    ----------
+    components : list of dict
+        List of dictionaries of LTN components.
+    edge_attr : key or list of keys
+        Edge attribute(s) to calculate the mean of.
+    """
+    # Loop over LTNs
+    for component in components:
+        # Loop over attributes
+        for attr in edge_attr if isinstance(edge_attr, list) else [edge_attr]:
+            # Calculate mean
+            component[f"mean_{attr}"] = aggregate_edge_attr(
+                component["subgraph"], attr, np.mean, dismiss_none=True
+            )
+
+
+def add_relative_changes(components, attr_pairs):
+    """Add relative difference of attributes to each LTN.
+
+    Measured in terms of percentual increase using
+    :func:`superblockify.utils.percentual_increase`.
+
+    Write the relative percentual change of the specified edge attribute(s) to each
+    LTN in the list of components. The relative change is the percentual change of
+    the first to the second attribute.
+    Works in-place and adds `change_{attr1}` to each LTN.
+    If `attr1` has a value of 2 and `attr2` has a value of 1, the relative change is
+    -0.5, a 50% decrease. If `attr1` has a value of 4 and `attr2` has a value of 6,
+    the relative change is 0.5, a 50% increase.
+
+    Parameters
+    ----------
+    components : list of dict
+        List of dictionaries of LTN components.
+    attr_pairs : list of tuples with two keys
+        List of attribute pairs to calculate the relative change of.
+
+    Raises
+    ------
+    KeyError
+        If any key cannot be found in the LTNs.
+    """
+    # Loop over LTNs
+    for component in components:
+        # Loop over attribute pairs
+        for attr1, attr2 in (
+            attr_pairs if isinstance(attr_pairs, list) else [attr_pairs]
+        ):
+            # Calculate relative change
+            try:
+                component[f"change_{attr1}"] = percentual_increase(
+                    component[attr1], component[attr2]
+                )
+            except KeyError as err:
+                raise KeyError(f"Key {err} not found in LTNs.") from err

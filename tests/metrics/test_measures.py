@@ -28,8 +28,9 @@ from superblockify.metrics.measures import (
     _calculate_betweenness,
     __calculate_high_bc_clustering,
     __calculate_high_bc_anisotropy,
+    add_relative_changes,
 )
-from superblockify.utils import __edges_to_1d
+from superblockify.utils import __edges_to_1d, percentual_increase
 
 
 @pytest.mark.parametrize(
@@ -729,3 +730,41 @@ def test___test___calculate_high_bc_anisotropy_faulty(coords):
     """Test error catching of betweenness centrality anisotropy."""
     with pytest.raises(ValueError):
         __calculate_high_bc_anisotropy(array(coords))
+
+
+@pytest.mark.parametrize(
+    "attr_pairs", [("a", "b"), [("a", "b")], [("a", "b"), ("c", "d")]]
+)
+@pytest.mark.parametrize(
+    "list_a,list_b",
+    [
+        ([], []),  # empty lists
+        ([9.8], [9.8]),  # single element lists
+        ([1, 2, 3], [2, 4, 6]),
+        ([0, 4, inf], [1, -2, 3]),
+    ],
+)
+def test_add_relative_changes(list_a, list_b, attr_pairs):
+    """Test error catching of add_relative_changes."""
+    test_dict_list = [
+        {"a": val_a, "b": val_b, "c": val_b, "d": val_a}
+        for val_a, val_b in zip(list_a, list_b)
+    ]
+    add_relative_changes(test_dict_list, attr_pairs)
+    # now `change_a` should have value percentual_increase(val_a, val_b)
+    assert allclose(
+        [val["change_a"] for val in test_dict_list],
+        [percentual_increase(val_a, val_b) for val_a, val_b in zip(list_a, list_b)],
+    )
+    if isinstance(attr_pairs, list) and len(attr_pairs) == 2:
+        # now `change_c` should have value percentual_increase(val_b, val_a)
+        assert allclose(
+            [val["change_c"] for val in test_dict_list],
+            [percentual_increase(val_b, val_a) for val_a, val_b in zip(list_a, list_b)],
+        )
+
+
+def test_add_relative_changes_key_error():
+    """Test error catching of add_relative_changes."""
+    with pytest.raises(KeyError):
+        add_relative_changes([{"a": 1, "b": 2}], [("a", "c")])

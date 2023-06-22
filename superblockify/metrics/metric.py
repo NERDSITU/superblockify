@@ -14,6 +14,8 @@ from .measures import (
     calculate_coverage,
     betweenness_centrality,
     calculate_high_bc_clustering,
+    add_ltn_means,
+    add_relative_changes,
 )
 from .plot import (
     plot_distance_matrices,
@@ -302,6 +304,34 @@ class Metric:
 
         write_relative_increase_to_edges(
             partitioner.graph, self.distance_matrix, self.node_list, "N", "S"
+        )
+        add_ltn_means(
+            partitioner.get_ltns(),
+            edge_attr=[
+                "edge_betweenness_normal",
+                "edge_betweenness_length",
+                "edge_betweenness_linear",
+                "edge_betweenness_normal_restricted",
+                "edge_betweenness_length_restricted",
+                "edge_betweenness_linear_restricted",
+            ],
+        )
+        add_relative_changes(
+            partitioner.get_ltns(),
+            [
+                (
+                    "mean_edge_betweenness_normal",
+                    "mean_edge_betweenness_normal_restricted",
+                ),
+                (
+                    "mean_edge_betweenness_length",
+                    "mean_edge_betweenness_length_restricted",
+                ),
+                (
+                    "mean_edge_betweenness_linear",
+                    "mean_edge_betweenness_linear_restricted",
+                ),
+            ],
         )
 
         if make_plots:

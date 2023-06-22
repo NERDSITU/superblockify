@@ -14,6 +14,10 @@ from numpy import (
     array_equal,
     empty,
     int64 as np_int64,
+    sign,
+    inf,
+    isinf,
+    nan,
 )
 from osmnx.stats import count_streets_per_node
 from shapely import wkt
@@ -342,6 +346,12 @@ def load_graphml_dtypes(filepath=None, attribute_label=None, attribute_dtype=Non
         "population": float,
         "area": float,
         "cell_id": int,
+        "edge_betweenness_normal": float,
+        "edge_betweenness_length": float,
+        "edge_betweenness_linear": float,
+        "edge_betweenness_normal_restricted": float,
+        "edge_betweenness_length_restricted": float,
+        "edge_betweenness_linear_restricted": float,
     }
     graph_dtypes = {
         "simplified": bool,
@@ -378,3 +388,39 @@ def load_graphml_dtypes(filepath=None, attribute_label=None, attribute_dtype=Non
         graph_dtypes=graph_dtypes,
     )
     return graph
+
+
+def percentual_increase(val_1, val_2):
+    """Compute the percentual increase between two values.
+
+    3 -> 4 = 33.33% = 1/3
+    4 -> 3 = -25.00% = -1/4
+
+    Parameters
+    ----------
+    val_1 : float
+        The first value.
+    val_2 : float
+        The second value.
+
+    Returns
+    -------
+    float
+        The relative difference between the two values.
+
+    Notes
+    -----
+    If both values are zero, the result is zero.
+    If one value is zero, the result is +-infinity.
+    """
+    if val_1 == val_2:
+        return 0
+    if val_1 == 0 or val_2 == 0:
+        return inf * (sign(val_2 - val_1) if val_2 != 0 else -1)
+    if isinf(val_1) and isinf(val_2):
+        return nan
+    if isinf(val_1):
+        return -inf
+    if isinf(val_2):
+        return inf * sign(val_1) * (sign(val_2) if val_2 != 0 else 1)
+    return (val_2 / val_1) - 1

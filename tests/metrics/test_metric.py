@@ -100,6 +100,13 @@ class TestMetric:
             assert dist_matrix.shape == (part.graph.number_of_nodes(),) * 2
         assert 0.0 < part.metric.high_bc_clustering < 1.0
         assert 1.0 <= part.metric.high_bc_anisotropy
+        for component in part.get_ltns():
+            assert 1 > component["mean_edge_betweenness_normal"] >= 0.0
+            assert 1 > component["mean_edge_betweenness_length"] >= 0.0
+            assert component["mean_edge_betweenness_linear"] >= 0.0
+            assert 1 > component["mean_edge_betweenness_normal_restricted"] >= 0.0
+            assert 1 > component["mean_edge_betweenness_length_restricted"] >= 0.0
+            assert component["mean_edge_betweenness_linear_restricted"] >= 0.0
 
     @pytest.mark.parametrize("unit", ["time", "distance"])
     def test_calculate_metrics_before(self, test_one_city_precalculated_copy, unit):

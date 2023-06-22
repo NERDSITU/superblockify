@@ -107,9 +107,7 @@ def components_are_connected(partitioning):
     """
     found = True
 
-    for component in (
-        partitioning.components if partitioning.components else partitioning.partitions
-    ):
+    for component in partitioning.get_ltns():
         if not is_weakly_connected(component["subgraph"]):
             logger.warning(
                 "The subgraph %s of %s is not connected.",
@@ -266,9 +264,7 @@ def components_are_connect_sparsified(partitioning):
         Whether each subgraph is connected to the sparsified graph
     """
 
-    for component in (
-        partitioning.components if partitioning.components else partitioning.partitions
-    ):
+    for component in partitioning.get_ltns():
         # subgraph and sparsified graph are connected if there is at least one node
         # that is contained in both
         if not any(
