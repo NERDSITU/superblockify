@@ -109,13 +109,13 @@ def load_graph_from_place(save_as, search_string, add_population=False, **gfp_kw
     # make shapely.geometry.MultiPolygon from all polygons
     # Project to WGS84 to query OSM
     mult_polygon = ox.project_gdf(mult_polygon, to_crs="epsg:4326")
+    # Get graph - automatically adds distances before simplifying
     graph = ox.graph_from_polygon(mult_polygon.geometry.unary_union, **gfp_kwargs)
     # Add edge bearings - the precision >1 is important for binning
     graph = ox.add_edge_bearings(graph, precision=2)
     # Project to local UTM - coordinates can be used as
     graph = ox.project_graph(graph)
 
-    graph = ox.distance.add_edge_lengths(graph)
     graph = ox.add_edge_speeds(graph)  # adds attribute "maxspeed"
     graph = ox.add_edge_travel_times(graph)  # adds attribute "travel_time"
     # count the number of streets per node / degree
