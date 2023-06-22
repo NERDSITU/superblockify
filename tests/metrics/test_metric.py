@@ -107,6 +107,9 @@ class TestMetric:
             assert 1 > component["mean_edge_betweenness_normal_restricted"] >= 0.0
             assert 1 > component["mean_edge_betweenness_length_restricted"] >= 0.0
             assert component["mean_edge_betweenness_linear_restricted"] >= 0.0
+            assert component["change_mean_edge_betweenness_normal"] is not None
+            assert component["change_mean_edge_betweenness_length"] is not None
+            assert component["change_mean_edge_betweenness_linear"] is not None
 
     @pytest.mark.parametrize("unit", ["time", "distance"])
     def test_calculate_metrics_before(self, test_one_city_precalculated_copy, unit):
