@@ -18,18 +18,33 @@ The environment to run the projects' code can be set up using the
 conda env create --file=environment.yml
 ```
 
-This initializes a conda environment by the name `superblockify`, which can be
-activated using `superblockify`. Alternatively a versionless setup can be done
-by executing (`environmentSetupVersionless.sh` in the working directory)
+This initializes a conda environment by the name `OSMnxPyrLab`, which can be
+activated using `OSMnxPyrLab`.
+If you want to use `mamba` or `micromamba` for faster package resolution, just replace 
+`conda` with the respective. For `micromamba`:
+    
+```bash
+micromamba env create --file=environment.yml
+```
+
+Alternatively a version-less setup can be done by executing 
+(`environmentSetupVersionless.sh` in the working directory)
 
 ```bash
-conda create -n superblockify -c conda-forge python=3.10 --file requirements.txt
-conda activate superblockify
+conda create -n OSMnxPyrLab -c conda-forge python=3.10 --file requirements.txt
+conda activate OSMnxPyrLab
 conda env export | grep -v "^prefix: " > environment.yml
 ```
 
 which does not have explicit versions, but might resolve dependency issues. Using
 `git diff environment.yml` the changes can be inspected.
+With `mamba` this can be done by running
+
+```bash
+mamba create -n OSMnxPyrLab -c conda-forge python=3.10 --file requirements.txt
+mamba activate OSMnxPyrLab
+mamba env export | grep -v "^prefix: " > environment.yml
+```
 
 ## Usage
 
@@ -41,8 +56,8 @@ folder and a [minimal working example](scripts/mwe.py).
 The logging is done using the `logging` module. The logging level can be set in the
 `setup.cfg` file. The logging level can be set to `DEBUG`, `INFO`, `WARNING`, `ERROR`
 or `CRITICAL`. It defaults to `INFO` and a rotating file handler is set up to log
-to `results/logs/superblockify.log`. The log file is rotated every megabyte and the last
-three log files are kept.
+to `results/logs/superblockify.log`. The log file is rotated every megabyte, and the
+last three log files are kept.
 
 ## Testing
 
