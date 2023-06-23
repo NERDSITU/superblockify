@@ -1,4 +1,4 @@
-name: superblockify
+name: base
 channels:
   - conda-forge
   - defaults
