@@ -18,13 +18,13 @@ The environment to run the projects' code can be set up using the
 conda env create --file=environment.yml
 ```
 
-This initializes a conda environment by the name `OSMnxPyrLab`, which can be
-activated using `OSMnxPyrLab`. Alternatively a versionless setup can be done
+This initializes a conda environment by the name `superblockify`, which can be
+activated using `superblockify`. Alternatively a versionless setup can be done
 by executing (`environmentSetupVersionless.sh` in the working directory)
 
 ```bash
-conda create -n OSMnxPyrLab -c conda-forge python=3.10 --file requirements.txt
-conda activate OSMnxPyrLab
+conda create -n superblockify -c conda-forge python=3.10 --file requirements.txt
+conda activate superblockify
 conda env export | grep -v "^prefix: " > environment.yml
 ```
 
