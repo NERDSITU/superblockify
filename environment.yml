@@ -1,4 +1,4 @@
-name: base
+name: sb_env
 channels:
   - conda-forge
   - defaults

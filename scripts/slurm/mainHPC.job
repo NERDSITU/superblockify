@@ -11,7 +11,7 @@
 #hostname
 
 eval "$(conda shell.bash hook)"
-conda activate superblockify
+conda activate sb_env
 cd ~/Superblockify/
 # Add root directory to PYTHONPATH
 export PYTHONPATH=$PYTHONPATH:$(pwd)

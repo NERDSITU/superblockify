@@ -18,8 +18,8 @@ The environment to run the projects' code can be set up using the
 conda env create --file=environment.yml
 ```
 
-This initializes a conda environment by the name `OSMnxPyrLab`, which can be
-activated using `OSMnxPyrLab`.
+This initializes a conda environment by the name `sb_env`, which can be
+activated using `sb_env`.
 If you want to use `mamba` or `micromamba` for faster package resolution, just replace 
 `conda` with the respective. For `micromamba`:
     
@@ -31,8 +31,8 @@ Alternatively a version-less setup can be done by executing
 (`environmentSetupVersionless.sh` in the working directory)
 
 ```bash
-conda create -n OSMnxPyrLab -c conda-forge python=3.10 --file requirements.txt
-conda activate OSMnxPyrLab
+conda create -n sb_env -c conda-forge python=3.10 --file requirements.txt
+conda activate sb_env
 conda env export | grep -v "^prefix: " > environment.yml
 ```
 
@@ -41,8 +41,8 @@ which does not have explicit versions, but might resolve dependency issues. Usin
 With `mamba` this can be done by running
 
 ```bash
-mamba create -n OSMnxPyrLab -c conda-forge python=3.10 --file requirements.txt
-mamba activate OSMnxPyrLab
+mamba create -n sb_env -c conda-forge python=3.10 --file requirements.txt
+mamba activate sb_env
 mamba env export | grep -v "^prefix: " > environment.yml
 ```
 

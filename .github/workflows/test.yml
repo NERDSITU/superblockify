@@ -42,7 +42,7 @@ jobs:
         with:
           miniforge-variant: Mambaforge
           miniforge-version: latest
-          activate-environment: superblockify
+          activate-environment: sb_env
           use-mamba: true
 
       - name: Show environment info
@@ -64,7 +64,7 @@ jobs:
 
       - name: Update environment
         run: # Install if cache not found
-          mamba env update -n superblockify -f environment.yml
+          mamba env update -n sb_env -f environment.yml
         if: steps.cache.outputs.cache-hit != 'true'
 
   run-tests:
@@ -101,7 +101,7 @@ jobs:
         with:
           miniforge-variant: Mambaforge
           miniforge-version: latest
-          activate-environment: superblockify
+          activate-environment: sb_env
           use-mamba: true
 
       - name: Use cache for ${{ matrix.submodule.name }}
