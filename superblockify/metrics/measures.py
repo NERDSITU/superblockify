@@ -15,7 +15,7 @@ from ..utils import __edges_to_1d, __edge_to_1d, percentual_increase
 def calculate_directness(distance_matrix, measure1, measure2):
     r"""Calculate the directness for the given network measures.
 
-    The directness in the mean of the ratios between the distances of the two
+    The directness is the mean of the ratios between the distances of the two
     network measures.
 
     If any of the distances is 0 or infinite, it is ignored in the calculation.
@@ -191,7 +191,7 @@ def write_relative_increase_to_edges(
 ):
     """Write the relative increase of the distance matrix to the edges of the graph.
 
-    For each edge the relative increases to and from every node to the two nodes
+    For each edge, the relative increases to and from every node to the two nodes
     of the edge are averaged and written to the edge attribute "rel_increase".
 
     Parameters
@@ -242,7 +242,7 @@ def betweenness_centrality(
 
     Uses the predecessors to calculate the betweenness centrality of the nodes and
     edges. The normalized betweenness centrality is calculated, length-scaled, and
-    linearly scaled betweenness centrality are calculated for the nodes and edges. When
+    linearly scaled betweenness centrality is calculated for the nodes and edges. When
     passing a k, the summation is only done over k random nodes. [1]_ [2]_ [3]_
 
     Parameters
@@ -273,19 +273,19 @@ def betweenness_centrality(
     Raises
     ------
     ValueError
-        If weight is not None and the graph does not have the weight attribute on all
+        If weight is not None, and the graph does not have the weight attribute on all
         edges.
 
     Notes
     -----
     Works in-place on the graph.
 
-    Does not include endpoints.
+    It Does not include endpoints.
 
     Modified from :mod:`networkx.algorithms.centrality.betweenness`.
 
     The :attr:`weight` attribute is not used to determine the shortest paths, these are
-    taken from the predecessors matrix. It is only used for parallel edges, to decide
+    taken from the predecessor matrix. It is only used for parallel edges to decide
     which edge to attribute the betweenness centrality to.
 
     If there are :math:`<=` 2 nodes, node betweenness is 0 for all nodes. If there are
@@ -577,7 +577,7 @@ def _sum_bc(loop_indices, pred, dist, edges_uv, edge_padding):  # pragma: no cov
     """
 
     betweennesses = np.zeros((len(pred) + len(edges_uv), 3), dtype=np.float64)
-    # The first len(pred) rows correspond to node betweenness, the rest to edge
+    # The first len(pred) rows correspond to node betweenness; the rest to edge
     # The 3 layers correspond to normal, length-scaled, and linearly scaled
 
     # Loop over nodes to collect betweenness using pair-wise dependencies
@@ -657,7 +657,7 @@ def __calculate_high_bc_clustering(coord_bc, threshold_idx):
         \sum_{i = 1}^{N_{\theta}} x_i
 
     The distance calculation :math:`\| x_i - x_{\mathrm{cm}, \theta} \|` includes the
-    x and y coordinates of the node, and is the Euclidean distance. In this case it
+    x and y coordinates of the node, and is the Euclidean distance. In this case, it
     is the Frobenius norm of the difference between the node coordinates and the
     center of mass of the high betweenness nodes.
 
@@ -676,7 +676,7 @@ def __calculate_high_bc_clustering(coord_bc, threshold_idx):
     Raises
     ------
     ValueError
-        If the coordinate array is has less than two nodes.
+        If the coordinate array has less than two nodes.
     ValueError
         If the threshold index is greater than the number of nodes.
     """
@@ -684,7 +684,7 @@ def __calculate_high_bc_clustering(coord_bc, threshold_idx):
         raise ValueError("Coordinate array must have at least two nodes.")
     if threshold_idx >= len(coord_bc):
         raise ValueError("Threshold index must be less than the number of nodes.")
-    # Center of mass of high betweenness nodes
+    # High betweenness nodes center of mass
     high_bc_cm = np.mean(coord_bc[threshold_idx:, :2], axis=0)
     # Average distance to center of mass
     avg_dist = np.mean(
@@ -705,7 +705,7 @@ def __calculate_high_bc_anisotropy(coord_high_bc):
     Parameters
     ----------
     coord_high_bc : np.ndarray
-        Array of node coordinates of the high betweenness nodes.
+        Array of the high betweenness nodes coordinates.
 
     Returns
     -------
