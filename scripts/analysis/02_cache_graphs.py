@@ -1,11 +1,18 @@
 """Cache graphs from cities.yml before processing.
 
 This script is used to download the graphs for the cities in cities.yml.
+
+Parameters
+----------
+SLURM_ARRAY_TASK_ID : int
+    The task ID of the SLURM job scheduler.
+SLURM_ARRAY_TASK_COUNT : int
+    The number of SLURM job scheduler tasks.
+
 """
+from os import environ
 from os.path import exists, join, dirname
 from sys import path
-
-from tqdm import tqdm
 
 path.append(join(dirname(__file__), "..", ".."))
 
@@ -22,12 +29,25 @@ ox.settings.use_cache = True
 RELOAD_GRAPHS = False
 
 if __name__ == "__main__":
+    # check $SLURM_ARRAY_TASK_ID $SLURM_ARRAY_TASK_COUNT are set
+    if "SLURM_ARRAY_TASK_ID" not in environ:
+        raise ValueError("SLURM_ARRAY_TASK_ID not set")
+    if "SLURM_ARRAY_TASK_COUNT" not in environ:
+        raise ValueError("SLURM_ARRAY_TASK_COUNT not set")
+
+    # Determine with slice of the cities to download
+    # from (task_num * num_cities // num_tasks)
+    # to ((task_num + 1) * num_cities // num_tasks)
+    subset = slice(
+        int(environ["SLURM_ARRAY_TASK_ID"])
+        * len(PLACES_100_CITIES)
+        // int(environ["SLURM_ARRAY_TASK_COUNT"]),
+        (int(environ["SLURM_ARRAY_TASK_ID"]) + 1)
+        * len(PLACES_100_CITIES)
+        // int(environ["SLURM_ARRAY_TASK_COUNT"]),
+    )
     # PLACES_100_CITIES is a dictionary of the form {name: place<dict>}
-    for place_name, place in tqdm(
-        list(PLACES_100_CITIES.items()),
-        desc="Downloading graphs",
-        unit="city",
-    ):
+    for place_name, place in list(PLACES_100_CITIES.items())[subset]:
         logger.info(
             "Caching graph for %s (%s)",
             place_name,
