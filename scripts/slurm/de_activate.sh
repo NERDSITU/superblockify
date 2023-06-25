@@ -18,7 +18,7 @@ if [ -n "$CONDA_DEFAULT_ENV" ]; then
     fi
 else
     # Activate environment
-    iff command -v micromamba &> /dev/null; then
+    if command -v micromamba &> /dev/null; then
         echo "Activating environment $ENV_NAME with micromamba"
         eval "$(micromamba shell hook -s bash)"
         micromamba activate $ENV_NAME
