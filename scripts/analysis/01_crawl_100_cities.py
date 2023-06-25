@@ -59,7 +59,8 @@ def get_table():
             if input().lower() != "y":
                 new_list_name = None
     print(
-        "How should the new list be described? (e.g. `100 cities from Boeing (2019)`)")
+        "How should the new list be described? (e.g. `100 cities from Boeing (2019)`)"
+    )
     new_list_description = input()
 
     def region_handle(region):
@@ -78,7 +79,7 @@ def get_table():
     # add new list
     cities["place_lists"][new_list_name] = {
         "description": new_list_description,
-        "cities": {}
+        "cities": {},
     }
     # add cities to new list
     for _, row in df.iterrows():
@@ -90,8 +91,8 @@ def get_table():
             "circuity_avg": row.get("ς", None),
             "median_segment_length": row.get("ĩ", None),
             "k_avg": row.get("k̅", None),
-            "nominatim link":
-                f"https://nominatim.openstreetmap.org/ui/search.html?q={row['City']}",
+            "nominatim link": f"https://nominatim.openstreetmap.org/ui/search.html?q="
+            f"{row['City']}",
         }
         # Add further columns if they exist
         for column in df.columns:
@@ -124,17 +125,23 @@ def update_nominatim_links():
     print("Also update the OSM relation links? (y/n)")
     update_osm = input().lower() == "y"
 
-    # update nominatim links and add link to first found OSM relation
+    # update nominatim links and add a link to first found OSM relation
     for place_list in cities["place_lists"]:
-        for city, data in tqdm(
-                cities["place_lists"][place_list]["cities"].items(),
-                desc=f"Updating {place_list}", unit="city"):
+        for data in tqdm(
+            cities["place_lists"][place_list]["cities"].values(),
+            desc=f"Updating {place_list}",
+            unit="city",
+        ):
             # Nominatim link
             data["nominatim link"] = [
                 f"https://nominatim.openstreetmap.org/ui/search.html?q={query}".replace(
-                    " ", "+")
-                for query in
-                (data["query"] if isinstance(data["query"], list) else [data["query"]])
+                    " ", "+"
+                )
+                for query in (
+                    data["query"]
+                    if isinstance(data["query"], list)
+                    else [data["query"]]
+                )
             ]
             # OSM relation link
             if not update_osm:
@@ -143,11 +150,11 @@ def update_nominatim_links():
             data["osm_id"] = []
             data["OSM relation"] = []
             for query in (
-                    data["query"] if isinstance(data["query"], list) else [
-                        data["query"]]):
-                response = requests.get(url, params={"q": query, "format": "json"},
-                                        timeout=10
-                                        ).json()
+                data["query"] if isinstance(data["query"], list) else [data["query"]]
+            ):
+                response = requests.get(
+                    url, params={"q": query, "format": "json"}, timeout=10
+                ).json()
                 if len(response) > 0:
                     # get first osm_id that is a relation
                     osm_id = None
@@ -171,10 +178,11 @@ def update_nominatim_links():
 
 
 if __name__ == "__main__":
-
     # Options
-    print("Do you want to (1) crawl the table from the website or "
-          "(2) update the Nominatim links? (1/2)")
+    print(
+        "Do you want to (1) crawl the table from the website or "
+        "(2) update the Nominatim links? (1/2)"
+    )
     answer = input()
     if answer == "1":
         get_table()
