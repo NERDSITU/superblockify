@@ -101,7 +101,7 @@ CLUSTERING_PERCENTILE = 90
 NUM_BINS = 36
 
 # Population data (GHSL)
-FULL_RASTER = join(GHSL_DIR, "GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0.tif")
+FULL_RASTER = None  # join(GHSL_DIR, "GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0.tif")
 DOWNLOAD_TIMEOUT = 60
 
 # Logging configuration using the setup.cfg file
@@ -119,11 +119,11 @@ with open(PLACES_FILE, "r", encoding="utf-8") as file:
     yaml = YAML(typ="safe")
     places = yaml.load(file)
     PLACES_GENERAL = [
-        (name, data["query"]) for name, data in
-        places["place_lists"]["test_general"]["cities"].items()
+        (name, data["query"])
+        for name, data in places["place_lists"]["test_general"]["cities"].items()
     ]
     PLACES_SMALL = [
-        (name, data["query"]) for name, data in
-        places["place_lists"]["test_small"]["cities"].items()
+        (name, data["query"])
+        for name, data in places["place_lists"]["test_small"]["cities"].items()
     ]
     PLACES_100_CITIES = places["place_lists"]["100_cities_boeing"]["cities"]
