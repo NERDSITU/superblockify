@@ -13,7 +13,7 @@
 #     cities:
 #       <city name>:
 #         query: <full city name or relation id to query OSM - str or list>
-#         country: <ISO 3166-1 alpha-2 code / state code>
+#         country: <ISO 3166-1 alpha-2 code / state code ISO 3166-2:US/CA>
 #         region: <region handle>
 #         <...>: ...
 #       <city name>: ...
@@ -199,7 +199,7 @@ place_lists:
         - 10264792
       Jakarta:
         query: Special Capital Region of Jakarta, Java, Indonesia
-        country:
+        country: ID
         region: A&O
         orient_order: 0.167
         circuity_avg: 1.065
@@ -217,7 +217,7 @@ place_lists:
         - 6362934
       Kabul:
         query: Kabul District, Kabul Province, Afghanistan
-        country:
+        country: AF
         region: A&O
         orient_order: 0.076
         circuity_avg: 1.062
@@ -235,7 +235,7 @@ place_lists:
         - 6616233
       Karachi:
         query: Karachi Division, Sindh, Pakistan
-        country:
+        country: PK
         region: A&O
         orient_order: 0.088
         circuity_avg: 1.032
@@ -253,7 +253,7 @@ place_lists:
         - 6080948
       Kathmandu:
         query: Kathmandu, Bagmati Pradesh, Nepal
-        country:
+        country: NP
         region: A&O
         orient_order: 0.054
         circuity_avg: 1.071
@@ -271,7 +271,7 @@ place_lists:
         - 4583247
       Kyoto:
         query: Kyoto, Kyoto Prefecture, Japan
-        country:
+        country: JP
         region: A&O
         orient_order: 0.357
         circuity_avg: 1.09
@@ -290,7 +290,7 @@ place_lists:
       Manila:
         # See https://www.wikidata.org/wiki/Q1461
         query: Metro Manila, Philippines
-        country:
+        country: PH
         region: A&O
         orient_order: 0.062
         circuity_avg: 1.023
@@ -308,7 +308,7 @@ place_lists:
         - 147488
       Melbourne:
         query: Greater Melbourne, Victoria, Australia
-        country:
+        country: AU
         region: A&O
         orient_order: 0.34
         circuity_avg: 1.037
@@ -326,7 +326,7 @@ place_lists:
         - 4246124
       Mumbai:
         query: Mumbai, Mumbai Suburban, Maharashtra, India
-        country:
+        country: IN
         region: A&O
         orient_order: 0.075
         circuity_avg: 1.081
@@ -344,7 +344,7 @@ place_lists:
         - 7888990
       New Delhi:
         query: New Delhi, Delhi, India
-        country:
+        country: IN
         region: A&O
         orient_order: 0.062
         circuity_avg: 1.083
@@ -362,7 +362,7 @@ place_lists:
         - 2763541
       Osaka:
         query: Osaka, Osaka Prefecture, Japan
-        country:
+        country: JP
         region: A&O
         orient_order: 0.243
         circuity_avg: 1.025
@@ -380,7 +380,7 @@ place_lists:
         - 358674
       Phnom Penh:
         query: KH-12, Cambodia
-        country:
+        country: KH
         region: A&O
         orient_order: 0.324
         circuity_avg: 1.04
@@ -398,7 +398,7 @@ place_lists:
         - 2199033
       Pyongyang:
         query: P'yŏngyang, North Korea
-        country:
+        country: KP
         region: A&O
         orient_order: 0.024
         circuity_avg: 1.097
@@ -416,7 +416,7 @@ place_lists:
         - 356443
       Seoul:
         query: Seoul, South Korea
-        country:
+        country: KR
         region: A&O
         orient_order: 0.009
         circuity_avg: 1.048
@@ -434,7 +434,7 @@ place_lists:
         - 2297418
       Shanghai:
         query: Shanghai, China
-        country:
+        country: CN
         region: A&O
         orient_order: 0.121
         circuity_avg: 1.04
@@ -452,7 +452,7 @@ place_lists:
         - 913067
       Singapore:
         query: Singapore
-        country:
+        country: SG
         region: A&O
         orient_order: 0.005
         circuity_avg: 1.077
@@ -470,7 +470,7 @@ place_lists:
         - 536780
       Sydney:
         query: Sydney, Council of the City of Sydney, New South Wales, Australia
-        country:
+        country: AU
         region: A&O
         orient_order: 0.092
         circuity_avg: 1.073
@@ -488,7 +488,7 @@ place_lists:
         - 5750005
       Taipei:
         query: Taipei, Taiwan
-        country:
+        country: TW
         region: A&O
         orient_order: 0.158
         circuity_avg: 1.068
@@ -506,7 +506,7 @@ place_lists:
         - 1293250
       Tokyo:
         query: JP-13, Japan
-        country:
+        country: JP
         region: A&O
         orient_order: 0.05
         circuity_avg: 1.046
@@ -524,7 +524,7 @@ place_lists:
         - 1543125
       Ulaanbaatar:
         query: Ulaanbaatar, Mongolia
-        country:
+        country: MN
         region: A&O
         orient_order: 0.058
         circuity_avg: 1.065
@@ -542,7 +542,7 @@ place_lists:
         - 270090
       Amsterdam:
         query: Amsterdam, North Holland, Netherlands
-        country:
+        country: NL
         region: EU
         orient_order: 0.071
         circuity_avg: 1.08
@@ -560,7 +560,7 @@ place_lists:
         - 271110
       Athens:
         query: Municipality of Athens, Regional Unit of Central Athens, Attica, Greece
-        country:
+        country: GR
         region: EU
         orient_order: 0.041
         circuity_avg: 1.019
@@ -578,7 +578,7 @@ place_lists:
         - 1370736
       Barcelona:
         query: Barcelonès, Barcelona, Catalonia, Spain
-        country:
+        country: ES
         region: EU
         orient_order: 0.108
         circuity_avg: 1.052
@@ -596,7 +596,7 @@ place_lists:
         - 2417889
       Berlin:
         query: Berlin, Germany
-        country:
+        country: DE
         region: EU
         orient_order: 0.011
         circuity_avg: 1.04
@@ -614,7 +614,7 @@ place_lists:
         - 62422
       Budapest:
         query: Budapest, Central Hungary, Hungary
-        country:
+        country: HU
         region: EU
         orient_order: 0.05
         circuity_avg: 1.032
@@ -634,7 +634,7 @@ place_lists:
         query:
         - Københavns Kommune, Denmark
         - Frederiksberg Kommune, Denmark
-        country:
+        country: DK
         region: EU
         orient_order: 0.029
         circuity_avg: 1.048
@@ -655,7 +655,7 @@ place_lists:
         - 2186660
       Dublin:
         query: Dublin, Dublin 1, Leinster, Ireland
-        country:
+        country: IE
         region: EU
         orient_order: 0.024
         circuity_avg: 1.061
@@ -673,7 +673,7 @@ place_lists:
         - 1109531
       Glasgow:
         query: Glasgow City, Scotland, G2 1DY, United Kingdom
-        country:
+        country: GB
         region: EU
         orient_order: 0.047
         circuity_avg: 1.079
@@ -692,7 +692,7 @@ place_lists:
       Helsinki:
         query: Helsinki, Helsinki sub-region, Uusimaa, Southern Finland, Mainland
           Finland, Finland
-        country:
+        country: FI
         region: EU
         orient_order: 0.006
         circuity_avg: 1.063
@@ -710,7 +710,7 @@ place_lists:
         - 34914
       Kiev:
         query: Kyiv, Ukraine
-        country:
+        country: UA
         region: EU
         orient_order: 0.014
         circuity_avg: 1.053
@@ -728,7 +728,7 @@ place_lists:
         - 421866
       Lisbon:
         query: Lisbon, Portugal
-        country:
+        country: PT
         region: EU
         orient_order: 0.023
         circuity_avg: 1.068
@@ -746,7 +746,7 @@ place_lists:
         - 5400890
       London:
         query: Greater London, England, United Kingdom
-        country:
+        country: GB
         region: EU
         orient_order: 0.015
         circuity_avg: 1.061
@@ -764,7 +764,7 @@ place_lists:
         - 175342
       Madrid:
         query: Madrid, Community of Madrid, Spain
-        country:
+        country: ES
         region: EU
         orient_order: 0.019
         circuity_avg: 1.05
@@ -782,7 +782,7 @@ place_lists:
         - 5326784
       Moscow:
         query: Moscow, Central Federal District, Russia
-        country:
+        country: RU
         region: EU
         orient_order: 0.007
         circuity_avg: 1.055
@@ -800,7 +800,7 @@ place_lists:
         - 2555133
       Munich:
         query: Munich, Bavaria, Germany
-        country:
+        country: DE
         region: EU
         orient_order: 0.078
         circuity_avg: 1.046
@@ -818,7 +818,7 @@ place_lists:
         - 62428
       Oslo:
         query: Oslo, Norway
-        country:
+        country: NO
         region: EU
         orient_order: 0.008
         circuity_avg: 1.095
@@ -836,7 +836,7 @@ place_lists:
         - 406091
       Paris:
         query: Paris, Ile-de-France, Metropolitan France, France
-        country:
+        country: FR
         region: EU
         orient_order: 0.016
         circuity_avg: 1.023
@@ -854,7 +854,7 @@ place_lists:
         - 7444
       Prague:
         query: Prague, Czechia
-        country:
+        country: CZ
         region: EU
         orient_order: 0.049
         circuity_avg: 1.065
@@ -872,7 +872,7 @@ place_lists:
         - 435514
       Reykjavik:
         query: Reykjavik, Capital Region, Iceland
-        country:
+        country: IS
         region: EU
         orient_order: 0.056
         circuity_avg: 1.071
@@ -890,7 +890,7 @@ place_lists:
         - 2580605
       Rome:
         query: Rome, Roma Capitale, Lazio, Italy
-        country:
+        country: IT
         region: EU
         orient_order: 0.005
         circuity_avg: 1.07
@@ -908,7 +908,7 @@ place_lists:
         - 41485
       Sarajevo:
         query: Sarajevo, Sarajevo Canton, Bosnia and Herzegovina
-        country:
+        country: BA
         region: EU
         orient_order: 0.039
         circuity_avg: 1.133
@@ -926,7 +926,7 @@ place_lists:
         - 15445108
       Stockholm:
         query: Stockholms kommun, Stockholm County, Sweden
-        country:
+        country: SE
         region: EU
         orient_order: 0.006
         circuity_avg: 1.091
@@ -944,7 +944,7 @@ place_lists:
         - 398021
       Venice (Mestre):
         query: Venice, Venezia, Veneto, Italy
-        country:
+        country: IT
         region: EU
         orient_order: 0.017
         circuity_avg: 1.09
@@ -962,7 +962,7 @@ place_lists:
         - 44741
       Vienna:
         query: Vienna, Austria
-        country:
+        country: AT
         region: EU
         orient_order: 0.05
         circuity_avg: 1.043
@@ -980,7 +980,7 @@ place_lists:
         - 109166
       Warsaw:
         query: Warsaw, Masovian Voivodeship, Poland
-        country:
+        country: PL
         region: EU
         orient_order: 0.036
         circuity_avg: 1.043
@@ -999,7 +999,7 @@ place_lists:
       Bogota:
         query: Bogota, Bogota Capital District - Municipality, RAP (Especial) Central,
           Colombia
-        country:
+        country: CO
         region: LatAm
         orient_order: 0.04
         circuity_avg: 1.044
@@ -1017,7 +1017,7 @@ place_lists:
         - 7426387
       Buenos Aires:
         query: Autonomous City of Buenos Aires, Argentina
-        country:
+        country: AR
         region: LatAm
         orient_order: 0.151
         circuity_avg: 1.011
@@ -1035,7 +1035,7 @@ place_lists:
         - 1224652
       Caracas:
         query: Caracas, Venezuela
-        country:
+        country: VE
         region: LatAm
         orient_order: 0.029
         circuity_avg: 1.148
@@ -1053,7 +1053,7 @@ place_lists:
         - 11219583
       Havana:
         query: CU-03, Cuba
-        country:
+        country: CU
         region: LatAm
         orient_order: 0.029
         circuity_avg: 1.04
@@ -1071,7 +1071,7 @@ place_lists:
         - 1854615
       Lima:
         query: Lima Metropolitan Area, Lima, Peru
-        country:
+        country: PE
         region: LatAm
         orient_order: 0.278
         circuity_avg: 1.017
@@ -1089,7 +1089,7 @@ place_lists:
         - 12933390
       Mexico City:
         query: Mexico City, Mexico
-        country:
+        country: MX
         region: LatAm
         orient_order: 0.154
         circuity_avg: 1.043
@@ -1107,7 +1107,7 @@ place_lists:
         - 1376330
       Port au Prince:
         query: Port-au-Prince, West, Haiti
-        country:
+        country: HT
         region: LatAm
         orient_order: 0.028
         circuity_avg: 1.088
@@ -1125,6 +1125,7 @@ place_lists:
         - 387318
       Rio de Janeiro:
         query: Rio de Janeiro, Southeast Region, Brazil
+        country: BR
         region: LatAm
         orient_order: 0.014
         circuity_avg: 1.055
@@ -1142,7 +1143,7 @@ place_lists:
         - 2697338
       Sao Paulo:
         query: São Paulo, Southeast Region, Brazil
-        country:
+        country: BR
         region: LatAm
         orient_order: 0.002
         circuity_avg: 1.05
@@ -1160,7 +1161,7 @@ place_lists:
         - 298285
       Baghdad:
         query: Baghdad, Baghdad Governorate, Iraq
-        country:
+        country: IQ
         region: MEA
         orient_order: 0.083
         circuity_avg: 1.033
@@ -1178,7 +1179,7 @@ place_lists:
         - 5638803
       Beirut:
         query: Beirut Governorate, Lebanon
-        country:
+        country: LB
         region: MEA
         orient_order: 0.206
         circuity_avg: 1.026
@@ -1196,7 +1197,7 @@ place_lists:
         - 316552
       Cairo:
         query: Cairo, Egypt
-        country:
+        country: EG
         region: MEA
         orient_order: 0.041
         circuity_avg: 1.067
@@ -1214,7 +1215,7 @@ place_lists:
         - 5466227
       Cape Town:
         query: City of Cape Town, Western Cape, 8001, South Africa
-        country:
+        country: ZA
         region: MEA
         orient_order: 0.025
         circuity_avg: 1.102
@@ -1232,7 +1233,7 @@ place_lists:
         - 79604
       Casablanca:
         query: Casablanca, Casablanca-Settat, Morocco
-        country:
+        country: MA
         region: MEA
         orient_order: 0.094
         circuity_avg: 1.048
@@ -1250,7 +1251,7 @@ place_lists:
         - 4072985
       Damascus:
         query: Damascus Governorate, Syria
-        country:
+        country: SY
         region: MEA
         orient_order: 0.043
         circuity_avg: 1.085
@@ -1268,7 +1269,7 @@ place_lists:
         - 7328462
       Dubai:
         query: Dubai, United Arab Emirates
-        country:
+        country: AE
         region: MEA
         orient_order: 0.031
         circuity_avg: 1.087
@@ -1286,7 +1287,7 @@ place_lists:
         - 4479752
       Istanbul:
         query: TR-34, Turkey
-        country:
+        country: TR
         region: MEA
         orient_order: 0.007
         circuity_avg: 1.059
@@ -1304,7 +1305,7 @@ place_lists:
         - 223474
       Jerusalem:
         query: Jerusalem, Jerusalem District, Israel
-        country:
+        country: IL
         region: MEA
         orient_order: 0.014
         circuity_avg: 1.092
@@ -1322,7 +1323,7 @@ place_lists:
         - 1381350
       Johannesburg:
         query: City of Johannesburg Metropolitan Municipality, 2001, South Africa
-        country:
+        country: ZA
         region: MEA
         orient_order: 0.019
         circuity_avg: 1.098
@@ -1340,7 +1341,7 @@ place_lists:
         - 594508
       Lagos:
         query: Lagos Island, Lagos State, Nigeria
-        country:
+        country: NG
         region: MEA
         orient_order: 0.039
         circuity_avg: 1.048
@@ -1358,7 +1359,7 @@ place_lists:
         - 7644528
       Mogadishu:
         query: Mogadishu District, Banaadir, Somalia
-        country:
+        country: SO
         region: MEA
         orient_order: 0.375
         circuity_avg: 1.019
@@ -1376,7 +1377,7 @@ place_lists:
         - 1720125
       Nairobi:
         query: Nairobi, Nairobi County, Kenya
-        country:
+        country: KE
         region: MEA
         orient_order: 0.014
         circuity_avg: 1.083
@@ -1394,7 +1395,7 @@ place_lists:
         - 9721587
       Tehran:
         query: Tehran, Tehran Province, Iran
-        country:
+        country: IR
         region: MEA
         orient_order: 0.137
         circuity_avg: 1.045
@@ -1412,7 +1413,7 @@ place_lists:
         - 6663864
       Atlanta:
         query: Atlanta, Fulton County, Georgia, United States
-        country:
+        country: US-GA
         region: NAM
         orient_order: 0.315
         circuity_avg: 1.074
@@ -1430,7 +1431,7 @@ place_lists:
         - 119557
       Baltimore:
         query: Baltimore, Maryland, United States
-        country:
+        country: US-MD
         region: NAM
         orient_order: 0.223
         circuity_avg: 1.036
@@ -1448,7 +1449,7 @@ place_lists:
         - 133345
       Boston:
         query: Boston, Suffolk County, Massachusetts, United States
-        country:
+        country: US-MA
         region: NAM
         orient_order: 0.026
         circuity_avg: 1.039
@@ -1466,7 +1467,7 @@ place_lists:
         - 2315704
       Charlotte:
         query: Charlotte, Mecklenburg County, North Carolina, United States
-        country:
+        country: US-NC
         region: NAM
         orient_order: 0.002
         circuity_avg: 1.067
@@ -1484,7 +1485,7 @@ place_lists:
         - 177415
       Chicago:
         query: Chicago, Cook County, Illinois, United States
-        country:
+        country: US-IL
         region: NAM
         orient_order: 0.899
         circuity_avg: 1.016
@@ -1502,7 +1503,7 @@ place_lists:
         - 122604
       Cleveland:
         query: Cleveland, Cuyahoga County, Ohio, United States
-        country:
+        country: US-OH
         region: NAM
         orient_order: 0.486
         circuity_avg: 1.029
@@ -1520,7 +1521,7 @@ place_lists:
         - 182130
       Dallas:
         query: Dallas, Dallas County, Texas, United States
-        country:
+        country: US-TX
         region: NAM
         orient_order: 0.305
         circuity_avg: 1.042
@@ -1538,7 +1539,7 @@ place_lists:
         - 6571629
       Denver:
         query: Denver, Colorado, United States
-        country:
+        country: US-CO
         region: NAM
         orient_order: 0.678
         circuity_avg: 1.031
@@ -1556,7 +1557,7 @@ place_lists:
         - 1411339
       Detroit:
         query: Detroit, Wayne County, Michigan, United States
-        country:
+        country: US-MI
         region: NAM
         orient_order: 0.582
         circuity_avg: 1.012
@@ -1574,7 +1575,7 @@ place_lists:
         - 134591
       Honolulu:
         query: R119231
-        country:
+        country: US-HI
         region: NAM
         orient_order: 0.034
         circuity_avg: 1.073
@@ -1603,7 +1604,7 @@ place_lists:
         - Bunker Hill Village, Harris County, Texas, United States
         - Hedwig Village, Harris County, Texas, United States
         - Jersey Village, Harris County, Texas, United States
-        country:
+        country: US-TX
         region: NAM
         orient_order: 0.425
         circuity_avg: 1.045
@@ -1665,7 +1666,7 @@ place_lists:
         - Paradise, Clark County, Nevada, United States
         - Sunrise Manor, Clark County, Nevada, United States
         - Enterprise, Clark County, Nevada, United States
-        country:
+        country: US-NV
         region: NAM
         orient_order: 0.542
         circuity_avg: 1.079
@@ -1704,7 +1705,7 @@ place_lists:
         - 170132
       Los Angeles:
         query: Los Angeles County, California, United States
-        country:
+        country: US-CA
         region: NAM
         orient_order: 0.348
         circuity_avg: 1.048
@@ -1722,7 +1723,7 @@ place_lists:
         - 396479
       Manhattan:
         query: Manhattan, New York County, New York, United States
-        country:
+        country: US-NY
         region: NAM
         orient_order: 0.669
         circuity_avg: 1.017
@@ -1740,7 +1741,7 @@ place_lists:
         - 8398124
       Miami:
         query: Miami, Miami-Dade County, Florida, United States
-        country:
+        country: US-FL
         region: NAM
         orient_order: 0.811
         circuity_avg: 1.023
@@ -1758,7 +1759,7 @@ place_lists:
         - 1216769
       Minneapolis:
         query: Minneapolis, Hennepin County, Minnesota, United States
-        country:
+        country: US-MN
         region: NAM
         orient_order: 0.749
         circuity_avg: 1.023
@@ -1776,7 +1777,7 @@ place_lists:
         - 136712
       Montreal:
         query: Montreal (administrative region), Quebec, Canada
-        country:
+        country: CA-QC
         region: NAM
         orient_order: 0.204
         circuity_avg: 1.057
@@ -1794,7 +1795,7 @@ place_lists:
         - 1571328
       New Orleans:
         query: New Orleans, Orleans Parish, Louisiana, United States
-        country:
+        country: US-LA
         region: NAM
         orient_order: 0.123
         circuity_avg: 1.035
@@ -1812,7 +1813,7 @@ place_lists:
         - 131885
       Orlando:
         query: Orlando, Orange County, Florida, United States
-        country:
+        country: US-FL
         region: NAM
         orient_order: 0.481
         circuity_avg: 1.064
@@ -1830,7 +1831,7 @@ place_lists:
         - 1128379
       Philadelphia:
         query: Philadelphia, Philadelphia County, Pennsylvania, United States
-        country:
+        country: US-PA
         region: NAM
         orient_order: 0.312
         circuity_avg: 1.03
@@ -1848,7 +1849,7 @@ place_lists:
         - 188022
       Phoenix:
         query: Phoenix, Maricopa County, Arizona, United States
-        country:
+        country: US-AZ
         region: NAM
         orient_order: 0.586
         circuity_avg: 1.073
@@ -1871,7 +1872,7 @@ place_lists:
         - Green Tree, Allegheny County, Pennsylvania, United States
         - Crafton, Allegheny County, Pennsylvania, United States
         - Ingram, Allegheny County, Pennsylvania, United States
-        country:
+        country: US-PA
         region: NAM
         orient_order: 0.018
         circuity_avg: 1.054
@@ -1903,7 +1904,7 @@ place_lists:
         query:
         - Portland, Multnomah County, Oregon, United States
         - Maywood Park, Multnomah County, Oregon, United States
-        country:
+        country: US-OR
         region: NAM
         orient_order: 0.679
         circuity_avg: 1.041
@@ -1924,7 +1925,7 @@ place_lists:
         - 186714
       San Francisco:
         query: San Francisco, California, United States
-        country:
+        country: US-CA
         region: NAM
         orient_order: 0.278
         circuity_avg: 1.033
@@ -1942,7 +1943,7 @@ place_lists:
         - 111968
       Seattle:
         query: Seattle, King County, Washington, United States
-        country:
+        country: US-WA
         region: NAM
         orient_order: 0.723
         circuity_avg: 1.028
@@ -1960,7 +1961,7 @@ place_lists:
         - 237385
       St Louis:
         query: St. Louis, Missouri, United States
-        country:
+        country: US-MO
         region: NAM
         orient_order: 0.276
         circuity_avg: 1.023
@@ -1978,7 +1979,7 @@ place_lists:
         - 1180533
       Toronto:
         query: City of Toronto, Golden Horseshoe, Ontario, Canada
-        country:
+        country: CA-ON
         region: NAM
         orient_order: 0.474
         circuity_avg: 1.09
@@ -1996,7 +1997,7 @@ place_lists:
         - 324211
       Vancouver:
         query: Vancouver, British Columbia, Canada
-        country:
+        country: CA-BC
         region: NAM
         orient_order: 0.749
         circuity_avg: 1.022
@@ -2014,7 +2015,7 @@ place_lists:
         - 1852574
       Washington:
         query: Washington, District of Columbia, United States
-        country:
+        country: US-DC
         region: NAM
         orient_order: 0.377
         circuity_avg: 1.038
