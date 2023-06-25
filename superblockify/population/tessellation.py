@@ -52,7 +52,7 @@ def add_edge_cells(graph, **tess_kwargs):
             graph.edges[edge_key]["cell_id"] = edge_cells.index.get_loc(edge_keys)
 
 
-def get_edge_cells(graph, limit=None, segment=10, show_plot=False):
+def get_edge_cells(graph, limit=None, segment=25, show_plot=False):
     """Get edge tessellation cells for the graph.
 
     Tessellates the graph into plane using a Voronoi cell approach.
@@ -69,7 +69,7 @@ def get_edge_cells(graph, limit=None, segment=10, show_plot=False):
         If None, it will be calculated as the exterior of the 100m buffered unary
         union of the graph's edges.
     segment : float
-        The maximum distance for the point interpolation. Default is 10.
+        The maximum distance for the point interpolation. Default is 25.
     show_plot : bool
         If True, a plot of the tessellation will be shown. Default is False.
 
@@ -207,7 +207,7 @@ def get_edge_polygons(graph):
     return GeoDataFrame(edges, geometry="geometry", crs=graph.graph["crs"])
 
 
-def edges_to_points(edges, segment=10):
+def edges_to_points(edges, segment=25):
     """Convert edges to points.
 
     Parameters
@@ -215,7 +215,7 @@ def edges_to_points(edges, segment=10):
     edges : geopandas.GeoDataFrame
         The edges to convert to points.
     segment : float
-        The maximum distance for the point interpolation. Default is 10.
+        The maximum distance for the point interpolation. Default is 25.
 
     Returns
     -------
