@@ -1574,7 +1574,7 @@ place_lists:
         osm_id:
         - 134591
       Honolulu:
-        query: R119231
+        query: 119231
         country: US-HI
         region: NAM
         orient_order: 0.034
@@ -1587,8 +1587,10 @@ place_lists:
         Η w: 3.55
         P de: 0.252
         P 4w: 0.185
-        OSM relation: []
-        osm_id: []
+        OSM relation:
+        - https://www.openstreetmap.org/relation/119231
+        osm_id:
+        - 119231
       Houston:
         query:
         - Houston, Harris County, Texas, United States
