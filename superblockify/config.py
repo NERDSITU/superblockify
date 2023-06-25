@@ -57,8 +57,12 @@ PLACES_GENERAL
 PLACES_SMALL
     Same as ``PLACES_GENERAL`` but for places of which the graph is small enough to
     be used in the tests.
-PLACES_OTHER
-    Same as ``PLACES_GENERAL`` but for a variety of places that are used in the tests.
+PLACES_100_CITIES
+    100 cities from Boeing et al. (2019) <https://doi.org/10.1007/s41109-019-0189-1>.
+    A dictionary of the form ``{name: place}`` where ``name`` is the name of the
+    place, and ``place`` is a dictionary of various attributes. One of them is the
+    ``query`` attribute which is the place string or a list of place strings.
+    Find the extensive list in the ``../cities.yml`` file.
 
 Notes
 -----
@@ -68,6 +72,8 @@ module is named ``superblockify``.
 
 import logging.config
 from os.path import join, dirname
+
+from ruamel.yaml import YAML
 
 # General
 WORK_DIR = join(dirname(__file__), "..")  # Change this to your working directory
@@ -95,7 +101,7 @@ CLUSTERING_PERCENTILE = 90
 NUM_BINS = 36
 
 # Population data (GHSL)
-FULL_RASTER = None  # GHSL_DIR + "GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0.tif"
+FULL_RASTER = join(GHSL_DIR, "GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0.tif")
 DOWNLOAD_TIMEOUT = 60
 
 # Logging configuration using the setup.cfg file
@@ -107,27 +113,17 @@ logger = logging.getLogger("superblockify")
 TEST_DATA_PATH = join(dirname(__file__), "..", "tests", "test_data")
 HIDE_PLOTS = True
 
-PLACES_GENERAL = [
-    ("Barcelona", "Barcelona, Catalonia, Spain"),
-    ("Brooklyn", "Brooklyn, New York, United States"),
-    ("Copenhagen", ["Københavns Kommune, Denmark", "Frederiksberg Kommune, Denmark"]),
-    ("Resistencia", "Resistencia, Chaco, Argentina"),
-    ("Liechtenstein", "Liechtenstein, Europe"),
-]
-
-PLACES_SMALL = [
-    ("Adliswil", "Adliswil, Bezirk Horgen, Zürich, Switzerland"),
-    ("MissionTown", "团城山街道, Xialu, Hubei, China"),
-    ("Scheveningen", "Scheveningen, The Hague, Netherlands"),
-]
-
-PLACES_OTHER = [
-    ("Strasbourg", "R4630050"),
-    ("Milan", "Milan, Lombardy, Italy"),
-    ("Palma", "Palma, Balearic Islands, Spain"),
-    ("New York", "New York, New York, United States"),
-    ("Paris", "Paris, Île-de-France, France"),
-    ("Rome", "Rome, Lazio, Italy"),
-    ("San Francisco", "San Francisco, California, United States"),
-    ("Tokyo", "Tokyo, Japan"),
-]
+# Places
+PLACES_FILE = join(dirname(__file__), "..", "cities.yml")
+with open(PLACES_FILE, "r", encoding="utf-8") as file:
+    yaml = YAML(typ="safe")
+    places = yaml.load(file)
+    PLACES_GENERAL = [
+        (name, data["query"]) for name, data in
+        places["place_lists"]["test_general"]["cities"].items()
+    ]
+    PLACES_SMALL = [
+        (name, data["query"]) for name, data in
+        places["place_lists"]["test_small"]["cities"].items()
+    ]
+    PLACES_100_CITIES = places["place_lists"]["100_cities_boeing"]["cities"]
