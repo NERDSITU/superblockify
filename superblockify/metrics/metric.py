@@ -501,7 +501,7 @@ class Metric:
         """
         return compare_dicts(self.__dict__, other.__dict__)
 
-    def save(self, folder, name):
+    def save(self, folder, name, dismiss_distance_matrix=False):
         """Save the metric to a file.
 
         Will be saved as a pickle file at folder/name.metrics.
@@ -512,6 +512,8 @@ class Metric:
             The folder to save the metric to.
         name : str
             The name of the file to save the metric to.
+        dismiss_distance_matrix : bool, optional
+            If True, the distance matrix will not be saved. Default is False.
 
         """
 
@@ -521,8 +523,20 @@ class Metric:
             logger.debug("Metrics already exist, overwriting %s", metrics_path)
         else:
             logger.debug("Saving metrics to %s", metrics_path)
+
+        if dismiss_distance_matrix:
+            # Get distance_matrix and predescessor_matrix reference
+            distance_matrix = self.distance_matrix
+            predecessor_matrix = self.predecessor_matrix
+            # Set distance_matrix and predescessor_matrix to None
+            self.distance_matrix = None
+            self.predecessor_matrix = None
         with open(metrics_path, "wb") as file:
             pickle.dump(self, file)
+        if dismiss_distance_matrix:
+            # Set distance_matrix and predescessor_matrix back to original
+            self.distance_matrix = distance_matrix
+            self.predecessor_matrix = predecessor_matrix
 
     @classmethod
     def load(cls, name):
