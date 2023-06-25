@@ -111,9 +111,9 @@ def load_graph_from_place(save_as, search_string, add_population=False, **gfp_kw
     mult_polygon = ox.project_gdf(mult_polygon, to_crs="epsg:4326")
     # Get graph - automatically adds distances before simplifying
     graph = ox.graph_from_polygon(mult_polygon.geometry.unary_union, **gfp_kwargs)
-    # Add edge bearings - the precision >1 is important for binning
-    # graph = ox.add_edge_bearings(graph, precision=2)
-    # only needed for deprecated BearingPartitioner
+    # Add edge bearings
+    graph = ox.add_edge_bearings(graph)  #, precision=2)  # the precision >1 is
+    # important for binning when using the deprecated BearingPartitioner
 
     # Project to local UTM - coordinates can be used as
     graph = ox.project_graph(graph)
