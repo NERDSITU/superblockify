@@ -16,6 +16,8 @@ from os.path import exists, join, dirname
 from sys import path
 from time import time
 
+from scripts.analysis.utils import get_hpc_subset
+
 path.append(join(dirname(__file__), "..", ".."))
 
 import osmnx as ox
@@ -31,12 +33,6 @@ ox.settings.use_cache = True
 RELOAD_GRAPHS = False
 
 if __name__ == "__main__":
-    # check $SLURM_ARRAY_TASK_ID $SLURM_ARRAY_TASK_COUNT are set
-    if "SLURM_ARRAY_TASK_ID" not in environ:
-        raise ValueError("SLURM_ARRAY_TASK_ID not set")
-    if "SLURM_ARRAY_TASK_COUNT" not in environ:
-        raise ValueError("SLURM_ARRAY_TASK_COUNT not set")
-
     # Throw out places that are already in GRAPH_DIR, so the rest is distributed
     if not RELOAD_GRAPHS:
         PLACES_100_CITIES = {
@@ -44,30 +40,17 @@ if __name__ == "__main__":
             for place_name, place in PLACES_100_CITIES.items()
             if not exists(join(GRAPH_DIR, place_name + ".graphml"))
         }
-
-    # Determine with slice of the cities to download
-    # from (task_num * num_cities // num_tasks)
-    # to ((task_num + 1) * num_cities // num_tasks)
-    subset = slice(
-        int(environ["SLURM_ARRAY_TASK_ID"])
-        * len(PLACES_100_CITIES)
-        // int(environ["SLURM_ARRAY_TASK_COUNT"]),
-        (int(environ["SLURM_ARRAY_TASK_ID"]) + 1)
-        * len(PLACES_100_CITIES)
-        // int(environ["SLURM_ARRAY_TASK_COUNT"]),
-    )
-
-    logger.info("There are %s graphs left to download", len(PLACES_100_CITIES))
+    logger.info("There are %s graphs left to cache", len(PLACES_100_CITIES))
+    subset = get_hpc_subset(list(PLACES_100_CITIES.items()))
     logger.info(
-        "Task %s/%s: Downloading graphs %s %s",
+        "Task %s/%s: Caching graphs %s",
         environ["SLURM_ARRAY_TASK_ID"],
         environ["SLURM_ARRAY_TASK_COUNT"],
-        subset,
-        list(PLACES_100_CITIES.keys())[subset],
+        [place_name for place_name, _ in subset],
     )
 
-    # PLACES_100_CITIES is a dictionary of the form {name: place<dict>}
-    for place_name, place in list(PLACES_100_CITIES.items())[subset]:
+    # PLACES_100_CITIES is a list of city dictionaries
+    for place_name, place in subset:
         logger.info(
             "Caching graph for %s (%s)",
             place_name,
