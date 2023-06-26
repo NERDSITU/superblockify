@@ -414,8 +414,8 @@ class BasePartitioner(ABC):
             part["subgraph"] = attribute.get_edge_subgraph_with_attribute_value(
                 self.graph, self.attribute_label, part["value"]
             )
-            part["num_edges"] = len(part["subgraph"].edges)
-            part["num_nodes"] = len(part["subgraph"].nodes)
+            part["m"] = part["subgraph"].number_of_edges()
+            part["n"] = part["subgraph"].number_of_nodes()
             part["length_total"] = sum(
                 d["length"] for u, v, d in part["subgraph"].edges(data=True)
             )
@@ -451,8 +451,8 @@ class BasePartitioner(ABC):
                             "name": f"{part['name']}_component_{i}",
                             "value": part["value"],
                             "subgraph": attribute_edge_subgraph,
-                            "num_edges": len(attribute_edge_subgraph.edges),
-                            "num_nodes": len(attribute_edge_subgraph.nodes),
+                            "m": len(attribute_edge_subgraph.edges),
+                            "n": len(attribute_edge_subgraph.nodes),
                             "length_total": sum(
                                 d["length"]
                                 for u, v, d in attribute_edge_subgraph.edges(data=True)
@@ -461,7 +461,7 @@ class BasePartitioner(ABC):
                     )
                     # Add 'ignore' attribute, based on min_edge_count and min_length
                     self.components[-1]["ignore"] = (
-                        self.components[-1]["num_edges"] < min_edge_count
+                        self.components[-1]["m"] < min_edge_count
                         or self.components[-1]["length_total"] < min_length
                     )
 
@@ -533,8 +533,8 @@ class BasePartitioner(ABC):
                     "name": f"residential_{i}",
                     "value": i,
                     "subgraph": subgraph,
-                    "num_edges": subgraph.number_of_edges(),
-                    "num_nodes": subgraph.number_of_nodes(),
+                    "m": subgraph.number_of_edges(),
+                    "n": subgraph.number_of_nodes(),
                     "length_total": edge_length_total(subgraph),
                 }
             )

@@ -83,10 +83,10 @@ def test_show_graph_stats(test_city_all_copy):
 def test_remove_dead_ends_directed(test_city_all_copy):
     """Test removing dead ends by design."""
     _, graph = test_city_all_copy
-    num_edges, num_nodes = len(graph.edges), len(graph.nodes)
+    num_edges, num_nodes = graph.number_of_edges(), graph.number_of_nodes()
     remove_dead_ends_directed(graph)
-    assert len(graph.edges) <= num_edges
-    assert len(graph.nodes) <= num_nodes
+    assert graph.number_of_edges() <= num_edges
+    assert graph.number_of_nodes() <= num_nodes
 
 
 def test_remove_dead_ends_undirected(test_city_all_copy):

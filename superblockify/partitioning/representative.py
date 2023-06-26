@@ -32,7 +32,7 @@ def set_representative_nodes(components):
         return node_geometry.distance(hull_nodes_reppoint)
 
     for component in components:
-        if component["num_edges"] == 1 and component["num_nodes"] == 2:
+        if component["m"] == 1 and component["n"] == 2:
             component["representative_node_id"] = min(
                 component["subgraph"].nodes, key=component["subgraph"].degree
             )
