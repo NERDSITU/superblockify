@@ -5,10 +5,10 @@ from uuid import uuid4
 
 from geopandas import GeoDataFrame
 from networkx import set_edge_attributes, strongly_connected_components
-from numpy import float64
+from numpy import generic
 from osmnx import graph_to_gdfs, get_undirected
 from pandas import DataFrame
-from shapely import Point
+from shapely import Point, Geometry
 from shapely.ops import substring
 
 from ..config import logger
@@ -535,41 +535,70 @@ def get_key_figures(partitioner):
     dict
         Key figures of the partitioner. See code for structure.
     """
-    return {
-        "name": str(partitioner.name),
-        "city_name": str(partitioner.city_name),
-        "attribute_label": str(partitioner.attribute_label),
-        "attribute_dtype": str(partitioner.attribute_dtype),
-        "graph_stats": {
-            key: value
-            for key, value in partitioner.graph.graph.items()
-            if isinstance(value, (int, float, str, dict, bool))
-        },
-        "components": [
-            # everything of the components/partitions, except the subgraph
-            {
-                key: str(value)
-                if key == "representative_node_id"
-                else float(value)
-                if isinstance(value, float64)
-                else value
-                for key, value in comp.items()
-                if key != "subgraph"
-            }
-            for comp in partitioner.get_ltns()
-        ],
-        "metric": {
-            "unit": str(partitioner.metric.unit),
-            "coverage": float(partitioner.metric.coverage),
-            "directness": {
-                key: float(value)
-                for key, value in partitioner.metric.directness.items()
+    return _make_yaml_compatible(
+        {
+            "name": partitioner.name,
+            "city_name": partitioner.city_name,
+            "attribute_label": partitioner.attribute_label,
+            "attribute_dtype": partitioner.attribute_dtype,
+            "graph_stats": {
+                key: value
+                for key, value in partitioner.graph.graph.items()
+                if not isinstance(value, Geometry)  # discard OSM graph boundary
             },
-            "global_efficiency": {
-                key: float(value)
-                for key, value in partitioner.metric.global_efficiency.items()
+            "components": [
+                # everything of the components/partitions, except the subgraph
+                {key: value for key, value in comp.items() if key != "subgraph"}
+                for comp in partitioner.get_ltns()
+            ],
+            "metric": {
+                "unit": partitioner.metric.unit,
+                "coverage": partitioner.metric.coverage,
+                "directness": partitioner.metric.directness,
+                "global_efficiency": partitioner.metric.global_efficiency,
+                "high_bc_clustering": partitioner.metric.high_bc_clustering,
+                "high_bc_anisotropy": partitioner.metric.high_bc_anisotropy,
             },
-            "high_bc_clustering": float(partitioner.metric.high_bc_clustering),
-            "high_bc_anisotropy": float(partitioner.metric.high_bc_anisotropy),
-        },
-    }
+        }
+    )
+
+
+def _make_yaml_compatible(input_dict):
+    """Make the dict compatible with the yaml format.
+
+    Represent only with python types, recursively.
+
+    Parameters
+    ----------
+    dict : dict
+        Dictionary to make compatible.
+
+    Returns
+    -------
+    dict
+        Copy of the dict with only python types.
+    """
+    new_dict = {}
+    for key, value in input_dict.items():
+        # Recursively call the function if the value is a dict
+        if isinstance(value, dict):
+            new_dict[key] = _make_yaml_compatible(value)
+        # If ins, float, str, bool, re-cast it to the same type
+        elif isinstance(value, int):
+            new_dict[key] = int(value)
+        elif isinstance(value, float):
+            new_dict[key] = float(value)
+        elif isinstance(value, str):
+            new_dict[key] = str(value)
+        elif isinstance(value, bool):
+            new_dict[key] = bool(value)
+        # Recursively call the function if the value is a list or tuple
+        elif isinstance(value, (list, tuple)):
+            new_dict[key] = [_make_yaml_compatible(v) for v in value]
+        # Numpy types
+        # find out if it is a numpy scalar
+        elif isinstance(value, generic):
+            new_dict[key] = value.item()
+        else:
+            new_dict[key] = str(value)
+    return new_dict
