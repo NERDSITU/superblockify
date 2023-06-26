@@ -185,7 +185,7 @@ class BasePartitioner(ABC):
         calculate_metrics=True,
         make_plots=False,
         replace_max_speeds=True,
-        **kwargs,
+        **part_kwargs,
     ):
         """Run partitioning.
 
@@ -201,6 +201,9 @@ class BasePartitioner(ABC):
             If True and :attr:`self.metric.unit` is "time", calculate the quickest paths
             in the restricted graph with the max speeds :attr:`V_MAX_LTN` and
             :attr:`V_MAX_SPARSE` set in :mod:`superblockify.config`. Default is True.
+        **part_kwargs
+            Passed to :meth:`self.partition_graph`. Depends on the abstract method
+            :meth:`self.partition_graph` of the subclass.
 
         Warnings
         --------
@@ -212,7 +215,7 @@ class BasePartitioner(ABC):
             logger.warning("replace_max_speeds is ignored when unit is not 'time'.")
             replace_max_speeds = None
 
-        self.partition_graph(make_plots=make_plots, **kwargs)
+        self.partition_graph(make_plots=make_plots, **part_kwargs)
 
         # If partitioner has only set the partitions, but not the sparsified graph,
         # make it from the edges not in the partitions
@@ -270,7 +273,6 @@ class BasePartitioner(ABC):
             self.calculate_metrics(
                 make_plots=make_plots,
                 replace_max_speeds=replace_max_speeds,
-                **kwargs,
             )
             calculate_component_metrics(self.get_ltns())
 
