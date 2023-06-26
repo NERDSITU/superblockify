@@ -10,9 +10,11 @@ SLURM_ARRAY_TASK_COUNT : int
     The number of SLURM job scheduler tasks.
 
 """
+from datetime import timedelta
 from os import environ
 from os.path import exists, join, dirname
 from sys import path
+from time import time
 
 path.append(join(dirname(__file__), "..", ".."))
 
@@ -60,6 +62,7 @@ if __name__ == "__main__":
         else:
             try:
                 logger.debug("Get graph from OSM relation IDs %s", place["osm_id"])
+                t_start = time()
                 load_graph_from_place(
                     save_as=graph_path,
                     search_string=["R" + str(osm_id) for osm_id in place["osm_id"]],
@@ -68,5 +71,11 @@ if __name__ == "__main__":
                     simplify=True,
                     only_cache=True,
                 )
+                logger.info(
+                    "Cached graph for %s in %s",
+                    place_name,
+                    timedelta(seconds=time() - t_start),
+                )
+
             except Exception as exc:
                 logger.error("Could not download graph for %s: %s", place_name, exc)
