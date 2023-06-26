@@ -2,19 +2,24 @@
 
 #SBATCH --job-name=superblockify_test   # Job name
 #SBATCH --output=job.%j.out             # Name of output file (%j expands to jobId)
-#SBATCH --cpus-per-task=20              # Schedule one core
-##SBATCH --mem=192G                      # Memory in MB
-#SBATCH --time=01:00:00                 # Run time (hh:mm:ss) - run for one hour max
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=10G
+#SBATCH --time=02:00:00                 # Run time (hh:mm:ss)
 #SBATCH --partition=red                 # Run on either the Red or Brown queue
 #SBATCH --mail-type=FAIL,END            # Send an email when the job finishes or fails
 
-#hostname
+WORK_DIR=~/Superblockify
 
-eval "$(conda shell.bash hook)"
-conda activate sb_env
-cd ~/Superblockify/
+# Activate environment
+source $WORK_DIR/scripts/slurm/de_activate.sh
+# Change working directory to root of project
+cd $WORK_DIR
 # Add root directory to PYTHONPATH
 export PYTHONPATH=$PYTHONPATH:$(pwd)
-python scripts/slurm/mainHPC.py
-# Deactivate conda environment
-conda deactivate
+
+# Run all tests
+pytest --cov=superblockify tests/
+
+# Deactivate environment
+source $WORK_DIR/scripts/slurm/de_activate.sh
+

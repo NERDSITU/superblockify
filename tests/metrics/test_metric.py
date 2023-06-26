@@ -166,9 +166,11 @@ class TestMetric:
             part.metric.calculate_high_bc_clustering(part.graph, percentile=percentile)
 
     @mark_xfail_flaky_download
+    @pytest.mark.parametrize("dismiss_distance_matrix", [True, False])
     def test_saving_and_loading(
         self,
         partitioner_class,
+        dismiss_distance_matrix,
         _teardown_test_graph_io,
     ):
         """Test saving and loading of metrics."""
@@ -180,8 +182,17 @@ class TestMetric:
         )
         part.run(calculate_metrics=True, make_plots=False)
         # Save
-        part.save(save_graph_copy=False)
+        part.save(
+            save_graph_copy=False,
+            dismiss_distance_matrix=dismiss_distance_matrix,
+            key_figures=True,
+        )
         # Load
         metric = Metric.load(part.name)
         # Check if metrics are equal
-        assert part.metric == metric
+        if dismiss_distance_matrix:
+            assert getattr(metric, "distance_matrix", None) is None
+            assert getattr(metric, "predecessor_matrix", None) is None
+            assert metric.coverage == part.metric.coverage
+        else:
+            assert part.metric == metric

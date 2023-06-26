@@ -1,4 +1,4 @@
-"""BasePartitioner parent and dummy."""
+"""BasePartitioner parent and dummy."""  # pylint: disable=too-many-lines
 import pickle
 from abc import ABC, abstractmethod
 from os import makedirs
@@ -13,6 +13,7 @@ from networkx import (
     MultiDiGraph,
 )
 from osmnx.stats import edge_length_total
+from ruamel.yaml import YAML
 
 from .checks import is_valid_partitioning
 from .plot import (
@@ -29,13 +30,14 @@ from .utils import (
     show_graph_stats,
     remove_dead_ends_directed,
     split_up_isolated_edges_directed,
+    get_key_figures,
 )
 from .. import attribute
-from ..config import logger, GRAPH_DIR, RESULTS_DIR, NETWORK_FILTER
+from ..config import logger, GRAPH_DIR, RESULTS_DIR, NETWORK_FILTER, PLOT_SUFFIX
 from ..graph_stats import calculate_component_metrics
 from ..metrics.metric import Metric
-from ..population.tessellation import add_edge_cells
 from ..plot import save_plot
+from ..population.tessellation import add_edge_cells
 from ..utils import load_graph_from_place, load_graphml_dtypes
 
 
@@ -233,21 +235,35 @@ class BasePartitioner(ABC):
         if make_plots:
             if self.partitions:
                 fig, _ = plot_partition_graph(self)
-                save_plot(self.results_dir, fig, f"{self.name}_partition_graph.pdf")
+                save_plot(
+                    self.results_dir, fig, f"{self.name}_partition_graph.{PLOT_SUFFIX}"
+                )
                 plt.show()
             fig, _ = plot_subgraph_component_size(self, "length")
-            save_plot(self.results_dir, fig, f"{self.name}_subgraph_component_size.pdf")
+            save_plot(
+                self.results_dir,
+                fig,
+                f"{self.name}_subgraph_component_size.{PLOT_SUFFIX}",
+            )
             plt.show()
             fig, _ = plot_component_rank_size(self, "length")
-            save_plot(self.results_dir, fig, f"{self.name}_component_rank_size.pdf")
+            save_plot(
+                self.results_dir, fig, f"{self.name}_component_rank_size.{PLOT_SUFFIX}"
+            )
             plt.show()
             if self.components:
                 fig, _ = plot_component_graph(self)
-                save_plot(self.results_dir, fig, f"{self.name}_component_graph.pdf")
+                save_plot(
+                    self.results_dir, fig, f"{self.name}_component_graph.{PLOT_SUFFIX}"
+                )
                 plt.show()
             if replace_max_speeds:
                 fig, _ = plot_speed_un_restricted(self.graph, self.sparsified)
-                save_plot(self.results_dir, fig, f"{self.name}_speed_un_restricted.pdf")
+                save_plot(
+                    self.results_dir,
+                    fig,
+                    f"{self.name}_speed_un_restricted.{PLOT_SUFFIX}",
+                )
                 fig.show()
 
         if calculate_metrics:
@@ -474,7 +490,6 @@ class BasePartitioner(ABC):
         The components are set to `self.components`, also overwriting the
         `self.partitions` attribute.
         """
-
         split_up_isolated_edges_directed(self.graph, self.sparsified)
 
         # Find difference, edgewise, between the graph and the sparsified subgraph
@@ -577,7 +592,6 @@ class BasePartitioner(ABC):
             into components).
 
         """
-
         self.check_has_been_run()
 
         if self.components is None:
@@ -664,7 +678,6 @@ class BasePartitioner(ABC):
             If BasePartitioner has not been run yet (the partitions are not defined).
 
         """
-
         self.check_has_been_run()
 
         # List of partitions /unignored components
@@ -692,7 +705,6 @@ class BasePartitioner(ABC):
                 if part["subgraph"].degree(node) >= 1
                 and node not in self.sparsified.nodes
             }
-
         return partitions
 
     def get_sorted_node_list(self):
@@ -793,7 +805,9 @@ class BasePartitioner(ABC):
         return graph
 
     # IO methods
-    def save(self, save_graph_copy=False):
+    def save(
+        self, save_graph_copy=False, dismiss_distance_matrix=False, key_figures=False
+    ):
         """Save the partitioner.
 
         Pickle the partitioner and save it to file. Metric object will be saved in
@@ -808,12 +822,18 @@ class BasePartitioner(ABC):
             a copy of the graph that has been modified by the partitioner.
             This is necessary for later plotting partitions, but not for component
             plots.
+        dismiss_distance_matrix : bool, optional
+            If True, dismiss the distance matrices in the metric object before saving.
+            This can use a lot of memory.
+        key_figures : bool, optional
+            If True, save key figures to file.
 
         Notes
         -----
         :attr:`GRAPH_DIR` is set in the :mod:`superblockify.config` module.
         """
-
+        if key_figures:
+            self.save_key_figures()
         # Save graph
         if save_graph_copy:
             graph_path = join(self.results_dir, self.name + ".graphml")
@@ -821,7 +841,9 @@ class BasePartitioner(ABC):
             ox.save_graphml(self.graph, filepath=graph_path)
 
         # Save metrics
-        self.metric.save(self.results_dir, self.name)
+        self.metric.save(
+            self.results_dir, self.name, dismiss_distance_matrix=dismiss_distance_matrix
+        )
 
         # Save partitioner, with self.graph = None
         partitioner_path = join(self.results_dir, self.name + ".partitioner")
@@ -853,6 +875,44 @@ class BasePartitioner(ABC):
             # Restore metric
             self.metric = metric
 
+    def save_key_figures(self, save_dir=join(RESULTS_DIR, "key_figures"), name=None):
+        """Save key figures.
+
+        Only saves graph attributes, essential metrics and the basic graph stats of
+        the partitions.
+
+        Parameters
+        ----------
+        save_dir : str, optional
+            Directory in which to save the key figures. If None, use
+            :attr:`RESULTS_DIR`+`/key_figures`.
+        name : str, optional
+            Name of the key figures. If None, use :attr:`name`.
+            "_key_figures.yml" will be appended to the name.
+
+        Notes
+        -----
+        :attr:`RESULTS_DIR` is set in the :mod:`superblockify.config` module.
+        """
+        if name is None:
+            name = self.name
+        logger.debug("Preparing key figures for %s.", name)
+
+        # Create save directory if it does not exist
+        if not exists(save_dir):
+            logger.debug("Creating directory %s", save_dir)
+            makedirs(save_dir)
+
+        # Get key figures
+        key_figures = get_key_figures(self)
+
+        # Save key figures
+        key_figures_path = join(save_dir, name + "_key_figures.yml")
+        logger.info("Saving key figures to %s.", key_figures_path)
+        with open(key_figures_path, "w", encoding="utf8") as file:
+            yaml = YAML()
+            yaml.dump(key_figures, file)
+
     @classmethod
     def load(cls, name):
         """Load a partitioner.
@@ -877,7 +937,6 @@ class BasePartitioner(ABC):
         -----
         The directories :attr:`GRAPH_DIR` and :attr:`RESULTS_DIR` are set in the
         :mod:`superblockify.config` module.
-
         """
 
         # Load partitioner

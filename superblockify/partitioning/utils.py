@@ -5,9 +5,10 @@ from uuid import uuid4
 
 from geopandas import GeoDataFrame
 from networkx import set_edge_attributes, strongly_connected_components
+from numpy import generic
 from osmnx import graph_to_gdfs, get_undirected
 from pandas import DataFrame
-from shapely import Point
+from shapely import Point, Geometry
 from shapely.ops import substring
 
 from ..config import logger
@@ -516,3 +517,89 @@ def get_new_node_id(graph):
     while node_id in graph.nodes or node_id < 2**63:
         node_id = uuid4().int
     return node_id
+
+
+def get_key_figures(partitioner):
+    """Get key figures of the partitioner.
+
+    Contains the name, city_name, graph_stats, metrics, component stats,
+    attribute_label, and attribute_dtype.
+
+    Parameters
+    ----------
+    partitioner : BasePartitioner
+        Partitioner to get the key figures for.
+
+    Returns
+    -------
+    dict
+        Key figures of the partitioner. See code for structure.
+    """
+    return _make_yaml_compatible(
+        {
+            "name": partitioner.name,
+            "city_name": partitioner.city_name,
+            "attribute_label": partitioner.attribute_label,
+            "attribute_dtype": partitioner.attribute_dtype,
+            "graph_stats": {
+                key: value
+                for key, value in partitioner.graph.graph.items()
+                if not isinstance(value, Geometry)  # discard OSM graph boundary
+            },
+            "components": [
+                # everything of the components/partitions, except the subgraph
+                {key: value for key, value in comp.items() if key != "subgraph"}
+                for comp in partitioner.get_ltns()
+            ],
+            "metric": {
+                "unit": partitioner.metric.unit,
+                "coverage": partitioner.metric.coverage,
+                "directness": partitioner.metric.directness,
+                "global_efficiency": partitioner.metric.global_efficiency,
+                "high_bc_clustering": partitioner.metric.high_bc_clustering,
+                "high_bc_anisotropy": partitioner.metric.high_bc_anisotropy,
+            },
+        }
+    )
+
+
+def _make_yaml_compatible(input_val):
+    """Make the dict compatible with the yaml format.
+
+    Represent only with python types, recursively.
+
+    Parameters
+    ----------
+    dict : dict
+        Dictionary to make compatible.
+
+    Returns
+    -------
+    dict
+        Copy of the dict with only python types.
+    """
+    # Recursively call the function if the value is a dict
+    if isinstance(input_val, dict):
+        new_dict = {}
+        for key, value in input_val.items():
+            new_dict[key] = _make_yaml_compatible(value)
+        return new_dict
+    # Recursively call the function if the value is a list or tuple
+    if isinstance(input_val, (list, tuple)):
+        return [_make_yaml_compatible(value) for value in input_val]
+    # If int, float, str, bool, re-cast it to the same type
+    if isinstance(input_val, int):
+        output_val = int(input_val)
+    elif isinstance(input_val, float):
+        output_val = float(input_val)
+    elif isinstance(input_val, str):
+        output_val = str(input_val)
+    elif isinstance(input_val, bool):
+        output_val = bool(input_val)
+    # Numpy types
+    # find out if it is a numpy scalar
+    elif isinstance(input_val, generic):
+        output_val = input_val.item()
+    else:
+        output_val = str(input_val)
+    return output_val

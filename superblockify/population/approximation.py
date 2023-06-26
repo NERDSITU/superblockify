@@ -123,7 +123,7 @@ def get_population_area(graph):
     return npsum(population), npsum(area)
 
 
-def get_edge_population(graph, batch_size=1000, **tess_kwargs):
+def get_edge_population(graph, batch_size=10000, **tess_kwargs):
     """Get edge population for the graph.
 
     Calculates the population and area of the edge. First tessellates the edges
@@ -136,7 +136,7 @@ def get_edge_population(graph, batch_size=1000, **tess_kwargs):
     graph : networkx.MultiDiGraph
         The graph to tessellate.
     batch_size : int, optional
-        Number of edges to process in one batch. By default, 1000.
+        Number of edges to process in one batch. By default, 10000.
         It must be greater than 0. If it is greater than the number of edges,
         all edges are processed in one batch.
     **tess_kwargs

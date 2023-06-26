@@ -303,6 +303,23 @@ class TestPartitioners:
             else:
                 assert getattr(part, attr) == getattr(part_loaded, attr)
 
+    @pytest.mark.parametrize("other_name", [None, "other_name"])
+    def test_save_key_figures(
+        self, test_city_small_precalculated_copy, other_name, _teardown_test_folders
+    ):
+        """Test saving of key figures."""
+        part = test_city_small_precalculated_copy
+        part.save_key_figures(
+            save_dir=join(RESULTS_DIR, "key_figures_test"), name=other_name
+        )
+        assert path.isfile(
+            path.join(
+                RESULTS_DIR,
+                "key_figures_test",
+                f"{other_name or part.name}_key_figures.yml",
+            )
+        )
+
     def test_load_file_not_found(self, partitioner_class):
         """Test loading of partitioner with file not found."""
         with pytest.raises(FileNotFoundError):

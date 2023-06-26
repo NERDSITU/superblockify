@@ -8,9 +8,9 @@ from superblockify.graph_stats import (
 )
 
 
-def test_graph_stats(test_city_all_copy):
+def test_graph_stats(test_city_small_copy):
     """Test the graph statistics calculation."""
-    _, graph = test_city_all_copy
+    _, graph = test_city_small_copy
     stats = basic_graph_stats(graph, area=1.0)
     assert len(stats) == 19
     assert stats["circuity_avg"] >= 1.0

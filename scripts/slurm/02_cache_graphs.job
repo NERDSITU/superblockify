@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#SBATCH --job-name=cache_cities         # Job name
+#SBATCH --array=0-9                     # Array index
+#SBATCH --output=cache_graphs.%j.out    # Name of output file (%j expands to jobId)
+#SBATCH --error=cache_graphs.%j.err
+#SBATCH --cpus-per-task=4               # Number of CPUs per task
+#SBATCH --mem=24G                       # Memory per node (all cores)
+#SBATCH --time=04:00:00                 # Run time (hh:mm:ss)
+#SBATCH --partition=red                 # Run on either the Red or Brown queue
+#SBATCH --mail-type=FAIL,END            # Send an email when the job finishes or fails
+
+WORK_DIR=~/Superblockify
+
+# Activate environment
+source $WORK_DIR/scripts/slurm/de_activate.sh
+# Change working directory to root of project
+cd $WORK_DIR
+# Add root directory to PYTHONPATH
+export PYTHONPATH=$PYTHONPATH:$(pwd)
+
+# Call python script to load cities
+python scripts/analysis/02_cache_graphs.py
+
+# Deactivate environment
+source $WORK_DIR/scripts/slurm/de_activate.sh
+

@@ -1,6 +1,7 @@
 """Utility functions for superblockify."""
 from ast import literal_eval
 from itertools import chain
+from os.path import getsize
 from re import match
 
 import osmnx as ox
@@ -19,11 +20,13 @@ from numpy import (
     isinf,
     nan,
 )
+from osmnx._errors import CacheOnlyModeInterrupt
 from osmnx.stats import count_streets_per_node
 from shapely import wkt
 
 from .graph_stats import basic_graph_stats
 from .population.approximation import add_edge_population
+from .config import logger
 
 
 def extract_attributes(graph, edge_attributes, node_attributes):
@@ -69,7 +72,9 @@ def extract_attributes(graph, edge_attributes, node_attributes):
     return graph
 
 
-def load_graph_from_place(save_as, search_string, add_population=False, **gfp_kwargs):
+def load_graph_from_place(
+    save_as, search_string, add_population=False, only_cache=False, **gfp_kwargs
+):
     """Load a graph from a place and save it to a file.
 
     The method filters the attributes of the graph to only include the ones that
@@ -86,13 +91,15 @@ def load_graph_from_place(save_as, search_string, add_population=False, **gfp_kw
         "R1234567". Not mixed with place names.
     add_population : bool, optional
         Whether to add population data to the graph. Default is False.
+    only_cache : bool, optional
+        Whether to only load the graph from cache. Default is False.
     **gfp_kwargs
         Keyword arguments to pass to osmnx.graph_from_place.
 
     Returns
     -------
-    networkx.MultiDiGraph
-        The graph loaded from the place.
+    networkx.MultiDiGraph or None
+        The graph loaded from the place. If only_cache is True, returns None.
     """
 
     # check the format of the search string, match to regex R\d+, str or list of str
@@ -109,10 +116,19 @@ def load_graph_from_place(save_as, search_string, add_population=False, **gfp_kw
     # make shapely.geometry.MultiPolygon from all polygons
     # Project to WGS84 to query OSM
     mult_polygon = ox.project_gdf(mult_polygon, to_crs="epsg:4326")
+    logger.debug("Reprojected boundary to WGS84 - Downloading graph")
     # Get graph - automatically adds distances before simplifying
-    graph = ox.graph_from_polygon(mult_polygon.geometry.unary_union, **gfp_kwargs)
-    # Add edge bearings - the precision >1 is important for binning
-    graph = ox.add_edge_bearings(graph, precision=2)
+    ox.settings.cache_only_mode = only_cache
+    try:
+        graph = ox.graph_from_polygon(mult_polygon.geometry.unary_union, **gfp_kwargs)
+    except CacheOnlyModeInterrupt:
+        logger.debug("Only loaded graph from cache")
+        return None
+    logger.debug("Downloaded graph - Preprocessing")
+    # Add edge bearings
+    graph = ox.add_edge_bearings(graph)  # precision=2)  # the precision >1 is
+    # important for binning when using the deprecated BearingPartitioner
+
     # Project to local UTM - coordinates can be used as
     graph = ox.project_graph(graph)
 
@@ -145,8 +161,10 @@ def load_graph_from_place(save_as, search_string, add_population=False, **gfp_kw
     graph.graph["area"] = graph.graph["boundary"].area
     # update graph attributes with basic graph stats
     graph.graph.update(basic_graph_stats(graph, area=graph.graph["area"]))
-
+    # Save graph
+    logger.debug("Preprocessing done - Saving graph")
     ox.save_graphml(graph, filepath=save_as)
+    logger.debug("Saved graph (%s MB) to %s", getsize(save_as) >> 20, save_as)
     return graph
 
 
