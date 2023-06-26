@@ -336,7 +336,7 @@ def remove_dead_ends_directed(graph):
 
 
 def split_up_isolated_edges_directed(graph, sparsified):
-    """Split up all edges in the directed graph than are isolated disregarding
+    """Split up all edges in the directed graph that are isolated disregarding
     the sparsified subgraph.
 
     Isolated edges are edges that are not connected to any other edge in the graph.
@@ -464,7 +464,7 @@ def split_up_isolated_edges_directed(graph, sparsified):
                 )
 
             else:
-                data_p.pop("geometry")
+                data_p.pop("geometry", None)
                 graph.add_edge(
                     u_parallel,
                     middle_id,

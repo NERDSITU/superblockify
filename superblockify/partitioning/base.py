@@ -1,6 +1,7 @@
 """BasePartitioner parent and dummy."""  # pylint: disable=too-many-lines
 import pickle
 from abc import ABC, abstractmethod
+from itertools import chain
 from os import makedirs
 from os.path import join, exists
 from typing import final, Final, List
@@ -542,6 +543,20 @@ class BasePartitioner(ABC):
         self.components = self.partitions
         for component in self.components:
             component["ignore"] = False
+
+        missing_edges = (
+            set(self.graph.edges)
+            - set(
+                chain.from_iterable(comp["subgraph"].edges for comp in self.components)
+            )
+            - set(self.sparsified.edges)
+        )
+        if missing_edges:
+            # Add missing edges to the sparsified graph - they are connected to the
+            # sparse graph on both sides, so they are not part of the components
+            self.sparsified = self.graph.edge_subgraph(
+                set(self.sparsified.edges) | missing_edges
+            )
 
     def set_sparsified_from_components(self):
         """Set sparsified graph from components.
