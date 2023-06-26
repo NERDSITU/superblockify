@@ -39,7 +39,7 @@ def get_hpc_subset(joblist):
     )
     subset = joblist[subset]
     logger.debug(
-        "Job %s/%s, with $s of %s jobs.",
+        "Job %s/%s, with %s of %s jobs.",
         environ["SLURM_ARRAY_TASK_ID"],
         environ["SLURM_ARRAY_TASK_COUNT"],
         len(subset),
