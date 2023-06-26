@@ -166,7 +166,9 @@ def plot_component_rank_size(partitioner, measure):
         )
 
     # Find number of edges in each component for each partition
-    key_name = "length_total" if measure == "length" else f"num_{measure}"
+    key_name = (
+        "length_total" if measure == "length" else "n" if measure == "nodes" else "m"
+    )
     component_size = []
     ignore = []
 
@@ -263,7 +265,9 @@ def plot_subgraph_component_size(partitioner, measure, xticks=None, **pcs_kwargs
         )
 
     # Find number of edges in each component for each partition
-    key_name = "length_total" if measure == "length" else f"num_{measure}"
+    key_name = (
+        "length_total" if measure == "length" else "n" if measure == "nodes" else "m"
+    )
     component_size = []
     component_values = []
     ignore = []
