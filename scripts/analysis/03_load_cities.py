@@ -34,7 +34,7 @@ from superblockify.utils import load_graph_from_place
 # turn on logging
 ox.settings.log_console = False
 # turn response caching off as this only loads graphs to files
-ox.settings.use_cache = False
+ox.settings.use_cache = True
 # turn on to force reloading the graph
 RELOAD_GRAPHS = False
 
@@ -44,6 +44,14 @@ if __name__ == "__main__":
         raise ValueError("SLURM_ARRAY_TASK_ID not set")
     if "SLURM_ARRAY_TASK_COUNT" not in environ:
         raise ValueError("SLURM_ARRAY_TASK_COUNT not set")
+
+    # Throw out places that are already in GRAPH_DIR, so the rest is distributed
+    if not RELOAD_GRAPHS:
+        PLACES_100_CITIES = {
+            place_name: place
+            for place_name, place in PLACES_100_CITIES.items()
+            if not exists(join(GRAPH_DIR, place_name + ".graphml"))
+        }
 
     # Determine with slice of the cities to download
     # from (task_num * num_cities // num_tasks)
@@ -56,6 +64,16 @@ if __name__ == "__main__":
         * len(PLACES_100_CITIES)
         // int(environ["SLURM_ARRAY_TASK_COUNT"]),
     )
+
+    logger.info("There are %s graphs left to download", len(PLACES_100_CITIES))
+    logger.info(
+        "Task %s/%s: Downloading graphs %s %s",
+        environ["SLURM_ARRAY_TASK_ID"],
+        environ["SLURM_ARRAY_TASK_COUNT"],
+        subset,
+        list(PLACES_100_CITIES.keys())[subset],
+    )
+
     # PLACES_100_CITIES is a dictionary of the form {name: place<dict>}
     for place_name, place in list(PLACES_100_CITIES.items())[subset]:
         logger.info(
