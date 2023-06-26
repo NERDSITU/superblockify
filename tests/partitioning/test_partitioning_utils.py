@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from networkx import gnp_random_graph
+from numpy import int64, float64
 from osmnx import graph_to_gdfs
 
 from superblockify.partitioning.utils import (
@@ -13,6 +14,7 @@ from superblockify.partitioning.utils import (
     remove_dead_ends_directed,
     split_up_isolated_edges_directed,
     get_new_node_id,
+    _make_yaml_compatible,
 )
 
 
@@ -168,3 +170,36 @@ def test_get_new_node_id(len_graph, patch_uuid, monkeypatch):
         )
     rand_graph.add_node(get_new_node_id(rand_graph))
     assert len(rand_graph.nodes) == len_graph + 1
+
+
+@pytest.mark.parametrize(
+    "test_dict, expected",
+    [
+        ({}, {}),
+        ({"a": 1}, {"a": 1}),
+        ({"a": None}, {"a": "None"}),
+        ({"a": int64(1)}, {"a": 1}),
+        ({"a": float64(1.0)}, {"a": 1.0}),
+        ({"a": "1"}, {"a": "1"}),
+        ({"a": True}, {"a": True}),
+        ({"a": False}, {"a": False}),
+        ({"a": [1, 2, 3]}, {"a": [1, 2, 3]}),
+        ({"a": (int64(1), float64(1.0))}, {"a": [1, 1.0]}),
+        ({"a": {"b": 1}}, {"a": {"b": 1}}),
+        ({"a": {"b": int64(1)}}, {"a": {"b": 1}}),
+        (
+            {"a": {"b": [{"c": "m"}, {"d": (1, 3, float64(4.3))}]}},
+            {"a": {"b": [{"c": "m"}, {"d": [1, 3, 4.3]}]}},
+        ),
+        (1, 1),
+        (1.0, 1.0),
+        ("1", "1"),
+        (True, True),
+        (False, False),
+        ([1, 2, 3], [1, 2, 3]),
+        ((int64(1), float64(1.0)), [1, 1.0]),
+    ],
+)
+def test__make_yaml_compatible(test_dict, expected):
+    """Test making a dict yaml compatible."""
+    assert _make_yaml_compatible(test_dict) == expected

@@ -19,7 +19,8 @@ from tests.conftest import mark_xfail_flaky_download
 
 
 @mark_xfail_flaky_download
-def test_load_graph_from_place():
+@pytest.mark.parametrize("only_cache", [True, False])
+def test_load_graph_from_place(only_cache):
     """Test that the load_graph_from_place function works."""
 
     graph = load_graph_from_place(
@@ -27,18 +28,22 @@ def test_load_graph_from_place():
         "Adliswil, Bezirk Horgen, Zürich, Switzerland",
         add_population=True,
         network_type="drive",
+        only_cache=only_cache,
     )
+    if only_cache:
+        assert graph is None
+    else:
+        assert graph is not None
+        assert len(graph) > 0
+        assert graph.size() > 0
+        assert isinstance(graph.graph["boundary"], (MultiPolygon, Polygon))
 
-    assert graph is not None
-    assert len(graph) > 0
-    assert graph.size() > 0
-    assert isinstance(graph.graph["boundary"], (MultiPolygon, Polygon))
-
-    # check that every edge has the attribute 'length', `speed_kph` and `travel_time`
-    for _, _, data in graph.edges(data=True):
-        assert "length" in data
-        assert "speed_kph" in data
-        assert "travel_time" in data
+        # check that every edge has the attribute'length', `speed_kph`,
+        # and `travel_time`
+        for _, _, data in graph.edges(data=True):
+            assert "length" in data
+            assert "speed_kph" in data
+            assert "travel_time" in data
 
 
 @pytest.mark.parametrize(

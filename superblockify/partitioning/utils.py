@@ -563,7 +563,7 @@ def get_key_figures(partitioner):
     )
 
 
-def _make_yaml_compatible(input_dict):
+def _make_yaml_compatible(input_val):
     """Make the dict compatible with the yaml format.
 
     Represent only with python types, recursively.
@@ -578,27 +578,28 @@ def _make_yaml_compatible(input_dict):
     dict
         Copy of the dict with only python types.
     """
-    new_dict = {}
-    for key, value in input_dict.items():
-        # Recursively call the function if the value is a dict
-        if isinstance(value, dict):
+    # Recursively call the function if the value is a dict
+    if isinstance(input_val, dict):
+        new_dict = {}
+        for key, value in input_val.items():
             new_dict[key] = _make_yaml_compatible(value)
-        # If ins, float, str, bool, re-cast it to the same type
-        elif isinstance(value, int):
-            new_dict[key] = int(value)
-        elif isinstance(value, float):
-            new_dict[key] = float(value)
-        elif isinstance(value, str):
-            new_dict[key] = str(value)
-        elif isinstance(value, bool):
-            new_dict[key] = bool(value)
-        # Recursively call the function if the value is a list or tuple
-        elif isinstance(value, (list, tuple)):
-            new_dict[key] = [_make_yaml_compatible(v) for v in value]
-        # Numpy types
-        # find out if it is a numpy scalar
-        elif isinstance(value, generic):
-            new_dict[key] = value.item()
-        else:
-            new_dict[key] = str(value)
-    return new_dict
+        return new_dict
+    # Recursively call the function if the value is a list or tuple
+    if isinstance(input_val, (list, tuple)):
+        return [_make_yaml_compatible(value) for value in input_val]
+    # If int, float, str, bool, re-cast it to the same type
+    if isinstance(input_val, int):
+        output_val = int(input_val)
+    elif isinstance(input_val, float):
+        output_val = float(input_val)
+    elif isinstance(input_val, str):
+        output_val = str(input_val)
+    elif isinstance(input_val, bool):
+        output_val = bool(input_val)
+    # Numpy types
+    # find out if it is a numpy scalar
+    elif isinstance(input_val, generic):
+        output_val = input_val.item()
+    else:
+        output_val = str(input_val)
+    return output_val

@@ -20,6 +20,7 @@ from numpy import (
     isinf,
     nan,
 )
+from osmnx._errors import CacheOnlyModeInterrupt
 from osmnx.stats import count_streets_per_node
 from shapely import wkt
 
@@ -118,8 +119,9 @@ def load_graph_from_place(
     logger.debug("Reprojected boundary to WGS84 - Downloading graph")
     # Get graph - automatically adds distances before simplifying
     ox.settings.cache_only_mode = only_cache
-    graph = ox.graph_from_polygon(mult_polygon.geometry.unary_union, **gfp_kwargs)
-    if only_cache:
+    try:
+        graph = ox.graph_from_polygon(mult_polygon.geometry.unary_union, **gfp_kwargs)
+    except CacheOnlyModeInterrupt:
         logger.debug("Only loaded graph from cache")
         return None
     logger.debug("Downloaded graph - Preprocessing")
