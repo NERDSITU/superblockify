@@ -188,12 +188,12 @@ def plot_by_attribute(
             )
         )
         # Print list of unique colors in the colormap, with a set comprehension
-        logger.debug(
-            "Unique colors in the node colormap %s (len %s): %s",
-            node_cmap,
-            len(n_c),
-            {tuple(c) for c in n_c},
-        )
+        # logger.debug(
+        #     "Unique colors in the node colormap %s (len %s): %s",
+        #     node_cmap,
+        #     len(n_c),
+        #     {tuple(c) for c in n_c},
+        # )
 
     # If only edge_attr is set
     if e_c and not n_c:
