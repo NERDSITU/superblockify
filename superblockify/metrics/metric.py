@@ -473,6 +473,8 @@ class Metric:
         """
         string = ""
         for key, value in self.__dict__.items():
+            if key == "node_list":
+                continue
             if value is not None or key == "unit":
                 if isinstance(value, dict):
                     if all(v is None for v in value.values()):
