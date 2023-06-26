@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from geopandas import GeoDataFrame
 from networkx import set_edge_attributes, strongly_connected_components
+from numpy import float64
 from osmnx import graph_to_gdfs, get_undirected
 from pandas import DataFrame
 from shapely import Point
@@ -516,3 +517,59 @@ def get_new_node_id(graph):
     while node_id in graph.nodes or node_id < 2**63:
         node_id = uuid4().int
     return node_id
+
+
+def get_key_figures(partitioner):
+    """Get key figures of the partitioner.
+
+    Contains the name, city_name, graph_stats, metrics, component stats,
+    attribute_label, and attribute_dtype.
+
+    Parameters
+    ----------
+    partitioner : BasePartitioner
+        Partitioner to get the key figures for.
+
+    Returns
+    -------
+    dict
+        Key figures of the partitioner. See code for structure.
+    """
+    return {
+        "name": str(partitioner.name),
+        "city_name": str(partitioner.city_name),
+        "attribute_label": str(partitioner.attribute_label),
+        "attribute_dtype": str(partitioner.attribute_dtype),
+        "graph_stats": {
+            key: value
+            for key, value in partitioner.graph.graph.items()
+            if isinstance(value, (int, float, str, dict, bool))
+        },
+        "components": [
+            # everything of the components/partitions, except the subgraph
+            {
+                key: str(value)
+                if key == "representative_node_id"
+                else float(value)
+                if isinstance(value, float64)
+                else value
+                for key, value in comp.items()
+                if key != "subgraph"
+            }
+            for comp in partitioner.get_ltns()
+        ],
+        "metric": {
+            "unit": str(partitioner.metric.unit),
+            "coverage": float(partitioner.metric.coverage),
+            "directness": {
+                key: float(value)
+                for key, value in partitioner.metric.directness.items()
+            },
+            "global_efficiency": {
+                key: float(value)
+                for key, value in partitioner.metric.global_efficiency.items()
+            },
+            "high_bc_clustering": float(partitioner.metric.high_bc_clustering),
+            "high_bc_anisotropy": float(partitioner.metric.high_bc_anisotropy),
+        },
+    }
