@@ -183,7 +183,9 @@ class TestMetric:
         part.run(calculate_metrics=True, make_plots=False)
         # Save
         part.save(
-            save_graph_copy=False, dismiss_distance_matrix=dismiss_distance_matrix
+            save_graph_copy=False,
+            dismiss_distance_matrix=dismiss_distance_matrix,
+            key_figures=True,
         )
         # Load
         metric = Metric.load(part.name)
