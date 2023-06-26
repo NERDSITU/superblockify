@@ -476,7 +476,6 @@ class BasePartitioner(ABC):
         The components are set to `self.components`, also overwriting the
         `self.partitions` attribute.
         """
-
         split_up_isolated_edges_directed(self.graph, self.sparsified)
 
         # Find difference, edgewise, between the graph and the sparsified subgraph
@@ -579,7 +578,6 @@ class BasePartitioner(ABC):
             into components).
 
         """
-
         self.check_has_been_run()
 
         if self.components is None:
@@ -666,7 +664,6 @@ class BasePartitioner(ABC):
             If BasePartitioner has not been run yet (the partitions are not defined).
 
         """
-
         self.check_has_been_run()
 
         # List of partitions /unignored components
@@ -694,7 +691,6 @@ class BasePartitioner(ABC):
                 if part["subgraph"].degree(node) >= 1
                 and node not in self.sparsified.nodes
             }
-
         return partitions
 
     def get_sorted_node_list(self):
@@ -795,7 +791,9 @@ class BasePartitioner(ABC):
         return graph
 
     # IO methods
-    def save(self, save_graph_copy=False, dismiss_distance_matrix=False):
+    def save(
+        self, save_graph_copy=False, dismiss_distance_matrix=False, key_figures=False
+    ):
         """Save the partitioner.
 
         Pickle the partitioner and save it to file. Metric object will be saved in
@@ -813,12 +811,15 @@ class BasePartitioner(ABC):
         dismiss_distance_matrix : bool, optional
             If True, dismiss the distance matrices in the metric object before saving.
             This can use a lot of memory.
+        key_figures : bool, optional
+            If True, save key figures to file.
 
         Notes
         -----
         :attr:`GRAPH_DIR` is set in the :mod:`superblockify.config` module.
         """
-        self.save_key_figures()
+        if key_figures:
+            self.save_key_figures()
         # Save graph
         if save_graph_copy:
             graph_path = join(self.results_dir, self.name + ".graphml")
