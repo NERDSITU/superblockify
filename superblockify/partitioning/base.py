@@ -1,4 +1,4 @@
-"""BasePartitioner parent and dummy."""
+"""BasePartitioner parent and dummy."""  # pylint: disable=too-many-lines
 import pickle
 from abc import ABC, abstractmethod
 from os import makedirs
@@ -33,7 +33,7 @@ from .utils import (
     get_key_figures,
 )
 from .. import attribute
-from ..config import logger, GRAPH_DIR, RESULTS_DIR, NETWORK_FILTER
+from ..config import logger, GRAPH_DIR, RESULTS_DIR, NETWORK_FILTER, PLOT_SUFFIX
 from ..graph_stats import calculate_component_metrics
 from ..metrics.metric import Metric
 from ..plot import save_plot
@@ -235,21 +235,35 @@ class BasePartitioner(ABC):
         if make_plots:
             if self.partitions:
                 fig, _ = plot_partition_graph(self)
-                save_plot(self.results_dir, fig, f"{self.name}_partition_graph.pdf")
+                save_plot(
+                    self.results_dir, fig, f"{self.name}_partition_graph.{PLOT_SUFFIX}"
+                )
                 plt.show()
             fig, _ = plot_subgraph_component_size(self, "length")
-            save_plot(self.results_dir, fig, f"{self.name}_subgraph_component_size.pdf")
+            save_plot(
+                self.results_dir,
+                fig,
+                f"{self.name}_subgraph_component_size.{PLOT_SUFFIX}",
+            )
             plt.show()
             fig, _ = plot_component_rank_size(self, "length")
-            save_plot(self.results_dir, fig, f"{self.name}_component_rank_size.pdf")
+            save_plot(
+                self.results_dir, fig, f"{self.name}_component_rank_size.{PLOT_SUFFIX}"
+            )
             plt.show()
             if self.components:
                 fig, _ = plot_component_graph(self)
-                save_plot(self.results_dir, fig, f"{self.name}_component_graph.pdf")
+                save_plot(
+                    self.results_dir, fig, f"{self.name}_component_graph.{PLOT_SUFFIX}"
+                )
                 plt.show()
             if replace_max_speeds:
                 fig, _ = plot_speed_un_restricted(self.graph, self.sparsified)
-                save_plot(self.results_dir, fig, f"{self.name}_speed_un_restricted.pdf")
+                save_plot(
+                    self.results_dir,
+                    fig,
+                    f"{self.name}_speed_un_restricted.{PLOT_SUFFIX}",
+                )
                 fig.show()
 
         if calculate_metrics:

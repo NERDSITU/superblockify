@@ -24,7 +24,7 @@ from .plot import (
     plot_relative_difference,
     plot_relative_increase_on_graph,
 )
-from ..config import logger, RESULTS_DIR, CLUSTERING_PERCENTILE
+from ..config import logger, RESULTS_DIR, CLUSTERING_PERCENTILE, PLOT_SUFFIX
 from ..plot import save_plot
 from ..utils import compare_dicts
 from ..graph_stats import basic_graph_stats
@@ -358,7 +358,7 @@ class Metric:
         save_plot(
             partitioner.results_dir,
             fig,
-            f"{partitioner.name}_distance_matrices.pdf",
+            f"{partitioner.name}_distance_matrices.{PLOT_SUFFIX}",
         )
         fig.show()
         fig, _ = plot_distance_matrices_pairwise_relative_difference(
@@ -368,7 +368,7 @@ class Metric:
             partitioner.results_dir,
             fig,
             f"{partitioner.name}_distance_matrices_"
-            f"pairwise_relative_difference.pdf",
+            f"pairwise_relative_difference.{PLOT_SUFFIX}",
         )
         fig.show()
         fig, _ = plot_relative_difference(
@@ -377,7 +377,7 @@ class Metric:
         save_plot(
             partitioner.results_dir,
             fig,
-            f"{partitioner.name}_relative_difference_SN.pdf",
+            f"{partitioner.name}_relative_difference_SN.{PLOT_SUFFIX}",
         )
         fig.show()
         fig, _ = plot_component_wise_travel_increase(
@@ -391,13 +391,13 @@ class Metric:
         save_plot(
             partitioner.results_dir,
             fig,
-            f"{partitioner.name}_component_wise_travel_increase.pdf",
+            f"{partitioner.name}_component_wise_travel_increase.{PLOT_SUFFIX}",
         )
         fig, _ = plot_relative_increase_on_graph(partitioner.graph, self.unit_symbol())
         save_plot(
             partitioner.results_dir,
             fig,
-            f"{partitioner.name}_relative_increase_on_graph.pdf",
+            f"{partitioner.name}_relative_increase_on_graph.{PLOT_SUFFIX}",
         )
 
         # self.coverage = self.calculate_coverage(partitioner)

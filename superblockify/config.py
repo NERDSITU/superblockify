@@ -64,6 +64,12 @@ PLACES_100_CITIES
     ``query`` attribute which is the place string or a list of place strings.
     Find the extensive list in the ``../cities.yml`` file.
 
+PLOT_SUFFIX
+    The format of the plots. Can be ``"png"``, ``"jpg"``, ``"pdf"``, ``"svg"``, etc.
+    Matplotlib uses the Pillow library to save the plots, so all formats supported by
+    Pillow are supported by Matplotlib.
+    <https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html>
+
 Notes
 -----
 Logger configuration is done using the :mod:`setup.cfg` file. The logger for this
@@ -127,3 +133,6 @@ with open(PLACES_FILE, "r", encoding="utf-8") as file:
         for name, data in places["place_lists"]["test_small"]["cities"].items()
     ]
     PLACES_100_CITIES = places["place_lists"]["100_cities_boeing"]["cities"]
+
+# Plot format
+PLOT_SUFFIX = "pdf"
