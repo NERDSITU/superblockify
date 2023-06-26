@@ -101,7 +101,7 @@ def get_edge_cells(graph, limit=None, segment=25, show_plot=False):
     )
     start_time = datetime.now()
     edges = get_edge_polygons(graph)
-
+    logger.debug("Prepared %d edge polygons. Next, interpolating points.", len(edges))
     # Make limit polygon
     if limit is None:
         limit = Polygon(edges.unary_union.buffer(100).exterior)
