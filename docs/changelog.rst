@@ -2,6 +2,22 @@
 Changelog
 *********
 
+Version 0.2.2 (2023-06-27)
+**************************
+
+* 📊 Unified Plot image format/suffix in config
+* 🔢 Key Figures: lightweight results for analysis, see
+  :func:`superblockify.partitioning.utils.get_key_figures`.
+* 💾 Lightweigth metric saving
+* 🆔 Added ISO 3166 country codes
+* 🏙️ City Crawling: Get cities from Springer Website Table. Useful functions to add
+  OSM relation IDs to the cities. Moved cities to `cities.yml` file.
+* 🌆 City List format specification.
+* 🗒️ Adjust logging for better usefullness. Add and remove some log messages.
+* 📚️ Added `mamba` to the installation instructions and changed standard environment
+  name.
+* ⬆️ Demand Change: Added LTN aggregate statistics for the betweennesses.
+
 Version 0.2.1 (2023-06-22)
 **************************
 
