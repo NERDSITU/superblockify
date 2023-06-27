@@ -1,12 +1,14 @@
 """Distance calculation for the network metrics."""
 from datetime import timedelta
 from itertools import combinations
-from multiprocessing import cpu_count, Pool
+from multiprocessing import Pool
+from os import environ
 from time import time
 
 import numpy as np
 from networkx import to_scipy_sparse_array
 from osmnx.projection import is_projected
+from psutil import virtual_memory
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import dijkstra
 from tqdm import tqdm
@@ -322,6 +324,7 @@ def calculate_partitioning_distance_matrix(
     chunk_size=1,
     plot_distributions=False,
     check_overlap=True,
+    max_mem_factor=0.2,
 ):
     """Calculate the distance matrix for the partitioning.
 
@@ -360,6 +363,9 @@ def calculate_partitioning_distance_matrix(
         If True, plot the distributions of the Euclidean distances and coordinates.
     check_overlap : bool, optional
         If True, check that the partitions do not overlap node-wise.
+    max_mem_factor : float, optional
+        The maximal memory factor to use for filling up the restricted distance
+        matrices as tensor. Otherwise, using vectorized version.
 
     Raises
     ------
@@ -384,10 +390,6 @@ def calculate_partitioning_distance_matrix(
 
     if node_order is None:
         node_order = list(partitioner.graph.nodes)
-
-    if num_workers is None:
-        num_workers = min(32, cpu_count() // 2)
-        logger.debug("No number of workers specified, using %s.", num_workers)
 
     partitions = partitioner.get_partition_nodes()
     # Check that the partitions have unique names
@@ -422,7 +424,13 @@ def calculate_partitioning_distance_matrix(
     }
 
     dist_matrix, pred_matrix = shortest_paths_restricted(
-        partitioner.graph, partitions, weight, node_order, num_workers, chunk_size
+        partitioner.graph,
+        partitions,
+        weight,
+        node_order,
+        num_workers,
+        chunk_size,
+        max_mem_factor,
     )
 
     if plot_distributions:
@@ -444,7 +452,13 @@ def calculate_partitioning_distance_matrix(
 
 
 def shortest_paths_restricted(
-    graph, partitions, weight, node_order, num_workers=2, chunk_size=1
+    graph,
+    partitions,
+    weight,
+    node_order,
+    num_workers=2,
+    chunk_size=1,
+    max_mem_factor=0.2,
 ):
     """Calculate restricted shortest paths.
 
@@ -474,9 +488,16 @@ def shortest_paths_restricted(
     node_order : list
         The order of the nodes in the distance matrix.
     num_workers : int, optional
-        The number of workers to use for the multiprocessing pool. Defaults to 2.
+        The maximal number of workers used to process distance matrices. Defaults
+        to 2.
     chunk_size : int, optional
-        The chunk size for the multiprocessing pool. Defaults to 1.
+        The chunk-size to use for the multiprocessing pool. This is the number of
+        partitions for which the distance matrix is calculated in one go (thread).
+        Keep this low if the graph is big or has many partitions. We suggest to
+        keep this at 1.
+    max_mem_factor : float, optional
+        The maximum fraction to use in the fully vectorized calculation. Defaults
+        to 0.2. Otherwise, the calculation is iterated over the partition indices.
 
     Returns
     -------
@@ -492,7 +513,7 @@ def shortest_paths_restricted(
     see :func:`calculate_partitioning_distance_matrix()
     <superblockify.metrics.distances.calculate_partitioning_distance_matrix>`.
     """
-    # pylint: disable=too-many-locals, unused-argument
+    # pylint: disable=too-many-locals, too-many-statements
 
     # node_order indices
     # filtered indices: sparse/partition
@@ -540,19 +561,20 @@ def shortest_paths_restricted(
     )
 
     # Calculate the combinations in parallel
+    num_workers = min(2, num_workers) if num_workers else 2
     logger.debug(
         "Calculating 2 semipermeable distance matrices with %d workers.",
-        min(2, num_workers),
+        num_workers,
     )
     start_time = time()
     # Parallelized calculation with `p.imap_unordered`
-    with Pool(processes=min(2, num_workers)) as pool:
+    with Pool(processes=num_workers) as pool:
         results = list(
             tqdm(
                 pool.imap_unordered(
                     dijkstra_settings,
                     [g_leaving, g_entering],
-                    chunksize=1,
+                    chunksize=chunk_size,
                 ),
                 desc="Calculating distance matrices",
                 total=2,
@@ -567,6 +589,7 @@ def shortest_paths_restricted(
     dist_le, pred_le = results[1]
     dist_le[min_mask] = results[0][0][min_mask]
     pred_le[min_mask] = results[0][1][min_mask]
+    del results
 
     # Fill up paths
     n_partition_intersect_indices = [
@@ -586,46 +609,113 @@ def shortest_paths_restricted(
 
     dist_step = np.full_like(dist_le, np.inf)
     pred_step = np.full_like(pred_le, -9999)
-
+    logger.debug("Prepared distance matrices")
+    tensorized = 0
+    vectorized = 0
     for part_idx, part_intersect in zip(
         n_partition_indices_separate, n_partition_intersect_indices
     ):
         # Add distances from i in part_idx to all j in n_partition_indices
         # to the same j to all k in n_partition_indices
-        # There is a different amount of i-j than j-k, calculate all combinations
-        # and then mask out the invalid ones
-        # add to a new dimension
-        dists = (
-            dist_le[np.ix_(part_idx, part_intersect)][:, :, np.newaxis]
-            + dist_le[np.ix_(part_intersect, n_partition_indices)][np.newaxis, :, :]
+        # In one step if small enough (max_mem_factor)
+        # shape (len(part_idx), len(part_intersect), len(n_partition_indices))
+        # Use $SLURM_MEM_PER_NODE if available
+        mem = float(
+            environ.get(  # different types of memory
+                "SLURM_MEM_PER_NODE",  # already in MB - total memory per node
+                # https://slurm.schedmd.com/sbatch.html#SECTION_OUTPUT-ENVIRONMENT-VARIABLES
+                virtual_memory().available / 1024 / 1024  # convert from bytes to MB
+                # available memory on the machine
+            )
         )
-        # get index of minimum distance for predecessor, use new axis
-        min_idx = np.argmin(dists, axis=1)
+        needed_mem = (
+            len(part_idx)
+            * len(part_intersect)
+            * len(n_partition_indices)
+            * 8
+            / 1024
+            / 1024
+        )
+        if needed_mem < mem * max_mem_factor:
+            # logger.debug(
+            #     "There is enough memory (%d/%d) to calculate the distances in one "
+            #     "step.",
+            #     needed_mem,
+            #     int(free_mem*max_mem_factor),
+            # )
+            tensorized += 1
+            # There is a different amount of i-j than j-k, calculate all combinations
+            # and then mask out the invalid ones
+            # add to a new dimension
+            dists = (
+                dist_le[np.ix_(part_idx, part_intersect)][:, :, np.newaxis]
+                + dist_le[np.ix_(part_intersect, n_partition_indices)][np.newaxis, :, :]
+            )
+            # get index of minimum distance for the predecessors, use new axis
+            min_idx = np.argmin(dists, axis=1)
 
-        # write minima into dist_step
-        dist_step[np.ix_(part_idx, n_partition_indices)] = dists[
-            np.arange(dists.shape[0])[:, np.newaxis],
-            min_idx,
-            np.arange(dists.shape[-1]),
-        ]
+            # write minima into dist_step
+            dist_step[np.ix_(part_idx, n_partition_indices)] = dists[
+                np.arange(dists.shape[0])[:, np.newaxis],
+                min_idx,
+                np.arange(dists.shape[-1]),
+            ]
+            del dists  # free memory
 
-        # write predecessors into pred_step
-        # predecessor i-k is the same as predecessor k-j
-        # into pred_step, write the predecessor of k-j
-        for n_p, i in enumerate(part_idx):
-            for m_p, j in enumerate(n_partition_indices):
-                if i == j:
-                    continue
-                pred_step[i, j] = pred_le[part_intersect[min_idx[n_p, m_p]], j]
-        # might be vectorized
+            # write predecessors into pred_step
+            # predecessor i-k is the same as predecessor k-j
+            # into pred_step, write the predecessor of k-j
+            for n_p, i in enumerate(part_idx):
+                for m_p, j in enumerate(n_partition_indices):
+                    if i == j:
+                        continue
+                    pred_step[i, j] = pred_le[part_intersect[min_idx[n_p, m_p]], j]
+            # might be vectorized
+            del min_idx
+        else:
+            vectorized += 1
+            # logger.debug(
+            #     "There is not enough memory (%d/%d) to calculate the distances in one"
+            #     " vectorized step. Looping over each partition index (%d).",
+            #     needed_mem,
+            #     int(free_mem*max_mem_factor),
+            #     len(part_idx),
+            # )
+            # Loop over each partition index
+            for i in part_idx:
+                # Calculate distances from i to all j in n_partition_indices
+                # to the same j to all k in n_partition_indices
+                # shape (len(part_intersect), len(n_partition_indices))
+                dists = (
+                    dist_le[i, part_intersect][:, np.newaxis]
+                    + dist_le[np.ix_(part_intersect, n_partition_indices)]
+                )
+                # get index of minimum distance for the predecessors
+                min_idx = np.argmin(dists, axis=0)
+
+                # write minima into dist_step
+                dist_step[i, n_partition_indices] = dists[
+                    min_idx, np.arange(dists.shape[-1])
+                ]
+                del dists
+                # write predecessors into pred_step
+                # predecessor i-k is the same as predecessor k-j
+                # into pred_step, write the predecessor of k-j
+                for m_p, j in enumerate(n_partition_indices):
+                    if i == j:
+                        continue
+                    pred_step[i, j] = pred_le[part_intersect[min_idx[m_p]], j]
+                del min_idx
 
     mask = dist_step < dist_le
     dist_le = np.where(mask, dist_step, dist_le)
     pred_le = np.where(mask, pred_step, pred_le)
 
     logger.debug(
-        "Finished filling up paths in %s.",
+        "Finished filling up paths in %s. Used %d tensorized and %d vectorized steps.",
         timedelta(seconds=time() - start_time),
+        tensorized,
+        vectorized,
     )
 
     return dist_le, pred_le
