@@ -12,8 +12,9 @@ class BetweennessPartitioner(AttributePartitioner):
     Set sparsified graph from edges or nodes with high betweenness centrality.
     """
 
-    def write_attribute(self, percentile=85.0, scaling="normal", max_range=None,
-                        **kwargs):
+    def write_attribute(
+        self, percentile=85.0, scaling="normal", max_range=None, **kwargs
+    ):
         """Determine edges with high betweenness centrality for sparsified graph.
 
         Edges with high betweenness centrality are used to construct the sparsified
