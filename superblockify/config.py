@@ -69,6 +69,10 @@ PLOT_SUFFIX
     Matplotlib uses the Pillow library to save the plots, so all formats supported by
     Pillow are supported by Matplotlib.
     <https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html>
+    
+MAX_NODES
+    The maximum number of nodes in the graph. If the graph has more nodes, it is
+    reduced. See :func:`superblockify.partitioning.utils.reduce_graph`.
 
 Notes
 -----
@@ -136,3 +140,6 @@ with open(PLACES_FILE, "r", encoding="utf-8") as file:
 
 # Plot format
 PLOT_SUFFIX = "pdf"
+
+# Reduce graph
+MAX_NODES = 30000

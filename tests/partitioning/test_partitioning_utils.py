@@ -15,6 +15,7 @@ from superblockify.partitioning.utils import (
     split_up_isolated_edges_directed,
     get_new_node_id,
     _make_yaml_compatible,
+    reduce_graph,
 )
 
 
@@ -203,3 +204,25 @@ def test_get_new_node_id(len_graph, patch_uuid, monkeypatch):
 def test__make_yaml_compatible(test_dict, expected):
     """Test making a dict yaml compatible."""
     assert _make_yaml_compatible(test_dict) == expected
+
+
+@pytest.mark.parametrize("max_nodes", [2, 4, 10, 300, 1000, 4000, None])
+def test_reduce_graph(test_city_all_copy, max_nodes):
+    """Test `reduce_graph` by design."""
+    _, graph = test_city_all_copy
+    reduced = reduce_graph(graph, max_nodes)
+    if max_nodes is None or graph.number_of_nodes() <= max_nodes:
+        assert reduced == graph
+    else:
+        assert reduced.number_of_nodes() <= max_nodes
+        assert reduced.number_of_edges() <= graph.number_of_edges()
+        if reduced.number_of_edges() > 1:
+            # Check for attributes: reduced_population, reduced_area,
+            # reduced_street_orientation_order, reduced_circuity_avg, reduced_n,
+            # reduced_m
+            assert "reduced_population" in reduced.graph
+            assert "reduced_area" in reduced.graph
+            assert "reduced_street_orientation_order" in reduced.graph
+            assert "reduced_circuity_avg" in reduced.graph
+            assert "reduced_n" in reduced.graph
+            assert "reduced_m" in reduced.graph

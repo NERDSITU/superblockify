@@ -32,9 +32,17 @@ from .utils import (
     remove_dead_ends_directed,
     split_up_isolated_edges_directed,
     get_key_figures,
+    reduce_graph,
 )
 from .. import attribute
-from ..config import logger, GRAPH_DIR, RESULTS_DIR, NETWORK_FILTER, PLOT_SUFFIX
+from ..config import (
+    logger,
+    GRAPH_DIR,
+    RESULTS_DIR,
+    NETWORK_FILTER,
+    PLOT_SUFFIX,
+    MAX_NODES,
+)
 from ..graph_stats import calculate_component_metrics
 from ..metrics.metric import Metric
 from ..plot import save_plot
@@ -77,6 +85,7 @@ class BasePartitioner(ABC):
         unit="time",
         graph=None,
         reload_graph=False,
+        max_nodes=MAX_NODES,
     ):
         """Constructing a BasePartitioner
 
@@ -105,6 +114,11 @@ class BasePartitioner(ABC):
         reload_graph : bool, optional
             If True, reload the graph from OSMnx, even if a graph with the name
             `name.graphml` is found in the working directory. Default is False.
+        max_nodes : int, optional
+            Maximum number of nodes in the graph. If the graph has more nodes, it will
+            be reduced to `max_nodes`, by taking the ego graph of a representative,
+            central node. If None, the graph will not be reduced. Default is set in
+            :mod:`superblockify.config`.
 
         Raises
         ------
@@ -150,6 +164,9 @@ class BasePartitioner(ABC):
             self.graph = graph
         else:
             raise ValueError("Either graph or search_str must be provided.")
+
+        if max_nodes is not None and self.graph.number_of_nodes() > max_nodes:
+            self.graph = reduce_graph(self.graph, max_nodes=max_nodes)
 
         remove_dead_ends_directed(self.graph)
         show_highway_stats(self.graph)

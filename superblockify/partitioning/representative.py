@@ -26,11 +26,6 @@ def set_representative_nodes(components):
     components.
 
     """
-
-    def _distance_to_rep_point(node_geometry):
-        """Return the distance from the node to the representative point."""
-        return node_geometry.distance(hull_nodes_reppoint)
-
     for component in components:
         if component["m"] == 1 and component["n"] == 2:
             component["representative_node_id"] = min(
@@ -38,26 +33,42 @@ def set_representative_nodes(components):
             )
             continue
 
-        # Get the nodes as a geodataframe
-        nodes = graph_to_gdfs(
-            G=component["subgraph"], nodes=True, edges=False, fill_edge_geometry=False
+        component["representative_node_id"] = find_representative_node_id(
+            component["subgraph"]
         )
-
-        # 1. create polygon that contains all points
-        hull_nodes: GeometryArray = nodes.unary_union.convex_hull  # Polygon geometry
-
-        # 2. find representative point of the polygon: Point geometry
-        hull_nodes_reppoint: GeometryArray = hull_nodes.representative_point()
-
-        # note that .centroid() is not guaranteed to be *within* the geometry,
-        # while .representative point() is
-
-        # 3. find network node that is closest to the representative point
-
-        component["representative_node_id"] = nodes.geometry.apply(
-            _distance_to_rep_point
-        ).idxmin()
 
         component["subgraph"].nodes[component["representative_node_id"]][
             "representative_node_name"
         ] = component["name"]
+
+
+def find_representative_node_id(graph):
+    """Find representative node in a graph.
+
+    Parameters
+    ----------
+    graph : networkx.MultiDiGraph
+        The graph to find a representative node for.
+
+    Returns
+    -------
+    representative_node_id : int
+        The id of the representative node.
+    """
+    # Get the nodes as a geodataframe
+    nodes = graph_to_gdfs(G=graph, nodes=True, edges=False, fill_edge_geometry=False)
+
+    # 1. create polygon that contains all points
+    hull_nodes: GeometryArray = nodes.unary_union.convex_hull  # Polygon geometry
+
+    # 2. find representative point of the polygon: Point geometry
+    hull_nodes_reppoint: GeometryArray = hull_nodes.representative_point()
+
+    # note that .centroid() is not guaranteed to be *within* the geometry,
+    # while .representative point() is
+
+    # 3. find network node that is closest to the representative point
+
+    return nodes.geometry.apply(
+        lambda node_geometry: node_geometry.distance(hull_nodes_reppoint)
+    ).idxmin()

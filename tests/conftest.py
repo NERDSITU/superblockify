@@ -115,6 +115,7 @@ def test_city_all_precalculated_save(test_city_all, partitioner_class):
         name=f"{city_name}_{partitioner_class.__name__}_precalculated_test",
         city_name=city_name,
         graph=graph.copy(),
+        max_nodes=None,
     )
     part.run(calculate_metrics=False)
     part.save(save_graph_copy=True)
@@ -126,6 +127,32 @@ def test_city_all_precalculated(test_city_all_precalculated_save):
     """Fixture for precalculated partitioners for all cities with bearing and length.
     Without metrics. Loaded for each test."""
     name, cls = test_city_all_precalculated_save
+    return cls.load(name=name)
+
+
+@pytest.fixture(scope="session")
+def test_city_all_reduced_precalculated_save(test_city_all, partitioner_class):
+    """Fixture for saving a reduced precalculated partitioners for all cities with
+    bearing and length test_data. Without metrics. Shared across all tests.
+    The graphs are reduced to the half of the nodes but max 1000 nodes.
+    """
+    city_name, graph = test_city_all
+    part = partitioner_class(
+        name=f"{city_name}_{partitioner_class.__name__}_precalculated_test",
+        city_name=city_name,
+        graph=graph.copy(),
+        max_nodes=min(1000, graph.number_of_nodes() // 2),
+    )
+    part.run(calculate_metrics=False)
+    part.save(save_graph_copy=True)
+    return part.name, part.__class__
+
+
+@pytest.fixture(scope="function")
+def test_city_all_reduced_precalculated(test_city_all_reduced_precalculated_save):
+    """Fixture for reduced precalculated partitioners for all cities with bearing and
+    length. Without metrics. Loaded for each test. Reduced to half or max 1000 nodes."""
+    name, cls = test_city_all_reduced_precalculated_save
     return cls.load(name=name)
 
 

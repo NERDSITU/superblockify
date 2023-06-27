@@ -45,6 +45,20 @@ class TestPartitioners:
         assert part.name is not None and part.name != ""
         assert part.city_name is not None and part.city_name != ""
 
+    def test_run_reduced_graph(self, test_city_all_reduced_precalculated):
+        """Test run/partitioning method by design with reduced graphs."""
+        part = test_city_all_reduced_precalculated
+        assert part.attribute_label is not None
+        assert part.partitions is not None
+        assert part.name is not None and part.name != ""
+        assert part.city_name is not None and part.city_name != ""
+        assert "reduced_population" in part.graph.graph
+        assert "reduced_area" in part.graph.graph
+        assert "reduced_street_orientation_order" in part.graph.graph
+        assert "reduced_circuity_avg" in part.graph.graph
+        assert "reduced_n" in part.graph.graph
+        assert "reduced_m" in part.graph.graph
+
     def test_run_make_plots(self, test_city_all_preloaded):
         """Test plotting of partitioning results by design."""
         test_city_all_preloaded.run(calculate_metrics=False, make_plots=True)

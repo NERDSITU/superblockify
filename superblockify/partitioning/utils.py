@@ -11,7 +11,9 @@ from pandas import DataFrame
 from shapely import Point, Geometry
 from shapely.ops import substring
 
+from .representative import find_representative_node_id
 from ..config import logger
+from ..graph_stats import get_population_area, basic_graph_stats
 
 
 def save_to_gpkg(
@@ -603,3 +605,97 @@ def _make_yaml_compatible(input_val):
     else:
         output_val = str(input_val)
     return output_val
+
+
+def reduce_graph(graph, max_nodes):
+    """Reduce the graph to have at most `max_nodes` nodes.
+
+    Done by taking the ego graph with not more than `max_nodes` nodes, starting from
+    a representative central node. As in
+    :func:`superblockify.partitioning.representative.set_representative_nodes`.
+    """
+    if max_nodes is None or graph.number_of_nodes() <= max_nodes:
+        logger.debug(
+            "No reduction necessary (%s <= %s)", graph.number_of_nodes(), max_nodes
+        )
+        return graph
+    logger.debug("Reducing graph to %s nodes", max_nodes)
+    # Find representative node
+    rep_node_id = find_representative_node_id(graph)
+    # Get ego graph - breadth first search (BFS)
+    included = dict(_bfs_egograph(graph, rep_node_id, max_nodes))
+    reduced = graph.subgraph(included).copy()
+    # Update basic graph stats
+    (
+        reduced.graph["reduced_population"],
+        reduced.graph["reduced_area"],
+    ) = get_population_area(reduced)
+    try:
+        reduced.graph["reduced_population_density"] = (
+            reduced.graph["reduced_population"] / reduced.graph["reduced_area"]
+        )
+    except ZeroDivisionError:
+        reduced.graph["reduced_population_density"] = 0
+
+    # Add basic_stats to the graph - prepend "reduced_" to the keys
+    if reduced.number_of_edges() > 0:
+        reduced.graph.update(
+            {
+                "reduced_" + key: value
+                for key, value in basic_graph_stats(
+                    reduced, area=reduced.graph["reduced_area"]
+                ).items()
+            }
+        )
+    logger.debug("Reduced graph has %s nodes", reduced.number_of_nodes())
+    return reduced
+
+
+def _bfs_egograph(graph, rep_node_id, max_nodes):
+    """Breadth-first search (BFS) to get the ego graph of the representative node.
+
+    Parameters
+    ----------
+    graph : networkx.classes.multidigraph.MultiDiGraph
+        Graph to get the ego graph for.
+    rep_node_id : int
+        Node id of the seed node.
+    max_nodes : int
+        Maximum number of nodes in the ego graph.
+
+    Yields
+    ------
+    (node_id, level) : tuple
+        Node id and level of the node in the BFS.
+
+    Notes
+    -----
+    Modified from
+    :func:`networkx.algorithms.shortest_paths.unweighted._single_shortest_path_length`.
+    """
+    seen = set([rep_node_id])
+    nextlevel = [rep_node_id]
+    level = 0
+    n_total = len(graph.adj)
+    # Yield the seed node
+    yield (rep_node_id, level)
+    # Yield the nodes in the BFS, as long as the sum of the next level and the seen
+    # nodes are less than the maximum number of nodes
+    while (
+        nextlevel
+        and len(seen)
+        + len([n_next for leaf in nextlevel for n_next in graph.adj[leaf]])
+        <= max_nodes
+    ):
+        level += 1
+        thislevel = nextlevel
+        nextlevel = []
+        for leaf in thislevel:
+            for n_next in graph.adj[leaf]:
+                if n_next not in seen:
+                    seen.add(n_next)
+                    nextlevel.append(n_next)
+                    # Yield the node id and level
+                    yield (n_next, level)
+            if len(seen) == n_total:
+                return
