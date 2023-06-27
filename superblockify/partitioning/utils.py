@@ -698,4 +698,4 @@ def _bfs_egograph(graph, rep_node_id, max_nodes):
                     # Yield the node id and level
                     yield (n_next, level)
             if len(seen) == n_total:
-                return
+                return  # pragma: no cover

@@ -297,7 +297,7 @@ def reconstruct_edge_cells(voronoi_diagram, indices, crs):
     # Dissolve cells by edge multiindex
     try:
         return poly_gdf.dissolve(by=poly_gdf.index)
-    except GEOSException as err:
+    except GEOSException as err:  # pragma: no cover
         raise ValueError(
             "The tessellation might contain invalid geometries. "
             "Try increasing the segment length."
