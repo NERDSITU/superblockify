@@ -2033,3 +2033,967 @@ place_lists:
         - https://www.openstreetmap.org/relation/5396194
         osm_id:
         - 5396194
+  germany_by_pop:
+    description: List of cities in Germany by population (Wikipedia)
+    cities:
+      Berlin:
+        query: Berlin, Germany
+        country: DE
+        state: Berlin
+        population: 3677472
+        location: 52°31′N 13°23′E / 52.517°N 13.383°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Berlin,+Germany
+        osm_id:
+        - 62422
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62422
+      Hamburg:
+        query: Hamburg, Germany
+        country: DE
+        state: Hamburg
+        population: 1906411
+        location: 53°33′N 10°0′E / 53.550°N 10.000°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Hamburg,+Germany
+        osm_id:
+        - 62782
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62782
+      Munich:
+        query: Munich, Bavaria, Germany
+        country: DE
+        state: Bavaria
+        population: 1487708
+        location: 48°8′N 11°34′E / 48.133°N 11.567°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Munich,+Bavaria,+Germany
+        osm_id:
+        - 62428
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62428
+      Cologne (Köln):
+        query: Cologne, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 1073096
+        location: 50°56′N 6°57′E / 50.933°N 6.950°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Cologne,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62578
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62578
+      Frankfurt am Main:
+        query: Frankfurt, Hesse, Germany
+        country: DE
+        state: Hesse
+        population: 759224
+        location: 50°7′N 8°41′E / 50.117°N 8.683°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Frankfurt,+Hesse,+Germany
+        osm_id:
+        - 62400
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62400
+      Stuttgart:
+        query: Stuttgart, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 626275
+        location: 48°47′N 9°11′E / 48.783°N 9.183°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Stuttgart,+Baden-Württemberg,+Germany
+        osm_id:
+        - 2793104
+        OSM relation:
+        - https://www.openstreetmap.org/relation/2793104
+      Düsseldorf:
+        query: Dusseldorf, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 619477
+        location: 51°14′N 6°47′E / 51.233°N 6.783°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Dusseldorf,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62539
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62539
+      Leipzig:
+        query: Leipzig, Saxony, Germany
+        country: DE
+        state: Saxony
+        population: 601866
+        location: 51°20′N 12°23′E / 51.333°N 12.383°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Leipzig,+Saxony,+Germany
+        osm_id:
+        - 62649
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62649
+      Dortmund:
+        query: Dortmund, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 586852
+        location: 51°31′N 7°28′E / 51.517°N 7.467°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Dortmund,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 1829065
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1829065
+      Essen:
+        query: Essen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 579432
+        location: 51°27′N 7°1′E / 51.450°N 7.017°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Essen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62713
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62713
+      Bremen:
+        query: Bremen, City of Bremen, Germany
+        country: DE
+        state: Bremen
+        population: 563290
+        location: 53°5′N 8°48′E / 53.083°N 8.800°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bremen,+City+of+Bremen,+Germany
+        osm_id:
+        - 62559
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62559
+      Dresden:
+        query: Dresden, Saxony, Germany
+        country: DE
+        state: Saxony
+        population: 555351
+        location: 51°2′N 13°44′E / 51.033°N 13.733°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Dresden,+Saxony,+Germany
+        osm_id:
+        - 191645
+        OSM relation:
+        - https://www.openstreetmap.org/relation/191645
+      Hanover (Hannover):
+        query: Hanover, Lower Saxony, Germany
+        country: DE
+        state: Lower Saxony
+        population: 535932
+        location: 52°22′N 9°43′E / 52.367°N 9.717°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Hanover,+Lower+Saxony,+Germany
+        osm_id:
+        - 59418
+        OSM relation:
+        - https://www.openstreetmap.org/relation/59418
+      Nuremberg:
+        query: Nuremberg, Bavaria, Germany
+        country: DE
+        state: Bavaria
+        population: 510632
+        location: 49°27′N 11°5′E / 49.450°N 11.083°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Nuremberg,+Bavaria,+Germany
+        osm_id:
+        - 62780
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62780
+      Duisburg:
+        query: Duisburg, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 495152
+        location: 51°26′N 6°46′E / 51.433°N 6.767°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Duisburg,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62456
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62456
+      Bochum:
+        query: Bochum, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 363441
+        location: 51°29′N 7°13′E / 51.483°N 7.217°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bochum,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62644
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62644
+      Wuppertal:
+        query: Wuppertal, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 354572
+        location: 51°16′N 7°11′E / 51.267°N 7.183°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Wuppertal,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62478
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62478
+      Bielefeld:
+        query: Bielefeld, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 334002
+        location: 52°1′N 8°32′E / 52.017°N 8.533°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bielefeld,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62646
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62646
+      Bonn:
+        query: Bonn, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 331885
+        location: 50°44′N 7°6′E / 50.733°N 7.100°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bonn,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62508
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62508
+      Münster:
+        query: Münster, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 317713
+        location: 51°58′N 7°38′E / 51.967°N 7.633°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Münster,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62591
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62591
+      Mannheim:
+        query: Mannheim, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 311831
+        location: 49°29′N 8°28′E / 49.483°N 8.467°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Mannheim,+Baden-Württemberg,+Germany
+        osm_id:
+        - 62691
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62691
+      Karlsruhe:
+        query: Karlsruhe, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 306502
+        location: 49°0′N 8°24′E / 49.000°N 8.400°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Karlsruhe,+Baden-Württemberg,+Germany
+        osm_id:
+        - 62518
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62518
+      Augsburg:
+        query: Augsburg, Bavaria, Germany
+        country: DE
+        state: Bavaria
+        population: 296478
+        location: 48°22′N 10°54′E / 48.367°N 10.900°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Augsburg,+Bavaria,+Germany
+        osm_id:
+        - 62407
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62407
+      Wiesbaden:
+        query: Wiesbaden, Hesse, Germany
+        country: DE
+        state: Hesse
+        population: 278950
+        location: 50°5′N 8°14′E / 50.083°N 8.233°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Wiesbaden,+Hesse,+Germany
+        osm_id:
+        - 62496
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62496
+      Mönchengladbach:
+        query: Mönchengladbach, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 261001
+        location: 51°12′N 6°26′E / 51.200°N 6.433°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Mönchengladbach,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62410
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62410
+      Gelsenkirchen:
+        query: Gelsenkirchen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 260126
+        location: 51°31′N 7°6′E / 51.517°N 7.100°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Gelsenkirchen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62522
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62522
+      Aachen:
+        query: Aachen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 249070
+        location: 50°47′N 6°5′E / 50.783°N 6.083°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Aachen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62564
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62564
+      Braunschweig:
+        query: Braunschweig, Lower Saxony, Germany
+        country: DE
+        state: Lower Saxony
+        population: 248823
+        location: 52°16′N 10°31′E / 52.267°N 10.517°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Braunschweig,+Lower+Saxony,+Germany
+        osm_id:
+        - 62531
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62531
+      Kiel:
+        query: Kiel, Schleswig-Holstein, Germany
+        country: DE
+        state: Schleswig-Holstein
+        population: 246243
+        location: 54°20′N 10°8′E / 54.333°N 10.133°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Kiel,+Schleswig-Holstein,+Germany
+        osm_id:
+        - 27021
+        OSM relation:
+        - https://www.openstreetmap.org/relation/27021
+      Chemnitz:
+        query: Chemnitz, Saxony, Germany
+        country: DE
+        state: Saxony
+        population: 243105
+        location: 50°50′N 12°55′E / 50.833°N 12.917°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Chemnitz,+Saxony,+Germany
+        osm_id:
+        - 62594
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62594
+      Halle (Saale):
+        query: Halle (Saale), Saxony-Anhalt, Germany
+        country: DE
+        state: Saxony-Anhalt
+        population: 238061
+        location: 51°29′N 11°58′E / 51.483°N 11.967°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Halle+(Saale),+Saxony-Anhalt,+Germany
+        osm_id:
+        - 62638
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62638
+      Magdeburg:
+        query: Magdeburg, Saxony-Anhalt, Germany
+        country: DE
+        state: Saxony-Anhalt
+        population: 236188
+        location: 52°8′N 11°37′E / 52.133°N 11.617°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Magdeburg,+Saxony-Anhalt,+Germany
+        osm_id:
+        - 62481
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62481
+      Freiburg im Breisgau:
+        query: Freiburg im Breisgau, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 231848
+        location: 47°59′N 7°51′E / 47.983°N 7.850°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Freiburg+im+Breisgau,+Baden-Württemberg,+Germany
+        osm_id:
+        - 62768
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62768
+      Krefeld:
+        query: Krefeld, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 227050
+        location: 51°20′N 6°34′E / 51.333°N 6.567°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Krefeld,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62748
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62748
+      Mainz:
+        query: Mainz, Rhineland-Palatinate, Germany
+        country: DE
+        state: Rhineland-Palatinate
+        population: 217556
+        location: 50°0′N 8°16′E / 50.000°N 8.267°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Mainz,+Rhineland-Palatinate,+Germany
+        osm_id:
+        - 62630
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62630
+      Lübeck:
+        query: Lübeck, Schleswig-Holstein, Germany
+        country: DE
+        state: Schleswig-Holstein
+        population: 216277
+        location: 53°52′N 10°41′E / 53.867°N 10.683°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Lübeck,+Schleswig-Holstein,+Germany
+        osm_id:
+        - 27027
+        OSM relation:
+        - https://www.openstreetmap.org/relation/27027
+      Erfurt:
+        query: Erfurt, Thuringia, Germany
+        country: DE
+        state: Thuringia
+        population: 213227
+        location: 50°59′N 11°2′E / 50.983°N 11.033°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Erfurt,+Thuringia,+Germany
+        osm_id:
+        - 62745
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62745
+      Oberhausen:
+        query: Oberhausen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 208752
+        location: 51°28′N 6°51′E / 51.467°N 6.850°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Oberhausen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62734
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62734
+      Rostock:
+        query: Rostock, Mecklenburg-Vorpommern, Germany
+        country: DE
+        state: Mecklenburg-Vorpommern
+        population: 208400
+        location: 54°5′N 12°8′E / 54.083°N 12.133°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Rostock,+Mecklenburg-Vorpommern,+Germany
+        osm_id:
+        - 62405
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62405
+      Kassel:
+        query: Kassel, Hesse, Germany
+        country: DE
+        state: Hesse
+        population: 200406
+        location: 51°19′N 9°30′E / 51.317°N 9.500°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Kassel,+Hesse,+Germany
+        osm_id:
+        - 62598
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62598
+      Hagen:
+        query: Hagen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 188713
+        location: 51°22′N 7°29′E / 51.367°N 7.483°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Hagen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 1800297
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1800297
+      Potsdam:
+        query: Potsdam, Brandenburg, Germany
+        country: DE
+        state: Brandenburg
+        population: 183154
+        location: 52°24′N 13°4′E / 52.400°N 13.067°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Potsdam,+Brandenburg,+Germany
+        osm_id:
+        - 62369
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62369
+      Saarbrücken:
+        query: Saarbrücken, Saarland, Germany
+        country: DE
+        state: Saarland
+        population: 179634
+        location: 49°14′N 7°0′E / 49.233°N 7.000°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Saarbrücken,+Saarland,+Germany
+        osm_id:
+        - 1187159
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1187159
+      Hamm:
+        query: Hamm, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 179238
+        location: 51°41′N 7°49′E / 51.683°N 7.817°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Hamm,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62499
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62499
+      Ludwigshafen am Rhein:
+        query: Ludwigshafen am Rhein, Rhineland-Palatinate, Germany
+        country: DE
+        state: Rhineland-Palatinate
+        population: 172145
+        location: 49°29′N 8°26′E / 49.483°N 8.433°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Ludwigshafen+am+Rhein,+Rhineland-Palatinate,+Germany
+        osm_id:
+        - 62347
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62347
+      Mülheim an der Ruhr:
+        query: Mülheim an der Ruhr, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 170739
+        location: 51°26′N 6°53′E / 51.433°N 6.883°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Mülheim+an+der+Ruhr,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62385
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62385
+      Oldenburg:
+        query: Oldenburg, Lower Saxony, Germany
+        country: DE
+        state: Lower Saxony
+        population: 170389
+        location: 53°8′N 8°13′E / 53.133°N 8.217°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Oldenburg,+Lower+Saxony,+Germany
+        osm_id:
+        - 62409
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62409
+      Osnabrück:
+        query: Osnabrück, Lower Saxony, Germany
+        country: DE
+        state: Lower Saxony
+        population: 165034
+        location: 52°17′N 8°3′E / 52.283°N 8.050°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Osnabrück,+Lower+Saxony,+Germany
+        osm_id:
+        - 62631
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62631
+      Leverkusen:
+        query: Leverkusen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 163851
+        location: 51°2′N 6°59′E / 51.033°N 6.983°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Leverkusen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62449
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62449
+      Darmstadt:
+        query: Darmstadt, Hesse, Germany
+        country: DE
+        state: Hesse
+        population: 159631
+        location: 49°52′N 8°39′E / 49.867°N 8.650°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Darmstadt,+Hesse,+Germany
+        osm_id:
+        - 62581
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62581
+      Heidelberg:
+        query: Heidelberg, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 159245
+        location: 49°25′N 8°43′E / 49.417°N 8.717°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Heidelberg,+Baden-Württemberg,+Germany
+        osm_id:
+        - 285864
+        OSM relation:
+        - https://www.openstreetmap.org/relation/285864
+      Solingen:
+        query: Solingen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 158957
+        location: 51°10′N 7°5′E / 51.167°N 7.083°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Solingen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62699
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62699
+      Herne:
+        query: Herne, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 156621
+        location: 51°33′N 7°13′E / 51.550°N 7.217°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Herne,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62396
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62396
+      Regensburg:
+        query: Regensburg, Bavaria, Germany
+        country: DE
+        state: Bavaria
+        population: 153542
+        location: 49°1′N 12°5′E / 49.017°N 12.083°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Regensburg,+Bavaria,+Germany
+        osm_id:
+        - 62411
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62411
+      Neuss:
+        query: Neuss, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 152731
+        location: 51°12′N 6°42′E / 51.200°N 6.700°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Neuss,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 163307
+        OSM relation:
+        - https://www.openstreetmap.org/relation/163307
+      Paderborn:
+        query: Paderborn, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 152531
+        location: 51°43′N 8°46′E / 51.717°N 8.767°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Paderborn,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 5610766
+        OSM relation:
+        - https://www.openstreetmap.org/relation/5610766
+      Ingolstadt:
+        query: Ingolstadt, Bavaria, Germany
+        country: DE
+        state: Bavaria
+        population: 138016
+        location: 48°46′N 11°26′E / 48.767°N 11.433°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Ingolstadt,+Bavaria,+Germany
+        osm_id:
+        - 62381
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62381
+      Offenbach am Main:
+        query: Offenbach am Main, Hesse, Germany
+        country: DE
+        state: Hesse
+        population: 131295
+        location: 50°6′N 8°48′E / 50.100°N 8.800°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Offenbach+am+Main,+Hesse,+Germany
+        osm_id:
+        - 62695
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62695
+      Fürth:
+        query: Fürth, Bavaria, Germany
+        country: DE
+        state: Bavaria
+        population: 129122
+        location: 49°28′N 11°0′E / 49.467°N 11.000°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Fürth,+Bavaria,+Germany
+        osm_id:
+        - 62374
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62374
+      Ulm:
+        query: Ulm, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 126949
+        location: 48°24′N 9°59′E / 48.400°N 9.983°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Ulm,+Baden-Württemberg,+Germany
+        osm_id:
+        - 62495
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62495
+      Würzburg:
+        query: Würzburg, Bavaria, Germany
+        country: DE
+        state: Bavaria
+        population: 126933
+        location: 49°47′N 9°56′E / 49.783°N 9.933°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Würzburg,+Bavaria,+Germany
+        osm_id:
+        - 62464
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62464
+      Heilbronn:
+        query: Heilbronn, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 125613
+        location: 49°9′N 9°13′E / 49.150°N 9.217°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Heilbronn,+Baden-Württemberg,+Germany
+        osm_id:
+        - 62751
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62751
+      Pforzheim:
+        query: Pforzheim, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 125529
+        location: 48°54′N 8°43′E / 48.900°N 8.717°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Pforzheim,+Baden-Württemberg,+Germany
+        osm_id:
+        - 62471
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62471
+      Wolfsburg:
+        query: Wolfsburg, Lower Saxony, Germany
+        country: DE
+        state: Lower Saxony
+        population: 123949
+        location: 52°25′23″N 10°47′14″E / 52.42306°N 10.78722°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Wolfsburg,+Lower+Saxony,+Germany
+        osm_id:
+        - 62418
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62418
+      Bottrop:
+        query: Bottrop, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 117311
+        location: 51°31′29″N 6°55′22″E / 51.52472°N 6.92278°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bottrop,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62634
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62634
+      Göttingen:
+        query: Göttingen, Lower Saxony, Germany
+        country: DE
+        state: Lower Saxony
+        population: 116557
+        location: 51°32′N 9°56′E / 51.533°N 9.933°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Göttingen,+Lower+Saxony,+Germany
+        osm_id:
+        - 191361
+        OSM relation:
+        - https://www.openstreetmap.org/relation/191361
+      Reutlingen:
+        query: Reutlingen, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 116456
+        location: 48°29′N 9°13′E / 48.483°N 9.217°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Reutlingen,+Baden-Württemberg,+Germany
+        osm_id:
+        - 2772661
+        OSM relation:
+        - https://www.openstreetmap.org/relation/2772661
+      Koblenz:
+        query: Koblenz, Rhineland-Palatinate, Germany
+        country: DE
+        state: Rhineland-Palatinate
+        population: 113638
+        location: 50°21′35″N 7°35′52″E / 50.35972°N 7.59778°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Koblenz,+Rhineland-Palatinate,+Germany
+        osm_id:
+        - 62512
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62512
+      Erlangen:
+        query: Erlangen, Bavaria, Germany
+        country: DE
+        state: Bavaria
+        population: 113292
+        location: 49°35′N 11°1′E / 49.583°N 11.017°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Erlangen,+Bavaria,+Germany
+        osm_id:
+        - 62403
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62403
+      Bremerhaven:
+        query: Bremerhaven, Bremen, Germany
+        country: DE
+        state: Bremen
+        population: 113173
+        location: 53°33′N 8°35′E / 53.550°N 8.583°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bremerhaven,+Bremen,+Germany
+        osm_id:
+        - 62658
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62658
+      Remscheid:
+        query: Remscheid, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 111770
+        location: 51°11′N 7°12′E / 51.183°N 7.200°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Remscheid,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 11799931
+        OSM relation:
+        - https://www.openstreetmap.org/relation/11799931
+      Bergisch Gladbach:
+        query: Bergisch Gladbach, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 111645
+        location: 51°6′N 7°7′E / 51.100°N 7.117°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bergisch+Gladbach,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 173103
+        OSM relation:
+        - https://www.openstreetmap.org/relation/173103
+      Recklinghausen:
+        query: Recklinghausen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 110714
+        location: 51°35′6″N 7°9′43″E / 51.58500°N 7.16194°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Recklinghausen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 56665
+        OSM relation:
+        - https://www.openstreetmap.org/relation/56665
+      Trier:
+        query: Trier, Rhineland-Palatinate, Germany
+        country: DE
+        state: Rhineland-Palatinate
+        population: 110570
+        location: 49°45′N 6°38′E / 49.750°N 6.633°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Trier,+Rhineland-Palatinate,+Germany
+        osm_id:
+        - 172679
+        OSM relation:
+        - https://www.openstreetmap.org/relation/172679
+      Jena:
+        query: Jena, Thuringia, Germany
+        country: DE
+        state: Thuringia
+        population: 110502
+        location: 50°55′38″N 11°35′10″E / 50.92722°N 11.58611°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Jena,+Thuringia,+Germany
+        osm_id:
+        - 62693
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62693
+      Moers:
+        query: Moers, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 103725
+        location: 51°27′33″N 6°37′11″E / 51.45917°N 6.61972°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Moers,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 58623
+        OSM relation:
+        - https://www.openstreetmap.org/relation/58623
+      Salzgitter:
+        query: Salzgitter, Lower Saxony, Germany
+        country: DE
+        state: Lower Saxony
+        population: 103694
+        location: 52°9′N 10°20′E / 52.150°N 10.333°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Salzgitter,+Lower+Saxony,+Germany
+        osm_id:
+        - 62659
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62659
+      Siegen:
+        query: Siegen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 101516
+        location: 50°53′N 8°1′E / 50.883°N 8.017°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Siegen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 163256
+        OSM relation:
+        - https://www.openstreetmap.org/relation/163256
+      Gütersloh:
+        query: Gütersloh, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 101158
+        location: 51°54′N 8°23′E / 51.900°N 8.383°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Gütersloh,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 138119
+        OSM relation:
+        - https://www.openstreetmap.org/relation/138119
+      Hildesheim:
+        query: Hildesheim, Lower Saxony, Germany
+        country: DE
+        state: Lower Saxony
+        population: 100319
+        location: 52°9′N 9°57′E / 52.150°N 9.950°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Hildesheim,+Lower+Saxony,+Germany
+        osm_id:
+        - 1176503
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1176503
+

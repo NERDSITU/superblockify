@@ -63,6 +63,9 @@ PLACES_100_CITIES
     place, and ``place`` is a dictionary of various attributes. One of them is the
     ``query`` attribute which is the place string or a list of place strings.
     Find the extensive list in the ``../cities.yml`` file.
+PLACES_GERMANY
+    List of cities in Germany by population. All cities with more than 100,000
+    inhabitants are included. Data from the German Federal Statistical Office.
 
 PLOT_SUFFIX
     The format of the plots. Can be ``"png"``, ``"jpg"``, ``"pdf"``, ``"svg"``, etc.
@@ -137,6 +140,7 @@ with open(PLACES_FILE, "r", encoding="utf-8") as file:
         for name, data in places["place_lists"]["test_small"]["cities"].items()
     ]
     PLACES_100_CITIES = places["place_lists"]["100_cities_boeing"]["cities"]
+    PLACES_GERMANY = places["place_lists"]["germany_by_pop"]["cities"]
 
 # Plot format
 PLOT_SUFFIX = "pdf"
