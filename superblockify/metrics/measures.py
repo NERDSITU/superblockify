@@ -566,7 +566,9 @@ def __accumulate_bc(
     parallel=True,
     fastmath=False,
 )
-def _sum_bc(loop_indices, pred, dist, edges_uv, edge_padding, max_range):
+def _sum_bc(
+    loop_indices, pred, dist, edges_uv, edge_padding, max_range
+):  # pragma: no cover
     """Calculate the betweenness centrality for a single source node.
 
     Parameters
@@ -594,7 +596,6 @@ def _sum_bc(loop_indices, pred, dist, edges_uv, edge_padding, max_range):
     The edges_u and edges_v arrays are sorted together, this way indices can be
     found using a binary search. This is faster than using np.where.
     """
-    # pragma: no cover
 
     betweennesses = np.zeros((len(pred) + len(edges_uv), 3), dtype=np.float64)
     # The first len(pred) rows correspond to node betweenness, the rest to edge

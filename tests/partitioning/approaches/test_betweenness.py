@@ -24,7 +24,7 @@ class TestBetweennessPartitioner:
             calculate_metrics=False,
             percentile=percentile,
             scaling=scaling,
-            range=max_range,
+            max_range=max_range,
         )
         part.attribute_label = "betweenness_percentile"
 
