@@ -6,7 +6,7 @@ from osmnx.stats import basic_stats
 from scipy.stats import entropy
 
 from .population.approximation import get_population_area
-from .config import logger, NUM_BINS
+from .config import NUM_BINS
 
 
 def basic_graph_stats(graph, area=None):
@@ -80,11 +80,11 @@ def street_orientation_order(graph, num_bins):
 
     graph_unprojected = graph.copy()
     if is_projected(graph_unprojected.graph["crs"]):
-        logger.debug(
-            "Orientation order: Unprojecting graph from %s to 2D coordinates ("
-            "epsg:4326).",
-            graph_unprojected.graph["crs"],
-        )
+        # logger.debug(
+        #     "Orientation order: Unprojecting graph from %s to 2D coordinates ("
+        #     "epsg:4326).",
+        #     graph_unprojected.graph["crs"],
+        # )
         graph_unprojected = project_graph(graph_unprojected, to_crs="epsg:4326")
     # orientation_entropy requires an undirected graph
     graph_unprojected = graph_unprojected.to_undirected()
