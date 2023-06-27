@@ -9,6 +9,7 @@ from osmnx.projection import is_projected
 from pandas import Series
 from scipy.spatial import Voronoi  # pylint: disable=no-name-in-module
 from shapely import Polygon, get_coordinates, line_interpolate_point, polygons
+from shapely.lib import GEOSException
 
 from ..config import logger
 
@@ -294,4 +295,10 @@ def reconstruct_edge_cells(voronoi_diagram, indices, crs):
     # Drop cells that are outside the boundary
     poly_gdf = poly_gdf.loc[poly_gdf.index != -1]
     # Dissolve cells by edge multiindex
-    return poly_gdf.dissolve(by=poly_gdf.index)
+    try:
+        return poly_gdf.dissolve(by=poly_gdf.index)
+    except GEOSException as err:
+        raise ValueError(
+            "The tessellation might contain invalid geometries. "
+            "Try increasing the segment length."
+        ) from err
