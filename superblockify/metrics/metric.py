@@ -172,7 +172,7 @@ class Metric:
         """
         self.graph_stats = basic_graph_stats(graph, area=graph.graph["area"])
 
-    def calculate_before(self, partitioner, make_plots=False):
+    def calculate_before(self, partitioner, betweenness_range=None, make_plots=False):
         """Calculate metrics on unrestricted graph
 
         Metrics that should be available to partitioners for use in their
@@ -185,6 +185,17 @@ class Metric:
         ----------
         partitioner : BasePartitioner
             The partitioner object to calculate the metrics for
+        betweenness_range : int, optional
+            The range to use for calculating the betweenness centrality, by default
+            None, which uses the whole graph.
+            If it is not None, two types of betweenness centralities are calculated.
+            The whole one is always needed for other statistics.
+            Its unit is determined by the :attr:`unit` attribute.
+            For convenience, when using the "time" unit, the range is interpreted as
+            meter able to travel at 30 km/h, and converted to seconds.
+        make_plots : bool, optional
+            Whether to plot the distributions of the shortest paths and distances,
+            by default False.
         """
         if self.node_list is None and partitioner.partitions is None:
             self.node_list = list(partitioner.graph.nodes)
@@ -223,6 +234,19 @@ class Metric:
             weight=weight,
             #  No `attr_suffix` for the full graph
         )
+        if betweenness_range is not None:
+            betweenness_centrality(
+                partitioner.graph,
+                self.node_list,
+                self.distance_matrix["S"],
+                self.predecessor_matrix["S"],
+                weight=weight,
+                attr_suffix="_range_limited",
+                max_range=betweenness_range
+                if self.unit != "time"
+                else betweenness_range / 30 * 3.6,
+                # t = s / v = range / (30 km/h) * (3600 s/h) = range / 30 * 3.6
+            )
 
         self.calculate_high_bc_clustering(partitioner.graph, CLUSTERING_PERCENTILE)
 

@@ -12,7 +12,8 @@ class BetweennessPartitioner(AttributePartitioner):
     Set sparsified graph from edges or nodes with high betweenness centrality.
     """
 
-    def write_attribute(self, percentile=85.0, scaling="normal", **kwargs):
+    def write_attribute(self, percentile=85.0, scaling="normal", max_range=None,
+                        **kwargs):
         """Determine edges with high betweenness centrality for sparsified graph.
 
         Edges with high betweenness centrality are used to construct the sparsified
@@ -30,6 +31,13 @@ class BetweennessPartitioner(AttributePartitioner):
         scaling : str, optional
             The type of betweenness to use, can be `normal`, `length`, or `linear`,
             by default `normal`
+        max_range : int, optional
+            The range to use for calculating the betweenness centrality, by default
+            None, which uses the whole graph. Its unit is meters.
+        **kwargs
+            Additional keyword arguments. `calculate_metrics_before` takes the
+            `make_plots` parameter.
+
 
         Raises
         ------
@@ -51,11 +59,19 @@ class BetweennessPartitioner(AttributePartitioner):
                 f"Scaling must be 'normal', 'length', or 'linear', but is {scaling}."
             )
 
-        self.calculate_metrics_before(make_plots=kwargs.get("make_plots", False))
+        self.calculate_metrics_before(
+            make_plots=kwargs.get("make_plots", False), betweenness_range=max_range
+        )
 
-        # determine threshold for betweenness from ranking
+        # determine a threshold for betweenness from ranking
         attr_list = array(
-            [val for _, _, val in self.graph.edges(data=f"edge_betweenness_{scaling}")]
+            [
+                val
+                for _, _, val in self.graph.edges(
+                    data=f"edge_betweenness_{scaling}"
+                    + ("_range_limited" if max_range else "")
+                )
+            ]
         )
 
         attr_list.sort()

@@ -252,8 +252,9 @@ def test_calculate_coverage(weights_in, weights_out, expected):
     ],
 )
 @pytest.mark.parametrize("half_k", [False, True])
+@pytest.mark.parametrize("max_range", [None, 1000])
 def test_betweenness_centrality_options(
-    test_one_city_precalculated_copy, kwargs, half_k
+    test_one_city_precalculated_copy, kwargs, half_k, max_range
 ):
     """Test betweenness centrality calculation"""
     part = test_one_city_precalculated_copy
@@ -264,6 +265,7 @@ def test_betweenness_centrality_options(
         part.metric.distance_matrix["S"],
         part.metric.predecessor_matrix["S"],
         k=None if half_k else int(part.graph.number_of_nodes() / 2),
+        max_range=max_range,
         **kwargs,
     )
     for bc_type in ["normal", "length", "linear"]:

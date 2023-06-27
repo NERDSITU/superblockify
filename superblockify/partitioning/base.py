@@ -363,7 +363,7 @@ class BasePartitioner(ABC):
 
         logger.debug("Metrics for %s: %s", self.name, self.metric)
 
-    def calculate_metrics_before(self, make_plots=False):
+    def calculate_metrics_before(self, make_plots=False, betweenness_range=None):
         """Calculate metrics for the graph before partitioning.
 
         Calculates the metrics that might be used by a partitioning approach. It
@@ -375,11 +375,18 @@ class BasePartitioner(ABC):
         make_plots : bool, optional
             If True show visualization graphs of the approach. If False, only print
             into console. Default is False.
+        betweenness_range : int, optional
+            The range to use for calculating the betweenness centrality, by default
+            None, which uses the whole graph. Its unit is meters.
+            If it is not None, two types of betweenness centralities are calculated.
+            The whole one is always needed for other statistics.
         """
 
         # Log calculating metrics
         logger.info("Calculating metrics for %s before partitioning", self.name)
-        self.metric.calculate_before(partitioner=self, make_plots=make_plots)
+        self.metric.calculate_before(
+            partitioner=self, make_plots=make_plots, betweenness_range=betweenness_range
+        )
 
         logger.debug("Metrics for %s: %s", self.name, self.metric)
 
