@@ -11,7 +11,8 @@ class TestBetweennessPartitioner:
     # pylint: disable=protected-access
     @pytest.mark.parametrize("percentile", [99.9, 90.0, 80.0, 10.0, 1e-8])
     @pytest.mark.parametrize("scaling", ["normal", "length", "linear"])
-    def test_run(self, test_one_city_copy, percentile, scaling):
+    @pytest.mark.parametrize("max_range", [None, 2000])
+    def test_run(self, test_one_city_copy, percentile, scaling, max_range):
         """Test the run method of the BetweennessPartitioner."""
         city_name, graph = test_one_city_copy
         part = BetweennessPartitioner(
@@ -23,6 +24,7 @@ class TestBetweennessPartitioner:
             calculate_metrics=False,
             percentile=percentile,
             scaling=scaling,
+            range=max_range,
         )
         part.attribute_label = "betweenness_percentile"
 

@@ -237,6 +237,7 @@ def betweenness_centrality(
     attr_suffix=None,
     k=None,
     seed=None,
+    max_range=None,
 ):
     """Calculate several types of betweenness centrality for the nodes and edges.
 
@@ -269,6 +270,10 @@ def betweenness_centrality(
         None
     seed : int, random_state, or None (default)
         Indicator of random number generation state. See :ref:`Randomness<randomness>`
+        for additional details.
+    max_range : float, optional
+        The maximum path length to consider, by default None, which means no maximum
+        path length. It is measured in unit of the weight attribute.
 
     Raises
     ------
@@ -302,7 +307,7 @@ def betweenness_centrality(
     .. [3] Brandes, U. (2008). On variants of shortest-path betweenness centrality and
        their generic computation. Social Networks, 30(2), 136–145.
        https://doi.org/10.1016/j.socnet.2007.11.001
-    """
+    """  # pylint: disable=too-many-locals
     # Check if weight attribute is present on all edges
     if weight and not all(
         weight in data for _, _, _, data in graph.edges(keys=True, data=True)
@@ -337,6 +342,7 @@ def betweenness_centrality(
             dist_matrix,
             edge_padding=len(str(len(graph))),
             index_subset=seed.sample(range(len(node_order)), k=k) if k else None,
+            max_range=max_range,
         )
 
     attr_suffix = attr_suffix if attr_suffix else ""
@@ -407,7 +413,9 @@ def betweenness_centrality(
     )
 
 
-def _calculate_betweenness(edges_uv_id, pred, dist, edge_padding, index_subset=None):
+def _calculate_betweenness(
+    edges_uv_id, pred, dist, edge_padding, index_subset=None, max_range=None
+):
     """Calculate the betweenness centralities for the nodes and edges.
 
     Parameters
@@ -426,6 +434,10 @@ def _calculate_betweenness(edges_uv_id, pred, dist, edge_padding, index_subset=N
     index_subset : list, optional
         List of node indices to calculate the betweenness centrality for, by default
         None. Used to calculate k-betweenness centrality
+    max_range : float, optional
+        Maximum range to calculate the betweenness centrality for, by default None.
+        Used to calculate range dependent betweenness centrality.
+        None is interpreted as all nodes.
     """
 
     node_indices = np.arange(pred.shape[0])
@@ -438,6 +450,7 @@ def _calculate_betweenness(edges_uv_id, pred, dist, edge_padding, index_subset=N
         dist,
         edges_uv_id,
         int32(edge_padding),
+        float32(max_range) if max_range else float32("inf"),
     )
 
     return {
@@ -454,8 +467,8 @@ def _calculate_betweenness(edges_uv_id, pred, dist, edge_padding, index_subset=N
     }
 
 
-@njit(int32[:](float32[:]), parallel=False)
-def _single_source_given_paths_simplified(dist_row):  # pragma: no cover
+@njit(int32[:](float32[:], float32), parallel=False)
+def _single_source_given_paths_simplified(dist_row, max_range):  # pragma: no cover
     """Sort nodes, predecessors and distances by distance.
 
     Parameters
@@ -475,7 +488,7 @@ def _single_source_given_paths_simplified(dist_row):  # pragma: no cover
     dist_order = np.argsort(dist_row)
     # Remove unreachable indices (inf), check from back which is the first
     # reachable node
-    while dist_row[dist_order[-1]] == np.inf:
+    while dist_row[dist_order[-1]] >= max_range:
         dist_order = dist_order[:-1]
     # Remove immediately reachable nodes with distance 0, including s itself
     while dist_row[dist_order[0]] == 0:
@@ -483,14 +496,16 @@ def _single_source_given_paths_simplified(dist_row):  # pragma: no cover
     return dist_order.astype(np.int32)
 
 
-@njit(float64[:, :](int32, int32[:], float32[:], int64[:], int32))
+@njit(float64[:, :](int32, int32[:], float32[:], int64[:], int32, float32))
 def __accumulate_bc(
     s_idx,
     pred_row,
     dist_row,
     edges_uv,
     edge_padding,
+    max_range,
 ):  # pragma: no cover
+    # pylint: disable=too-many-locals
     """Calculate the betweenness centrality for a single source node.
 
     Parameters
@@ -505,6 +520,8 @@ def __accumulate_bc(
         Array of concatenated edge indices, sorted in ascending order.
     edge_padding : int
         Number of digits to pad the edge indices with, :attr:`max_len` of the nodes.
+    max_range : float
+        Maximum range to calculate the betweenness centrality for.
 
     Returns
     -------
@@ -513,7 +530,7 @@ def __accumulate_bc(
     """
     betweennesses = np.zeros((len(pred_row) + len(edges_uv), 3), dtype=np.float64)
 
-    s_queue_idx = _single_source_given_paths_simplified(dist_row)
+    s_queue_idx = _single_source_given_paths_simplified(dist_row, max_range)
     # delta = dict.fromkeys(node_indices, 0)
     # delta as 1d-ndarray
     delta = np.zeros(len(pred_row))
@@ -545,11 +562,11 @@ def __accumulate_bc(
 
 
 @njit(  # return of two 1d float64 arrays including node and edge betweenness
-    float64[:, :](int32[:], int32[:, :], float32[:, :], int64[:], int32),
+    float64[:, :](int32[:], int32[:, :], float32[:, :], int64[:], int32, float32),
     parallel=True,
     fastmath=False,
 )
-def _sum_bc(loop_indices, pred, dist, edges_uv, edge_padding):  # pragma: no cover
+def _sum_bc(loop_indices, pred, dist, edges_uv, edge_padding, max_range):
     """Calculate the betweenness centrality for a single source node.
 
     Parameters
@@ -565,6 +582,8 @@ def _sum_bc(loop_indices, pred, dist, edges_uv, edge_padding):  # pragma: no cov
     edge_padding : int
         Number of digits to pad edge indices with. Used to convert edge indices
         to 1D indices.
+    max_range : int
+        Maximum path distances to consider for betweenness calculation.
     Returns
     -------
     node_bc : tuple of ndarray
@@ -575,6 +594,7 @@ def _sum_bc(loop_indices, pred, dist, edges_uv, edge_padding):  # pragma: no cov
     The edges_u and edges_v arrays are sorted together, this way indices can be
     found using a binary search. This is faster than using np.where.
     """
+    # pragma: no cover
 
     betweennesses = np.zeros((len(pred) + len(edges_uv), 3), dtype=np.float64)
     # The first len(pred) rows correspond to node betweenness, the rest to edge
@@ -588,6 +608,7 @@ def _sum_bc(loop_indices, pred, dist, edges_uv, edge_padding):  # pragma: no cov
             dist[loop_indices[idx]],
             edges_uv,
             edge_padding,
+            max_range,
         )
     return betweennesses
 
