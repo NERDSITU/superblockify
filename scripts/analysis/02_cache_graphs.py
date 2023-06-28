@@ -16,7 +16,7 @@ from os.path import exists, join, dirname
 from sys import path
 from time import time
 
-from scripts.analysis.utils import get_hpc_subset
+from scripts.analysis.config import get_hpc_subset
 
 path.append(join(dirname(__file__), "..", ".."))
 

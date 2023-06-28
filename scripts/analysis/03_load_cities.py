@@ -28,8 +28,14 @@ from os.path import exists, join, dirname
 
 import osmnx as ox
 
-from scripts.analysis.utils import get_hpc_subset
-from superblockify.config import logger, NETWORK_FILTER, GRAPH_DIR, PLACES_100_CITIES
+from scripts.analysis.config import get_hpc_subset
+from superblockify.config import (
+    logger,
+    NETWORK_FILTER,
+    GRAPH_DIR,
+    PLACES_100_CITIES,
+    PLACES_GERMANY,
+)
 from superblockify.utils import load_graph_from_place
 
 # turn on logging
