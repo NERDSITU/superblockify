@@ -42,18 +42,9 @@ if __name__ == "__main__":
         elif exists(folder):
             availability.loc[i, "done"] = "started"
     print(availability)
-    # General percentages
-    print(availability["done"].value_counts(normalize=True))
     # Show percentage per combination that has `True` in the `done` column
     # handle load_err and started as 0 - add new column
     print(availability.groupby(["combination", "done"]).count().groupby(level=0))
-    # Show percentage of `True` in done column per city - all clu
-    print(
-        availability.groupby(["city", "done"])
-        .count()
-        .groupby(level=0)
-        .apply(lambda x: 100 * x / x.sum())
-    )
     # Show percentage per city and partitioner (that is the first part of the
     # combination string before the first underscore)
     availability["partitioner"] = availability["combination"].apply(
@@ -65,3 +56,12 @@ if __name__ == "__main__":
         .groupby(level=[0, 1])
         .apply(lambda x: 100 * x / x.sum())
     )
+    # Show percentage of `True` in done column per city - all clu
+    print(
+        availability.groupby(["city", "done"])
+        .count()
+        .groupby(level=0)
+        .apply(lambda x: 100 * x / x.sum())
+    )
+    # General percentages
+    print(availability["done"].value_counts(normalize=True))
