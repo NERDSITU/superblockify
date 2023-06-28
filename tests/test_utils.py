@@ -22,7 +22,8 @@ from tests.conftest import mark_xfail_flaky_download
 
 @mark_xfail_flaky_download
 @pytest.mark.parametrize("only_cache", [True, False])
-def test_load_graph_from_place(only_cache):
+@pytest.mark.parametrize("max_nodes", [None, 100])
+def test_load_graph_from_place(only_cache, max_nodes):
     """Test that the load_graph_from_place function works."""
 
     graph = load_graph_from_place(
@@ -31,6 +32,7 @@ def test_load_graph_from_place(only_cache):
         add_population=True,
         network_type="drive",
         only_cache=only_cache,
+        max_nodes=max_nodes,
     )
     if only_cache:
         assert graph is None
