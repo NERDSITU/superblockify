@@ -619,7 +619,9 @@ def reduce_graph(graph, max_nodes):
             "No reduction necessary (%s <= %s)", graph.number_of_nodes(), max_nodes
         )
         return graph
-    logger.debug("Reducing graph to %s nodes", max_nodes)
+    logger.debug(
+        "Reducing graph from %s to %s nodes", graph.number_of_nodes(), max_nodes
+    )
     # Find representative node
     rep_node_id = find_representative_node_id(graph)
     # Get ego graph - breadth first search (BFS)
