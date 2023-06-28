@@ -120,6 +120,8 @@ DOWNLOAD_TIMEOUT = 60
 # Logging configuration using the setup.cfg file
 logging.config.fileConfig(join(dirname(__file__), "..", "setup.cfg"))
 # Get the logger for this module
+numba_logger = logging.getLogger("numba")
+numba_logger.setLevel(logging.WARNING)
 logger = logging.getLogger("superblockify")
 
 # Tests
