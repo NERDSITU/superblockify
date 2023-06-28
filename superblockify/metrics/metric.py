@@ -254,8 +254,6 @@ class Metric:
         self,
         partitioner,
         replace_max_speeds=True,
-        num_workers=None,
-        chunk_size=1,
         make_plots=False,
     ):
         """Calculate all metrics for the partitioning.
@@ -271,11 +269,6 @@ class Metric:
             If True and unit is "time", calculate the quickest paths in the restricted
             graph with the max speeds :attr:`V_MAX_LTN` and :attr:`V_MAX_SPARSE` set in
             :mod:`superblockify.config`. Default is True.
-        num_workers : int, optional
-            The number of workers to use for multiprocessing. If None, use
-            min(32, os.cpu_count() + 4), by default None
-        chunk_size : int, optional
-            The chunk size to use for multiprocessing, by default 1
         make_plots : bool, optional
             Whether to make plots of the distributions of the distances for each
             network measure, by default False
@@ -310,8 +303,6 @@ class Metric:
             weight=weight_restricted,
             unit_symbol=self.unit_symbol(),
             node_order=self.node_list,
-            num_workers=num_workers,
-            chunk_size=chunk_size,
             plot_distributions=make_plots,
         )
 

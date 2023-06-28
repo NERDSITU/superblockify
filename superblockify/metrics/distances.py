@@ -1,7 +1,6 @@
 """Distance calculation for the network metrics."""
 from datetime import timedelta
 from itertools import combinations
-from multiprocessing import Pool
 from os import environ
 from time import time
 
@@ -11,7 +10,6 @@ from osmnx.projection import is_projected
 from psutil import virtual_memory
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import dijkstra
-from tqdm import tqdm
 
 from .plot import plot_distance_distributions
 from ..config import logger
@@ -320,8 +318,6 @@ def calculate_partitioning_distance_matrix(
     weight=None,
     unit_symbol=None,
     node_order=None,
-    num_workers=None,
-    chunk_size=1,
     plot_distributions=False,
     check_overlap=True,
     max_mem_factor=0.2,
@@ -348,17 +344,6 @@ def calculate_partitioning_distance_matrix(
     node_order : list, optional
         The order of the nodes in the distance matrix. If None, the ordering is
         produced by graph.nodes().
-    num_workers : int, optional
-        The maximal number of workers used to process distance matrices. If None,
-        the number of workers is set to ``min(32, cpu_count() // 2)``.
-        Choose this number carefully, as it can lead to memory errors if too high,
-        if the graph has partitions. In this case another partitioner approach
-        might yield better results.
-    chunk_size : int, optional
-        The chunk-size to use for the multiprocessing pool. This is the number of
-        partitions for which the distance matrix is calculated in one go (thread).
-        Keep this low if the graph is big or has many partitions. We suggest to
-        keep this at 1.
     plot_distributions : bool, optional
         If True, plot the distributions of the Euclidean distances and coordinates.
     check_overlap : bool, optional
@@ -428,8 +413,6 @@ def calculate_partitioning_distance_matrix(
         partitions,
         weight,
         node_order,
-        num_workers,
-        chunk_size,
         max_mem_factor,
     )
 
@@ -456,8 +439,6 @@ def shortest_paths_restricted(
     partitions,
     weight,
     node_order,
-    num_workers=2,
-    chunk_size=1,
     max_mem_factor=0.2,
 ):
     """Calculate restricted shortest paths.
@@ -487,14 +468,6 @@ def shortest_paths_restricted(
         The edge attribute to use as weight. If None, all edge weights are 1.
     node_order : list
         The order of the nodes in the distance matrix.
-    num_workers : int, optional
-        The maximal number of workers used to process distance matrices. Defaults
-        to 2.
-    chunk_size : int, optional
-        The chunk-size to use for the multiprocessing pool. This is the number of
-        partitions for which the distance matrix is calculated in one go (thread).
-        Keep this low if the graph is big or has many partitions. We suggest to
-        keep this at 1.
     max_mem_factor : float, optional
         The maximum fraction to use in the fully vectorized calculation. Defaults
         to 0.2. Otherwise, the calculation is iterated over the partition indices.
@@ -560,36 +533,35 @@ def shortest_paths_restricted(
         (data, (row, col)), shape=(len(node_order), len(node_order))
     )
 
-    # Calculate the combinations in parallel
-    num_workers = min(2, num_workers) if num_workers else 2
-    logger.debug(
-        "Calculating 2 semipermeable distance matrices with %d workers.",
-        num_workers,
-    )
+    # Calculate the combinations
+    logger.debug("Calculating 2 semipermeable distance matrices.")
     start_time = time()
-    # Parallelized calculation with `p.imap_unordered`
-    with Pool(processes=num_workers) as pool:
-        results = list(
-            tqdm(
-                pool.imap_unordered(
-                    dijkstra_settings,
-                    [g_leaving, g_entering],
-                    chunksize=chunk_size,
-                ),
-                desc="Calculating distance matrices",
-                total=2,
-                unit_scale=1,
-            )
-        )
+    dist_entering, pred_entering = dijkstra(
+        g_entering,
+        directed=True,
+        indices=None,  # all nodes, sorted as in sparse_matrix
+        return_predecessors=True,
+        unweighted=False,
+    )
+    logger.debug(
+        "Finished calculating the first distance matrix in %s. Starting the second.",
+        timedelta(seconds=time() - start_time),
+    )
+    dist_le, pred_le = dijkstra(
+        g_leaving,
+        directed=True,
+        indices=None,  # all nodes, sorted as in sparse_matrix
+        return_predecessors=True,
+        unweighted=False,
+    )
     logger.debug(
         "Finished calculating distance matrices in %s. Combining the results.",
         timedelta(seconds=time() - start_time),
     )
-    min_mask = results[0][0] < results[1][0]
-    dist_le, pred_le = results[1]
-    dist_le[min_mask] = results[0][0][min_mask]
-    pred_le[min_mask] = results[0][1][min_mask]
-    del results
+    min_mask = dist_le > dist_entering
+    dist_le[min_mask] = dist_entering[min_mask]
+    pred_le[min_mask] = dist_entering[min_mask]
+    del dist_entering, pred_entering
 
     # Fill up paths
     n_partition_intersect_indices = [
@@ -607,8 +579,8 @@ def shortest_paths_restricted(
 
     start_time = time()
 
-    dist_step = np.full_like(dist_le, np.inf)
-    pred_step = np.full_like(pred_le, -9999)
+    dist_step = np.full_like(dist_le, np.inf, dtype=np.float32)
+    pred_step = np.full_like(pred_le, -9999, dtype=np.int32)
     logger.debug("Prepared distance matrices")
     tensorized = 0
     vectorized = 0

@@ -147,7 +147,6 @@ def test_calculate_partitioning_distance_matrix(
             plot_distributions=True,
             check_overlap=True,
             max_mem_factor=max_mem_factor,
-            num_workers=2,
         )
     else:
         calculate_partitioning_distance_matrix(
@@ -155,7 +154,6 @@ def test_calculate_partitioning_distance_matrix(
             plot_distributions=True,
             check_overlap=True,
             max_mem_factor=max_mem_factor,
-            num_workers=2,
         )
     plt.close("all")
 

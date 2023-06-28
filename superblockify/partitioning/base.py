@@ -321,8 +321,6 @@ class BasePartitioner(ABC):
         self,
         make_plots=False,
         replace_max_speeds=True,
-        num_workers=None,
-        chunk_size=1,
     ):
         """Calculate metrics for the partitioning.
 
@@ -342,13 +340,6 @@ class BasePartitioner(ABC):
         replace_max_speeds : bool, optional
             If True and unit is "time", replace max speeds set in
             :mod:`superblockify.config`. Default is True.
-        num_workers : int, optional
-            Number of workers to use for parallel processing. Default is None, which
-            uses min(32, os.cpu_count() + 4) workers.
-        chunk_size : int, optional
-            Size of chunks to split the graph into for parallel processing. Default is
-            1, which means no chunking. A chunking over 3 seems to not be beneficial.
-
         """
 
         # Log calculating metrics
@@ -357,8 +348,6 @@ class BasePartitioner(ABC):
             partitioner=self,
             replace_max_speeds=replace_max_speeds,
             make_plots=make_plots,
-            num_workers=num_workers,
-            chunk_size=chunk_size,
         )
 
         logger.debug("Metrics for %s: %s", self.name, self.metric)
