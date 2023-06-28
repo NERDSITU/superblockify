@@ -24,9 +24,10 @@ from osmnx._errors import CacheOnlyModeInterrupt
 from osmnx.stats import count_streets_per_node
 from shapely import wkt
 
+from .partitioning.utils import reduce_graph
+from .config import logger, MAX_NODES
 from .graph_stats import basic_graph_stats
 from .population.approximation import add_edge_population
-from .config import logger
 
 
 def extract_attributes(graph, edge_attributes, node_attributes):
@@ -73,7 +74,12 @@ def extract_attributes(graph, edge_attributes, node_attributes):
 
 
 def load_graph_from_place(
-    save_as, search_string, add_population=False, only_cache=False, **gfp_kwargs
+    save_as,
+    search_string,
+    add_population=False,
+    only_cache=False,
+    max_nodes=MAX_NODES,
+    **gfp_kwargs
 ):
     """Load a graph from a place and save it to a file.
 
@@ -93,6 +99,11 @@ def load_graph_from_place(
         Whether to add population data to the graph. Default is False.
     only_cache : bool, optional
         Whether to only load the graph from cache. Default is False.
+    max_nodes : int, optional
+        Maximum number of nodes in the graph. If the graph has more nodes, it will
+        be reduced to `max_nodes`, by taking the ego graph of a representative,
+        central node. If None, the graph will not be reduced. Default is set in
+        :mod:`superblockify.config`.
     **gfp_kwargs
         Keyword arguments to pass to osmnx.graph_from_place.
 
@@ -162,6 +173,9 @@ def load_graph_from_place(
     # update graph attributes with basic graph stats
     graph.graph.update(basic_graph_stats(graph, area=graph.graph["area"]))
     # Save graph
+    if max_nodes is not None and graph.number_of_nodes() > max_nodes:
+        logger.debug("Reducing graph to %s nodes", max_nodes)
+        graph = reduce_graph(graph, max_nodes=max_nodes)
     logger.debug("Preprocessing done - Saving graph")
     ox.save_graphml(graph, filepath=save_as)
     logger.debug("Saved graph (%s MB) to %s", getsize(save_as) >> 20, save_as)
