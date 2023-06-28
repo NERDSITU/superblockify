@@ -79,7 +79,7 @@ def load_graph_from_place(
     add_population=False,
     only_cache=False,
     max_nodes=MAX_NODES,
-    **gfp_kwargs
+    **gfp_kwargs,
 ):
     """Load a graph from a place and save it to a file.
 
@@ -410,6 +410,10 @@ def load_graphml_dtypes(filepath=None, attribute_label=None, attribute_dtype=Non
         "street_density_km": float,
         "street_orientation_order": float,
     }
+    # Add the same graph_dtypes, but with the `reduced_` prefix
+    graph_dtypes.update(
+        {f"reduced_{key}": value for key, value in graph_dtypes.items()}
+    )
 
     if attribute_label is not None and attribute_dtype is not None:
         edge_dtypes[attribute_label] = attribute_dtype
