@@ -23,8 +23,8 @@ SLURM_ARRAY_TASK_COUNT : int
     The number of SLURM job scheduler tasks.
 """
 from itertools import product
+from os import rmdir
 from os.path import join, dirname, exists, getsize
-from random import shuffle
 from sys import path
 
 import osmnx as ox
@@ -138,6 +138,26 @@ if __name__ == "__main__":
             # If partitioner already done, skip
             if exists(join(RESULTS_DIR, name, "done")):
                 logger.info("Partitioner %s has already been run, skipping!", name)
+                continue
+            elif exists(join(RESULTS_DIR, name, "load_err")):
+                logger.info(
+                    "Partitioner %s has already been run, but loading failed. "
+                    "Deleting and rerunning!",
+                )
+                # remove folder
+                rmdir(join(RESULTS_DIR, name))
+            try:
+                part = comb["part_class"](  # instantiate partitioner
+                    name=name,
+                    city_name=place_name,
+                    search_str=["R" + str(osmid) for osmid in place["osm_id"]],
+                    unit=comb["unit"],
+                )
+            except FileExistsError as err:
+                logger.error(
+                    "FileExistsError when initializing partitioner %s: %s", name, err
+                )
+                continue
             part = comb["part_class"](  # instantiate partitioner
                 name=name,
                 city_name=place_name,
