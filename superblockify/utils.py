@@ -121,7 +121,7 @@ def load_graph_from_place(
     ox.settings.cache_only_mode = only_cache
     try:
         graph = ox.graph_from_polygon(mult_polygon.geometry.unary_union, **gfp_kwargs)
-    except CacheOnlyModeInterrupt:
+    except CacheOnlyModeInterrupt:  # pragma: no cover
         logger.debug("Only loaded graph from cache")
         return None
     logger.debug("Downloaded graph - Preprocessing")

@@ -3,6 +3,7 @@ from os import remove
 from os.path import exists, join
 
 import pytest
+from networkx import Graph, MultiDiGraph
 from numpy import array, array_equal, int32, int64, inf, nan, isnan
 from shapely import MultiPolygon, Polygon
 
@@ -14,6 +15,7 @@ from superblockify.utils import (
     __edge_to_1d,
     __edges_to_1d,
     percentual_increase,
+    compare_components_and_partitions,
 )
 from tests.conftest import mark_xfail_flaky_download
 
@@ -309,3 +311,53 @@ def test_percentual_increase(val_1, val_2, expected):
         assert isnan(percentual_increase(val_1, val_2))
     else:
         assert pytest.approx(percentual_increase(val_1, val_2), 1e-6) == expected
+
+
+@pytest.mark.parametrize(
+    "list1,list2,expected",
+    [
+        # equal
+        ([], None, True),
+        ([{}], None, True),
+        ([{}, {}], None, True),
+        ([{}, {}, {}], None, True),
+        ([{"a": 1}], None, True),
+        # graphs
+        ([{"a": 1, "graph": Graph()}], None, True),
+        ([{"a": 1, "graph": Graph([(1, 2)])}], None, True),
+        # isomorphism
+        (
+            [{"a": 1, "graph": Graph([(1, 2), (2, 3), (3, 4)])}],
+            [{"a": 1, "graph": Graph([(4, 3), (3, 2), (2, 1)])}],
+            True,
+        ),
+        (
+            [{"a": 1, "graph": Graph([(1, 2), (2, 3), (3, 4)])}],
+            [{"a": 1, "graph": Graph(MultiDiGraph([(4, 3), (3, 2), (2, 1)]))}],
+            True,
+        ),
+        # different keys
+        ([{"a": 1}], [{"b": 1}], False),
+        # different values
+        ([{"a": 1}, {"a": 1}], [{"a": 1}, {"a": 2}], False),
+        ([{"b": 1}, {"a": 1}], [{"b": 1}, {"a": 2}], False),
+        # different length
+        ([], [{}], False),
+        # different graphs
+        (
+            [{"a": 1, "graph": Graph([(1, 2)])}],
+            [{"a": 1, "graph": Graph([(1, 3), (3, 2)])}],
+            False,
+        ),
+    ],
+)
+def test_compare_components_and_partitions(list1, list2, expected):
+    """Test `compare_components_and_partitions`.
+    Compares two lists of dicts, where the dicts need to have the same keys and
+    especially checks if the values in the dict are equal or isomorphic if type is
+    Graph.
+    """
+    if list2 is None:
+        assert compare_components_and_partitions(list1, list1) is True
+    else:
+        assert compare_components_and_partitions(list1, list2) == expected
