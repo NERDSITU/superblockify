@@ -148,4 +148,4 @@ with open(PLACES_FILE, "r", encoding="utf-8") as file:
 PLOT_SUFFIX = "pdf"
 
 # Reduce graph
-MAX_NODES = 30000
+MAX_NODES = 20000
