@@ -113,8 +113,9 @@ def test_split_up_isolated_edges_directed(test_city_small_precalculated_copy):
         assert len(group["cell_id"].unique()) == 1
 
 
+@pytest.mark.parametrize("degree", [3, 4, 5])
 def test_split_up_isolated_edges_directed_higher_orders(
-    test_city_small_precalculated_copy,
+    test_city_small_precalculated_copy, degree
 ):
     """Test splitting up isolated edges by design with higher degree than 2."""
     part = test_city_small_precalculated_copy
@@ -135,7 +136,9 @@ def test_split_up_isolated_edges_directed_higher_orders(
     # double that edge in both directions
     u_id, v_id = isolated[0]
     part.graph.add_edges_from(
-        [(u_id, v_id, -1), (v_id, u_id, -1)], **part.graph.edges[(u_id, v_id, 0)]
+        [(u_id, v_id, -deg) for deg in range(0, degree - 2)]
+        + [(v_id, u_id, -deg) for deg in range(0, degree - 2)],
+        **part.graph.edges[(u_id, v_id, 0)]
     )
     num_edges, num_nodes = len(part.graph.edges), len(part.graph.nodes)
     split_up_isolated_edges_directed(part.graph, part.sparsified)
@@ -158,36 +161,6 @@ def test_split_up_isolated_edges_undirected(
     setattr(part, to_directed, getattr(part, to_directed).to_undirected())
     with pytest.raises(ValueError):
         split_up_isolated_edges_directed(part.graph, part.sparsified)
-
-
-@pytest.mark.parametrize("degree", [3])
-@pytest.mark.parametrize("into,out", [(True, False), (False, True), (True, True)])
-def test_split_up_isolated_edges_directed_unsupported_isolated_edge_degree(
-    degree, into, out, test_city_all_copy
-):
-    """Test splitting up isolated edges for graphs where the degree is too high."""
-    _, graph = test_city_all_copy
-    sparse_graph = graph.edge_subgraph(
-        (u, v, k)
-        for u, v, k in graph.edges(keys=True)
-        if not (graph.degree(u) == 1 and graph.degree(v) == 1)
-    )
-    # Add #degree nodes+edges to the graph, connecting to a node that is not in the
-    # sparsified graph
-    connection_node_id = next(node_id for node_id in graph.nodes)
-    new_id = get_new_node_id(graph)
-    graph.add_node(new_id, x=0, y=0, osmid=0)
-    if into:
-        graph.add_edges_from(
-            [(new_id, connection_node_id, {"osmid": 0}) for _ in range(degree)]
-        )
-    if out:
-        graph.add_edges_from(
-            [(connection_node_id, new_id, {"osmid": 0}) for _ in range(degree)]
-        )
-
-    with pytest.raises(NotImplementedError):
-        split_up_isolated_edges_directed(graph, sparse_graph)
 
 
 @pytest.mark.parametrize("len_graph", [0, 1, 2, 4, 10])
