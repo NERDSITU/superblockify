@@ -1,6 +1,5 @@
 """Distance calculation for the network metrics."""
 from datetime import timedelta
-from itertools import combinations
 from os import environ
 from time import time
 
@@ -372,6 +371,7 @@ def calculate_partitioning_distance_matrix(
         predecessor of node j on the shortest path from node i for the given rules
         of the partitioning.
     """
+    logger.debug("Preparing to calculate partitioning distance matrix.")
 
     if node_order is None:
         node_order = list(partitioner.graph.nodes)
@@ -401,6 +401,7 @@ def calculate_partitioning_distance_matrix(
         # diagonal
         if np.any(pairwise_overlap[np.triu_indices_from(pairwise_overlap, k=1)]):
             raise ValueError("The partitions overlap node-wise. This is not allowed.")
+        logger.debug("Checked that the partitions do not overlap node-wise.")
 
     partitions["sparsified"] = {
         "subgraph": partitioner.sparsified,
@@ -499,38 +500,38 @@ def shortest_paths_restricted(
     n_partition_indices = [n for part in n_partition_indices_separate for n in part]
 
     # Semipermeable graphs
-    g_leaving = graph.copy()
+    logger.debug("Constructing semipermeable graphs:")
     # Construct Compressed Sparse Row matrix
     # https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_matrix.html
     g_leaving = to_scipy_sparse_array(
-        g_leaving, nodelist=node_order, weight=weight, format="coo"
+        graph, nodelist=node_order, weight=weight, format="coo"
     )
     data, row, col = g_leaving.data, g_leaving.row, g_leaving.col
 
-    # Remove edges between different partitions
-    # (col, row in separate n_partition_indices_separate)
-    for n_ind_1, n_ind_2 in combinations(n_partition_indices_separate, 2):
-        mask = np.logical_and(np.isin(row, n_ind_1), np.isin(col, n_ind_2))
-        mask = np.logical_or(
-            mask, np.logical_and(np.isin(row, n_ind_2), np.isin(col, n_ind_1))
-        )
-        data, row, col = data[~mask], row[~mask], col[~mask]
-    g_entering = (data, (row, col))
-
-    # Remove edges from partition to sparse
-    mask = np.logical_and(
-        np.isin(row, n_partition_indices), np.isin(col, n_sparse_indices)
-    )
-    data, row, col = data[~mask], row[~mask], col[~mask]
-    g_leaving = csr_matrix((data, (row, col)), shape=(len(node_order), len(node_order)))
-    # Remove edges from sparse to partition
-    data, (row, col) = g_entering
-    mask = np.logical_and(
+    mask_to = np.logical_and(
         np.isin(row, n_sparse_indices), np.isin(col, n_partition_indices)
     )
-    data, row, col = data[~mask], row[~mask], col[~mask]
+    mask_from = np.logical_and(
+        np.isin(row, n_partition_indices), np.isin(col, n_sparse_indices)
+    )
+    # mask the edges inside each partition and inside the sparse graph
+    mask_intra = np.logical_and(
+        np.isin(row, n_sparse_indices), np.isin(col, n_sparse_indices)
+    )
+    for n_ind in n_partition_indices_separate:
+        mask_intra = np.logical_or(
+            mask_intra, np.logical_and(np.isin(row, n_ind), np.isin(col, n_ind))
+        )
+
+    mask_to = np.logical_or(mask_to, mask_intra)
+    mask_from = np.logical_or(mask_from, mask_intra)
+    g_leaving = csr_matrix(
+        (data[mask_to], (row[mask_to], col[mask_to])),
+        shape=(len(node_order), len(node_order)),
+    )
     g_entering = csr_matrix(
-        (data, (row, col)), shape=(len(node_order), len(node_order))
+        (data[mask_from], (row[mask_from], col[mask_from])),
+        shape=(len(node_order), len(node_order)),
     )
 
     # Calculate the combinations
