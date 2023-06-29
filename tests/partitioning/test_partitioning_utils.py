@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 import pytest
 from networkx import gnp_random_graph
 from numpy import int64, float64
-from osmnx import graph_to_gdfs
+from osmnx import graph_to_gdfs, get_undirected
 
 from superblockify.partitioning.utils import (
     show_highway_stats,
@@ -101,6 +101,42 @@ def test_remove_dead_ends_undirected(test_city_all_copy):
 def test_split_up_isolated_edges_directed(test_city_small_precalculated_copy):
     """Test splitting up isolated edges by design."""
     part = test_city_small_precalculated_copy
+    num_edges, num_nodes = len(part.graph.edges), len(part.graph.nodes)
+    split_up_isolated_edges_directed(part.graph, part.sparsified)
+    assert len(part.graph.edges) >= num_edges
+    assert len(part.graph.nodes) >= num_nodes
+    # Check that for each edge with the same geometry, the cell_id is the same
+    edges = graph_to_gdfs(part.graph, nodes=False, fill_edge_geometry=True)
+    # group by geometry
+    edges = edges.groupby("geometry")
+    for _, group in edges:
+        assert len(group["cell_id"].unique()) == 1
+
+
+def test_split_up_isolated_edges_directed_higher_orders(
+    test_city_small_precalculated_copy,
+):
+    """Test splitting up isolated edges by design with higher degree than 2."""
+    part = test_city_small_precalculated_copy
+    # Get some edge not in the sparsified graph
+    rest = part.graph.edge_subgraph(
+        [
+            (u, v, k)
+            for u, v, k in part.graph.edges(keys=True, data=False)
+            if (u, v, k) not in part.sparsified.edges(keys=True)
+        ]
+    )
+    rest_un = get_undirected(rest)
+    isolated = [
+        (u, v)
+        for u, v in rest_un.edges()
+        if rest_un.degree(u) == 1 and rest_un.degree(v) == 1
+    ]
+    # double that edge in both directions
+    u_id, v_id = isolated[0]
+    part.graph.add_edges_from(
+        [(u_id, v_id, -1), (v_id, u_id, -1)], **part.graph.edges[(u_id, v_id, 0)]
+    )
     num_edges, num_nodes = len(part.graph.edges), len(part.graph.nodes)
     split_up_isolated_edges_directed(part.graph, part.sparsified)
     assert len(part.graph.edges) >= num_edges

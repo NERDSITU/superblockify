@@ -408,11 +408,14 @@ def split_up_isolated_edges_directed(graph, sparsified):
             edges = [(*list(rest.edges(v_isol, keys=True, data=True))[0], u_isol)]
             edges += [(*list(rest.edges(u_isol, keys=True, data=True))[0], v_isol)]
         else:
-            raise NotImplementedError(
-                f"Parallel edges of degree {rest.degree(u_isol)} and "
-                f"{rest.degree(v_isol)} are not supported yet, "
-                f"but the elif case should be general enough."
-            )  # If you want to add this, please add a test case
+            edges = [
+                (*list(rest.edges(v_isol, keys=True, data=True))[deg_v_isol], u_isol)
+                for deg_v_isol in range(rest.out_degree(v_isol))
+            ]
+            edges += [
+                (*list(rest.edges(u_isol, keys=True, data=True))[deg_u_isol], v_isol)
+                for deg_u_isol in range(rest.out_degree(u_isol))
+            ]
 
         # Split up at the middle point
         if "geometry" not in edges[0][3]:
