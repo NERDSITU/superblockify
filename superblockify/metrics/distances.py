@@ -560,7 +560,7 @@ def shortest_paths_restricted(
     )
     min_mask = dist_le > dist_entering
     dist_le[min_mask] = dist_entering[min_mask]
-    pred_le[min_mask] = dist_entering[min_mask]
+    pred_le[min_mask] = pred_entering[min_mask]
     del dist_entering, pred_entering
 
     # Fill up paths

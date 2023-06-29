@@ -584,7 +584,7 @@ def _sum_bc(
     edge_padding : int
         Number of digits to pad edge indices with. Used to convert edge indices
         to 1D indices.
-    max_range : int
+    max_range : float
         Maximum path distances to consider for betweenness calculation.
     Returns
     -------

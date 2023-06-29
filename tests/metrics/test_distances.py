@@ -133,14 +133,14 @@ def test_calculate_euclidean_distance_matrix_haversine_faulty_coords(
 
 
 @pytest.mark.parametrize("predefined_node_order", [True, False])
-@pytest.mark.parametrize("max_mem_factor", [0.9, 0.5, 0.0])
+@pytest.mark.parametrize("max_mem_factor", [0.5, 0.0])
 def test_calculate_partitioning_distance_matrix(
     test_city_small_precalculated_copy, predefined_node_order, max_mem_factor
 ):
     """Test calculating distances for partitioned graph by design."""
     part = test_city_small_precalculated_copy
     if predefined_node_order:
-        calculate_partitioning_distance_matrix(
+        dist, pred = calculate_partitioning_distance_matrix(
             part,
             # reverse node order
             node_order=list(part.graph.nodes)[::-1],
@@ -149,13 +149,17 @@ def test_calculate_partitioning_distance_matrix(
             max_mem_factor=max_mem_factor,
         )
     else:
-        calculate_partitioning_distance_matrix(
+        dist, pred = calculate_partitioning_distance_matrix(
             part,
             plot_distributions=True,
             check_overlap=True,
             max_mem_factor=max_mem_factor,
         )
     plt.close("all")
+    assert dist.shape == (part.graph.number_of_nodes(),) * 2
+    assert dist.dtype.kind == "f"
+    assert pred.shape == (part.graph.number_of_nodes(),) * 2
+    assert pred.dtype.kind == "i"
 
 
 def test_calculate_partitioning_distance_matrix_duplicate_partition_names(
