@@ -64,7 +64,8 @@ class MinimumPartitioner(AttributePartitioner):
 
         Notes
         -----
-        The runtime
+        The runtime of this approach is not optimized and can be improved by using the
+        shortest paths calculation of :mod:`superblockify.metrics.distances`.
         """
         self.attribute_label = "steiner_tree"
         self.attribute_dtype = int
