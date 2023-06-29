@@ -500,7 +500,7 @@ def shortest_paths_restricted(
     n_partition_indices = [n for part in n_partition_indices_separate for n in part]
 
     # Semipermeable graphs
-    logger.debug("Constructing semipermeable graphs:")
+    logger.debug("Preparing semipermeable graphs.")
     # Construct Compressed Sparse Row matrix
     # https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.coo_matrix.html
     g_leaving = to_scipy_sparse_array(
