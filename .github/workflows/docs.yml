@@ -68,6 +68,9 @@ jobs:
           conda list
           conda config --show
 
+      - name: Add Notebook Kernel
+        run: python -m ipykernel install --user --name sb_env --display-name "Python (sb_env)"
+
       - name: Generating .rst files
         run: sphinx-apidoc -o docs/api/ superblockify/
       - name: Generating html
