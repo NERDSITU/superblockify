@@ -202,7 +202,7 @@ class BasePartitioner(ABC):
         self,
         calculate_metrics=True,
         make_plots=False,
-        replace_max_speeds=True,
+        replace_max_speeds=False,
         **part_kwargs,
     ):
         """Run partitioning.
@@ -218,7 +218,7 @@ class BasePartitioner(ABC):
         replace_max_speeds : bool, optional
             If True and :attr:`self.metric.unit` is "time", calculate the quickest paths
             in the restricted graph with the max speeds :attr:`V_MAX_LTN` and
-            :attr:`V_MAX_SPARSE` set in :mod:`superblockify.config`. Default is True.
+            :attr:`V_MAX_SPARSE` set in :mod:`superblockify.config`. Default is False.
         **part_kwargs
             Passed to :meth:`self.partition_graph`. Depends on the abstract method
             :meth:`self.partition_graph` of the subclass.
