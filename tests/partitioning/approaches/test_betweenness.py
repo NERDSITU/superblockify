@@ -1,4 +1,4 @@
-"""Tests for the partitioner module."""
+"""Tests for the betweenness partitioner."""
 import pytest
 from networkx import get_edge_attributes, set_edge_attributes
 

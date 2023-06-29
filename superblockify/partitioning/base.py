@@ -235,15 +235,6 @@ class BasePartitioner(ABC):
 
         self.partition_graph(make_plots=make_plots, **part_kwargs)
 
-        # If partitioner has only set the partitions, but not the sparsified graph,
-        # make it from the edges not in the partitions
-        if self.sparsified is None:
-            logger.debug(
-                "Sparsified graph not set. "
-                "Making it from the edges not in the partitions."
-            )
-            self.set_sparsified_from_components()
-
         # Set representative nodes
         set_representative_nodes(self.get_ltns())
 
@@ -295,7 +286,7 @@ class BasePartitioner(ABC):
             calculate_component_metrics(self.get_ltns())
 
     @abstractmethod
-    def partition_graph(self, make_plots=False, **kwargs):
+    def partition_graph(self, make_plots=False, **kwargs):  # pragma: no cover
         """Partition the graph.
 
         Parameters
@@ -534,7 +525,7 @@ class BasePartitioner(ABC):
         for i, component in enumerate(wc_components):
             # Find edges that are connected to the component nodes, on undirected graph
             edges = undirected.edges(component, keys=True)
-            if not edges:
+            if not edges:  # pragma: no cover
                 logger.debug("Skipping empty component %d", i)
                 continue
             subgraph = self.graph.edge_subgraph(
@@ -1017,7 +1008,7 @@ class BasePartitioner(ABC):
                 partitioner.graph = load_graphml_dtypes(
                     graph_path, partitioner.attribute_label, partitioner.attribute_dtype
                 )
-            else:
+            else:  # pragma: no cover
                 logger.debug("Graph not found in %s, keeping empty", graph_path)
                 return partitioner
         # Only if self.graph is not None, not if it could not be loaded.

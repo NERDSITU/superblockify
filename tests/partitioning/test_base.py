@@ -59,9 +59,14 @@ class TestPartitioners:
         assert "reduced_n" in part.graph.graph
         assert "reduced_m" in part.graph.graph
 
-    def test_run_make_plots(self, test_city_all_preloaded):
+    @pytest.mark.parametrize("replace_max_speeds", [False, True])
+    def test_run_make_plots(self, test_city_all_preloaded, replace_max_speeds):
         """Test plotting of partitioning results by design."""
-        test_city_all_preloaded.run(calculate_metrics=False, make_plots=True)
+        test_city_all_preloaded.run(
+            calculate_metrics=False,
+            make_plots=True,
+            replace_max_speeds=replace_max_speeds,
+        )
 
     @pytest.mark.parametrize(
         "unit,replace_max_speeds",
@@ -223,6 +228,14 @@ class TestPartitioners:
         """Test loading and finding of graph files with invalid input."""
         with pytest.raises(error_type):
             partitioner_class(name, city_name, search_str, graph)
+
+    def test_no_search_str_graph_given(self, partitioner_class):
+        """Tests error raising when no graph, nor search_str is given."""
+        with pytest.raises(ValueError):
+            partitioner_class(
+                name="test",
+                city_name="test",
+            )
 
     @mark_xfail_flaky_download
     @pytest.mark.parametrize(

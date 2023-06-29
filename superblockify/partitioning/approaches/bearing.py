@@ -17,7 +17,7 @@ from ...plot import save_plot
 
 
 @deprecated("BearingPartitioner does not necessarily produce a valid partitioning.")
-class BearingPartitioner(BasePartitioner):
+class BearingPartitioner(BasePartitioner):  # pragma: no cover
     """Bearing partitioner.
 
     Partitions based on the edge bearings.
@@ -109,7 +109,7 @@ class BearingPartitioner(BasePartitioner):
         group_bearing = nx.get_edge_attributes(self.residential_graph, "bearing_90")
         logger.debug("Writing attribute 'bearing_group' to graph.")
         for edge, bearing in group_bearing.items():
-            if np.isnan(bearing):
+            if np.isnan(bearing):  # pragma: no cover
                 group_bearing[edge] = np.nan
             else:
                 i = bisect_right(self._inter_vals["boundaries"], bearing)

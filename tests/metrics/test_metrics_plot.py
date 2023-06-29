@@ -18,6 +18,14 @@ def test_plot_distance_matrices(test_city_small_precalculated_copy):
     plt.show()
 
 
+def test_plot_distance_matrices_missing(test_city_small_precalculated_copy):
+    """Test plotting distance matrices with missing matrix."""
+    part = test_city_small_precalculated_copy
+    part.metric.distance_matrix = None
+    with pytest.raises(ValueError):
+        plot_distance_matrices(part.metric)
+
+
 def test_plot_distance_matrices_pairwise_relative_difference(
     test_city_small_precalculated_copy,
 ):
@@ -25,6 +33,16 @@ def test_plot_distance_matrices_pairwise_relative_difference(
     part = test_city_small_precalculated_copy
     plt, _ = plot_distance_matrices_pairwise_relative_difference(part.metric)
     plt.show()
+
+
+def test_plot_distance_matrices_pairwise_relative_difference_missing(
+    test_city_small_precalculated_copy,
+):
+    """Test plotting pairwise relative difference with missing matrix."""
+    part = test_city_small_precalculated_copy
+    part.metric.distance_matrix = None
+    with pytest.raises(ValueError):
+        plot_distance_matrices_pairwise_relative_difference(part.metric)
 
 
 def test_plot_relative_difference(test_city_small_precalculated_copy):

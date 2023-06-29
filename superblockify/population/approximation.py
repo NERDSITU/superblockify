@@ -230,7 +230,8 @@ def get_edge_population(graph, batch_size=10000, **tess_kwargs):
     return edge_cells
 
 
-def population_fraction(ghsl_polygon, population, road_cell):
+# Marked as `no cover` as it is tested, but as a forked process with `multiprocessing`
+def population_fraction(ghsl_polygon, population, road_cell):  # pragma: no cover
     """Function returns fractional population count between road_cell and
     ghsl_polygon.
 
@@ -252,7 +253,7 @@ def population_fraction(ghsl_polygon, population, road_cell):
     return population * intersection.area / ghsl_polygon.area
 
 
-def _population_fraction_list(
+def _population_fraction_list(  # pragma: no cover
     ghsl_polygons, ghsl_populations, overlap_index_pairs, road_cell_geometries
 ):
     """Function returns population count for each road cell in road_cell_geometries
@@ -284,7 +285,7 @@ def _population_fraction_list(
     return population
 
 
-def _population_fraction_list_sliced(
+def _population_fraction_list_sliced(  # pragma: no cover
     ghsl_polygons, ghsl_populations, ghsl_polygons_index, road_cell_geometries, slice_n
 ):
     """Function for the parallelization of _population_fraction_list.

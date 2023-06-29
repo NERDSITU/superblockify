@@ -1,4 +1,4 @@
-"""Tests for the partitioner module."""
+"""Tests for the bearing partitioning approach."""
 from itertools import product
 
 import numpy as np

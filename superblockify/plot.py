@@ -30,15 +30,23 @@ def paint_streets(graph, cmap="hsv", **pg_kwargs):
     fig, ax : tuple
         matplotlib figure, axis
 
+    Raises
+    ------
+    ValueError
+        If no bearing attribute is found in the graph.
+
     Examples
     --------
     _See example in `scripts/TestingNotebooks/20221122-painting_grids.py`._
 
     """
 
-    # Calculate bearings if no edge has `bearing` attribute.
-    if not bool(nx.get_edge_attributes(graph, "bearing")):
-        graph = ox.add_edge_bearings(graph)
+    # Check for bearing attribute.
+    if "bearing" not in nx.get_edge_attributes(graph, "bearing"):
+        logger.warning(
+            "No edge attribute `bearing` found. "
+            "Use `osmnx.add_edge_bearings` to add them on the unprojected graph."
+        )
 
     # Write attribute where bearings are baked down modulo 90 degrees.
     new_edge_attribute_by_function(

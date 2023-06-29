@@ -692,17 +692,3 @@ def shortest_paths_restricted(
     )
 
     return dist_le, pred_le
-
-
-def dijkstra_settings(sparse_matrix):
-    """Wrapper for the dijkstra function.
-
-    Fixes keyword arguments for the dijkstra function.
-    """
-    return dijkstra(
-        sparse_matrix,
-        directed=True,
-        indices=None,  # all nodes, sorted as in sparse_matrix
-        return_predecessors=True,
-        unweighted=False,
-    )

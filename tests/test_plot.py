@@ -30,6 +30,17 @@ def test_paint_streets(test_city_all_copy, e_l, n_a, save):
     plt.close()
 
 
+def test_paint_streets_missing_bearings(test_city_all_copy):
+    """Test `paint_streets` with missing bearings."""
+    _, graph = test_city_all_copy
+    # remove bearings if they exist
+    for _, _, data in graph.edges(data=True):
+        if "bearing" in data:
+            del data["bearing"]
+    with pytest.raises(ValueError):
+        paint_streets(graph)
+
+
 def test_paint_streets_overwrite_ec(test_city_all_copy):
     """Test `paint_streets` trying to overwrite the edge colors."""
     _, graph = test_city_all_copy
