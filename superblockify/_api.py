@@ -5,6 +5,7 @@ from .attribute import new_edge_attribute_by_function
 from .partitioning import BearingPartitioner
 from .partitioning import BetweennessPartitioner
 from .partitioning import DummyPartitioner
+from .partitioning import MinimumPartitioner
 from .partitioning import ResidentialPartitioner
 from .partitioning import save_to_gpkg
 from .partitioning import __all_partitioners__

@@ -7,6 +7,7 @@ from .approaches import (
     BearingPartitioner,
     BetweennessPartitioner,
     DummyPartitioner,
+    MinimumPartitioner,
     ResidentialPartitioner,
 )
 
