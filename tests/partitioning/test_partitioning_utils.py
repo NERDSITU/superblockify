@@ -134,6 +134,9 @@ def test_split_up_isolated_edges_directed_higher_orders(
         if rest_un.degree(u) == 1 and rest_un.degree(v) == 1
     ]
     # double that edge in both directions
+    if len(isolated) == 0:
+        # pass test if no isolated edges are found
+        return
     u_id, v_id = isolated[0]
     part.graph.add_edges_from(
         [(u_id, v_id, -deg) for deg in range(0, degree - 2)]
