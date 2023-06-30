@@ -593,14 +593,14 @@ def _make_yaml_compatible(input_val):
     if isinstance(input_val, (list, tuple)):
         return [_make_yaml_compatible(value) for value in input_val]
     # If int, float, str, bool, re-cast it to the same type
-    if isinstance(input_val, int):
+    if isinstance(input_val, bool):
+        output_val = bool(input_val)
+    elif isinstance(input_val, int):
         output_val = int(input_val)
     elif isinstance(input_val, float):
         output_val = float(input_val)
     elif isinstance(input_val, str):
         output_val = str(input_val)
-    elif isinstance(input_val, bool):
-        output_val = bool(input_val)
     # Numpy types
     # find out if it is a numpy scalar
     elif isinstance(input_val, generic):

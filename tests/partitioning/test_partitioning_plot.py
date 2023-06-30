@@ -68,6 +68,10 @@ def test_plot_component_graph_unpartitioned(
     part.attribute_label = None
     with pytest.raises(AssertionError):
         plot_component_graph(part)
+    part.attribute_label = "test"
+    part.components = None
+    with pytest.raises(AssertionError):
+        plot_component_graph(part)
 
 
 def test_plot_subgraph_component_size(

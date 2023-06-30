@@ -253,9 +253,9 @@ def population_fraction(ghsl_polygon, population, road_cell):  # pragma: no cove
     return population * intersection.area / ghsl_polygon.area
 
 
-def _population_fraction_list(  # pragma: no cover
+def _population_fraction_list(
     ghsl_polygons, ghsl_populations, overlap_index_pairs, road_cell_geometries
-):
+):  # pragma: no cover
     """Function returns population count for each road cell in road_cell_geometries
 
     Parameters
@@ -285,9 +285,9 @@ def _population_fraction_list(  # pragma: no cover
     return population
 
 
-def _population_fraction_list_sliced(  # pragma: no cover
+def _population_fraction_list_sliced(
     ghsl_polygons, ghsl_populations, ghsl_polygons_index, road_cell_geometries, slice_n
-):
+):  # pragma: no cover
     """Function for the parallelization of _population_fraction_list.
 
     Works like :func:`_population_fraction_list`, but takes all the road cells

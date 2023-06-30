@@ -181,6 +181,20 @@ def test_make_color_list_faulty_attr_type(
         )
 
 
+@pytest.mark.parametrize("obj_type", ["Node", "vertex"])
+def test_make_color_list_faulty_obj_type(test_city_all_copy, obj_type):
+    """Test `make_edge_color_list` with faulty obj_type."""
+    _, graph = test_city_all_copy
+    colormap = plt.get_cmap("rainbow")
+    with pytest.raises(ValueError):
+        make_color_list(
+            graph,
+            "bearing",
+            cmap=colormap,
+            obj_type=obj_type,
+        )
+
+
 def test_make_edge_color_list_attr_unsortable(test_city_all_copy):
     """Test `make_edge_color_list` with unsortable attribute."""
     _, graph = test_city_all_copy
