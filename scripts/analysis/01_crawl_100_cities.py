@@ -16,9 +16,10 @@ import requests
 from ruamel.yaml import YAML
 from tqdm import tqdm
 
-table_url = (
-    "https://appliednetsci.springeropen.com/articles/10.1007/s41109-019-0189-1/tables/1"
-)
+# table_url = (
+#     "https://appliednetsci.springeropen.com/articles/10.1007/s41109-019-0189-1/tables/1"
+# )
+table_url = "https://en.wikipedia.org/wiki/List_of_cities_in_Germany_by_population"
 
 
 def get_table():
@@ -85,19 +86,22 @@ def get_table():
     for _, row in df.iterrows():
         city = {
             "query": row["City"],
-            "country": None,
-            "region": region_handle(row["Region"]),
-            "orient_order": row.get("φ", None),
-            "circuity_avg": row.get("ς", None),
-            "median_segment_length": row.get("ĩ", None),
-            "k_avg": row.get("k̅", None),
-            "nominatim link": f"https://nominatim.openstreetmap.org/ui/search.html?q="
-            f"{row['City']}",
+            "country": "DE",
+            "state": row["State"],
+            "population": row["2021 estimate"],
+            "location": row["Location"],
+            # "region": region_handle(row["Region"]),
+            # "orient_order": row.get("φ", None),
+            # "circuity_avg": row.get("ς", None),
+            # "median_segment_length": row.get("ĩ", None),
+            # "k_avg": row.get("k̅", None),
+            # "nominatim link": f"https://nominatim.openstreetmap.org/ui/search.html?q="
+            # f"{row['City']}",
         }
         # Add further columns if they exist
-        for column in df.columns:
-            if column not in ["City", "Region", "φ", "ς", "ĩ", "σ", "k̅"]:
-                city[column] = row[column]
+        # for column in df.columns:
+        #     if column not in ["City", "Region", "φ", "ς", "ĩ", "σ", "k̅"]:
+        #         city[column] = row[column]
         cities["place_lists"][new_list_name]["cities"][row["City"]] = city
 
     # save cities.yml
@@ -177,17 +181,70 @@ def update_nominatim_links():
     print("Updated Nominatim links in `cities.yml`.")
 
 
+def add_population_approximations():
+    """Add population approximations to cities.yml."""
+    from os.path import join, dirname
+    from sys import path
+
+    path.append(join(dirname(__file__), "..", ".."))
+    from superblockify import get_ghsl, resample_load_window
+    from rasterstats import zonal_stats
+    import osmnx as ox
+    import logging
+
+    logging.getLogger("rasterio").setLevel(logging.WARN)
+
+    ghsl = get_ghsl()
+
+    # load cities.yml
+    with open("cities.yml", encoding="utf-8") as file:
+        yaml = YAML()
+        cities = yaml.load(file)
+
+    # add population approximations
+    for place_list in cities["place_lists"]:
+        for place_name, data in tqdm(
+            cities["place_lists"][place_list]["cities"].items(),
+            desc=f"Updating {place_list}",
+            unit="city",
+        ):
+            boundary_gdf = ox.geocode_to_gdf(data["query"])
+            boundary_gdf.to_crs("World Mollweide", inplace=True)
+            ghsl_raster, ghsl_affine = resample_load_window(
+                file=ghsl,
+                window=boundary_gdf,
+                resample_factor=1 / 10,
+            )
+            ghsl_raster[ghsl_raster < 0] = 0
+            ghsl_raster = ghsl_raster / (1 / 10) ** 2
+            data["pop_GHSL2023"] = zonal_stats(
+                boundary_gdf, ghsl_raster, affine=ghsl_affine, stats="sum", nodata=0
+            )
+            data["pop_GHSL2023"] = sum(
+                [x["sum"] for x in data["pop_GHSL2023"] if x["sum"] is not None]
+            )
+            print(f"Population approximation for {place_name}: {data['pop_GHSL2023']}")
+
+    # save cities.yml
+    with open("cities.yml", "w", encoding="utf-8") as file:
+        yaml.dump(cities, file)
+
+    print("Added population approximations to `cities.yml`.")
+
+
 if __name__ == "__main__":
     # Options
     print(
-        "Do you want to (1) crawl the table from the website or "
-        "(2) update the Nominatim links? (1/2)"
+        "Do you want to (1) crawl the table from the website, (2) update the "
+        "Nominatim links, or add population approximations (3)? (1/2/3)"
     )
     answer = input()
     if answer == "1":
         get_table()
     elif answer == "2":
         update_nominatim_links()
+    elif answer == "3":
+        add_population_approximations()
     else:
         print("Invalid option. Aborting.")
         sys.exit(0)
