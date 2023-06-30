@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#SBATCH --job-name=repackage_key_figures       # Job name
+#SBATCH --output=repackage_key_figures.%j.out  # Name of output file (%j expands to jobId)
+#SBATCH --error=repackage_key_figures.%j.err
+#SBATCH --cpus-per-task=40                      # Number of CPUs per task
+#SBATCH --mem=20G                               # Memory per node (all cores)
+#SBATCH --time=0:20:00                          # Run time (hh:mm:ss)
+#SBATCH --partition=red                         # Run on either the Red or Brown queue
+#SBATCH --mail-type=FAIL,END                    # Send an email when the job finishes
+# or fails
+
+WORK_DIR=~/Superblockify
+
+# Activate environment
+source $WORK_DIR/scripts/slurm/de_activate.sh
+# Change working directory to root of project
+cd $WORK_DIR
+# Add root directory to PYTHONPATH
+export PYTHONPATH=$PYTHONPATH:$(pwd)
+
+# Call python script to load cities
+python scripts/analysis/19_repackage_key_figures.py
+
+# Deactivate environment
+source $WORK_DIR/scripts/slurm/de_activate.sh
+

@@ -1,8 +1,6 @@
 """Utility functions for analysis scripts."""
 from os import environ
 
-from superblockify.config import logger
-
 from itertools import product
 
 import osmnx as ox

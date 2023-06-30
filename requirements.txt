@@ -8,6 +8,7 @@ numba
 tqdm
 contextily
 ruamel.yaml
+pyarrow
 rasterstats  # only used in one reference notebook
 momepy  # only used in one reference notebook
 
