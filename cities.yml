@@ -44,6 +44,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1682077
         osm_id:
         - 1682077
+        pop_GHSL2023: 13676.786494255062
       MissionTown:
         query: 团城山街道, Xialu, Hubei, China
         country: CN
@@ -54,6 +55,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/14163964
         osm_id:
         - 14163964
+        pop_GHSL2023: 101881.07181787488
       Scheveningen:
         query: Scheveningen, The Hague, Netherlands
         country: NL
@@ -64,6 +66,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/13751467
         osm_id:
         - 13751467
+        pop_GHSL2023: 77554.43975925444
   test_general:
     description: Larger test cities
     cities:
@@ -77,6 +80,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/347950
         osm_id:
         - 347950
+        pop_GHSL2023: 1757832.6379999514
       Brooklyn:
         query: Brooklyn, New York, United States
         country: US
@@ -87,6 +91,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/9691750
         osm_id:
         - 9691750
+        pop_GHSL2023: 2443446.936081211
       Copenhagen:
         query:
         - Københavns Kommune, Denmark
@@ -102,6 +107,7 @@ place_lists:
         osm_id:
         - 2192363
         - 2186660
+        pop_GHSL2023: 764718.588683754
       Resistencia:
         query: Resistencia, Chaco, Argentina
         country: AR
@@ -112,6 +118,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1572779
         osm_id:
         - 1572779
+        pop_GHSL2023: 328740.3926395578
       Liechtenstein:
         query: Liechtenstein, Europe
         country: LI
@@ -122,6 +129,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1155955
         osm_id:
         - 1155955
+        pop_GHSL2023: 37289.27578861111
   100_cities_boeing:
     description: 100 representative cities from Boeing (2019)
     cities:
@@ -143,6 +151,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/92277
         osm_id:
         - 92277
+        pop_GHSL2023: 12342851.661893278
       Beijing:
         query: CN-BJ, China
         country: CN
@@ -161,6 +170,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/912940
         osm_id:
         - 912940
+        pop_GHSL2023: 24149290.576004617
       Hanoi:
         query: Hà Nội, Vietnam
         country: VN
@@ -179,6 +189,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1903516
         osm_id:
         - 1903516
+        pop_GHSL2023: 7412688.725904138
       Hong Kong:
         query: Hong Kong Island, Hong Kong, China
         country: HK
@@ -197,6 +208,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/10264792
         osm_id:
         - 10264792
+        pop_GHSL2023: 1220949.8235658924
       Jakarta:
         query: Special Capital Region of Jakarta, Java, Indonesia
         country: ID
@@ -215,6 +227,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/6362934
         osm_id:
         - 6362934
+        pop_GHSL2023: 11342187.842398439
       Kabul:
         query: Kabul District, Kabul Province, Afghanistan
         country: AF
@@ -233,6 +246,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/6616233
         osm_id:
         - 6616233
+        pop_GHSL2023: 5656560.564128555
       Karachi:
         query: Karachi Division, Sindh, Pakistan
         country: PK
@@ -251,6 +265,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/6080948
         osm_id:
         - 6080948
+        pop_GHSL2023: 21243358.03043522
       Kathmandu:
         query: Kathmandu, Bagmati Pradesh, Nepal
         country: NP
@@ -269,6 +284,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/4583247
         osm_id:
         - 4583247
+        pop_GHSL2023: 3008734.5134922313
       Kyoto:
         query: Kyoto, Kyoto Prefecture, Japan
         country: JP
@@ -287,6 +303,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/357794
         osm_id:
         - 357794
+        pop_GHSL2023: 1270597.194326272
       Manila:
         # See https://www.wikidata.org/wiki/Q1461
         query: Metro Manila, Philippines
@@ -306,6 +323,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/147488
         osm_id:
         - 147488
+        pop_GHSL2023: 13751861.781497028
       Melbourne:
         query: Greater Melbourne, Victoria, Australia
         country: AU
@@ -324,6 +342,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/4246124
         osm_id:
         - 4246124
+        pop_GHSL2023: 5378918.1597416485
       Mumbai:
         query: Mumbai, Mumbai Suburban, Maharashtra, India
         country: IN
@@ -342,6 +361,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/7888990
         osm_id:
         - 7888990
+        pop_GHSL2023: 14523039.176669551
       New Delhi:
         query: New Delhi, Delhi, India
         country: IN
@@ -360,6 +380,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/2763541
         osm_id:
         - 2763541
+        pop_GHSL2023: 1203942.1327352521
       Osaka:
         query: Osaka, Osaka Prefecture, Japan
         country: JP
@@ -378,6 +399,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/358674
         osm_id:
         - 358674
+        pop_GHSL2023: 2388944.7906184644
       Phnom Penh:
         query: KH-12, Cambodia
         country: KH
@@ -396,6 +418,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/2199033
         osm_id:
         - 2199033
+        pop_GHSL2023: 2369492.133270343
       Pyongyang:
         query: P'yŏngyang, North Korea
         country: KP
@@ -414,6 +437,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/356443
         osm_id:
         - 356443
+        pop_GHSL2023: 3480278.592318181
       Seoul:
         query: Seoul, South Korea
         country: KR
@@ -432,6 +456,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/2297418
         osm_id:
         - 2297418
+        pop_GHSL2023: 9645141.225111853
       Shanghai:
         query: Shanghai, China
         country: CN
@@ -450,6 +475,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/913067
         osm_id:
         - 913067
+        pop_GHSL2023: 33924003.60635262
       Singapore:
         query: Singapore
         country: SG
@@ -468,6 +494,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/536780
         osm_id:
         - 536780
+        pop_GHSL2023: 5959450.356524699
       Sydney:
         query: Sydney, Council of the City of Sydney, New South Wales, Australia
         country: AU
@@ -486,6 +513,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/5750005
         osm_id:
         - 5750005
+        pop_GHSL2023: 5100197.878210587
       Taipei:
         query: Taipei, Taiwan
         country: TW
@@ -504,6 +532,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1293250
         osm_id:
         - 1293250
+        pop_GHSL2023: 2542878.0502161
       Tokyo:
         query: JP-13, Japan
         country: JP
@@ -522,6 +551,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1543125
         osm_id:
         - 1543125
+        pop_GHSL2023: 13453095.368577162
       Ulaanbaatar:
         query: Ulaanbaatar, Mongolia
         country: MN
@@ -540,6 +570,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/270090
         osm_id:
         - 270090
+        pop_GHSL2023: 1876392.4283411014
       Amsterdam:
         query: Amsterdam, North Holland, Netherlands
         country: NL
@@ -558,6 +589,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/271110
         osm_id:
         - 271110
+        pop_GHSL2023: 818407.499844633
       Athens:
         query: Municipality of Athens, Regional Unit of Central Athens, Attica, Greece
         country: GR
@@ -576,6 +608,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1370736
         osm_id:
         - 1370736
+        pop_GHSL2023: 613633.1565856932
       Barcelona:
         query: Barcelonès, Barcelona, Catalonia, Spain
         country: ES
@@ -594,6 +627,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/2417889
         osm_id:
         - 2417889
+        pop_GHSL2023: 2463690.163737535
       Berlin:
         query: Berlin, Germany
         country: DE
@@ -612,6 +646,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/62422
         osm_id:
         - 62422
+        pop_GHSL2023: 3524738.8939121147
       Budapest:
         query: Budapest, Central Hungary, Hungary
         country: HU
@@ -630,6 +665,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/37244
         osm_id:
         - 37244
+        pop_GHSL2023: 1835722.523857839
       Copenhagen:
         query:
         - Københavns Kommune, Denmark
@@ -653,6 +689,7 @@ place_lists:
         osm_id:
         - 2192363
         - 2186660
+        pop_GHSL2023: 764718.588683754
       Dublin:
         query: Dublin, Dublin 1, Leinster, Ireland
         country: IE
@@ -671,6 +708,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1109531
         osm_id:
         - 1109531
+        pop_GHSL2023: 554085.2711834605
       Glasgow:
         query: Glasgow City, Scotland, G2 1DY, United Kingdom
         country: GB
@@ -689,6 +727,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1906767
         osm_id:
         - 1906767
+        pop_GHSL2023: 582972.040480375
       Helsinki:
         query: Helsinki, Helsinki sub-region, Uusimaa, Southern Finland, Mainland
           Finland, Finland
@@ -708,6 +747,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/34914
         osm_id:
         - 34914
+        pop_GHSL2023: 640938.2250840327
       Kiev:
         query: Kyiv, Ukraine
         country: UA
@@ -726,6 +766,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/421866
         osm_id:
         - 421866
+        pop_GHSL2023: 2552854.8664907534
       Lisbon:
         query: Lisbon, Portugal
         country: PT
@@ -744,6 +785,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/5400890
         osm_id:
         - 5400890
+        pop_GHSL2023: 564066.0386443137
       London:
         query: Greater London, England, United Kingdom
         country: GB
@@ -762,6 +804,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/175342
         osm_id:
         - 175342
+        pop_GHSL2023: 9734682.771514352
       Madrid:
         query: Madrid, Community of Madrid, Spain
         country: ES
@@ -780,6 +823,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/5326784
         osm_id:
         - 5326784
+        pop_GHSL2023: 3797206.0047106226
       Moscow:
         query: Moscow, Central Federal District, Russia
         country: RU
@@ -798,6 +842,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/2555133
         osm_id:
         - 2555133
+        pop_GHSL2023: 12023201.84294212
       Munich:
         query: Munich, Bavaria, Germany
         country: DE
@@ -816,6 +861,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/62428
         osm_id:
         - 62428
+        pop_GHSL2023: 1552833.6185131217
       Oslo:
         query: Oslo, Norway
         country: NO
@@ -834,6 +880,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/406091
         osm_id:
         - 406091
+        pop_GHSL2023: 708820.38776549
       Paris:
         query: Paris, Ile-de-France, Metropolitan France, France
         country: FR
@@ -852,6 +899,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/7444
         osm_id:
         - 7444
+        pop_GHSL2023: 2322862.0913982387
       Prague:
         query: Prague, Czechia
         country: CZ
@@ -870,6 +918,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/435514
         osm_id:
         - 435514
+        pop_GHSL2023: 1327193.6264477668
       Reykjavik:
         query: Reykjavik, Capital Region, Iceland
         country: IS
@@ -888,6 +937,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/2580605
         osm_id:
         - 2580605
+        pop_GHSL2023: 104272.41692510885
       Rome:
         query: Rome, Roma Capitale, Lazio, Italy
         country: IT
@@ -906,6 +956,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/41485
         osm_id:
         - 41485
+        pop_GHSL2023: 2706949.850030726
       Sarajevo:
         query: Sarajevo, Sarajevo Canton, Bosnia and Herzegovina
         country: BA
@@ -924,6 +975,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/15445108
         osm_id:
         - 15445108
+        pop_GHSL2023: 196713.784235157
       Stockholm:
         query: Stockholms kommun, Stockholm County, Sweden
         country: SE
@@ -942,6 +994,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/398021
         osm_id:
         - 398021
+        pop_GHSL2023: 1022888.4359776971
       Venice (Mestre):
         query: Venice, Venezia, Veneto, Italy
         country: IT
@@ -960,6 +1013,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/44741
         osm_id:
         - 44741
+        pop_GHSL2023: 256643.2521157807
       Vienna:
         query: Vienna, Austria
         country: AT
@@ -978,6 +1032,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/109166
         osm_id:
         - 109166
+        pop_GHSL2023: 1932893.754314165
       Warsaw:
         query: Warsaw, Masovian Voivodeship, Poland
         country: PL
@@ -996,6 +1051,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/336075
         osm_id:
         - 336075
+        pop_GHSL2023: 1849553.232625499
       Bogota:
         query: Bogota, Bogota Capital District - Municipality, RAP (Especial) Central,
           Colombia
@@ -1015,6 +1071,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/7426387
         osm_id:
         - 7426387
+        pop_GHSL2023: 8899793.370068071
       Buenos Aires:
         query: Autonomous City of Buenos Aires, Argentina
         country: AR
@@ -1033,6 +1090,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1224652
         osm_id:
         - 1224652
+        pop_GHSL2023: 2711340.2666851874
       Caracas:
         query: Caracas, Venezuela
         country: VE
@@ -1051,6 +1109,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/11219583
         osm_id:
         - 11219583
+        pop_GHSL2023: 2668989.406249012
       Havana:
         query: CU-03, Cuba
         country: CU
@@ -1069,6 +1128,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1854615
         osm_id:
         - 1854615
+        pop_GHSL2023: 2078137.1455927053
       Lima:
         query: Lima Metropolitan Area, Lima, Peru
         country: PE
@@ -1087,6 +1147,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/12933390
         osm_id:
         - 12933390
+        pop_GHSL2023: 10924814.244125538
       Mexico City:
         query: Mexico City, Mexico
         country: MX
@@ -1105,6 +1166,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1376330
         osm_id:
         - 1376330
+        pop_GHSL2023: 7649332.880559048
       Port au Prince:
         query: Port-au-Prince, West, Haiti
         country: HT
@@ -1123,6 +1185,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/387318
         osm_id:
         - 387318
+        pop_GHSL2023: 1481683.71467255
       Rio de Janeiro:
         query: Rio de Janeiro, Southeast Region, Brazil
         country: BR
@@ -1141,6 +1204,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/2697338
         osm_id:
         - 2697338
+        pop_GHSL2023: 6768933.523283653
       Sao Paulo:
         query: São Paulo, Southeast Region, Brazil
         country: BR
@@ -1159,6 +1223,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/298285
         osm_id:
         - 298285
+        pop_GHSL2023: 11858950.620425723
       Baghdad:
         query: Baghdad, Baghdad Governorate, Iraq
         country: IQ
@@ -1177,6 +1242,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/5638803
         osm_id:
         - 5638803
+        pop_GHSL2023: 6338692.7509337645
       Beirut:
         query: Beirut Governorate, Lebanon
         country: LB
@@ -1195,6 +1261,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/316552
         osm_id:
         - 316552
+        pop_GHSL2023: 354208.8213920592
       Cairo:
         query: Cairo, Egypt
         country: EG
@@ -1213,6 +1280,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/5466227
         osm_id:
         - 5466227
+        pop_GHSL2023: 9149031.085013825
       Cape Town:
         query: City of Cape Town, Western Cape, 8001, South Africa
         country: ZA
@@ -1231,6 +1299,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/79604
         osm_id:
         - 79604
+        pop_GHSL2023: 5052916.481144726
       Casablanca:
         query: Casablanca, Casablanca-Settat, Morocco
         country: MA
@@ -1249,6 +1318,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/4072985
         osm_id:
         - 4072985
+        pop_GHSL2023: 3387477.14780569
       Damascus:
         query: Damascus Governorate, Syria
         country: SY
@@ -1267,6 +1337,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/7328462
         osm_id:
         - 7328462
+        pop_GHSL2023: 2160242.529167125
       Dubai:
         query: Dubai, United Arab Emirates
         country: AE
@@ -1285,6 +1356,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/4479752
         osm_id:
         - 4479752
+        pop_GHSL2023: 3122371.0558517794
       Istanbul:
         query: TR-34, Turkey
         country: TR
@@ -1303,6 +1375,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/223474
         osm_id:
         - 223474
+        pop_GHSL2023: 14243965.122489264
       Jerusalem:
         query: Jerusalem, Jerusalem District, Israel
         country: IL
@@ -1321,6 +1394,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1381350
         osm_id:
         - 1381350
+        pop_GHSL2023: 1253649.2788656482
       Johannesburg:
         query: City of Johannesburg Metropolitan Municipality, 2001, South Africa
         country: ZA
@@ -1339,6 +1413,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/594508
         osm_id:
         - 594508
+        pop_GHSL2023: 6409611.695537722
       Lagos:
         query: Lagos Island, Lagos State, Nigeria
         country: NG
@@ -1357,6 +1432,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/7644528
         osm_id:
         - 7644528
+        pop_GHSL2023: 119799.5473861694
       Mogadishu:
         query: Mogadishu District, Banaadir, Somalia
         country: SO
@@ -1375,6 +1451,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1720125
         osm_id:
         - 1720125
+        pop_GHSL2023: 3867823.297230401
       Nairobi:
         query: Nairobi, Nairobi County, Kenya
         country: KE
@@ -1393,6 +1470,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/9721587
         osm_id:
         - 9721587
+        pop_GHSL2023: 5838242.6927329
       Tehran:
         query: Tehran, Tehran Province, Iran
         country: IR
@@ -1411,6 +1489,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/6663864
         osm_id:
         - 6663864
+        pop_GHSL2023: 7294182.58308172
       Atlanta:
         query: Atlanta, Fulton County, Georgia, United States
         country: US-GA
@@ -1429,6 +1508,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/119557
         osm_id:
         - 119557
+        pop_GHSL2023: 517627.27642059315
       Baltimore:
         query: Baltimore, Maryland, United States
         country: US-MD
@@ -1447,6 +1527,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/133345
         osm_id:
         - 133345
+        pop_GHSL2023: 628695.3598501991
       Boston:
         query: Boston, Suffolk County, Massachusetts, United States
         country: US-MA
@@ -1465,6 +1546,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/2315704
         osm_id:
         - 2315704
+        pop_GHSL2023: 613869.7221977434
       Charlotte:
         query: Charlotte, Mecklenburg County, North Carolina, United States
         country: US-NC
@@ -1483,6 +1565,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/177415
         osm_id:
         - 177415
+        pop_GHSL2023: 829529.5766545291
       Chicago:
         query: Chicago, Cook County, Illinois, United States
         country: US-IL
@@ -1501,6 +1584,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/122604
         osm_id:
         - 122604
+        pop_GHSL2023: 2640668.741081328
       Cleveland:
         query: Cleveland, Cuyahoga County, Ohio, United States
         country: US-OH
@@ -1519,6 +1603,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/182130
         osm_id:
         - 182130
+        pop_GHSL2023: 365347.62727096665
       Dallas:
         query: Dallas, Dallas County, Texas, United States
         country: US-TX
@@ -1537,6 +1622,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/6571629
         osm_id:
         - 6571629
+        pop_GHSL2023: 1472292.9103196533
       Denver:
         query: Denver, Colorado, United States
         country: US-CO
@@ -1555,6 +1641,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1411339
         osm_id:
         - 1411339
+        pop_GHSL2023: 675848.2442275502
       Detroit:
         query: Detroit, Wayne County, Michigan, United States
         country: US-MI
@@ -1573,6 +1660,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/134591
         osm_id:
         - 134591
+        pop_GHSL2023: 658243.4261336921
       Honolulu:
         query: 119231
         country: US-HI
@@ -1591,6 +1679,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/119231
         osm_id:
         - 119231
+        pop_GHSL2023: 404124.8977179931
       Houston:
         query:
         - Houston, Harris County, Texas, United States
@@ -1658,6 +1747,7 @@ place_lists:
         - 2947137
         - 2947139
         - 4840276
+        pop_GHSL2023: 2780403.3394391406
       Las Vegas:
         query:
         - Las Vegas, Clark County, Nevada, United States
@@ -1705,6 +1795,7 @@ place_lists:
         - 170053
         - 170068
         - 170132
+        pop_GHSL2023: 2451129.123220173
       Los Angeles:
         query: Los Angeles County, California, United States
         country: US-CA
@@ -1723,6 +1814,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/396479
         osm_id:
         - 396479
+        pop_GHSL2023: 10131722.735823404
       Manhattan:
         query: Manhattan, New York County, New York, United States
         country: US-NY
@@ -1741,6 +1833,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/8398124
         osm_id:
         - 8398124
+        pop_GHSL2023: 1658451.516783237
       Miami:
         query: Miami, Miami-Dade County, Florida, United States
         country: US-FL
@@ -1759,6 +1852,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1216769
         osm_id:
         - 1216769
+        pop_GHSL2023: 401627.16193004296
       Minneapolis:
         query: Minneapolis, Hennepin County, Minnesota, United States
         country: US-MN
@@ -1777,6 +1871,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/136712
         osm_id:
         - 136712
+        pop_GHSL2023: 375276.78887844074
       Montreal:
         query: Montreal (administrative region), Quebec, Canada
         country: CA-QC
@@ -1795,6 +1890,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1571328
         osm_id:
         - 1571328
+        pop_GHSL2023: 1972042.624127009
       New Orleans:
         query: New Orleans, Orleans Parish, Louisiana, United States
         country: US-LA
@@ -1813,6 +1909,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/131885
         osm_id:
         - 131885
+        pop_GHSL2023: 366732.97836517997
       Orlando:
         query: Orlando, Orange County, Florida, United States
         country: US-FL
@@ -1831,6 +1928,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1128379
         osm_id:
         - 1128379
+        pop_GHSL2023: 304166.8284669285
       Philadelphia:
         query: Philadelphia, Philadelphia County, Pennsylvania, United States
         country: US-PA
@@ -1849,6 +1947,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/188022
         osm_id:
         - 188022
+        pop_GHSL2023: 1501334.2557670078
       Phoenix:
         query: Phoenix, Maricopa County, Arizona, United States
         country: US-AZ
@@ -1867,6 +1966,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/111257
         osm_id:
         - 111257
+        pop_GHSL2023: 1872464.6450785124
       Pittsburgh:
         query:
         - Pittsburgh, Allegheny County, Pennsylvania, United States
@@ -1902,6 +2002,7 @@ place_lists:
         - 187458
         - 187434
         - 187435
+        pop_GHSL2023: 309714.70544934267
       Portland:
         query:
         - Portland, Multnomah County, Oregon, United States
@@ -1925,6 +2026,7 @@ place_lists:
         osm_id:
         - 186579
         - 186714
+        pop_GHSL2023: 685184.3103695348
       San Francisco:
         query: San Francisco, California, United States
         country: US-CA
@@ -1943,6 +2045,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/111968
         osm_id:
         - 111968
+        pop_GHSL2023: 823489.8565498033
       Seattle:
         query: Seattle, King County, Washington, United States
         country: US-WA
@@ -1961,6 +2064,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/237385
         osm_id:
         - 237385
+        pop_GHSL2023: 710391.1301186976
       St Louis:
         query: St. Louis, Missouri, United States
         country: US-MO
@@ -1979,6 +2083,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1180533
         osm_id:
         - 1180533
+        pop_GHSL2023: 312467.4185018753
       Toronto:
         query: City of Toronto, Golden Horseshoe, Ontario, Canada
         country: CA-ON
@@ -1997,6 +2102,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/324211
         osm_id:
         - 324211
+        pop_GHSL2023: 2860231.37706411
       Vancouver:
         query: Vancouver, British Columbia, Canada
         country: CA-BC
@@ -2015,6 +2121,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/1852574
         osm_id:
         - 1852574
+        pop_GHSL2023: 693480.7865019785
       Washington:
         query: Washington, District of Columbia, United States
         country: US-DC
@@ -2033,6 +2140,7 @@ place_lists:
         - https://www.openstreetmap.org/relation/5396194
         osm_id:
         - 5396194
+        pop_GHSL2023: 701524.8640937685
   germany_by_pop:
     description: List of cities in Germany by population (Wikipedia)
     cities:
@@ -2048,6 +2156,7 @@ place_lists:
         - 62422
         OSM relation:
         - https://www.openstreetmap.org/relation/62422
+        pop_GHSL2023: 3524738.8939121147
       Hamburg:
         query: Hamburg, Germany
         country: DE
@@ -2060,6 +2169,7 @@ place_lists:
         - 62782
         OSM relation:
         - https://www.openstreetmap.org/relation/62782
+        pop_GHSL2023: 1761088.7599678198
       Munich:
         query: Munich, Bavaria, Germany
         country: DE
@@ -2072,6 +2182,7 @@ place_lists:
         - 62428
         OSM relation:
         - https://www.openstreetmap.org/relation/62428
+        pop_GHSL2023: 1552833.6185131217
       Cologne (Köln):
         query: Cologne, North Rhine-Westphalia, Germany
         country: DE
@@ -2084,6 +2195,7 @@ place_lists:
         - 62578
         OSM relation:
         - https://www.openstreetmap.org/relation/62578
+        pop_GHSL2023: 1171662.0742877943
       Frankfurt am Main:
         query: Frankfurt, Hesse, Germany
         country: DE
@@ -2096,6 +2208,7 @@ place_lists:
         - 62400
         OSM relation:
         - https://www.openstreetmap.org/relation/62400
+        pop_GHSL2023: 821447.1059717236
       Stuttgart:
         query: Stuttgart, Baden-Württemberg, Germany
         country: DE
@@ -2108,6 +2221,7 @@ place_lists:
         - 2793104
         OSM relation:
         - https://www.openstreetmap.org/relation/2793104
+        pop_GHSL2023: 608298.9549454299
       Düsseldorf:
         query: Dusseldorf, North Rhine-Westphalia, Germany
         country: DE
@@ -2120,6 +2234,7 @@ place_lists:
         - 62539
         OSM relation:
         - https://www.openstreetmap.org/relation/62539
+        pop_GHSL2023: 629943.5862600802
       Leipzig:
         query: Leipzig, Saxony, Germany
         country: DE
@@ -2132,6 +2247,7 @@ place_lists:
         - 62649
         OSM relation:
         - https://www.openstreetmap.org/relation/62649
+        pop_GHSL2023: 587300.3685810135
       Dortmund:
         query: Dortmund, North Rhine-Westphalia, Germany
         country: DE
@@ -2144,6 +2260,7 @@ place_lists:
         - 1829065
         OSM relation:
         - https://www.openstreetmap.org/relation/1829065
+        pop_GHSL2023: 597406.1646491288
       Essen:
         query: Essen, North Rhine-Westphalia, Germany
         country: DE
@@ -2156,6 +2273,7 @@ place_lists:
         - 62713
         OSM relation:
         - https://www.openstreetmap.org/relation/62713
+        pop_GHSL2023: 566901.7672717569
       Bremen:
         query: Bremen, City of Bremen, Germany
         country: DE
@@ -2168,6 +2286,7 @@ place_lists:
         - 62559
         OSM relation:
         - https://www.openstreetmap.org/relation/62559
+        pop_GHSL2023: 569530.6147225898
       Dresden:
         query: Dresden, Saxony, Germany
         country: DE
@@ -2180,6 +2299,7 @@ place_lists:
         - 191645
         OSM relation:
         - https://www.openstreetmap.org/relation/191645
+        pop_GHSL2023: 604470.7496758811
       Hanover (Hannover):
         query: Hanover, Lower Saxony, Germany
         country: DE
@@ -2192,6 +2312,7 @@ place_lists:
         - 59418
         OSM relation:
         - https://www.openstreetmap.org/relation/59418
+        pop_GHSL2023: 536017.4882024525
       Nuremberg:
         query: Nuremberg, Bavaria, Germany
         country: DE
@@ -2204,6 +2325,7 @@ place_lists:
         - 62780
         OSM relation:
         - https://www.openstreetmap.org/relation/62780
+        pop_GHSL2023: 499332.5104406102
       Duisburg:
         query: Duisburg, North Rhine-Westphalia, Germany
         country: DE
@@ -2216,6 +2338,7 @@ place_lists:
         - 62456
         OSM relation:
         - https://www.openstreetmap.org/relation/62456
+        pop_GHSL2023: 541060.8880877494
       Bochum:
         query: Bochum, North Rhine-Westphalia, Germany
         country: DE
@@ -2228,6 +2351,7 @@ place_lists:
         - 62644
         OSM relation:
         - https://www.openstreetmap.org/relation/62644
+        pop_GHSL2023: 357434.85097885126
       Wuppertal:
         query: Wuppertal, North Rhine-Westphalia, Germany
         country: DE
@@ -2240,6 +2364,7 @@ place_lists:
         - 62478
         OSM relation:
         - https://www.openstreetmap.org/relation/62478
+        pop_GHSL2023: 349787.26579546917
       Bielefeld:
         query: Bielefeld, North Rhine-Westphalia, Germany
         country: DE
@@ -2252,6 +2377,7 @@ place_lists:
         - 62646
         OSM relation:
         - https://www.openstreetmap.org/relation/62646
+        pop_GHSL2023: 333409.8926514386
       Bonn:
         query: Bonn, North Rhine-Westphalia, Germany
         country: DE
@@ -2264,6 +2390,7 @@ place_lists:
         - 62508
         OSM relation:
         - https://www.openstreetmap.org/relation/62508
+        pop_GHSL2023: 298244.66710514383
       Münster:
         query: Münster, North Rhine-Westphalia, Germany
         country: DE
@@ -2276,6 +2403,7 @@ place_lists:
         - 62591
         OSM relation:
         - https://www.openstreetmap.org/relation/62591
+        pop_GHSL2023: 341446.0807846858
       Mannheim:
         query: Mannheim, Baden-Württemberg, Germany
         country: DE
@@ -2288,6 +2416,7 @@ place_lists:
         - 62691
         OSM relation:
         - https://www.openstreetmap.org/relation/62691
+        pop_GHSL2023: 331411.8676640092
       Karlsruhe:
         query: Karlsruhe, Baden-Württemberg, Germany
         country: DE
@@ -2300,6 +2429,7 @@ place_lists:
         - 62518
         OSM relation:
         - https://www.openstreetmap.org/relation/62518
+        pop_GHSL2023: 321957.63255011983
       Augsburg:
         query: Augsburg, Bavaria, Germany
         country: DE
@@ -2312,6 +2442,7 @@ place_lists:
         - 62407
         OSM relation:
         - https://www.openstreetmap.org/relation/62407
+        pop_GHSL2023: 284132.46682134515
       Wiesbaden:
         query: Wiesbaden, Hesse, Germany
         country: DE
@@ -2324,6 +2455,7 @@ place_lists:
         - 62496
         OSM relation:
         - https://www.openstreetmap.org/relation/62496
+        pop_GHSL2023: 297597.62034389994
       Mönchengladbach:
         query: Mönchengladbach, North Rhine-Westphalia, Germany
         country: DE
@@ -2336,6 +2468,7 @@ place_lists:
         - 62410
         OSM relation:
         - https://www.openstreetmap.org/relation/62410
+        pop_GHSL2023: 267545.6431359052
       Gelsenkirchen:
         query: Gelsenkirchen, North Rhine-Westphalia, Germany
         country: DE
@@ -2348,6 +2481,7 @@ place_lists:
         - 62522
         OSM relation:
         - https://www.openstreetmap.org/relation/62522
+        pop_GHSL2023: 268021.2257325648
       Aachen:
         query: Aachen, North Rhine-Westphalia, Germany
         country: DE
@@ -2360,6 +2494,7 @@ place_lists:
         - 62564
         OSM relation:
         - https://www.openstreetmap.org/relation/62564
+        pop_GHSL2023: 243387.76502981776
       Braunschweig:
         query: Braunschweig, Lower Saxony, Germany
         country: DE
@@ -2372,6 +2507,7 @@ place_lists:
         - 62531
         OSM relation:
         - https://www.openstreetmap.org/relation/62531
+        pop_GHSL2023: 231285.2623034268
       Kiel:
         query: Kiel, Schleswig-Holstein, Germany
         country: DE
@@ -2384,6 +2520,7 @@ place_lists:
         - 27021
         OSM relation:
         - https://www.openstreetmap.org/relation/27021
+        pop_GHSL2023: 236948.35277050728
       Chemnitz:
         query: Chemnitz, Saxony, Germany
         country: DE
@@ -2396,6 +2533,7 @@ place_lists:
         - 62594
         OSM relation:
         - https://www.openstreetmap.org/relation/62594
+        pop_GHSL2023: 281487.2192971407
       Halle (Saale):
         query: Halle (Saale), Saxony-Anhalt, Germany
         country: DE
@@ -2408,6 +2546,7 @@ place_lists:
         - 62638
         OSM relation:
         - https://www.openstreetmap.org/relation/62638
+        pop_GHSL2023: 226774.07903894776
       Magdeburg:
         query: Magdeburg, Saxony-Anhalt, Germany
         country: DE
@@ -2420,6 +2559,7 @@ place_lists:
         - 62481
         OSM relation:
         - https://www.openstreetmap.org/relation/62481
+        pop_GHSL2023: 239762.95349462883
       Freiburg im Breisgau:
         query: Freiburg im Breisgau, Baden-Württemberg, Germany
         country: DE
@@ -2432,6 +2572,7 @@ place_lists:
         - 62768
         OSM relation:
         - https://www.openstreetmap.org/relation/62768
+        pop_GHSL2023: 252070.2626246958
       Krefeld:
         query: Krefeld, North Rhine-Westphalia, Germany
         country: DE
@@ -2444,6 +2585,7 @@ place_lists:
         - 62748
         OSM relation:
         - https://www.openstreetmap.org/relation/62748
+        pop_GHSL2023: 228622.10160866374
       Mainz:
         query: Mainz, Rhineland-Palatinate, Germany
         country: DE
@@ -2456,6 +2598,7 @@ place_lists:
         - 62630
         OSM relation:
         - https://www.openstreetmap.org/relation/62630
+        pop_GHSL2023: 192033.2704339176
       Lübeck:
         query: Lübeck, Schleswig-Holstein, Germany
         country: DE
@@ -2468,6 +2611,7 @@ place_lists:
         - 27027
         OSM relation:
         - https://www.openstreetmap.org/relation/27027
+        pop_GHSL2023: 214359.11554070184
       Erfurt:
         query: Erfurt, Thuringia, Germany
         country: DE
@@ -2480,6 +2624,7 @@ place_lists:
         - 62745
         OSM relation:
         - https://www.openstreetmap.org/relation/62745
+        pop_GHSL2023: 229810.96490019985
       Oberhausen:
         query: Oberhausen, North Rhine-Westphalia, Germany
         country: DE
@@ -2492,6 +2637,7 @@ place_lists:
         - 62734
         OSM relation:
         - https://www.openstreetmap.org/relation/62734
+        pop_GHSL2023: 210994.3231761455
       Rostock:
         query: Rostock, Mecklenburg-Vorpommern, Germany
         country: DE
@@ -2504,6 +2650,7 @@ place_lists:
         - 62405
         OSM relation:
         - https://www.openstreetmap.org/relation/62405
+        pop_GHSL2023: 180835.00286210616
       Kassel:
         query: Kassel, Hesse, Germany
         country: DE
@@ -2516,6 +2663,7 @@ place_lists:
         - 62598
         OSM relation:
         - https://www.openstreetmap.org/relation/62598
+        pop_GHSL2023: 195841.11059885466
       Hagen:
         query: Hagen, North Rhine-Westphalia, Germany
         country: DE
@@ -2528,6 +2676,7 @@ place_lists:
         - 1800297
         OSM relation:
         - https://www.openstreetmap.org/relation/1800297
+        pop_GHSL2023: 192985.87121069425
       Potsdam:
         query: Potsdam, Brandenburg, Germany
         country: DE
@@ -2540,6 +2689,7 @@ place_lists:
         - 62369
         OSM relation:
         - https://www.openstreetmap.org/relation/62369
+        pop_GHSL2023: 197204.92013428442
       Saarbrücken:
         query: Saarbrücken, Saarland, Germany
         country: DE
@@ -2552,6 +2702,7 @@ place_lists:
         - 1187159
         OSM relation:
         - https://www.openstreetmap.org/relation/1187159
+        pop_GHSL2023: 185580.33219028142
       Hamm:
         query: Hamm, North Rhine-Westphalia, Germany
         country: DE
@@ -2564,6 +2715,7 @@ place_lists:
         - 62499
         OSM relation:
         - https://www.openstreetmap.org/relation/62499
+        pop_GHSL2023: 171828.1519785523
       Ludwigshafen am Rhein:
         query: Ludwigshafen am Rhein, Rhineland-Palatinate, Germany
         country: DE
@@ -2576,6 +2728,7 @@ place_lists:
         - 62347
         OSM relation:
         - https://www.openstreetmap.org/relation/62347
+        pop_GHSL2023: 146645.6872336566
       Mülheim an der Ruhr:
         query: Mülheim an der Ruhr, North Rhine-Westphalia, Germany
         country: DE
@@ -2588,6 +2741,7 @@ place_lists:
         - 62385
         OSM relation:
         - https://www.openstreetmap.org/relation/62385
+        pop_GHSL2023: 173668.34945082662
       Oldenburg:
         query: Oldenburg, Lower Saxony, Germany
         country: DE
@@ -2600,6 +2754,7 @@ place_lists:
         - 62409
         OSM relation:
         - https://www.openstreetmap.org/relation/62409
+        pop_GHSL2023: 149219.0436193719
       Osnabrück:
         query: Osnabrück, Lower Saxony, Germany
         country: DE
@@ -2612,6 +2767,7 @@ place_lists:
         - 62631
         OSM relation:
         - https://www.openstreetmap.org/relation/62631
+        pop_GHSL2023: 148963.6332005262
       Leverkusen:
         query: Leverkusen, North Rhine-Westphalia, Germany
         country: DE
@@ -2624,6 +2780,7 @@ place_lists:
         - 62449
         OSM relation:
         - https://www.openstreetmap.org/relation/62449
+        pop_GHSL2023: 151995.9388852119
       Darmstadt:
         query: Darmstadt, Hesse, Germany
         country: DE
@@ -2636,6 +2793,7 @@ place_lists:
         - 62581
         OSM relation:
         - https://www.openstreetmap.org/relation/62581
+        pop_GHSL2023: 143254.62058037517
       Heidelberg:
         query: Heidelberg, Baden-Württemberg, Germany
         country: DE
@@ -2648,6 +2806,7 @@ place_lists:
         - 285864
         OSM relation:
         - https://www.openstreetmap.org/relation/285864
+        pop_GHSL2023: 154854.53628560057
       Solingen:
         query: Solingen, North Rhine-Westphalia, Germany
         country: DE
@@ -2660,6 +2819,7 @@ place_lists:
         - 62699
         OSM relation:
         - https://www.openstreetmap.org/relation/62699
+        pop_GHSL2023: 158327.46900320047
       Herne:
         query: Herne, North Rhine-Westphalia, Germany
         country: DE
@@ -2672,6 +2832,7 @@ place_lists:
         - 62396
         OSM relation:
         - https://www.openstreetmap.org/relation/62396
+        pop_GHSL2023: 164314.78438377377
       Regensburg:
         query: Regensburg, Bavaria, Germany
         country: DE
@@ -2684,6 +2845,7 @@ place_lists:
         - 62411
         OSM relation:
         - https://www.openstreetmap.org/relation/62411
+        pop_GHSL2023: 151635.27298718685
       Neuss:
         query: Neuss, North Rhine-Westphalia, Germany
         country: DE
@@ -2696,6 +2858,7 @@ place_lists:
         - 163307
         OSM relation:
         - https://www.openstreetmap.org/relation/163307
+        pop_GHSL2023: 169732.4745044112
       Paderborn:
         query: Paderborn, North Rhine-Westphalia, Germany
         country: DE
@@ -2708,6 +2871,7 @@ place_lists:
         - 5610766
         OSM relation:
         - https://www.openstreetmap.org/relation/5610766
+        pop_GHSL2023: 93098.35931211707
       Ingolstadt:
         query: Ingolstadt, Bavaria, Germany
         country: DE
@@ -2720,6 +2884,7 @@ place_lists:
         - 62381
         OSM relation:
         - https://www.openstreetmap.org/relation/62381
+        pop_GHSL2023: 124418.21458852934
       Offenbach am Main:
         query: Offenbach am Main, Hesse, Germany
         country: DE
@@ -2732,6 +2897,7 @@ place_lists:
         - 62695
         OSM relation:
         - https://www.openstreetmap.org/relation/62695
+        pop_GHSL2023: 109759.49343144891
       Fürth:
         query: Fürth, Bavaria, Germany
         country: DE
@@ -2744,6 +2910,7 @@ place_lists:
         - 62374
         OSM relation:
         - https://www.openstreetmap.org/relation/62374
+        pop_GHSL2023: 147272.84554243082
       Ulm:
         query: Ulm, Baden-Württemberg, Germany
         country: DE
@@ -2756,6 +2923,7 @@ place_lists:
         - 62495
         OSM relation:
         - https://www.openstreetmap.org/relation/62495
+        pop_GHSL2023: 117743.99580718306
       Würzburg:
         query: Würzburg, Bavaria, Germany
         country: DE
@@ -2768,6 +2936,7 @@ place_lists:
         - 62464
         OSM relation:
         - https://www.openstreetmap.org/relation/62464
+        pop_GHSL2023: 128355.29968417247
       Heilbronn:
         query: Heilbronn, Baden-Württemberg, Germany
         country: DE
@@ -2780,6 +2949,7 @@ place_lists:
         - 62751
         OSM relation:
         - https://www.openstreetmap.org/relation/62751
+        pop_GHSL2023: 116836.40956012529
       Pforzheim:
         query: Pforzheim, Baden-Württemberg, Germany
         country: DE
@@ -2792,6 +2962,7 @@ place_lists:
         - 62471
         OSM relation:
         - https://www.openstreetmap.org/relation/62471
+        pop_GHSL2023: 114279.89176134576
       Wolfsburg:
         query: Wolfsburg, Lower Saxony, Germany
         country: DE
@@ -2804,6 +2975,7 @@ place_lists:
         - 62418
         OSM relation:
         - https://www.openstreetmap.org/relation/62418
+        pop_GHSL2023: 114474.95202474817
       Bottrop:
         query: Bottrop, North Rhine-Westphalia, Germany
         country: DE
@@ -2816,6 +2988,7 @@ place_lists:
         - 62634
         OSM relation:
         - https://www.openstreetmap.org/relation/62634
+        pop_GHSL2023: 120419.19062280792
       Göttingen:
         query: Göttingen, Lower Saxony, Germany
         country: DE
@@ -2828,6 +3001,7 @@ place_lists:
         - 191361
         OSM relation:
         - https://www.openstreetmap.org/relation/191361
+        pop_GHSL2023: 124678.53125402467
       Reutlingen:
         query: Reutlingen, Baden-Württemberg, Germany
         country: DE
@@ -2840,6 +3014,7 @@ place_lists:
         - 2772661
         OSM relation:
         - https://www.openstreetmap.org/relation/2772661
+        pop_GHSL2023: 121992.67420992251
       Koblenz:
         query: Koblenz, Rhineland-Palatinate, Germany
         country: DE
@@ -2852,6 +3027,7 @@ place_lists:
         - 62512
         OSM relation:
         - https://www.openstreetmap.org/relation/62512
+        pop_GHSL2023: 121517.91575462554
       Erlangen:
         query: Erlangen, Bavaria, Germany
         country: DE
@@ -2864,6 +3040,7 @@ place_lists:
         - 62403
         OSM relation:
         - https://www.openstreetmap.org/relation/62403
+        pop_GHSL2023: 126349.33028798547
       Bremerhaven:
         query: Bremerhaven, Bremen, Germany
         country: DE
@@ -2876,6 +3053,7 @@ place_lists:
         - 62658
         OSM relation:
         - https://www.openstreetmap.org/relation/62658
+        pop_GHSL2023: 113689.3916842702
       Remscheid:
         query: Remscheid, North Rhine-Westphalia, Germany
         country: DE
@@ -2888,6 +3066,7 @@ place_lists:
         - 11799931
         OSM relation:
         - https://www.openstreetmap.org/relation/11799931
+        pop_GHSL2023: 55548.23748469351
       Bergisch Gladbach:
         query: Bergisch Gladbach, North Rhine-Westphalia, Germany
         country: DE
@@ -2900,6 +3079,7 @@ place_lists:
         - 173103
         OSM relation:
         - https://www.openstreetmap.org/relation/173103
+        pop_GHSL2023: 116460.2804894326
       Recklinghausen:
         query: Recklinghausen, North Rhine-Westphalia, Germany
         country: DE
@@ -2912,6 +3092,7 @@ place_lists:
         - 56665
         OSM relation:
         - https://www.openstreetmap.org/relation/56665
+        pop_GHSL2023: 118133.97546708581
       Trier:
         query: Trier, Rhineland-Palatinate, Germany
         country: DE
@@ -2924,6 +3105,7 @@ place_lists:
         - 172679
         OSM relation:
         - https://www.openstreetmap.org/relation/172679
+        pop_GHSL2023: 124173.42026184776
       Jena:
         query: Jena, Thuringia, Germany
         country: DE
@@ -2936,6 +3118,7 @@ place_lists:
         - 62693
         OSM relation:
         - https://www.openstreetmap.org/relation/62693
+        pop_GHSL2023: 96349.92435650199
       Moers:
         query: Moers, North Rhine-Westphalia, Germany
         country: DE
@@ -2948,6 +3131,7 @@ place_lists:
         - 58623
         OSM relation:
         - https://www.openstreetmap.org/relation/58623
+        pop_GHSL2023: 107912.45186328885
       Salzgitter:
         query: Salzgitter, Lower Saxony, Germany
         country: DE
@@ -2960,6 +3144,7 @@ place_lists:
         - 62659
         OSM relation:
         - https://www.openstreetmap.org/relation/62659
+        pop_GHSL2023: 95014.67304599934
       Siegen:
         query: Siegen, North Rhine-Westphalia, Germany
         country: DE
@@ -2972,6 +3157,7 @@ place_lists:
         - 163256
         OSM relation:
         - https://www.openstreetmap.org/relation/163256
+        pop_GHSL2023: 111237.85921204832
       Gütersloh:
         query: Gütersloh, North Rhine-Westphalia, Germany
         country: DE
@@ -2984,6 +3170,7 @@ place_lists:
         - 138119
         OSM relation:
         - https://www.openstreetmap.org/relation/138119
+        pop_GHSL2023: 89440.50304740664
       Hildesheim:
         query: Hildesheim, Lower Saxony, Germany
         country: DE
@@ -2997,3 +3184,4 @@ place_lists:
         OSM relation:
         - https://www.openstreetmap.org/relation/1176503
 
+        pop_GHSL2023: 108481.75792009567
