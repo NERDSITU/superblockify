@@ -387,7 +387,7 @@ def load_graphml_dtypes(filepath=None, attribute_label=None, attribute_dtype=Non
     }
     graph_dtypes = {
         "simplified": bool,
-        "edge_population": bool,
+        "edge_population": float,
         "boundary": wkt.loads,
         "area": float,
         "n": int,
