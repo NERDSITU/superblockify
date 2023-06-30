@@ -46,6 +46,10 @@ jobs:
       - name: Install pylint
         run: pip install pylint
 
-      - name: Run Pylint
-        run: pylint -d E0401 superblockify/ tests/
+      - name: Lint Source Code
+        run: pylint -d E0401 superblockify/
         # ignore import-errors first, analyze later with tests in anaconda environment
+
+      - name: Lint Tests
+        run: pylint -d E0401 -d R0801 tests/
+        # also ignore code repetition in tests
