@@ -45,7 +45,7 @@ def test_load_graphml_dtypes(test_city_small_precalculated_copy):
     """Test that the graph is loaded with the correct dtypes."""
     graph = test_city_small_precalculated_copy.graph.graph
     assert isinstance(graph["simplified"], bool)
-    assert isinstance(graph["edge_population"], bool)
+    assert isinstance(graph["edge_population"], bool)  # bool showing if pop was added
     assert isinstance(graph["boundary"], (Polygon, MultiPolygon))
     assert isinstance(graph["area"], float)
     assert isinstance(graph["n"], int)
