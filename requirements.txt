@@ -9,6 +9,7 @@ tqdm
 contextily
 ruamel.yaml
 pyarrow
+seaborn
 rasterstats  # only used in one reference notebook
 momepy  # only used in one reference notebook
 
