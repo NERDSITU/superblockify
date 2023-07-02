@@ -13,6 +13,8 @@ class MinimumPartitioner(AttributePartitioner):
     Can be in terms of distance or travel time.
     """
 
+    __exclude_test_fixture__ = True  # own tests will be run
+
     def write_attribute(
         self,
         weight="travel_time",

@@ -48,9 +48,14 @@ SMALL_CITIES = [
         if not getattr(part, "__deprecated__", False)
         else pytest.param(part, marks=pytest.mark.xfail(reason=part.__deprecated__))
         for part in __all_partitioners__
+        if not getattr(part, "__exclude_test_fixture__", False)
     ],
     # use partitioner name, but cut off "Partitioner"-> "Part" if it is there
-    ids=[part.__name__.replace("Partitioner", "Part") for part in __all_partitioners__],
+    ids=[
+        part.__name__.replace("Partitioner", "Part")
+        for part in __all_partitioners__
+        if not getattr(part, "__exclude_test_fixture__", False)
+    ],
 )
 def partitioner_class(request):
     """Fixture for parametrizing all partitioners inheriting from BasePartitioner."""
