@@ -79,7 +79,9 @@ if __name__ == "__main__":
 
         # Save to disk
         print(" - Saving to disk")
-        key_figures.to_feather(join(KEY_FIGURES_DIR, config))
+        key_figures.to_feather(
+            join(KEY_FIGURES_DIR, config.replace(".yml", ".feather"))
+        )
 
     print("Done!")
     if not all_loaded:
