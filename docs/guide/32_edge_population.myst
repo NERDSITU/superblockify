@@ -181,8 +181,8 @@ cells, but when dissolving the cells into LTNs, the effect will compensate itsel
 For this approach first, we need to polygonize the raster data. For that, `rasterio`
 has the `features.shapes` function.
 
-Then we will use a :class:`shapely.STRtree` to intersect the road cells with
-the polygons. The :class:`shapely.STRtree` is a spatial index, which can be used to
+Then we will use a {py:class}`shapely.STRtree` to intersect the road cells with
+the polygons. The {py:class}`shapely.STRtree` is a spatial index, which can be used to
 efficiently query the intersection of two geometries. From the tesselation we will
 build up the spatial index and query the intersection of the road cells with the
 polygons. This way we will distribute the population of the raster to the road cells,

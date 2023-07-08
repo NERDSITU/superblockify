@@ -14,9 +14,10 @@ kernelspec:
 
 # Restricted Distance Calculation
 
-````{sidebar} [Partition Requirements](./partition_requirements)
-Our street network graph $G = (V, E, v)$ has a partition
-$v: G \rightarrow (G_s, G_1 \ldots G_k)$ and for every node.
+````{sidebar} [Partition Requirements](./00_partition_requirements)
+Our street network graph $G = (V, E, l)$ with edges $e \in E$ and vertices $v \in V$
+has a partition $\mathcal{P} : G \mapsto \left(G_\mathrm{sp} \cup G_1 \cup \dots \cup G_k\right)$
+returning subgraphs $G_i\subseteq G$.
 ````
 
 For a valid partitioning we want to calculate the **distances and predecessors** between 
@@ -147,8 +148,8 @@ Analogous to the first pass, but now we cut the edges that lead us into a partit
 Here we will find the paths from partition nodes to the sparse graph nodes.
 
 For finding the shortest paths we could use
-:func:`nx.floyd_warshall_predecessor_and_distance`, but as we'll use this approach
-for larger graphs, we'll use :func:`scipy.sparse.csgraph.dijkstra`.
+{py:func}`nx.floyd_warshall_predecessor_and_distance`, but as we'll use this approach
+for larger graphs, we'll use {py:func}`scipy.sparse.csgraph.dijkstra`.
 
 We will convert the graph to a sparse representation (csr) and filter out the
 concerning edges.
