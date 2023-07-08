@@ -156,9 +156,9 @@ tesselation, of the city.
 There is a solution satisfying our requirements. Okabe and Sugihara define the
 line Network Voronoi Diagram (line N-VD) [Equation 4.7]. It is basically a Voronoi
 diagram (also called Thiessen polygons in some fields) where lines are made up of
-multiple points[^2].
-Araldi and Fusco use this idea to do geostatistical analysis. Fleischmann et al.
-implement this idea in the {py:mod}`momepy` package for building footprints [^3].
+multiple points[^1].
+Araldi and Fusco use this idea to do geostatistical analysis[^2]. Fleischmann et al.
+implement the same idea in the {py:mod}`momepy` package for building footprints [^3].
 With list of footprint geometries, the {py:class}`Tessellation <momepy.Tessellation>`
 class returns a `GeoDataFrame` with a cell corresponding to each input geometry that was
 given.
