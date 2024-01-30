@@ -34,6 +34,7 @@ from scripts.analysis.config import (
     get_hpc_subset,
     combinations,
     MAKE_PLOTS,
+    ONLY_PLOT,
     short_name_combination,
 )
 
@@ -110,7 +111,9 @@ if __name__ == "__main__":
 
         name = place_name + "_" + short_name_combination(comb)
         # If partitioner already done, skip
-        if exists(join(RESULTS_DIR, name, "done")):
+        if ONLY_PLOT:
+            logger.info("Only plotting, not saving partitioner to disk.")
+        elif exists(join(RESULTS_DIR, name, "done")):
             logger.info("Partitioner %s has already been run, skipping!", name)
             continue
         elif exists(join(RESULTS_DIR, name, "load_err")):
@@ -134,11 +137,14 @@ if __name__ == "__main__":
             continue
         logger.debug("Initialized partitioner %s, now running", part)
         part.run(
-            calculate_metrics=True,
+            calculate_metrics=not ONLY_PLOT,
             make_plots=MAKE_PLOTS,
             replace_max_speeds=comb["replace_max_speeds"],
             **comb["part_kwargs"],
         )
+        if ONLY_PLOT:
+            logger.info("Only plotting, skipping saving to disk")
+            continue
         logger.info("Finished partitioning %s, saving to disk", part)
         part.save(save_graph_copy=False, dismiss_distance_matrix=True, key_figures=True)
         logger.info("Saved partitioner %s to disk", part)
