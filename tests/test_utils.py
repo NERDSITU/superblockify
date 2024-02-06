@@ -1,4 +1,5 @@
 """Tests for the utils module."""
+
 from os import remove
 from os.path import exists, join
 

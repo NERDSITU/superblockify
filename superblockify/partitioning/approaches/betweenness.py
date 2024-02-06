@@ -1,4 +1,5 @@
 """Approach based on high betweenness centrality of nodes and edges."""
+
 from numpy import array
 
 from .attribute import AttributePartitioner

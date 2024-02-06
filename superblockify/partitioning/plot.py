@@ -1,4 +1,5 @@
 """Plotting functions for the partitioners."""
+
 from matplotlib import pyplot as plt
 from matplotlib.cm import ScalarMappable
 from matplotlib.colors import ListedColormap, Normalize

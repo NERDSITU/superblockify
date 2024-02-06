@@ -1,4 +1,5 @@
 """Check which cities are done."""
+
 from itertools import product
 from os.path import join, dirname, exists
 from sys import path

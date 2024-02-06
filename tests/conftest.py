@@ -1,4 +1,5 @@
 """Module for test fixtures available for all test files"""
+
 from copy import deepcopy
 from functools import wraps
 from glob import glob
@@ -44,9 +45,11 @@ SMALL_CITIES = [
 @pytest.fixture(
     scope="session",
     params=[
-        part
-        if not getattr(part, "__deprecated__", False)
-        else pytest.param(part, marks=pytest.mark.xfail(reason=part.__deprecated__))
+        (
+            part
+            if not getattr(part, "__deprecated__", False)
+            else pytest.param(part, marks=pytest.mark.xfail(reason=part.__deprecated__))
+        )
         for part in __all_partitioners__
         if not getattr(part, "__exclude_test_fixture__", False)
     ],

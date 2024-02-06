@@ -1,4 +1,5 @@
 """Partitioning init, subpackage for the base partitioner and all approaches."""
+
 from inspect import isclass
 
 # Import all partitioners for `__api.py`.

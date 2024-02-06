@@ -1,4 +1,5 @@
 """Measures for the metrics module."""
+
 from datetime import timedelta
 from time import time
 

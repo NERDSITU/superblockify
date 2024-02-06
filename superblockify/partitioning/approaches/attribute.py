@@ -3,6 +3,7 @@
 For example using the betweenness centrality of nodes and edges to partition the
 graph.
 """
+
 from abc import abstractmethod, ABC
 
 from networkx import weakly_connected_components

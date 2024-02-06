@@ -1,4 +1,5 @@
 """Script on how to use paint streets function"""
+
 # Belongs to 20221018-Painting_Grids notebook.
 
 import osmnx as ox

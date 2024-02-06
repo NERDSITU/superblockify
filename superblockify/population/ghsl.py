@@ -1,4 +1,5 @@
 """GHSL IO functions for the population submodule of the superblockify package."""
+
 from io import BytesIO
 from os import path, mkdir
 from zipfile import ZipFile

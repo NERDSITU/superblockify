@@ -1,4 +1,5 @@
 """Approach relating using edge bearings."""
+
 from bisect import bisect_right
 from typing import List, Set
 

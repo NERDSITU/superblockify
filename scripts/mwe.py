@@ -1,4 +1,5 @@
 """Minimum working example for superblockify."""
+
 from superblockify import ResidentialPartitioner
 
 if __name__ == "__main__":

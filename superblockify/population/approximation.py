@@ -2,6 +2,7 @@
 
 See reference notebook for a detailed description of the population approximation.
 """
+
 from functools import partial
 from multiprocessing import Pool
 

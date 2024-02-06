@@ -1,4 +1,5 @@
 """Test the partitioner checks that are not covered by other tests."""
+
 from networkx import DiGraph
 
 from superblockify.partitioning.checks import is_valid_partitioning

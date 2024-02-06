@@ -1,4 +1,5 @@
 """Distance calculation for the network metrics."""
+
 from datetime import timedelta
 from os import environ
 from time import time
@@ -597,7 +598,7 @@ def shortest_paths_restricted(
             environ.get(  # different types of memory
                 "SLURM_MEM_PER_NODE",  # already in MB - total memory per node
                 # https://slurm.schedmd.com/sbatch.html#SECTION_OUTPUT-ENVIRONMENT-VARIABLES
-                virtual_memory().available / 1024 / 1024  # convert from bytes to MB
+                virtual_memory().available / 1024 / 1024,  # convert from bytes to MB
                 # available memory on the machine
             )
         )

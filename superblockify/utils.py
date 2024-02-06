@@ -1,4 +1,5 @@
 """Utility functions for superblockify."""
+
 from ast import literal_eval
 from itertools import chain
 from os.path import getsize

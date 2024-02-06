@@ -1,4 +1,5 @@
 """BasePartitioner parent and dummy."""  # pylint: disable=too-many-lines
+
 import pickle
 from abc import ABC, abstractmethod
 from itertools import chain
@@ -1016,16 +1017,16 @@ class BasePartitioner(ABC):
         if partitioner.components is not None:
             for i, component in enumerate(partitioner.components):
                 if "subgraph" in component:
-                    partitioner.components[i][
-                        "subgraph"
-                    ] = partitioner.graph.edge_subgraph(component["subgraph"].edges)
+                    partitioner.components[i]["subgraph"] = (
+                        partitioner.graph.edge_subgraph(component["subgraph"].edges)
+                    )
         # Graphs of self.partitions need to be converted to be subgraphs of self.graph.
         if partitioner.partitions is not None:
             for i, partition in enumerate(partitioner.partitions):
                 if "subgraph" in partition:
-                    partitioner.partitions[i][
-                        "subgraph"
-                    ] = partitioner.graph.edge_subgraph(partition["subgraph"].edges)
+                    partitioner.partitions[i]["subgraph"] = (
+                        partitioner.graph.edge_subgraph(partition["subgraph"].edges)
+                    )
         # Convert self.sparsified to subgraph of self.graph.
         if partitioner.sparsified is not None:
             partitioner.sparsified = partitioner.graph.edge_subgraph(

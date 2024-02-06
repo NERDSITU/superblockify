@@ -1,4 +1,5 @@
 """Tests for the partitioner module."""
+
 from os import path, remove
 from os.path import exists, join
 

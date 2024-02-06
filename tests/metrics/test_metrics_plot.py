@@ -1,4 +1,5 @@
 """Tests for the metrics plotting module."""
+
 import pytest
 
 from superblockify.metrics.metric import Metric

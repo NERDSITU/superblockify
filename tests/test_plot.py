@@ -1,4 +1,5 @@
 """Tests for the plot module."""
+
 from os.path import join
 
 import pytest

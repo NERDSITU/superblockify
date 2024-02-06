@@ -1,4 +1,5 @@
 """Load this module to fetch test data needed for certain tests."""
+
 # pylint: disable=wrong-import-position
 import sys
 from os import path

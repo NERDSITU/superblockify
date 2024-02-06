@@ -1,4 +1,5 @@
 """Metric object for the superblockify package."""
+
 import pickle
 from os.path import join, exists
 
@@ -212,9 +213,7 @@ class Metric:
         weight = (
             "length"
             if self.unit == "distance"
-            else "travel_time"
-            if self.unit == "time"
-            else self.unit
+            else "travel_time" if self.unit == "time" else self.unit
         )
         (
             self.distance_matrix["S"],
@@ -242,9 +241,11 @@ class Metric:
                 self.predecessor_matrix["S"],
                 weight=weight,
                 attr_suffix="_range_limited",
-                max_range=betweenness_range
-                if self.unit != "time"
-                else betweenness_range / 30 * 3.6,
+                max_range=(
+                    betweenness_range
+                    if self.unit != "time"
+                    else betweenness_range / 30 * 3.6
+                ),
                 # t = s / v = range / (30 km/h) * (3600 s/h) = range / 30 * 3.6
             )
 
@@ -289,11 +290,15 @@ class Metric:
         weight_restricted = (
             "length"
             if self.unit == "distance"
-            else "travel_time"
-            if self.unit == "time" and not replace_max_speeds
-            else "travel_time_restricted"
-            if self.unit == "time" and replace_max_speeds
-            else self.unit
+            else (
+                "travel_time"
+                if self.unit == "time" and not replace_max_speeds
+                else (
+                    "travel_time_restricted"
+                    if self.unit == "time" and replace_max_speeds
+                    else self.unit
+                )
+            )
         )
         (
             self.distance_matrix["N"],

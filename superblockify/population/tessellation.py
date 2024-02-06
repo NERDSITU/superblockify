@@ -1,4 +1,5 @@
 """Graph Tessellation for the population submodule of the superblockify package."""
+
 from datetime import timedelta, datetime
 
 from geopandas import GeoDataFrame

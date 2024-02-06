@@ -10,6 +10,7 @@ SLURM_ARRAY_TASK_COUNT : int
     The number of SLURM job scheduler tasks.
 
 """
+
 from datetime import timedelta
 from os import environ
 from os.path import exists, join, dirname

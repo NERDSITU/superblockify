@@ -1,4 +1,5 @@
 """Utility functions for analysis scripts."""
+
 from glob import glob
 from itertools import product
 from os import environ

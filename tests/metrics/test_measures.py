@@ -1,4 +1,5 @@
 """Tests for the measure calculation module."""
+
 from dataclasses import dataclass
 from math import isclose
 from random import Random
@@ -238,9 +239,11 @@ def test_calculate_coverage(weights_in, weights_out, expected):
         # otherwise assert that the expected value is returned
         assert isclose(
             calculate_coverage(Part(graph, sparsified), "weight"),
-            expected
-            if expected is not None
-            else sum(weights_in) / sum(weights_in + weights_out),
+            (
+                expected
+                if expected is not None
+                else sum(weights_in) / sum(weights_in + weights_out)
+            ),
         )
 
 

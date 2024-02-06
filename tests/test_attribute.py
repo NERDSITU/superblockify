@@ -1,4 +1,5 @@
 """Tests for the attribute module."""
+
 from inspect import isclass
 
 import pytest

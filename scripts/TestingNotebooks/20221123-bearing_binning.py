@@ -1,4 +1,5 @@
 """First try on neighborhood finding using binning of street bearings."""
+
 # Bearing binning from 20221025-Find_Grids notebook.
 
 import osmnx as ox

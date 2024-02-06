@@ -1,4 +1,5 @@
 """Plotting functions for the network measures."""
+
 from itertools import product
 
 import numpy as np

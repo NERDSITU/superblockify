@@ -19,6 +19,7 @@ Notes
 By the parameters, this script knows which cities to download.
 Also, the population is added to the graph, which is an expensive operation.
 """
+
 from os import environ
 from os.path import exists, join, dirname
 

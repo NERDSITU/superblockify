@@ -22,6 +22,7 @@ SLURM_ARRAY_TASK_ID : int
 SLURM_ARRAY_TASK_COUNT : int
     The number of SLURM job scheduler tasks.
 """
+
 from itertools import zip_longest
 from os import rmdir
 from os.path import join, dirname, exists, getsize

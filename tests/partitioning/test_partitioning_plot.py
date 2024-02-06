@@ -1,4 +1,5 @@
 """Tests for the partitioning plot module."""
+
 import pytest
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import Figure, Axes

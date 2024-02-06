@@ -1,4 +1,5 @@
 """Tests for the population approximation module."""
+
 import pytest
 from networkx import ego_graph
 from numpy import float32

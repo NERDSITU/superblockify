@@ -1,4 +1,5 @@
 """Tests for the partitioning utils."""
+
 from os.path import join, exists
 from uuid import UUID, uuid4
 

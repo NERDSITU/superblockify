@@ -1,4 +1,5 @@
 """Tests for the distance calculations."""
+
 import pytest
 from matplotlib import pyplot as plt
 from numpy import inf

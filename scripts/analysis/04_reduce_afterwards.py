@@ -2,6 +2,7 @@
 larger `MAX_NODES` than you want to work with, you can use this script to reduce the
 already saved graphs.
 """
+
 from os import listdir
 from os.path import join
 from shutil import move

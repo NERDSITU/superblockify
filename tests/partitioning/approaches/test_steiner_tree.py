@@ -1,4 +1,5 @@
 """Tests for the steiner tree partitioner."""
+
 import pytest
 
 from superblockify.partitioning import MinimumPartitioner

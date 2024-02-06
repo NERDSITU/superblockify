@@ -1,4 +1,5 @@
 """Checks for the partitioning module."""
+
 from itertools import chain
 from sys import modules
 

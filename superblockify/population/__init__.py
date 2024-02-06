@@ -1,4 +1,5 @@
 """Population init, subpackage for the GHSL Population data"""
+
 from .approximation import (
     add_edge_population,
     get_edge_population,

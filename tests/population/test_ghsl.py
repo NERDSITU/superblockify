@@ -1,4 +1,5 @@
 """Tests for the ghsl module."""
+
 from os.path import join, isfile
 from shutil import rmtree
 
