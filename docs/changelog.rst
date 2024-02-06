@@ -2,6 +2,22 @@
 Changelog
 *********
 
+Version 1.0.0 (2024-02-
+**************************
+
+* ✨ First major release ✨
+* 📊 IO operations enhanced with graph reduction.
+* 🗒️ Logging improvements: silenced numba compilation, reprojected debug messages.
+* ⚙️ Parallelization updates: removed `num_workers` and `chunk_size`.
+* 🧪 Testing updates: increased util coverage, added response 502 as `xfail`.
+* 🆕 New features: Betweenness Centrality Cutoff, Reduced path filling.
+* 🐛 Fixes: notebook formatting, GEOSException in tesselation, missing attribute.
+* 🔄 Merged pull request: `🌐 Added Betweenness Centrality Cutoff
+  <https://github.com/cbueth/Superblockify/pull/82>`_.
+* 📝 Misc changes: deactivated colormap logging,
+  unified nodes and edges into one variable.
+* 📊 Improved analysis scripts
+
 Version 0.2.2 (2023-06-27)
 **************************
 

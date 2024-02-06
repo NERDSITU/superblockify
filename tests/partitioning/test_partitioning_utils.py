@@ -141,7 +141,7 @@ def test_split_up_isolated_edges_directed_higher_orders(
     part.graph.add_edges_from(
         [(u_id, v_id, -deg) for deg in range(0, degree - 2)]
         + [(v_id, u_id, -deg) for deg in range(0, degree - 2)],
-        **part.graph.edges[(u_id, v_id, 0)]
+        **part.graph.edges[(u_id, v_id, 0)],
     )
     num_edges, num_nodes = len(part.graph.edges), len(part.graph.nodes)
     split_up_isolated_edges_directed(part.graph, part.sparsified)

@@ -22,6 +22,7 @@ jobs:
         uses: psf/black@stable
         with:
           src: './superblockify ./tests ./scripts'
+          options: '--target-version py310'
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:

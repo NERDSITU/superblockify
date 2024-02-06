@@ -22,9 +22,9 @@ sys.path.insert(0, os.path.abspath(".."))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "superblockify"
-copyright = "2023, Carlson Büth"
+copyright = "2023-2024, Carlson Büth"
 author = "Carlson Büth"
-release = "0.2.2"
+release = "1.0.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -54,7 +54,7 @@ language = "en"
 
 myst_enable_extensions = ["colon_fence", "deflist", "dollarmath", "amsmath"]
 myst_heading_anchors = 3
-execution_timeout = 180
+nb_execution_timeout = 180
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
