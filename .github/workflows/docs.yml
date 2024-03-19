@@ -25,8 +25,12 @@ concurrency:
 
 jobs:
   generate-deploy-docs:
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+        os: [ubuntu-latest]
     name: Generate documentation
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     environment:
       name: Deploy to github pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -35,38 +39,18 @@ jobs:
         shell: bash -el {0}
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Setup Mambaforge
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Get week number
+        run: echo "WEEK=$(date +'%V')" >> $GITHUB_ENV
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: mamba-org/setup-micromamba@v1
         with:
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          activate-environment: sb_env
-          use-mamba: true
-
-      - name: Use cache for ${{ matrix.submodule.name }}
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.CONDA }}/envs
-          key:
-            conda-${{ runner.os }}--${{ runner.arch }}--${{
-            hashFiles('environment.yml') }}-${{ env.CACHE_NUMBER }}
-        env:
-          # Increase this value to reset cache if etc/example-environment.yml has not changed
-          CACHE_NUMBER: 0
-        id: cache
-
-      - name: Update environment
-        run: # Install if cache not found
-          mamba env update -n sb_env -f environment.yml
-        if: steps.cache.outputs.cache-hit != 'true'
-
-      - name: Show environment info
-        run: |
-          conda info
-          conda list
-          conda config --show
+          create-args: python=${{ matrix.python-version }}
+          environment-file: environment.yml
+          cache-environment: true
+          cache-environment-key: W${{ env.WEEK }}
 
       - name: Add Notebook Kernel
         run: python -m ipykernel install --user --name sb_env --display-name "Python (sb_env)"
