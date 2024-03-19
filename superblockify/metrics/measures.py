@@ -180,11 +180,12 @@ def rel_increase(value_i, value_j):
     # Use double precision to avoid overflow
     value_i = value_i.astype(np.double)
     value_j = value_j.astype(np.double)
-    return np.where(
-        (value_i == np.inf) | (value_j == np.inf) | (value_j == 0) | (value_i == 0),
-        np.inf,
-        value_i / value_j,
-    )
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return np.where(
+            (value_i == np.inf) | (value_j == np.inf) | (value_j == 0) | (value_i == 0),
+            np.inf,
+            value_i / value_j,
+        )
 
 
 def write_relative_increase_to_edges(

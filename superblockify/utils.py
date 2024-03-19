@@ -21,7 +21,7 @@ from numpy import (
     isinf,
     nan,
 )
-from osmnx._errors import CacheOnlyModeInterrupt
+from osmnx._errors import CacheOnlyInterruptError
 from osmnx.stats import count_streets_per_node
 from shapely import wkt
 
@@ -133,7 +133,7 @@ def load_graph_from_place(
     ox.settings.cache_only_mode = only_cache
     try:
         graph = ox.graph_from_polygon(mult_polygon.geometry.unary_union, **gfp_kwargs)
-    except CacheOnlyModeInterrupt:  # pragma: no cover
+    except CacheOnlyInterruptError:  # pragma: no cover
         logger.debug("Only loaded graph from cache")
         return None
     logger.debug("Downloaded graph - Preprocessing")

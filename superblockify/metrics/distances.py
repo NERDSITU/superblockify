@@ -109,6 +109,25 @@ def calculate_path_distance_matrix(
     graph_matrix = to_scipy_sparse_array(
         graph, weight=weight, format="csr", nodelist=node_order
     )
+
+    # Try to downcast indices to int32
+    if graph_matrix.indices.dtype != np.int32:
+        logger.debug("Downcasting indices to int32.")
+        downcasted_indices = graph_matrix.indices.astype(np.int32)
+        if np.array_equal(downcasted_indices, graph_matrix.indices):
+            graph_matrix.indices = downcasted_indices
+        else:
+            logger.warning("Downcasting indices to int32 failed.")
+
+    # Try to downcast indptr to int32
+    if graph_matrix.indptr.dtype != np.int32:
+        logger.debug("Downcasting indptr to int32.")
+        downcasted_indptr = graph_matrix.indptr.astype(np.int32)
+        if np.array_equal(downcasted_indptr, graph_matrix.indptr):
+            graph_matrix.indptr = downcasted_indptr
+        else:
+            logger.warning("Downcasting indptr to int32 failed.")
+
     start_time = time()
     dist_full_graph, predecessors = dijkstra(
         graph_matrix, directed=True, return_predecessors=True, unweighted=False

@@ -6,6 +6,7 @@ import networkx as nx
 import osmnx as ox
 from matplotlib import patches
 from matplotlib import pyplot as plt
+plt.set_loglevel("info")
 
 from .attribute import determine_minmax_val, new_edge_attribute_by_function
 from .config import logger
