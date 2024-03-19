@@ -11,6 +11,7 @@ __pycache__/
 .coverage
 docs/api/*
 !docs/api/index.rst
+build/
 
 # OSMnx cache
 **/cache/

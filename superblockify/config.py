@@ -79,7 +79,7 @@ MAX_NODES
 
 Notes
 -----
-Logger configuration is done using the :mod:`setup.cfg` file. The logger for this
+Logger configuration is done using the :mod:`logging.cfg` file. The logger for this
 module is named ``superblockify``.
 """
 
@@ -117,8 +117,8 @@ NUM_BINS = 36
 FULL_RASTER = None  # join(GHSL_DIR, "GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0.tif")
 DOWNLOAD_TIMEOUT = 60
 
-# Logging configuration using the setup.cfg file
-logging.config.fileConfig(join(dirname(__file__), "..", "setup.cfg"))
+# Logging configuration using the logging.cfg file
+logging.config.fileConfig(join(dirname(__file__), "logging.cfg"))
 # Get the logger for this module
 numba_logger = logging.getLogger("numba")
 numba_logger.setLevel(logging.WARNING)

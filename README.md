@@ -9,41 +9,29 @@ Source code for blockifying existing street networks.
 
 ---
 
-## Set up
+## Installation
 
-The environment to run the projects' code can be set up using the
-`environment.yaml` by running:
+TODO: Install `superblockify` from conda-forge
+
+## Development Setup
+
+For development, we recommend using `micromamba` to create a virtual
+environment and installing the package in editable mode.
+Alternatively, one can use `conda` or `mamba` to create the environment
+(they can be used interchangeably).
+After cloning the repository, navigate to the root folder and
+create the environment with the wished python version and the development dependencies.
 
 ```bash
-conda env create --file=environment.yml
+micromamba create -n sb_env -c conda-forge python=3.10 --file=environment.yml
+micromamba activate sb_env
 ```
 
-This initializes a conda environment by the name `sb_env`, which can be
-activated using `sb_env`.
-If you want to use `mamba` or `micromamba` for faster package resolution, just replace 
-`conda` with the respective. For `micromamba`:
-    
-```bash
-micromamba env create --file=environment.yml
-```
-
-Alternatively a version-less setup can be done by executing 
-(`environmentSetupVersionless.sh` in the working directory)
+Now it is possible to import the package relatively to the root folder.
+Optionally, register the package in editable mode with `pip`:
 
 ```bash
-conda create -n sb_env -c conda-forge python=3.10 --file requirements.txt
-conda activate sb_env
-conda env export | grep -v "^prefix: " > environment.yml
-```
-
-which does not have explicit versions, but might resolve dependency issues. Using
-`git diff environment.yml` the changes can be inspected.
-With `mamba` this can be done by running
-
-```bash
-mamba create -n sb_env -c conda-forge python=3.10 --file requirements.txt
-mamba activate sb_env
-mamba env export | grep -v "^prefix: " > environment.yml
+pip install --no-build-isolation --no-deps -e .
 ```
 
 ## Usage

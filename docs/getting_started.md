@@ -1,25 +1,9 @@
 # Getting Started
 
-To set up an environment, the simplest way is to use `conda` or `mamba` (exchange
-`conda` with `mamba` in any of the commands) and the `environment.yml` file. This
-will create an environment called `sb_env` with all the necessary dependencies.
+TODO: Install `superblockify` from conda-forge
 
-```bash
-conda env create --file=environment.yml
-conda activate sb_env
-```
-
-Alternatively, a version-less setup can be done by resolving the dependencies
-separately.
-
-```bash
-conda create -n sb_env -c conda-forge python=3.10 --file requirements.txt
-conda activate sb_env
-```
-
-To inspect the changes, run
-`conda env export | grep -v "^prefix: " > environment.yml`
-and see the differences in versions using `git diff environment.yml`.
+For development, we recommend using a virtual environment, see
+[Development Setup](#development-setup).
 
 ## Usage
 
@@ -51,6 +35,26 @@ To learn more about the inner workings and background of the package, please
 see the next Reference section. Otherwise, you can also check out the
 [API documentation](api/index)
 
+## Development Setup
+
+For development, we recommend using `micromamba` to create a virtual
+environment and installing the package in editable mode.
+Alternatively, one can use `conda` or `mamba` to create the environment
+(they can be used interchangeably).
+After cloning the repository, navigate to the root folder and
+create the environment with the wished python version and the development dependencies.
+
+```bash
+micromamba create -n sb_env -c conda-forge python=3.10 --file=environment.yml
+micromamba activate sb_env
+```
+
+Now it is possible to import the package relatively to the root folder.
+Optionally, register the package in editable mode with `pip`:
+
+```bash
+pip install --no-build-isolation --no-deps -e .
+```
 
 ## Testing
 

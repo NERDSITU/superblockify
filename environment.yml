@@ -18,9 +18,6 @@ dependencies:
   - seaborn
   - rasterstats  # only used in one reference notebook
   - momepy  # only used in one reference notebook
-  # Editor
-  - jupyterlab
-  - jupyterlab_code_formatter
   # Code Quality
   - blackd
   - isort
