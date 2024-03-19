@@ -9,7 +9,7 @@
 #SBATCH --partition=red                 # Run on either the Red or Brown queue
 #SBATCH --mail-type=FAIL,END            # Send an email when the job finishes or fails
 
-WORK_DIR=~/Superblockify
+WORK_DIR=~/superblockify
 
 # Activate environment
 source $WORK_DIR/scripts/slurm/de_activate.sh

@@ -75,7 +75,7 @@ html_sidebars = {
 }
 html_static_path = ["_static"]
 html_theme_options = {
-    "repository_url": "https://github.com/cbueth/Superblockify/",
+    "repository_url": "https://github.com/cbueth/superblockify/",
     "repository_branch": "main",
     "use_source_button": True,
     "use_repository_button": True,

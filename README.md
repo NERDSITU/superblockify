@@ -1,7 +1,7 @@
-# Superblockify
+# `superblockify`
 
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://cbueth.github.io/Superblockify/)
-[![codecov](https://codecov.io/gh/cbueth/Superblockify/branch/main/graph/badge.svg?token=AS72IFT2Q4)](https://codecov.io/gh/cbueth/Superblockify)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://cbueth.github.io/superblockify/)
+[![codecov](https://codecov.io/gh/cbueth/superblockify/branch/main/graph/badge.svg?token=AS72IFT2Q4)](https://codecov.io/gh/cbueth/superblockify)
 [![linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/PyCQA/pylint)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
