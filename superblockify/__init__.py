@@ -1,4 +1,5 @@
 """superblockify init."""
+
 from os import environ
 
 environ["USE_PYGEOS"] = "0"  # pylint: disable=wrong-import-position
