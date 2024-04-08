@@ -42,9 +42,9 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://cbueth.de/superblockify"
-Repository = "https://github.com/cbueth/superblockify"
-Changelog = "https://cbueth.de/superblockify/changelog/"
+Documentation = "https://NERDSITU.github.io/superblockify"
+Repository = "https://github.com/NERDSITU/superblockify"
+Changelog = "https://NERDSITU.github.io/superblockify/changelog/"
 
 [project.optional-dependencies]
 lint = ["blackd", "isort", "pylint"]

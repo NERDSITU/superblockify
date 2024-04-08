@@ -1,13 +1,13 @@
 # `superblockify`
 
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://cbueth.github.io/superblockify/)
-[![codecov](https://codecov.io/gh/cbueth/superblockify/branch/main/graph/badge.svg?token=AS72IFT2Q4)](https://codecov.io/gh/cbueth/superblockify)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://NERDSITU.github.io/superblockify/)
+[![codecov](https://codecov.io/gh/NERDSITU/superblockify/branch/main/graph/badge.svg?token=AS72IFT2Q4)](https://codecov.io/gh/NERDSITU/superblockify)
 [![linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/PyCQA/pylint)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-[![Docs](https://github.com/cbueth/superblockify/actions/workflows/docs.yml/badge.svg)](https://github.com/cbueth/superblockify/actions/workflows/docs.yml)
-[![Lint](https://github.com/cbueth/superblockify/actions/workflows/lint.yml/badge.svg)](https://github.com/cbueth/superblockify/actions/workflows/lint.yml)
-[![Test](https://github.com/cbueth/superblockify/actions/workflows/test.yml/badge.svg)](https://github.com/cbueth/superblockify/actions/workflows/test.yml)
+[![Docs](https://github.com/NERDSITU/superblockify/actions/workflows/docs.yml/badge.svg)](https://github.com/NERDSITU/superblockify/actions/workflows/docs.yml)
+[![Lint](https://github.com/NERDSITU/superblockify/actions/workflows/lint.yml/badge.svg)](https://github.com/NERDSITU/superblockify/actions/workflows/lint.yml)
+[![Test](https://github.com/NERDSITU/superblockify/actions/workflows/test.yml/badge.svg)](https://github.com/NERDSITU/superblockify/actions/workflows/test.yml)
 
 Source code for blockifying existing street networks.
 
@@ -15,7 +15,19 @@ Source code for blockifying existing street networks.
 
 ## Installation
 
-TODO: Install `superblockify` from conda-forge
+Create a new environment with `conda` or `mamba` and install the package from the
+`conda-forge` channel.
+
+```bash
+conda create -n sb_env -c conda-forge superblockify
+conda activate sb_env
+```
+
+This installs the package and its dependencies,
+ready for use when activating the environment.
+Learn more about `superblockify` by reading
+the [documentation](https://NERDSITU.github.io/superblockify/)
+or the [minimal working example](scripts/mwe.py).
 
 ## Development Setup
 

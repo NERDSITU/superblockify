@@ -1,9 +1,17 @@
 # Getting Started
 
-TODO: Install `superblockify` from conda-forge
+Create a new environment with `conda` or `mamba` and install the package from the
+`conda-forge` channel.
 
-For development, we recommend using a virtual environment, see
-[Development Setup](#development-setup).
+```bash
+conda create -n sb_env -c conda-forge superblockify
+conda activate sb_env
+```
+
+This installs the package and its dependencies,
+ready for use when activating the environment.
+
+For development, see the [Development Setup](#development-setup) section.
 
 ## Usage
 
@@ -12,12 +20,13 @@ necessary. Maps are downloaded from the OpenStreetMap API and population data is
 downloaded from the [GHSL-POP 2023](https://ghsl.jrc.ec.europa.eu/ghs_pop2023.php)
 dataset. Only tiles needed are being cached in the `data/ghsl` folder.
 
-As example we will try to partition the french city of Lyon with the
-`ResidentialPartitioner` class. Afterwards we will save the results to a geopackage
+As example, we will try to partition the French city of Lyon with the
+`ResidentialPartitioner` class. Afterward we will save the results to a geopackage
 file that can easily be opened and edited in QGIS.
 
 ```python
 import superblockify as sb
+
 part = sb.ResidentialPartitioner(
     name="Lyon_test", city_name="Lyon", search_str="Lyon, France"
 )
@@ -45,7 +54,7 @@ After cloning the repository, navigate to the root folder and
 create the environment with the wished python version and the development dependencies.
 
 ```bash
-micromamba create -n sb_env -c conda-forge python=3.10 --file=environment.yml
+micromamba create -n sb_env -c conda-forge python=3.12 --file=environment.yml
 micromamba activate sb_env
 ```
 

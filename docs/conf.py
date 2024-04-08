@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "superblockify"
 copyright = "2023-2024, Carlson Büth"
 author = "Carlson Büth"
-release = "1.0.0"
+release = "1.0.0rc1"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -75,7 +75,7 @@ html_sidebars = {
 }
 html_static_path = ["_static"]
 html_theme_options = {
-    "repository_url": "https://github.com/cbueth/superblockify/",
+    "repository_url": "https://github.com/NERDSITU/superblockify/",
     "repository_branch": "main",
     "use_source_button": True,
     "use_repository_button": True,
