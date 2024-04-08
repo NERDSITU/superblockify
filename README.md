@@ -5,6 +5,10 @@
 [![linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/PyCQA/pylint)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
+[![Docs](https://github.com/cbueth/superblockify/actions/workflows/docs.yml/badge.svg)](https://github.com/cbueth/superblockify/actions/workflows/docs.yml)
+[![Lint](https://github.com/cbueth/superblockify/actions/workflows/lint.yml/badge.svg)](https://github.com/cbueth/superblockify/actions/workflows/lint.yml)
+[![Test](https://github.com/cbueth/superblockify/actions/workflows/test.yml/badge.svg)](https://github.com/cbueth/superblockify/actions/workflows/test.yml)
+
 Source code for blockifying existing street networks.
 
 ---
@@ -23,7 +27,7 @@ After cloning the repository, navigate to the root folder and
 create the environment with the wished python version and the development dependencies.
 
 ```bash
-micromamba create -n sb_env -c conda-forge python=3.10 --file=environment.yml
+micromamba create -n sb_env -c conda-forge python=3.12 --file=environment.yml
 micromamba activate sb_env
 ```
 
