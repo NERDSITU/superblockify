@@ -7,7 +7,7 @@ from networkx import is_weakly_connected
 from numpy import argwhere, fill_diagonal
 from osmnx import plot_graph
 
-from ..config import logger, HIDE_PLOTS
+from ..config import logger, Config
 from ..plot import plot_by_attribute
 from ..utils import has_pairwise_overlap
 
@@ -125,7 +125,7 @@ def components_are_connected(partitioning):
                 edge_attr_types="numerical",
                 edge_cmap="hsv",
                 edge_minmax_val=(0, 1),
-                show="pytest" not in modules or not HIDE_PLOTS,
+                show="pytest" not in modules or not Config.HIDE_PLOTS,
             )
             # Reset edge attribute 'highlight'
             for edge in component["subgraph"].edges:
@@ -202,7 +202,7 @@ def nodes_and_edges_are_contained_in_exactly_one_subgraph(partitioning):
                 for node in partitioning.graph.nodes
             ],
             bgcolor="none",
-            show="pytest" not in modules or not HIDE_PLOTS,
+            show="pytest" not in modules or not Config.HIDE_PLOTS,
         )
         is_valid = False
 

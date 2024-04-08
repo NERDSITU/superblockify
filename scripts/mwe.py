@@ -2,6 +2,9 @@
 
 from superblockify import ResidentialPartitioner
 
+# If you have the whole GHS POP raster, set the path like so:
+# >>> superblockify.config.Config.FULL_RASTER = ...
+
 if __name__ == "__main__":
     part = ResidentialPartitioner(
         name="Salerno_mwe",

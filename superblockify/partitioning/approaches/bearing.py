@@ -13,7 +13,7 @@ from typing_extensions import deprecated
 
 from ..base import BasePartitioner
 from ... import attribute
-from ...config import logger, PLOT_SUFFIX
+from ...config import logger, Config
 from ...plot import save_plot
 
 
@@ -91,7 +91,9 @@ class BearingPartitioner(BasePartitioner):  # pragma: no cover
 
         if make_plots:
             fig, _ = self.plot_peakfinding()
-            save_plot(self.results_dir, fig, f"{self.name}_peakfinding.{PLOT_SUFFIX}")
+            save_plot(
+                self.results_dir, fig, f"{self.name}_peakfinding.{Config.PLOT_SUFFIX}"
+            )
             plt.show()
 
         # Make boundaries
@@ -100,7 +102,9 @@ class BearingPartitioner(BasePartitioner):  # pragma: no cover
         if make_plots:
             fig, _ = self.plot_interval_splitting()
             save_plot(
-                self.results_dir, fig, f"{self.name}_interval_splitting.{PLOT_SUFFIX}"
+                self.results_dir,
+                fig,
+                f"{self.name}_interval_splitting.{Config.PLOT_SUFFIX}",
             )
             plt.show()
 

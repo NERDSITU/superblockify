@@ -7,7 +7,7 @@ import networkx as nx
 import pytest
 from osmnx import load_graphml
 
-from superblockify.config import logger, TEST_DATA_PATH, GRAPH_DIR, RESULTS_DIR
+from superblockify.config import logger, Config
 from superblockify.partitioning import BasePartitioner
 from superblockify.utils import compare_components_and_partitions
 from tests.conftest import mark_xfail_flaky_download
@@ -136,7 +136,9 @@ class TestPartitioners:
                 "Adliswil_tmp_name",
                 "Adliswil_tmp",
                 None,
-                load_graphml(path.join(TEST_DATA_PATH, "cities", "Adliswil.graphml")),
+                load_graphml(
+                    path.join(Config.TEST_DATA_PATH, "cities", "Adliswil.graphml")
+                ),
                 False,
             ),
             (
@@ -173,7 +175,7 @@ class TestPartitioners:
         assert part.graph is not None
         assert part.name is not None
         if reload_graph:
-            test_graph = join(GRAPH_DIR, "Adliswil_tmp.graphml")
+            test_graph = join(Config.GRAPH_DIR, "Adliswil_tmp.graphml")
             if exists(test_graph):
                 remove(test_graph)
 
@@ -263,11 +265,11 @@ class TestPartitioners:
         part.save(save_graph_copy)
         if delete_before_load:
             # Delete graph at GRAPH_DIR/Adliswil_tmp_save_load.graphml
-            remove(path.join(GRAPH_DIR, "Adliswil_tmp_save_load.graphml"))
+            remove(path.join(Config.GRAPH_DIR, "Adliswil_tmp_save_load.graphml"))
             # Delete metrics at RESULTS_DIR/.../Adliswil_tmp_save_load_name.metrics
             remove(
                 path.join(
-                    RESULTS_DIR,
+                    Config.RESULTS_DIR,
                     "Adliswil_tmp_save_load_name",
                     "Adliswil_tmp_save_load_name.metrics",
                 )
@@ -338,11 +340,11 @@ class TestPartitioners:
         """Test saving of key figures."""
         part = test_city_small_precalculated_copy
         part.save_key_figures(
-            save_dir=join(RESULTS_DIR, "key_figures_test"), name=other_name
+            save_dir=join(Config.RESULTS_DIR, "key_figures_test"), name=other_name
         )
         assert path.isfile(
             path.join(
-                RESULTS_DIR,
+                Config.RESULTS_DIR,
                 "key_figures_test",
                 f"{other_name or part.name}_key_figures.yml",
             )

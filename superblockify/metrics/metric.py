@@ -25,7 +25,7 @@ from .plot import (
     plot_relative_difference,
     plot_relative_increase_on_graph,
 )
-from ..config import logger, RESULTS_DIR, CLUSTERING_PERCENTILE, PLOT_SUFFIX
+from ..config import logger, Config
 from ..plot import save_plot
 from ..utils import compare_dicts
 from ..graph_stats import basic_graph_stats
@@ -249,7 +249,9 @@ class Metric:
                 # t = s / v = range / (30 km/h) * (3600 s/h) = range / 30 * 3.6
             )
 
-        self.calculate_high_bc_clustering(partitioner.graph, CLUSTERING_PERCENTILE)
+        self.calculate_high_bc_clustering(
+            partitioner.graph, Config.CLUSTERING_PERCENTILE
+        )
 
     def calculate_all(
         self,
@@ -378,7 +380,7 @@ class Metric:
         save_plot(
             partitioner.results_dir,
             fig,
-            f"{partitioner.name}_distance_matrices.{PLOT_SUFFIX}",
+            f"{partitioner.name}_distance_matrices.{Config.PLOT_SUFFIX}",
         )
         fig.show()
         fig, _ = plot_distance_matrices_pairwise_relative_difference(
@@ -388,7 +390,7 @@ class Metric:
             partitioner.results_dir,
             fig,
             f"{partitioner.name}_distance_matrices_"
-            f"pairwise_relative_difference.{PLOT_SUFFIX}",
+            f"pairwise_relative_difference.{Config.PLOT_SUFFIX}",
         )
         fig.show()
         fig, _ = plot_relative_difference(
@@ -397,7 +399,7 @@ class Metric:
         save_plot(
             partitioner.results_dir,
             fig,
-            f"{partitioner.name}_relative_difference_SN.{PLOT_SUFFIX}",
+            f"{partitioner.name}_relative_difference_SN.{Config.PLOT_SUFFIX}",
         )
         fig.show()
         fig, _ = plot_component_wise_travel_increase(
@@ -411,13 +413,13 @@ class Metric:
         save_plot(
             partitioner.results_dir,
             fig,
-            f"{partitioner.name}_component_wise_travel_increase.{PLOT_SUFFIX}",
+            f"{partitioner.name}_component_wise_travel_increase.{Config.PLOT_SUFFIX}",
         )
         fig, _ = plot_relative_increase_on_graph(partitioner.graph, self.unit_symbol())
         save_plot(
             partitioner.results_dir,
             fig,
-            f"{partitioner.name}_relative_increase_on_graph.{PLOT_SUFFIX}",
+            f"{partitioner.name}_relative_increase_on_graph.{Config.PLOT_SUFFIX}",
         )
 
         # self.coverage = self.calculate_coverage(partitioner)
@@ -576,7 +578,7 @@ class Metric:
 
         """
 
-        metrics_path = join(RESULTS_DIR, name, name + ".metrics")
+        metrics_path = join(Config.RESULTS_DIR, name, name + ".metrics")
         logger.debug("Loading metrics from %s", metrics_path)
         with open(metrics_path, "rb") as file:
             metrics = pickle.load(file)

@@ -6,11 +6,11 @@ import os
 print(f"Current working directory: {os.getcwd()}")
 
 from superblockify import ResidentialPartitioner, save_to_gpkg
-from superblockify.config import PLACES_GENERAL, PLACES_SMALL
+from superblockify.config import Config
 
 if __name__ == "__main__":
-    CITY_NAME, SEARCH_STR = PLACES_GENERAL[1]
-    # CITY_NAME, SEARCH_STR = PLACES_SMALL[0]
+    CITY_NAME, SEARCH_STR = Config.PLACES_GENERAL[1]
+    # CITY_NAME, SEARCH_STR = Config.PLACES_SMALL[0]
 
     part = ResidentialPartitioner(
         name=CITY_NAME + "_HPC", city_name=CITY_NAME, search_str=SEARCH_STR

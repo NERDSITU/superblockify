@@ -39,13 +39,7 @@ from scripts.analysis.config import (
     short_name_combination,
 )
 
-from superblockify.config import (
-    logger,
-    GRAPH_DIR,
-    RESULTS_DIR,
-    PLACES_100_CITIES,
-    PLACES_GERMANY,
-)
+from superblockify.config import logger, Config
 
 if __name__ == "__main__":
     # Add list(PLACES_100_CITIES.items()) + list(PLACES_GERMANY.items()) together, but
@@ -54,7 +48,7 @@ if __name__ == "__main__":
     city_list = [
         city
         for pair in zip_longest(
-            list(PLACES_100_CITIES.items()), list(PLACES_GERMANY.items())
+            list(Config.PLACES_100_CITIES.items()), list(Config.PLACES_GERMANY.items())
         )
         for city in pair
         if city is not None
@@ -79,7 +73,7 @@ if __name__ == "__main__":
         for place_name, place, comb in city_combination
         if not exists(
             join(
-                RESULTS_DIR,
+                Config.RESULTS_DIR,
                 place_name + "_" + short_name_combination(comb),
                 "done",
             )
@@ -93,7 +87,9 @@ if __name__ == "__main__":
 
     subset = get_hpc_subset(city_combination)
     # Sort by graph size on disk (GRAPH_DIR/PLACE_NAME.graphml)
-    subset = sorted(subset, key=lambda x: getsize(join(GRAPH_DIR, x[0] + ".graphml")))
+    subset = sorted(
+        subset, key=lambda x: getsize(join(Config.GRAPH_DIR, x[0] + ".graphml"))
+    )
 
     for place_name, place, comb in subset:
         logger.info(
@@ -104,7 +100,7 @@ if __name__ == "__main__":
             short_name_combination(comb),
         )
         # If graph not downloaded, skip
-        graph_path = join(GRAPH_DIR, place_name + ".graphml")
+        graph_path = join(Config.GRAPH_DIR, place_name + ".graphml")
         if not exists(graph_path):
             logger.info("Graph not found in %s, skipping!", graph_path)
             continue
@@ -114,16 +110,16 @@ if __name__ == "__main__":
         # If partitioner already done, skip
         if ONLY_PLOT:
             logger.info("Only plotting, not saving partitioner to disk.")
-        elif exists(join(RESULTS_DIR, name, "done")):
+        elif exists(join(Config.RESULTS_DIR, name, "done")):
             logger.info("Partitioner %s has already been run, skipping!", name)
             continue
-        elif exists(join(RESULTS_DIR, name, "load_err")):
+        elif exists(join(Config.RESULTS_DIR, name, "load_err")):
             logger.info(
                 "Partitioner %s has already been run, but loading failed. "
                 "Deleting and rerunning!",
             )
             # remove folder
-            rmdir(join(RESULTS_DIR, name))
+            rmdir(join(Config.RESULTS_DIR, name))
         try:
             part = comb["part_class"](  # instantiate partitioner
                 name=name,
@@ -161,7 +157,7 @@ if __name__ == "__main__":
             # mark the partitioner as failed - write file `load_err` in the
             # partitioner dir
             with open(
-                join(RESULTS_DIR, part.name, "load_err"), "w", encoding="utf-8"
+                join(Config.RESULTS_DIR, part.name, "load_err"), "w", encoding="utf-8"
             ) as file:
                 file.write(str(err))
         else:
@@ -171,6 +167,6 @@ if __name__ == "__main__":
             # mark the partitioner as done - write file `done` in the partitioner
             # dir
             with open(
-                join(RESULTS_DIR, part.name, "done"), "w", encoding="utf-8"
+                join(Config.RESULTS_DIR, part.name, "done"), "w", encoding="utf-8"
             ) as file:
                 file.write("done")

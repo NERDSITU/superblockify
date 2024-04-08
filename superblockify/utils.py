@@ -26,7 +26,7 @@ from osmnx.stats import count_streets_per_node
 from shapely import wkt
 
 from .partitioning.utils import reduce_graph
-from .config import logger, MAX_NODES
+from .config import logger, Config
 from .graph_stats import basic_graph_stats
 from .population.approximation import add_edge_population
 
@@ -79,7 +79,7 @@ def load_graph_from_place(
     search_string,
     add_population=False,
     only_cache=False,
-    max_nodes=MAX_NODES,
+    max_nodes=Config.MAX_NODES,
     **gfp_kwargs,
 ):
     """Load a graph from a place and save it to a file.

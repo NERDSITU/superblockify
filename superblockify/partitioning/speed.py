@@ -1,13 +1,13 @@
 """Speed module for superblockify, used to add speed limits to the edges of a graph."""
 
-from ..config import V_MAX_SPARSE, V_MAX_LTN
+from ..config import Config
 
 
 def add_edge_travel_times_restricted(
     graph,
     sparsified,
-    v_s=V_MAX_SPARSE,
-    v_ltn=V_MAX_LTN,
+    v_s=Config.V_MAX_SPARSE,
+    v_ltn=Config.V_MAX_LTN,
 ):
     r"""Add edge travel times (in seconds) to a graph.
 

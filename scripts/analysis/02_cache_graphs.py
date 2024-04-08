@@ -23,7 +23,7 @@ path.append(join(dirname(__file__), "..", ".."))
 
 import osmnx as ox
 
-from superblockify.config import logger, NETWORK_FILTER, GRAPH_DIR, PLACES_100_CITIES
+from superblockify.config import logger, Config
 from superblockify.utils import load_graph_from_place
 
 # turn on logging
@@ -38,8 +38,8 @@ if __name__ == "__main__":
     if not RELOAD_GRAPHS:
         PLACES_100_CITIES = {
             place_name: place
-            for place_name, place in PLACES_100_CITIES.items()
-            if not exists(join(GRAPH_DIR, place_name + ".graphml"))
+            for place_name, place in Config.PLACES_100_CITIES.items()
+            if not exists(join(Config.GRAPH_DIR, place_name + ".graphml"))
         }
     logger.info("There are %s graphs left to cache", len(PLACES_100_CITIES))
     subset = get_hpc_subset(list(PLACES_100_CITIES.items()))
@@ -58,7 +58,7 @@ if __name__ == "__main__":
             place["query"],
         )
         # Check if the graph already exists
-        graph_path = join(GRAPH_DIR, place_name + ".graphml")
+        graph_path = join(Config.GRAPH_DIR, place_name + ".graphml")
         if exists(graph_path) and not RELOAD_GRAPHS:
             logger.debug("Graph already exists, skipping")
         else:
@@ -69,7 +69,7 @@ if __name__ == "__main__":
                     save_as=graph_path,
                     search_string=["R" + str(osm_id) for osm_id in place["osm_id"]],
                     add_population=True,
-                    custom_filter=NETWORK_FILTER,
+                    custom_filter=Config.NETWORK_FILTER,
                     simplify=True,
                     only_cache=True,
                 )

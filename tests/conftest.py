@@ -12,17 +12,11 @@ from networkx import set_node_attributes
 from requests.exceptions import ConnectTimeout
 from urllib3.exceptions import MaxRetryError
 
-from superblockify.config import (
-    TEST_DATA_PATH,
-    RESULTS_DIR,
-    PLACES_SMALL,
-    GRAPH_DIR,
-    HIDE_PLOTS,
-)
+from superblockify.config import Config
 from superblockify.partitioning import __all_partitioners__
 from superblockify.utils import load_graphml_dtypes
 
-TEST_CITY_PATH = join(TEST_DATA_PATH, "cities")
+TEST_CITY_PATH = join(Config.TEST_DATA_PATH, "cities")
 ALL_CITIES_SORTED = sorted(
     [city for city in listdir(TEST_CITY_PATH) if city.endswith(".graphml")],
     key=lambda city: getsize(join(TEST_CITY_PATH, city)),
@@ -30,7 +24,7 @@ ALL_CITIES_SORTED = sorted(
 SMALL_CITIES = [
     city
     for city in listdir(TEST_CITY_PATH)
-    if city in [city[0] + ".graphml" for city in PLACES_SMALL]
+    if city in [city[0] + ".graphml" for city in Config.PLACES_SMALL]
 ]
 
 
@@ -318,10 +312,10 @@ def _teardown_test_graph_io():
     yield None
     work_cities = ["Adliswil_tmp", "Adliswil_tmp_save_load"]
     for city in work_cities:
-        test_graph = join(GRAPH_DIR, city + ".graphml")
+        test_graph = join(Config.GRAPH_DIR, city + ".graphml")
         if exists(test_graph):
             remove(test_graph)
-        results_dir = join(RESULTS_DIR, city + "_name")
+        results_dir = join(Config.RESULTS_DIR, city + "_name")
         if exists(results_dir):
             rmtree(results_dir)
 
@@ -331,17 +325,17 @@ def _teardown_test_folders():
     """Delete all test data folders."""
     yield None
     # Delete all folders in RESULTS_DIR that end with _test
-    if exists(RESULTS_DIR):
-        for folder in listdir(RESULTS_DIR):
+    if exists(Config.RESULTS_DIR):
+        for folder in listdir(Config.RESULTS_DIR):
             if folder.endswith("_test"):
-                rmtree(join(RESULTS_DIR, folder))
+                rmtree(join(Config.RESULTS_DIR, folder))
 
 
 @pytest.fixture(scope="module")
 def _delete_ghsl_tifs():
     """Delete GHSL tifs."""
     yield
-    for filepath in glob(join(TEST_DATA_PATH, "GHS_POP*.tif")):
+    for filepath in glob(join(Config.TEST_DATA_PATH, "GHS_POP*.tif")):
         remove(filepath)
 
 
@@ -350,7 +344,7 @@ def _delete_ghsl_tifs():
 # ***********************
 
 
-@pytest.fixture(scope="function", autouse=HIDE_PLOTS)
+@pytest.fixture(scope="function", autouse=Config.HIDE_PLOTS)
 def _patch_plt_show(monkeypatch):
     """Patch plt.show() and plt.Figure.show() to prevent plots from showing during
     tests."""
