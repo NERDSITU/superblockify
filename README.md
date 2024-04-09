@@ -27,7 +27,8 @@ This installs the package and its dependencies,
 ready for use when activating the environment.
 Learn more about `superblockify` by reading
 the [documentation](https://NERDSITU.github.io/superblockify/)
-or the [minimal working example](scripts/mwe.py).
+or
+the [minimal working example](https://github.com/NERDSITU/superblockify/blob/main/scripts/examples/mwe.py).
 
 ## Development Setup
 
@@ -52,8 +53,10 @@ pip install --no-build-isolation --no-deps -e .
 
 ## Usage
 
-For a quick start there are example scripts in the [`examples/`](scripts/examples/)
-folder and a [minimal working example](scripts/mwe.py).
+For a quick start there are example scripts in
+the [`examples/`](https://github.com/NERDSITU/superblockify/blob/main/scripts/examples/)
+folder and
+a [minimal working example](https://github.com/NERDSITU/superblockify/blob/main/scripts/examples/mwe.py).
 
 ## Logging
 

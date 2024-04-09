@@ -10,7 +10,7 @@ The logger for this module is named ``superblockify``.
 
 import logging.config
 from os import getcwd
-from os.path import join, dirname
+from os.path import join, dirname, exists
 
 from ruamel.yaml import YAML
 
@@ -151,6 +151,23 @@ class Config:  # pylint: disable=too-few-public-methods
         ]
         PLACES_100_CITIES = places["place_lists"]["100_cities_boeing"]["cities"]
         PLACES_GERMANY = places["place_lists"]["germany_by_pop"]["cities"]
+    # see if the file is available
+    if exists(PLACES_FILE):
+        with open(PLACES_FILE, "r", encoding="utf-8") as file:
+            yaml = YAML(typ="safe")
+            places = yaml.load(file)
+            PLACES_GENERAL = [
+                (name, data["query"])
+                for name, data in places["place_lists"]["test_general"][
+                    "cities"
+                ].items()
+            ]
+            PLACES_SMALL = [
+                (name, data["query"])
+                for name, data in places["place_lists"]["test_small"]["cities"].items()
+            ]
+            PLACES_100_CITIES = places["place_lists"]["100_cities_boeing"]["cities"]
+            PLACES_GERMANY = places["place_lists"]["germany_by_pop"]["cities"]
 
     # Plot format
     PLOT_SUFFIX = "pdf"

@@ -2,8 +2,6 @@
 
 from superblockify import ResidentialPartitioner
 
-# If you have the whole GHS POP raster, set the path like so:
-# >>> superblockify.config.Config.FULL_RASTER = ...
 
 if __name__ == "__main__":
     part = ResidentialPartitioner(
@@ -17,10 +15,9 @@ if __name__ == "__main__":
     # For large places sufficient memory is required
 
     # Save the preprocessed graph to disk:
-    # part.save(save_graph_copy=True)
-
-    # If loading all previous steps are not needed:
-    # part = sb.ResidentialPartitioner.load("Milan_mwe")
+    # >>> part.save(save_graph_copy=True)
+    # If loading a previously saved graph, all previous steps are not needed:
+    # >>> part = ResidentialPartitioner.load("Salerno_mwe")
 
     part.run(
         calculate_metrics=True,
@@ -31,3 +28,12 @@ if __name__ == "__main__":
     # Save the partitioner to disk, with all attributes, without an extra copy of the
     # graph. The original graph has been cached in the data/graphs folder.
     part.save()
+
+# or
+# >>> import superblockify as sb
+# >>> part = sb.ResidentialPartitioner(...)
+# >>> part.run(...)
+# >>> sb.save_to_gpkg(part)
+
+# If you have the whole GHS POP raster, set the path after importing like so:
+# >>> sb.config.Config.FULL_RASTER = ...
