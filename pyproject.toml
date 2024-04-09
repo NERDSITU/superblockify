@@ -39,6 +39,8 @@ dependencies = [
     "ruamel.yaml",
     "pyarrow",
     "seaborn",
+    "psutil",
+    "typing-extensions",
 ]
 
 [project.urls]

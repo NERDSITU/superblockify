@@ -4,7 +4,7 @@ channels:
   - conda
   - defaults
 dependencies:
-# Dependencies
+  # Dependencies
   - osmnx
   - geopandas
   - rasterio
@@ -16,6 +16,8 @@ dependencies:
   - ruamel.yaml
   - pyarrow
   - seaborn
+  - psutil
+  - typing-extensions
   - rasterstats  # only used in one reference notebook
   - momepy  # only used in one reference notebook
   # Code Quality
