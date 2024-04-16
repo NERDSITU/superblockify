@@ -12,6 +12,7 @@ __pycache__/
 docs/api/*
 !docs/api/index.rst
 build/
+dist/
 
 # OSMnx cache
 **/cache/

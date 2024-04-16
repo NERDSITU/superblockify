@@ -1,11 +1,18 @@
 # Getting Started
 
-Create a new environment with `conda` or `mamba` and install the package from the
-`conda-forge` channel.
+## Installation
+
+We recommend using `micromamba` to create a virtual
+environment and installing the package in editable mode.
+Alternatively, one can use `conda` or `mamba` to create the environment
+(they can be used interchangeably).
+After cloning the repository, navigate to the root folder and
+create the environment with the wished python version and the development dependencies.
 
 ```bash
-conda create -n sb_env -c conda-forge superblockify
-conda activate sb_env
+micromamba create -n sb_env -c conda-forge python=3.12 osmnx
+micromamba activate sb_env
+pip install superblockify
 ```
 
 This installs the package and its dependencies,
@@ -46,11 +53,7 @@ see the next Reference section. Otherwise, you can also check out the
 
 ## Development Setup
 
-For development, we recommend using `micromamba` to create a virtual
-environment and installing the package in editable mode.
-Alternatively, one can use `conda` or `mamba` to create the environment
-(they can be used interchangeably).
-After cloning the repository, navigate to the root folder and
+For development, clone the repository, navigate to the root folder and
 create the environment with the wished python version and the development dependencies.
 
 ```bash

@@ -138,19 +138,6 @@ class Config:  # pylint: disable=too-few-public-methods
 
     # Places
     PLACES_FILE = join(dirname(__file__), "..", "cities.yml")
-    with open(PLACES_FILE, "r", encoding="utf-8") as file:
-        yaml = YAML(typ="safe")
-        places = yaml.load(file)
-        PLACES_GENERAL = [
-            (name, data["query"])
-            for name, data in places["place_lists"]["test_general"]["cities"].items()
-        ]
-        PLACES_SMALL = [
-            (name, data["query"])
-            for name, data in places["place_lists"]["test_small"]["cities"].items()
-        ]
-        PLACES_100_CITIES = places["place_lists"]["100_cities_boeing"]["cities"]
-        PLACES_GERMANY = places["place_lists"]["germany_by_pop"]["cities"]
     # see if the file is available
     if exists(PLACES_FILE):
         with open(PLACES_FILE, "r", encoding="utf-8") as file:

@@ -6,12 +6,12 @@ build-backend = "setuptools.build_meta"
 name = "superblockify"
 authors = [{ name = "Carlson Büth", email = "carlson@cbueth.de" }]
 maintainers = [{ name = "superblockify contributors" }]
-license = { text = "APGL-3.0" }
+license = { text = "APGL-3.0-or-later" }
 readme = "README.md"
 description = "Automated Generation, Visualization, and Analysis of potential Superblocks in Cities"
 keywords = ["Low Traffic Neighborhoods", "GIS", "Networks", "OpenStreetMap", "Urban Planning", "Urban Mobility", "Urban Data"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
@@ -19,6 +19,8 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Natural Language :: English",
     "Topic :: Scientific/Engineering :: GIS",
     "Topic :: Scientific/Engineering :: Information Analysis",
