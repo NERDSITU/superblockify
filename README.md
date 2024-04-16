@@ -1,4 +1,4 @@
-# superblockify
+![superblockify_logo.png](superblockify_logo.png "superblockify")
 
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://NERDSITU.github.io/superblockify/)
 [![PyPI Version](https://badge.fury.io/py/superblockify.svg)](https://pypi.org/project/superblockify/)
@@ -12,7 +12,7 @@
 [![Test](https://github.com/NERDSITU/superblockify/actions/workflows/test.yml/badge.svg)](https://github.com/NERDSITU/superblockify/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/NERDSITU/superblockify/branch/main/graph/badge.svg?token=AS72IFT2Q4)](https://codecov.io/gh/NERDSITU/superblockify)
 
-Source code for blockifying existing street networks.
+Source code to `superblockify` an urban street network
 
 ---
 
