@@ -1,5 +1,6 @@
 """Tests for the utils module."""
 
+from logging import DEBUG
 from os import remove
 from os.path import exists, join
 
@@ -8,7 +9,7 @@ from networkx import Graph, MultiDiGraph
 from numpy import array, array_equal, int32, int64, inf, nan, isnan
 from shapely import MultiPolygon, Polygon
 
-from superblockify.config import Config
+from superblockify.config import Config, set_log_level
 from superblockify.utils import (
     load_graph_from_place,
     has_pairwise_overlap,
@@ -364,3 +365,36 @@ def test_compare_components_and_partitions(list1, list2, expected):
         assert compare_components_and_partitions(list1, list1) is True
     else:
         assert compare_components_and_partitions(list1, list2) == expected
+
+
+@pytest.mark.parametrize(
+    "level",
+    [
+        10,
+        20,
+        30,
+        40,
+        50,
+        "DEBUG",
+        "INFO",
+        "WARNING",
+        "ERROR",
+        DEBUG,
+    ],
+)
+def test_set_level(level):
+    """Test `set_log_level`."""
+    set_log_level(level)
+
+
+@pytest.mark.parametrize("level", ["DEBUG1", ""])
+def test_set_level_value_error(level):
+    """Test `set_log_level` exception handling."""
+    with pytest.raises(ValueError):
+        set_log_level(level)
+
+
+def test_set_level_type_error():
+    """Test `set_log_level` exception handling."""
+    with pytest.raises(TypeError):
+        set_log_level(None)  # type: ignore

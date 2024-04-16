@@ -22,6 +22,25 @@ numba_logger.setLevel(logging.WARNING)
 logger = logging.getLogger("superblockify")
 
 
+def set_log_level(level: int | str) -> None:
+    """Set the logging level for the superblockify logger.
+
+    Also sets the logging level for the first handler of the root logger.
+
+    Parameters
+    ----------
+    level : int | str
+        The logging level. See the :mod:`logging` module for more information.
+
+    Raises
+    ------
+    ValueError
+        If the level is not a valid logging level.
+    """
+    logger.setLevel(level)
+    logging.getLogger().handlers[0].setLevel(level)
+
+
 class Config:  # pylint: disable=too-few-public-methods
     """Configuration class for superblockify.
 
