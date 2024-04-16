@@ -9,7 +9,6 @@ dependencies:
   - geopandas
   - rasterio
   - shapely
-  - pyrosm
   - numba
   - tqdm
   - contextily

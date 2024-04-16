@@ -64,14 +64,6 @@ the [`examples/`](https://github.com/NERDSITU/superblockify/blob/main/scripts/ex
 folder and
 a [minimal working example](https://github.com/NERDSITU/superblockify/blob/main/scripts/examples/mwe.py).
 
-## Logging
-
-The logging is done using the `logging` module. The logging level can be set in the
-`setup.cfg` file. The logging level can be set to `DEBUG`, `INFO`, `WARNING`, `ERROR`
-or `CRITICAL`. It defaults to `INFO` and a rotating file handler is set up to log
-to `results/logs/superblockify.log`. The log file is rotated every megabyte, and the
-last three log files are kept.
-
 ## Testing
 
 The tests are specified using the `pytest` signature, see [`tests/`](tests/) folder, and
