@@ -71,7 +71,7 @@ readme = { file = ["README.md", "LICENSE"] }
 version = { attr = "superblockify._version.__version__" }
 
 [tool.setuptools.package-data]
-superblockify = ["*.cfg"]
+superblockify = ["*.cfg", "*.yml"]
 
 # --------------------------------------------------------------------------------------
 # Linting

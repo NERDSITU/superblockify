@@ -104,7 +104,7 @@ class Config:  # pylint: disable=too-few-public-methods
         A dictionary of the form ``{name: place}`` where ``name`` is the name of the
         place, and ``place`` is a dictionary of various attributes. One of them is the
         ``query`` attribute which is the place string or a list of place strings.
-        Find the extensive list in the ``../cities.yml`` file.
+        Find the extensive list in the ``./cities.yml`` file.
     PLACES_GERMANY
         List of cities in Germany by population. All cities with more than 100,000
         inhabitants are included. Data from the German Federal Statistical Office.
@@ -156,7 +156,7 @@ class Config:  # pylint: disable=too-few-public-methods
     HIDE_PLOTS = True
 
     # Places
-    PLACES_FILE = join(dirname(__file__), "..", "cities.yml")
+    PLACES_FILE = join(dirname(__file__), "cities.yml")
     # see if the file is available
     if exists(PLACES_FILE):
         with open(PLACES_FILE, "r", encoding="utf-8") as file:
