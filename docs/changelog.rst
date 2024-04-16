@@ -2,10 +2,17 @@
 Changelog
 *********
 
-Version 1.0.0 (2024-02-
+Version 1.0.0 (2024-XX-XX)
 **************************
 
 * ✨ First major release ✨
+* 📦 Prepared for osmnx 2.0.0 and shipped `cities.yml` in pypi package.
+* ⚙️ Added function to set log level and added python versions 3.11 and 3.12.
+* 🔄 Merged several pull requests improving settings, README, dependencies, and project structure.
+* 🐛 Fixed coverage for special case, tests, and code style issues.
+* 📝 Updated README with CI/CD badges, improved documentation, and unified capitalization.
+* 🗒️ Updated Changelog, Version, and Website Copyright.
+* 📝 Licensed work under GNU AGPLv3.
 * 📊 IO operations enhanced with graph reduction.
 * 🗒️ Logging improvements: silenced numba compilation, reprojected debug messages.
 * ⚙️ Parallelization updates: removed `num_workers` and `chunk_size`.

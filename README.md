@@ -18,10 +18,13 @@ Source code for blockifying existing street networks.
 
 ## Installation
 
-We recommend using `micromamba` to create a virtual
-environment and installing the package in editable mode.
-Alternatively, one can use `conda` or `mamba` to create the environment
-(they can be used interchangeably).
+We recommend
+using [`micromamba`](https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html)
+to create a virtual environment and installing the package in editable mode.
+Alternatively, one can
+use [`conda`](https://docs.conda.io/projects/conda/en/latest/index.html)
+or [`mamba`](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html)
+to create the environment (they can be used interchangeably).
 After cloning the repository, navigate to the root folder and
 create the environment with the wished python version and the development dependencies.
 
@@ -35,6 +38,7 @@ This installs the package and its dependencies,
 ready for use when activating the environment.
 Learn more about `superblockify` by reading
 the [documentation](https://NERDSITU.github.io/superblockify/)
+with the [usage section](https://nerdsitu.github.io/superblockify/usage/)
 or
 the [minimal working example](https://github.com/NERDSITU/superblockify/blob/main/scripts/examples/mwe.py).
 
