@@ -1,4 +1,5 @@
 """Spatial graph order measures for the superblockify package."""
+
 from numpy import log
 from osmnx import orientation_entropy
 from osmnx.projection import is_projected, project_graph
@@ -6,7 +7,7 @@ from osmnx.stats import basic_stats
 from scipy.stats import entropy
 
 from .population.approximation import get_population_area
-from .config import NUM_BINS
+from .config import Config
 
 
 def basic_graph_stats(graph, area=None):
@@ -25,7 +26,7 @@ def basic_graph_stats(graph, area=None):
         measures.
     """
     stats = basic_stats(graph, area=area)
-    stats["street_orientation_order"] = street_orientation_order(graph, NUM_BINS)
+    stats["street_orientation_order"] = street_orientation_order(graph, Config.NUM_BINS)
     return stats
 
 

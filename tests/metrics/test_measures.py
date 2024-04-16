@@ -1,4 +1,5 @@
 """Tests for the measure calculation module."""
+
 from dataclasses import dataclass
 from math import isclose
 from random import Random
@@ -30,7 +31,7 @@ from superblockify.metrics.measures import (
     __calculate_high_bc_anisotropy,
     add_relative_changes,
 )
-from superblockify.utils import __edges_to_1d, percentual_increase
+from superblockify.utils import __edges_to_1d, percentual_increase, logger
 
 
 @pytest.mark.parametrize(
@@ -238,9 +239,11 @@ def test_calculate_coverage(weights_in, weights_out, expected):
         # otherwise assert that the expected value is returned
         assert isclose(
             calculate_coverage(Part(graph, sparsified), "weight"),
-            expected
-            if expected is not None
-            else sum(weights_in) / sum(weights_in + weights_out),
+            (
+                expected
+                if expected is not None
+                else sum(weights_in) / sum(weights_in + weights_out)
+            ),
         )
 
 
@@ -287,6 +290,25 @@ def test_betweenness_centrality_options(
         assert all(
             vals >= 0 for vals in get_edge_attributes(part.graph, edge_label).values()
         )
+
+
+def _downcast_(sparse_graph):
+    # Try to downcast indices to int32
+    if sparse_graph.indices.dtype != int32:
+        logger.debug("Downcasting indices to int32.")
+        downcasted_indices = sparse_graph.indices.astype(int32)
+        if array_equal(downcasted_indices, sparse_graph.indices):
+            sparse_graph.indices = downcasted_indices
+        else:
+            logger.warning("Downcasting indices to int32 failed.")
+    # Try to downcast indptr to int32
+    if sparse_graph.indptr.dtype != int32:
+        logger.debug("Downcasting indptr to int32.")
+        downcasted_indptr = sparse_graph.indptr.astype(int32)
+        if array_equal(downcasted_indptr, sparse_graph.indptr):
+            sparse_graph.indptr = downcasted_indptr
+        else:
+            logger.warning("Downcasting indptr to int32 failed.")
 
 
 @pytest.mark.parametrize(
@@ -417,6 +439,7 @@ def test_calculate_betweenness_scales(graph, expected):
     """Test calculation of edge betweenness with scaled results of toy graphs."""
     set_edge_attributes(graph, 1, "weight")
     sparse_graph = to_scipy_sparse_array(graph, nodelist=sorted(graph))
+    _downcast_(sparse_graph)
     dist, pred = dijkstra(sparse_graph, return_predecessors=True, directed=True)
     betweenness_centrality(graph, list(sorted(graph)), dist, pred, weight="weight")
     assert array_equal(
@@ -539,6 +562,7 @@ def test_calculate_betweenness_scales(graph, expected):
 def test__calculate_betweenness_unscaled(graph, expected):
     """Test calculation of betweenness centrality graph to dict, unscaled."""
     sparse_graph = to_scipy_sparse_array(graph, nodelist=sorted(graph))
+    _downcast_(sparse_graph)
     padding = len(str(len(graph)))
     edges = __edges_to_1d(
         array([u for u, _ in graph.edges(keys=False)], dtype=int32),
@@ -705,7 +729,7 @@ def test___calculate_high_bc_anisotropy(
     anisotropy = __calculate_high_bc_anisotropy(coord_high_bc)
     assert 1.0 <= anisotropy
     # check invariance to x and y coordinate swap
-    assert __calculate_high_bc_anisotropy(coord_high_bc[:, ::-1]) == anisotropy
+    assert isclose(__calculate_high_bc_anisotropy(coord_high_bc[:, ::-1]), anisotropy)
 
 
 @pytest.mark.parametrize(

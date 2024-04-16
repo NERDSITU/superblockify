@@ -1,4 +1,5 @@
 """Tests for the metric class."""
+
 import matplotlib.pyplot as plt
 import pytest
 

@@ -1,0 +1,3187 @@
+# File for storing cities/places and their relevant information
+#
+# Used to contain lists of cities that can be used in the analysis,
+# as well as test cities.
+#
+# To obtain the query string or relation id for a place, search at Nominatim:
+# https://nominatim.openstreetmap.org/ui/search.html
+#
+# Format:
+# place_lists:
+#   <list name>:
+#     description: <list description>
+#     cities:
+#       <city name>:
+#         query: <full city name or relation id to query OSM - str or list>
+#         country: <ISO 3166-1 alpha-2 code / state code ISO 3166-2:US/CA>
+#         region: <region handle>
+#         <...>: ...
+#       <city name>: ...
+#   <list name>: ...
+#
+# regions:
+#   <region handle>: <region name>
+#   <region handle>: ...
+
+regions:
+  A&O: Asia & Oceania
+  EU: Europe
+  LatAm: Latin America
+  MEA: Middle East & Africa
+  NAM: North America
+
+place_lists:
+  test_small:
+    description: Small test cities
+    cities:
+      Adliswil:
+        query: Adliswil, Bezirk Horgen, Zürich, Switzerland
+        country: CH
+        region: EU
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Adliswil,+Bezirk+Horgen,+Zürich,+Switzerland
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1682077
+        osm_id:
+        - 1682077
+        pop_GHSL2023: 13676.786494255062
+      MissionTown:
+        query: 团城山街道, Xialu, Hubei, China
+        country: CN
+        region: A&O
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=团城山街道,+Xialu,+Hubei,+China
+        OSM relation:
+        - https://www.openstreetmap.org/relation/14163964
+        osm_id:
+        - 14163964
+        pop_GHSL2023: 101881.07181787488
+      Scheveningen:
+        query: Scheveningen, The Hague, Netherlands
+        country: NL
+        region: EU
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Scheveningen,+The+Hague,+Netherlands
+        OSM relation:
+        - https://www.openstreetmap.org/relation/13751467
+        osm_id:
+        - 13751467
+        pop_GHSL2023: 77554.43975925444
+  test_general:
+    description: Larger test cities
+    cities:
+      Barcelona:
+        query: Barcelona, Catalonia, Spain
+        country: ES
+        region: EU
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Barcelona,+Catalonia,+Spain
+        OSM relation:
+        - https://www.openstreetmap.org/relation/347950
+        osm_id:
+        - 347950
+        pop_GHSL2023: 1757832.6379999514
+      Brooklyn:
+        query: Brooklyn, New York, United States
+        country: US
+        region: NAM
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Brooklyn,+New+York,+United+States
+        OSM relation:
+        - https://www.openstreetmap.org/relation/9691750
+        osm_id:
+        - 9691750
+        pop_GHSL2023: 2443446.936081211
+      Copenhagen:
+        query:
+        - Københavns Kommune, Denmark
+        - Frederiksberg Kommune, Denmark
+        country: DK
+        region: EU
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Københavns+Kommune,+Denmark
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Frederiksberg+Kommune,+Denmark
+        OSM relation:
+        - https://www.openstreetmap.org/relation/2192363
+        - https://www.openstreetmap.org/relation/2186660
+        osm_id:
+        - 2192363
+        - 2186660
+        pop_GHSL2023: 764718.588683754
+      Resistencia:
+        query: Resistencia, Chaco, Argentina
+        country: AR
+        region: LatAm
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Resistencia,+Chaco,+Argentina
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1572779
+        osm_id:
+        - 1572779
+        pop_GHSL2023: 328740.3926395578
+      Liechtenstein:
+        query: Liechtenstein, Europe
+        country: LI
+        region: EU
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Liechtenstein,+Europe
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1155955
+        osm_id:
+        - 1155955
+        pop_GHSL2023: 37289.27578861111
+  100_cities_boeing:
+    description: 100 representative cities from Boeing (2019)
+    cities:
+      Bangkok:
+        query: TH-10, Thailand
+        country: TH
+        region: A&O
+        orient_order: 0.105
+        circuity_avg: 1.059
+        median_segment_length: 64.6
+        k_avg: 2.385
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=TH-10,+Thailand
+        Η o: 3.465
+        Η w: 3.452
+        P de: 0.36
+        P 4w: 0.108
+        OSM relation:
+        - https://www.openstreetmap.org/relation/92277
+        osm_id:
+        - 92277
+        pop_GHSL2023: 12342851.661893278
+      Beijing:
+        query: CN-BJ, China
+        country: CN
+        region: A&O
+        orient_order: 0.335
+        circuity_avg: 1.053
+        median_segment_length: 177.5
+        k_avg: 2.985
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=CN-BJ,+China
+        Η o: 3.177
+        Η w: 3.206
+        P de: 0.135
+        P 4w: 0.241
+        OSM relation:
+        - https://www.openstreetmap.org/relation/912940
+        osm_id:
+        - 912940
+        pop_GHSL2023: 24149290.576004617
+      Hanoi:
+        query: Hà Nội, Vietnam
+        country: VN
+        region: A&O
+        orient_order: 0.01
+        circuity_avg: 1.065
+        median_segment_length: 64.4
+        k_avg: 2.61
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Hà+Nội,+Vietnam
+        Η o: 3.573
+        Η w: 3.572
+        P de: 0.246
+        P 4w: 0.102
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1903516
+        osm_id:
+        - 1903516
+        pop_GHSL2023: 7412688.725904138
+      Hong Kong:
+        query: Hong Kong Island, Hong Kong, China
+        country: HK
+        region: A&O
+        orient_order: 0.012
+        circuity_avg: 1.137
+        median_segment_length: 61.0
+        k_avg: 2.932
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Hong+Kong+Island,+Hong+Kong,+China
+        Η o: 3.571
+        Η w: 3.563
+        P de: 0.114
+        P 4w: 0.174
+        OSM relation:
+        - https://www.openstreetmap.org/relation/10264792
+        osm_id:
+        - 10264792
+        pop_GHSL2023: 1220949.8235658924
+      Jakarta:
+        query: Special Capital Region of Jakarta, Java, Indonesia
+        country: ID
+        region: A&O
+        orient_order: 0.167
+        circuity_avg: 1.065
+        median_segment_length: 52.8
+        k_avg: 2.741
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Special+Capital+Region+of+Jakarta,+Java,+Indonesia
+        Η o: 3.391
+        Η w: 3.347
+        P de: 0.175
+        P 4w: 0.096
+        OSM relation:
+        - https://www.openstreetmap.org/relation/6362934
+        osm_id:
+        - 6362934
+        pop_GHSL2023: 11342187.842398439
+      Kabul:
+        query: Kabul District, Kabul Province, Afghanistan
+        country: AF
+        region: A&O
+        orient_order: 0.076
+        circuity_avg: 1.062
+        median_segment_length: 79.3
+        k_avg: 2.673
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Kabul+District,+Kabul+Province,+Afghanistan
+        Η o: 3.499
+        Η w: 3.51
+        P de: 0.226
+        P 4w: 0.13
+        OSM relation:
+        - https://www.openstreetmap.org/relation/6616233
+        osm_id:
+        - 6616233
+        pop_GHSL2023: 5656560.564128555
+      Karachi:
+        query: Karachi Division, Sindh, Pakistan
+        country: PK
+        region: A&O
+        orient_order: 0.088
+        circuity_avg: 1.032
+        median_segment_length: 71.3
+        k_avg: 3.027
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Karachi+Division,+Sindh,+Pakistan
+        Η o: 3.485
+        Η w: 3.493
+        P de: 0.095
+        P 4w: 0.216
+        OSM relation:
+        - https://www.openstreetmap.org/relation/6080948
+        osm_id:
+        - 6080948
+        pop_GHSL2023: 21243358.03043522
+      Kathmandu:
+        query: Kathmandu, Bagmati Pradesh, Nepal
+        country: NP
+        region: A&O
+        orient_order: 0.054
+        circuity_avg: 1.071
+        median_segment_length: 63.3
+        k_avg: 2.595
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Kathmandu,+Bagmati+Pradesh,+Nepal
+        Η o: 3.523
+        Η w: 3.5
+        P de: 0.234
+        P 4w: 0.089
+        OSM relation:
+        - https://www.openstreetmap.org/relation/4583247
+        osm_id:
+        - 4583247
+        pop_GHSL2023: 3008734.5134922313
+      Kyoto:
+        query: Kyoto, Kyoto Prefecture, Japan
+        country: JP
+        region: A&O
+        orient_order: 0.357
+        circuity_avg: 1.09
+        median_segment_length: 49.6
+        k_avg: 2.887
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Kyoto,+Kyoto+Prefecture,+Japan
+        Η o: 3.148
+        Η w: 3.229
+        P de: 0.134
+        P 4w: 0.157
+        OSM relation:
+        - https://www.openstreetmap.org/relation/357794
+        osm_id:
+        - 357794
+        pop_GHSL2023: 1270597.194326272
+      Manila:
+        # See https://www.wikidata.org/wiki/Q1461
+        query: Metro Manila, Philippines
+        country: PH
+        region: A&O
+        orient_order: 0.062
+        circuity_avg: 1.023
+        median_segment_length: 63.5
+        k_avg: 3.141
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Metro+Manila,+Philippines
+        Η o: 3.514
+        Η w: 3.484
+        P de: 0.095
+        P 4w: 0.347
+        OSM relation:
+        - https://www.openstreetmap.org/relation/147488
+        osm_id:
+        - 147488
+        pop_GHSL2023: 13751861.781497028
+      Melbourne:
+        query: Greater Melbourne, Victoria, Australia
+        country: AU
+        region: A&O
+        orient_order: 0.34
+        circuity_avg: 1.037
+        median_segment_length: 51.9
+        k_avg: 3.16
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Greater+Melbourne,+Victoria,+Australia
+        Η o: 3.172
+        Η w: 3.203
+        P de: 0.06
+        P 4w: 0.332
+        OSM relation:
+        - https://www.openstreetmap.org/relation/4246124
+        osm_id:
+        - 4246124
+        pop_GHSL2023: 5378918.1597416485
+      Mumbai:
+        query: Mumbai, Mumbai Suburban, Maharashtra, India
+        country: IN
+        region: A&O
+        orient_order: 0.075
+        circuity_avg: 1.081
+        median_segment_length: 68.9
+        k_avg: 2.705
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Mumbai,+Mumbai+Suburban,+Maharashtra,+India
+        Η o: 3.499
+        Η w: 3.476
+        P de: 0.211
+        P 4w: 0.136
+        OSM relation:
+        - https://www.openstreetmap.org/relation/7888990
+        osm_id:
+        - 7888990
+        pop_GHSL2023: 14523039.176669551
+      New Delhi:
+        query: New Delhi, Delhi, India
+        country: IN
+        region: A&O
+        orient_order: 0.062
+        circuity_avg: 1.083
+        median_segment_length: 62.5
+        k_avg: 2.696
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=New+Delhi,+Delhi,+India
+        Η o: 3.515
+        Η w: 3.491
+        P de: 0.197
+        P 4w: 0.119
+        OSM relation:
+        - https://www.openstreetmap.org/relation/2763541
+        osm_id:
+        - 2763541
+        pop_GHSL2023: 1203942.1327352521
+      Osaka:
+        query: Osaka, Osaka Prefecture, Japan
+        country: JP
+        region: A&O
+        orient_order: 0.243
+        circuity_avg: 1.025
+        median_segment_length: 51.0
+        k_avg: 3.155
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Osaka,+Osaka+Prefecture,+Japan
+        Η o: 3.298
+        Η w: 3.306
+        P de: 0.069
+        P 4w: 0.292
+        OSM relation:
+        - https://www.openstreetmap.org/relation/358674
+        osm_id:
+        - 358674
+        pop_GHSL2023: 2388944.7906184644
+      Phnom Penh:
+        query: KH-12, Cambodia
+        country: KH
+        region: A&O
+        orient_order: 0.324
+        circuity_avg: 1.04
+        median_segment_length: 81.6
+        k_avg: 2.784
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=KH-12,+Cambodia
+        Η o: 3.193
+        Η w: 3.235
+        P de: 0.205
+        P 4w: 0.188
+        OSM relation:
+        - https://www.openstreetmap.org/relation/2199033
+        osm_id:
+        - 2199033
+        pop_GHSL2023: 2369492.133270343
+      Pyongyang:
+        query: P'yŏngyang, North Korea
+        country: KP
+        region: A&O
+        orient_order: 0.024
+        circuity_avg: 1.097
+        median_segment_length: 132.4
+        k_avg: 2.524
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=P'yŏngyang,+North+Korea
+        Η o: 3.557
+        Η w: 3.568
+        P de: 0.294
+        P 4w: 0.12
+        OSM relation:
+        - https://www.openstreetmap.org/relation/356443
+        osm_id:
+        - 356443
+        pop_GHSL2023: 3480278.592318181
+      Seoul:
+        query: Seoul, South Korea
+        country: KR
+        region: A&O
+        orient_order: 0.009
+        circuity_avg: 1.048
+        median_segment_length: 53.5
+        k_avg: 3.011
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Seoul,+South+Korea
+        Η o: 3.573
+        Η w: 3.573
+        P de: 0.101
+        P 4w: 0.205
+        OSM relation:
+        - https://www.openstreetmap.org/relation/2297418
+        osm_id:
+        - 2297418
+        pop_GHSL2023: 9645141.225111853
+      Shanghai:
+        query: Shanghai, China
+        country: CN
+        region: A&O
+        orient_order: 0.121
+        circuity_avg: 1.04
+        median_segment_length: 233.0
+        k_avg: 3.017
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Shanghai,+China
+        Η o: 3.447
+        Η w: 3.433
+        P de: 0.156
+        P 4w: 0.317
+        OSM relation:
+        - https://www.openstreetmap.org/relation/913067
+        osm_id:
+        - 913067
+        pop_GHSL2023: 33924003.60635262
+      Singapore:
+        query: Singapore
+        country: SG
+        region: A&O
+        orient_order: 0.005
+        circuity_avg: 1.077
+        median_segment_length: 64.7
+        k_avg: 2.994
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Singapore
+        Η o: 3.578
+        Η w: 3.57
+        P de: 0.11
+        P 4w: 0.215
+        OSM relation:
+        - https://www.openstreetmap.org/relation/536780
+        osm_id:
+        - 536780
+        pop_GHSL2023: 5959450.356524699
+      Sydney:
+        query: Sydney, Council of the City of Sydney, New South Wales, Australia
+        country: AU
+        region: A&O
+        orient_order: 0.092
+        circuity_avg: 1.073
+        median_segment_length: 93.1
+        k_avg: 2.674
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Sydney,+Council+of+the+City+of+Sydney,+New+South+Wales,+Australia
+        Η o: 3.48
+        Η w: 3.431
+        P de: 0.206
+        P 4w: 0.087
+        OSM relation:
+        - https://www.openstreetmap.org/relation/5750005
+        osm_id:
+        - 5750005
+        pop_GHSL2023: 5100197.878210587
+      Taipei:
+        query: Taipei, Taiwan
+        country: TW
+        region: A&O
+        orient_order: 0.158
+        circuity_avg: 1.068
+        median_segment_length: 73.5
+        k_avg: 3.096
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Taipei,+Taiwan
+        Η o: 3.402
+        Η w: 3.428
+        P de: 0.11
+        P 4w: 0.305
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1293250
+        osm_id:
+        - 1293250
+        pop_GHSL2023: 2542878.0502161
+      Tokyo:
+        query: JP-13, Japan
+        country: JP
+        region: A&O
+        orient_order: 0.05
+        circuity_avg: 1.046
+        median_segment_length: 49.6
+        k_avg: 2.95
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=JP-13,+Japan
+        Η o: 3.528
+        Η w: 3.529
+        P de: 0.119
+        P 4w: 0.186
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1543125
+        osm_id:
+        - 1543125
+        pop_GHSL2023: 13453095.368577162
+      Ulaanbaatar:
+        query: Ulaanbaatar, Mongolia
+        country: MN
+        region: A&O
+        orient_order: 0.058
+        circuity_avg: 1.065
+        median_segment_length: 88.7
+        k_avg: 2.486
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Ulaanbaatar,+Mongolia
+        Η o: 3.519
+        Η w: 3.463
+        P de: 0.283
+        P 4w: 0.061
+        OSM relation:
+        - https://www.openstreetmap.org/relation/270090
+        osm_id:
+        - 270090
+        pop_GHSL2023: 1876392.4283411014
+      Amsterdam:
+        query: Amsterdam, North Holland, Netherlands
+        country: NL
+        region: EU
+        orient_order: 0.071
+        circuity_avg: 1.08
+        median_segment_length: 65.8
+        k_avg: 2.897
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Amsterdam,+North+Holland,+Netherlands
+        Η o: 3.504
+        Η w: 3.488
+        P de: 0.146
+        P 4w: 0.205
+        OSM relation:
+        - https://www.openstreetmap.org/relation/271110
+        osm_id:
+        - 271110
+        pop_GHSL2023: 818407.499844633
+      Athens:
+        query: Municipality of Athens, Regional Unit of Central Athens, Attica, Greece
+        country: GR
+        region: EU
+        orient_order: 0.041
+        circuity_avg: 1.019
+        median_segment_length: 55.5
+        k_avg: 3.245
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Municipality+of+Athens,+Regional+Unit+of+Central+Athens,+Attica,+Greece
+        Η o: 3.538
+        Η w: 3.532
+        P de: 0.056
+        P 4w: 0.363
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1370736
+        osm_id:
+        - 1370736
+        pop_GHSL2023: 613633.1565856932
+      Barcelona:
+        query: Barcelonès, Barcelona, Catalonia, Spain
+        country: ES
+        region: EU
+        orient_order: 0.108
+        circuity_avg: 1.052
+        median_segment_length: 78.1
+        k_avg: 3.135
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Barcelonès,+Barcelona,+Catalonia,+Spain
+        Η o: 3.462
+        Η w: 3.46
+        P de: 0.078
+        P 4w: 0.303
+        OSM relation:
+        - https://www.openstreetmap.org/relation/2417889
+        osm_id:
+        - 2417889
+        pop_GHSL2023: 2463690.163737535
+      Berlin:
+        query: Berlin, Germany
+        country: DE
+        region: EU
+        orient_order: 0.011
+        circuity_avg: 1.04
+        median_segment_length: 113.1
+        k_avg: 3.002
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Berlin,+Germany
+        Η o: 3.572
+        Η w: 3.57
+        P de: 0.118
+        P 4w: 0.259
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62422
+        osm_id:
+        - 62422
+        pop_GHSL2023: 3524738.8939121147
+      Budapest:
+        query: Budapest, Central Hungary, Hungary
+        country: HU
+        region: EU
+        orient_order: 0.05
+        circuity_avg: 1.032
+        median_segment_length: 93.0
+        k_avg: 3.037
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Budapest,+Central+Hungary,+Hungary
+        Η o: 3.528
+        Η w: 3.516
+        P de: 0.096
+        P 4w: 0.231
+        OSM relation:
+        - https://www.openstreetmap.org/relation/37244
+        osm_id:
+        - 37244
+        pop_GHSL2023: 1835722.523857839
+      Copenhagen:
+        query:
+        - Københavns Kommune, Denmark
+        - Frederiksberg Kommune, Denmark
+        country: DK
+        region: EU
+        orient_order: 0.029
+        circuity_avg: 1.048
+        median_segment_length: 78.0
+        k_avg: 2.881
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Københavns+Kommune,+Denmark
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Frederiksberg+Kommune,+Denmark
+        Η o: 3.552
+        Η w: 3.551
+        P de: 0.146
+        P 4w: 0.194
+        OSM relation:
+        - https://www.openstreetmap.org/relation/2192363
+        - https://www.openstreetmap.org/relation/2186660
+        osm_id:
+        - 2192363
+        - 2186660
+        pop_GHSL2023: 764718.588683754
+      Dublin:
+        query: Dublin, Dublin 1, Leinster, Ireland
+        country: IE
+        region: EU
+        orient_order: 0.024
+        circuity_avg: 1.061
+        median_segment_length: 71.5
+        k_avg: 2.492
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Dublin,+Dublin+1,+Leinster,+Ireland
+        Η o: 3.557
+        Η w: 3.541
+        P de: 0.279
+        P 4w: 0.068
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1109531
+        osm_id:
+        - 1109531
+        pop_GHSL2023: 554085.2711834605
+      Glasgow:
+        query: Glasgow City, Scotland, G2 1DY, United Kingdom
+        country: GB
+        region: EU
+        orient_order: 0.047
+        circuity_avg: 1.079
+        median_segment_length: 72.3
+        k_avg: 2.62
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Glasgow+City,+Scotland,+G2+1DY,+United+Kingdom
+        Η o: 3.531
+        Η w: 3.513
+        P de: 0.238
+        P 4w: 0.109
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1906767
+        osm_id:
+        - 1906767
+        pop_GHSL2023: 582972.040480375
+      Helsinki:
+        query: Helsinki, Helsinki sub-region, Uusimaa, Southern Finland, Mainland
+          Finland, Finland
+        country: FI
+        region: EU
+        orient_order: 0.006
+        circuity_avg: 1.063
+        median_segment_length: 42.0
+        k_avg: 2.348
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Helsinki,+Helsinki+sub-region,+Uusimaa,+Southern+Finland,+Mainland+Finland,+Finland
+        Η o: 3.577
+        Η w: 3.571
+        P de: 0.395
+        P 4w: 0.134
+        OSM relation:
+        - https://www.openstreetmap.org/relation/34914
+        osm_id:
+        - 34914
+        pop_GHSL2023: 640938.2250840327
+      Kiev:
+        query: Kyiv, Ukraine
+        country: UA
+        region: EU
+        orient_order: 0.014
+        circuity_avg: 1.053
+        median_segment_length: 125.1
+        k_avg: 2.813
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Kyiv,+Ukraine
+        Η o: 3.568
+        Η w: 3.554
+        P de: 0.164
+        P 4w: 0.16
+        OSM relation:
+        - https://www.openstreetmap.org/relation/421866
+        osm_id:
+        - 421866
+        pop_GHSL2023: 2552854.8664907534
+      Lisbon:
+        query: Lisbon, Portugal
+        country: PT
+        region: EU
+        orient_order: 0.023
+        circuity_avg: 1.068
+        median_segment_length: 60.8
+        k_avg: 2.923
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Lisbon,+Portugal
+        Η o: 3.558
+        Η w: 3.546
+        P de: 0.108
+        P 4w: 0.154
+        OSM relation:
+        - https://www.openstreetmap.org/relation/5400890
+        osm_id:
+        - 5400890
+        pop_GHSL2023: 564066.0386443137
+      London:
+        query: Greater London, England, United Kingdom
+        country: GB
+        region: EU
+        orient_order: 0.015
+        circuity_avg: 1.061
+        median_segment_length: 70.3
+        k_avg: 2.561
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Greater+London,+England,+United+Kingdom
+        Η o: 3.566
+        Η w: 3.564
+        P de: 0.251
+        P 4w: 0.07
+        OSM relation:
+        - https://www.openstreetmap.org/relation/175342
+        osm_id:
+        - 175342
+        pop_GHSL2023: 9734682.771514352
+      Madrid:
+        query: Madrid, Community of Madrid, Spain
+        country: ES
+        region: EU
+        orient_order: 0.019
+        circuity_avg: 1.05
+        median_segment_length: 62.5
+        k_avg: 3.079
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Madrid,+Community+of+Madrid,+Spain
+        Η o: 3.562
+        Η w: 3.553
+        P de: 0.065
+        P 4w: 0.21
+        OSM relation:
+        - https://www.openstreetmap.org/relation/5326784
+        osm_id:
+        - 5326784
+        pop_GHSL2023: 3797206.0047106226
+      Moscow:
+        query: Moscow, Central Federal District, Russia
+        country: RU
+        region: EU
+        orient_order: 0.007
+        circuity_avg: 1.055
+        median_segment_length: 130.5
+        k_avg: 2.999
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Moscow,+Central+Federal+District,+Russia
+        Η o: 3.576
+        Η w: 3.573
+        P de: 0.074
+        P 4w: 0.17
+        OSM relation:
+        - https://www.openstreetmap.org/relation/2555133
+        osm_id:
+        - 2555133
+        pop_GHSL2023: 12023201.84294212
+      Munich:
+        query: Munich, Bavaria, Germany
+        country: DE
+        region: EU
+        orient_order: 0.078
+        circuity_avg: 1.046
+        median_segment_length: 96.0
+        k_avg: 2.958
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Munich,+Bavaria,+Germany
+        Η o: 3.496
+        Η w: 3.482
+        P de: 0.099
+        P 4w: 0.2
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62428
+        osm_id:
+        - 62428
+        pop_GHSL2023: 1552833.6185131217
+      Oslo:
+        query: Oslo, Norway
+        country: NO
+        region: EU
+        orient_order: 0.008
+        circuity_avg: 1.095
+        median_segment_length: 78.0
+        k_avg: 2.711
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Oslo,+Norway
+        Η o: 3.574
+        Η w: 3.564
+        P de: 0.197
+        P 4w: 0.113
+        OSM relation:
+        - https://www.openstreetmap.org/relation/406091
+        osm_id:
+        - 406091
+        pop_GHSL2023: 708820.38776549
+      Paris:
+        query: Paris, Ile-de-France, Metropolitan France, France
+        country: FR
+        region: EU
+        orient_order: 0.016
+        circuity_avg: 1.023
+        median_segment_length: 71.5
+        k_avg: 3.11
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Paris,+Ile-de-France,+Metropolitan+France,+France
+        Η o: 3.566
+        Η w: 3.568
+        P de: 0.05
+        P 4w: 0.24
+        OSM relation:
+        - https://www.openstreetmap.org/relation/7444
+        osm_id:
+        - 7444
+        pop_GHSL2023: 2322862.0913982387
+      Prague:
+        query: Prague, Czechia
+        country: CZ
+        region: EU
+        orient_order: 0.049
+        circuity_avg: 1.065
+        median_segment_length: 84.5
+        k_avg: 2.807
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Prague,+Czechia
+        Η o: 3.529
+        Η w: 3.513
+        P de: 0.177
+        P 4w: 0.171
+        OSM relation:
+        - https://www.openstreetmap.org/relation/435514
+        osm_id:
+        - 435514
+        pop_GHSL2023: 1327193.6264477668
+      Reykjavik:
+        query: Reykjavik, Capital Region, Iceland
+        country: IS
+        region: EU
+        orient_order: 0.056
+        circuity_avg: 1.071
+        median_segment_length: 63.2
+        k_avg: 2.54
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Reykjavik,+Capital+Region,+Iceland
+        Η o: 3.522
+        Η w: 3.529
+        P de: 0.283
+        P 4w: 0.117
+        OSM relation:
+        - https://www.openstreetmap.org/relation/2580605
+        osm_id:
+        - 2580605
+        pop_GHSL2023: 104272.41692510885
+      Rome:
+        query: Rome, Roma Capitale, Lazio, Italy
+        country: IT
+        region: EU
+        orient_order: 0.005
+        circuity_avg: 1.07
+        median_segment_length: 73.7
+        k_avg: 2.82
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Rome,+Roma+Capitale,+Lazio,+Italy
+        Η o: 3.578
+        Η w: 3.578
+        P de: 0.161
+        P 4w: 0.145
+        OSM relation:
+        - https://www.openstreetmap.org/relation/41485
+        osm_id:
+        - 41485
+        pop_GHSL2023: 2706949.850030726
+      Sarajevo:
+        query: Sarajevo, Sarajevo Canton, Bosnia and Herzegovina
+        country: BA
+        region: EU
+        orient_order: 0.039
+        circuity_avg: 1.133
+        median_segment_length: 94.7
+        k_avg: 2.522
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Sarajevo,+Sarajevo+Canton,+Bosnia+and+Herzegovina
+        Η o: 3.54
+        Η w: 3.558
+        P de: 0.27
+        P 4w: 0.078
+        OSM relation:
+        - https://www.openstreetmap.org/relation/15445108
+        osm_id:
+        - 15445108
+        pop_GHSL2023: 196713.784235157
+      Stockholm:
+        query: Stockholms kommun, Stockholm County, Sweden
+        country: SE
+        region: EU
+        orient_order: 0.006
+        circuity_avg: 1.091
+        median_segment_length: 82.0
+        k_avg: 2.681
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Stockholms+kommun,+Stockholm+County,+Sweden
+        Η o: 3.577
+        Η w: 3.568
+        P de: 0.222
+        P 4w: 0.141
+        OSM relation:
+        - https://www.openstreetmap.org/relation/398021
+        osm_id:
+        - 398021
+        pop_GHSL2023: 1022888.4359776971
+      Venice (Mestre):
+        query: Venice, Venezia, Veneto, Italy
+        country: IT
+        region: EU
+        orient_order: 0.017
+        circuity_avg: 1.09
+        median_segment_length: 23.2
+        k_avg: 2.474
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Venice,+Venezia,+Veneto,+Italy
+        Η o: 3.564
+        Η w: 3.553
+        P de: 0.3
+        P 4w: 0.073
+        OSM relation:
+        - https://www.openstreetmap.org/relation/44741
+        osm_id:
+        - 44741
+        pop_GHSL2023: 256643.2521157807
+      Vienna:
+        query: Vienna, Austria
+        country: AT
+        region: EU
+        orient_order: 0.05
+        circuity_avg: 1.043
+        median_segment_length: 90.4
+        k_avg: 2.985
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Vienna,+Austria
+        Η o: 3.528
+        Η w: 3.515
+        P de: 0.122
+        P 4w: 0.244
+        OSM relation:
+        - https://www.openstreetmap.org/relation/109166
+        osm_id:
+        - 109166
+        pop_GHSL2023: 1932893.754314165
+      Warsaw:
+        query: Warsaw, Masovian Voivodeship, Poland
+        country: PL
+        region: EU
+        orient_order: 0.036
+        circuity_avg: 1.043
+        median_segment_length: 90.9
+        k_avg: 2.717
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Warsaw,+Masovian+Voivodeship,+Poland
+        Η o: 3.544
+        Η w: 3.532
+        P de: 0.204
+        P 4w: 0.16
+        OSM relation:
+        - https://www.openstreetmap.org/relation/336075
+        osm_id:
+        - 336075
+        pop_GHSL2023: 1849553.232625499
+      Bogota:
+        query: Bogota, Bogota Capital District - Municipality, RAP (Especial) Central,
+          Colombia
+        country: CO
+        region: LatAm
+        orient_order: 0.04
+        circuity_avg: 1.044
+        median_segment_length: 58.4
+        k_avg: 2.977
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bogota,+Bogota+Capital+District+-+Municipality,+RAP+(Especial)+Central,+Colombia
+        Η o: 3.539
+        Η w: 3.529
+        P de: 0.122
+        P 4w: 0.234
+        OSM relation:
+        - https://www.openstreetmap.org/relation/7426387
+        osm_id:
+        - 7426387
+        pop_GHSL2023: 8899793.370068071
+      Buenos Aires:
+        query: Autonomous City of Buenos Aires, Argentina
+        country: AR
+        region: LatAm
+        orient_order: 0.151
+        circuity_avg: 1.011
+        median_segment_length: 104.8
+        k_avg: 3.548
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Autonomous+City+of+Buenos+Aires,+Argentina
+        Η o: 3.411
+        Η w: 3.423
+        P de: 0.027
+        P 4w: 0.576
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1224652
+        osm_id:
+        - 1224652
+        pop_GHSL2023: 2711340.2666851874
+      Caracas:
+        query: Caracas, Venezuela
+        country: VE
+        region: LatAm
+        orient_order: 0.029
+        circuity_avg: 1.148
+        median_segment_length: 95.3
+        k_avg: 2.71
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Caracas,+Venezuela
+        Η o: 3.551
+        Η w: 3.564
+        P de: 0.217
+        P 4w: 0.145
+        OSM relation:
+        - https://www.openstreetmap.org/relation/11219583
+        osm_id:
+        - 11219583
+        pop_GHSL2023: 2668989.406249012
+      Havana:
+        query: CU-03, Cuba
+        country: CU
+        region: LatAm
+        orient_order: 0.029
+        circuity_avg: 1.04
+        median_segment_length: 86.9
+        k_avg: 3.13
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=CU-03,+Cuba
+        Η o: 3.551
+        Η w: 3.552
+        P de: 0.118
+        P 4w: 0.357
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1854615
+        osm_id:
+        - 1854615
+        pop_GHSL2023: 2078137.1455927053
+      Lima:
+        query: Lima Metropolitan Area, Lima, Peru
+        country: PE
+        region: LatAm
+        orient_order: 0.278
+        circuity_avg: 1.017
+        median_segment_length: 76.7
+        k_avg: 3.161
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Lima+Metropolitan+Area,+Lima,+Peru
+        Η o: 3.254
+        Η w: 3.228
+        P de: 0.04
+        P 4w: 0.331
+        OSM relation:
+        - https://www.openstreetmap.org/relation/12933390
+        osm_id:
+        - 12933390
+        pop_GHSL2023: 10924814.244125538
+      Mexico City:
+        query: Mexico City, Mexico
+        country: MX
+        region: LatAm
+        orient_order: 0.154
+        circuity_avg: 1.043
+        median_segment_length: 69.9
+        k_avg: 2.977
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Mexico+City,+Mexico
+        Η o: 3.408
+        Η w: 3.406
+        P de: 0.146
+        P 4w: 0.264
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1376330
+        osm_id:
+        - 1376330
+        pop_GHSL2023: 7649332.880559048
+      Port au Prince:
+        query: Port-au-Prince, West, Haiti
+        country: HT
+        region: LatAm
+        orient_order: 0.028
+        circuity_avg: 1.088
+        median_segment_length: 55.0
+        k_avg: 2.495
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Port-au-Prince,+West,+Haiti
+        Η o: 3.552
+        Η w: 3.554
+        P de: 0.295
+        P 4w: 0.087
+        OSM relation:
+        - https://www.openstreetmap.org/relation/387318
+        osm_id:
+        - 387318
+        pop_GHSL2023: 1481683.71467255
+      Rio de Janeiro:
+        query: Rio de Janeiro, Southeast Region, Brazil
+        country: BR
+        region: LatAm
+        orient_order: 0.014
+        circuity_avg: 1.055
+        median_segment_length: 74.0
+        k_avg: 2.804
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Rio+de+Janeiro,+Southeast+Region,+Brazil
+        Η o: 3.568
+        Η w: 3.566
+        P de: 0.172
+        P 4w: 0.147
+        OSM relation:
+        - https://www.openstreetmap.org/relation/2697338
+        osm_id:
+        - 2697338
+        pop_GHSL2023: 6768933.523283653
+      Sao Paulo:
+        query: São Paulo, Southeast Region, Brazil
+        country: BR
+        region: LatAm
+        orient_order: 0.002
+        circuity_avg: 1.05
+        median_segment_length: 76.0
+        k_avg: 2.936
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=São+Paulo,+Southeast+Region,+Brazil
+        Η o: 3.581
+        Η w: 3.58
+        P de: 0.12
+        P 4w: 0.176
+        OSM relation:
+        - https://www.openstreetmap.org/relation/298285
+        osm_id:
+        - 298285
+        pop_GHSL2023: 11858950.620425723
+      Baghdad:
+        query: Baghdad, Baghdad Governorate, Iraq
+        country: IQ
+        region: MEA
+        orient_order: 0.083
+        circuity_avg: 1.033
+        median_segment_length: 68.3
+        k_avg: 3.043
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Baghdad,+Baghdad+Governorate,+Iraq
+        Η o: 3.49
+        Η w: 3.498
+        P de: 0.05
+        P 4w: 0.144
+        OSM relation:
+        - https://www.openstreetmap.org/relation/5638803
+        osm_id:
+        - 5638803
+        pop_GHSL2023: 6338692.7509337645
+      Beirut:
+        query: Beirut Governorate, Lebanon
+        country: LB
+        region: MEA
+        orient_order: 0.206
+        circuity_avg: 1.026
+        median_segment_length: 63.9
+        k_avg: 3.061
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Beirut+Governorate,+Lebanon
+        Η o: 3.344
+        Η w: 3.308
+        P de: 0.072
+        P 4w: 0.218
+        OSM relation:
+        - https://www.openstreetmap.org/relation/316552
+        osm_id:
+        - 316552
+        pop_GHSL2023: 354208.8213920592
+      Cairo:
+        query: Cairo, Egypt
+        country: EG
+        region: MEA
+        orient_order: 0.041
+        circuity_avg: 1.067
+        median_segment_length: 66.6
+        k_avg: 2.996
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Cairo,+Egypt
+        Η o: 3.538
+        Η w: 3.526
+        P de: 0.085
+        P 4w: 0.171
+        OSM relation:
+        - https://www.openstreetmap.org/relation/5466227
+        osm_id:
+        - 5466227
+        pop_GHSL2023: 9149031.085013825
+      Cape Town:
+        query: City of Cape Town, Western Cape, 8001, South Africa
+        country: ZA
+        region: MEA
+        orient_order: 0.025
+        circuity_avg: 1.102
+        median_segment_length: 75.2
+        k_avg: 2.793
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=City+of+Cape+Town,+Western+Cape,+8001,+South+Africa
+        Η o: 3.556
+        Η w: 3.553
+        P de: 0.183
+        P 4w: 0.162
+        OSM relation:
+        - https://www.openstreetmap.org/relation/79604
+        osm_id:
+        - 79604
+        pop_GHSL2023: 5052916.481144726
+      Casablanca:
+        query: Casablanca, Casablanca-Settat, Morocco
+        country: MA
+        region: MEA
+        orient_order: 0.094
+        circuity_avg: 1.048
+        median_segment_length: 48.0
+        k_avg: 3.026
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Casablanca,+Casablanca-Settat,+Morocco
+        Η o: 3.477
+        Η w: 3.461
+        P de: 0.08
+        P 4w: 0.178
+        OSM relation:
+        - https://www.openstreetmap.org/relation/4072985
+        osm_id:
+        - 4072985
+        pop_GHSL2023: 3387477.14780569
+      Damascus:
+        query: Damascus Governorate, Syria
+        country: SY
+        region: MEA
+        orient_order: 0.043
+        circuity_avg: 1.085
+        median_segment_length: 65.8
+        k_avg: 2.801
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Damascus+Governorate,+Syria
+        Η o: 3.536
+        Η w: 3.525
+        P de: 0.146
+        P 4w: 0.107
+        OSM relation:
+        - https://www.openstreetmap.org/relation/7328462
+        osm_id:
+        - 7328462
+        pop_GHSL2023: 2160242.529167125
+      Dubai:
+        query: Dubai, United Arab Emirates
+        country: AE
+        region: MEA
+        orient_order: 0.031
+        circuity_avg: 1.087
+        median_segment_length: 79.7
+        k_avg: 2.925
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Dubai,+United+Arab+Emirates
+        Η o: 3.55
+        Η w: 3.529
+        P de: 0.074
+        P 4w: 0.073
+        OSM relation:
+        - https://www.openstreetmap.org/relation/4479752
+        osm_id:
+        - 4479752
+        pop_GHSL2023: 3122371.0558517794
+      Istanbul:
+        query: TR-34, Turkey
+        country: TR
+        region: MEA
+        orient_order: 0.007
+        circuity_avg: 1.059
+        median_segment_length: 50.1
+        k_avg: 2.998
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=TR-34,+Turkey
+        Η o: 3.576
+        Η w: 3.574
+        P de: 0.093
+        P 4w: 0.174
+        OSM relation:
+        - https://www.openstreetmap.org/relation/223474
+        osm_id:
+        - 223474
+        pop_GHSL2023: 14243965.122489264
+      Jerusalem:
+        query: Jerusalem, Jerusalem District, Israel
+        country: IL
+        region: MEA
+        orient_order: 0.014
+        circuity_avg: 1.092
+        median_segment_length: 44.0
+        k_avg: 2.735
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Jerusalem,+Jerusalem+District,+Israel
+        Η o: 3.568
+        Η w: 3.562
+        P de: 0.18
+        P 4w: 0.109
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1381350
+        osm_id:
+        - 1381350
+        pop_GHSL2023: 1253649.2788656482
+      Johannesburg:
+        query: City of Johannesburg Metropolitan Municipality, 2001, South Africa
+        country: ZA
+        region: MEA
+        orient_order: 0.019
+        circuity_avg: 1.098
+        median_segment_length: 88.6
+        k_avg: 2.865
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=City+of+Johannesburg+Metropolitan+Municipality,+2001,+South+Africa
+        Η o: 3.562
+        Η w: 3.556
+        P de: 0.158
+        P 4w: 0.182
+        OSM relation:
+        - https://www.openstreetmap.org/relation/594508
+        osm_id:
+        - 594508
+        pop_GHSL2023: 6409611.695537722
+      Lagos:
+        query: Lagos Island, Lagos State, Nigeria
+        country: NG
+        region: MEA
+        orient_order: 0.039
+        circuity_avg: 1.048
+        median_segment_length: 87.2
+        k_avg: 2.619
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Lagos+Island,+Lagos+State,+Nigeria
+        Η o: 3.54
+        Η w: 3.521
+        P de: 0.223
+        P 4w: 0.07
+        OSM relation:
+        - https://www.openstreetmap.org/relation/7644528
+        osm_id:
+        - 7644528
+        pop_GHSL2023: 119799.5473861694
+      Mogadishu:
+        query: Mogadishu District, Banaadir, Somalia
+        country: SO
+        region: MEA
+        orient_order: 0.375
+        circuity_avg: 1.019
+        median_segment_length: 39.4
+        k_avg: 3.346
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Mogadishu+District,+Banaadir,+Somalia
+        Η o: 3.123
+        Η w: 3.292
+        P de: 0.055
+        P 4w: 0.472
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1720125
+        osm_id:
+        - 1720125
+        pop_GHSL2023: 3867823.297230401
+      Nairobi:
+        query: Nairobi, Nairobi County, Kenya
+        country: KE
+        region: MEA
+        orient_order: 0.014
+        circuity_avg: 1.083
+        median_segment_length: 91.8
+        k_avg: 2.506
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Nairobi,+Nairobi+County,+Kenya
+        Η o: 3.568
+        Η w: 3.556
+        P de: 0.279
+        P 4w: 0.075
+        OSM relation:
+        - https://www.openstreetmap.org/relation/9721587
+        osm_id:
+        - 9721587
+        pop_GHSL2023: 5838242.6927329
+      Tehran:
+        query: Tehran, Tehran Province, Iran
+        country: IR
+        region: MEA
+        orient_order: 0.137
+        circuity_avg: 1.045
+        median_segment_length: 52.0
+        k_avg: 2.652
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Tehran,+Tehran+Province,+Iran
+        Η o: 3.427
+        Η w: 3.405
+        P de: 0.24
+        P 4w: 0.134
+        OSM relation:
+        - https://www.openstreetmap.org/relation/6663864
+        osm_id:
+        - 6663864
+        pop_GHSL2023: 7294182.58308172
+      Atlanta:
+        query: Atlanta, Fulton County, Georgia, United States
+        country: US-GA
+        region: NAM
+        orient_order: 0.315
+        circuity_avg: 1.074
+        median_segment_length: 112.5
+        k_avg: 2.806
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Atlanta,+Fulton+County,+Georgia,+United+States
+        Η o: 3.204
+        Η w: 3.197
+        P de: 0.164
+        P 4w: 0.153
+        OSM relation:
+        - https://www.openstreetmap.org/relation/119557
+        osm_id:
+        - 119557
+        pop_GHSL2023: 517627.27642059315
+      Baltimore:
+        query: Baltimore, Maryland, United States
+        country: US-MD
+        region: NAM
+        orient_order: 0.223
+        circuity_avg: 1.036
+        median_segment_length: 100.0
+        k_avg: 3.182
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Baltimore,+Maryland,+United+States
+        Η o: 3.324
+        Η w: 3.367
+        P de: 0.085
+        P 4w: 0.36
+        OSM relation:
+        - https://www.openstreetmap.org/relation/133345
+        osm_id:
+        - 133345
+        pop_GHSL2023: 628695.3598501991
+      Boston:
+        query: Boston, Suffolk County, Massachusetts, United States
+        country: US-MA
+        region: NAM
+        orient_order: 0.026
+        circuity_avg: 1.039
+        median_segment_length: 77.0
+        k_avg: 2.945
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Boston,+Suffolk+County,+Massachusetts,+United+States
+        Η o: 3.554
+        Η w: 3.552
+        P de: 0.135
+        P 4w: 0.211
+        OSM relation:
+        - https://www.openstreetmap.org/relation/2315704
+        osm_id:
+        - 2315704
+        pop_GHSL2023: 613869.7221977434
+      Charlotte:
+        query: Charlotte, Mecklenburg County, North Carolina, United States
+        country: US-NC
+        region: NAM
+        orient_order: 0.002
+        circuity_avg: 1.067
+        median_segment_length: 117.2
+        k_avg: 2.546
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Charlotte,+Mecklenburg+County,+North+Carolina,+United+States
+        Η o: 3.582
+        Η w: 3.581
+        P de: 0.288
+        P 4w: 0.139
+        OSM relation:
+        - https://www.openstreetmap.org/relation/177415
+        osm_id:
+        - 177415
+        pop_GHSL2023: 829529.5766545291
+      Chicago:
+        query: Chicago, Cook County, Illinois, United States
+        country: US-IL
+        region: NAM
+        orient_order: 0.899
+        circuity_avg: 1.016
+        median_segment_length: 105.3
+        k_avg: 3.343
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Chicago,+Cook+County,+Illinois,+United+States
+        Η o: 2.083
+        Η w: 2.103
+        P de: 0.074
+        P 4w: 0.507
+        OSM relation:
+        - https://www.openstreetmap.org/relation/122604
+        osm_id:
+        - 122604
+        pop_GHSL2023: 2640668.741081328
+      Cleveland:
+        query: Cleveland, Cuyahoga County, Ohio, United States
+        country: US-OH
+        region: NAM
+        orient_order: 0.486
+        circuity_avg: 1.029
+        median_segment_length: 103.7
+        k_avg: 2.979
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Cleveland,+Cuyahoga+County,+Ohio,+United+States
+        Η o: 2.961
+        Η w: 2.899
+        P de: 0.091
+        P 4w: 0.198
+        OSM relation:
+        - https://www.openstreetmap.org/relation/182130
+        osm_id:
+        - 182130
+        pop_GHSL2023: 365347.62727096665
+      Dallas:
+        query: Dallas, Dallas County, Texas, United States
+        country: US-TX
+        region: NAM
+        orient_order: 0.305
+        circuity_avg: 1.042
+        median_segment_length: 106.1
+        k_avg: 3.12
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Dallas,+Dallas+County,+Texas,+United+States
+        Η o: 3.218
+        Η w: 3.182
+        P de: 0.091
+        P 4w: 0.317
+        OSM relation:
+        - https://www.openstreetmap.org/relation/6571629
+        osm_id:
+        - 6571629
+        pop_GHSL2023: 1472292.9103196533
+      Denver:
+        query: Denver, Colorado, United States
+        country: US-CO
+        region: NAM
+        orient_order: 0.678
+        circuity_avg: 1.031
+        median_segment_length: 102.7
+        k_avg: 3.249
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Denver,+Colorado,+United+States
+        Η o: 2.634
+        Η w: 2.571
+        P de: 0.071
+        P 4w: 0.416
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1411339
+        osm_id:
+        - 1411339
+        pop_GHSL2023: 675848.2442275502
+      Detroit:
+        query: Detroit, Wayne County, Michigan, United States
+        country: US-MI
+        region: NAM
+        orient_order: 0.582
+        circuity_avg: 1.012
+        median_segment_length: 101.2
+        k_avg: 3.352
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Detroit,+Wayne+County,+Michigan,+United+States
+        Η o: 2.807
+        Η w: 2.718
+        P de: 0.053
+        P 4w: 0.482
+        OSM relation:
+        - https://www.openstreetmap.org/relation/134591
+        osm_id:
+        - 134591
+        pop_GHSL2023: 658243.4261336921
+      Honolulu:
+        query: 119231
+        country: US-HI
+        region: NAM
+        orient_order: 0.034
+        circuity_avg: 1.073
+        median_segment_length: 101.8
+        k_avg: 2.681
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=R119231
+        Η o: 3.545
+        Η w: 3.55
+        P de: 0.252
+        P 4w: 0.185
+        OSM relation:
+        - https://www.openstreetmap.org/relation/119231
+        osm_id:
+        - 119231
+        pop_GHSL2023: 404124.8977179931
+      Houston:
+        query:
+        - Houston, Harris County, Texas, United States
+        - Bellaire, Harris County, Texas, United States
+        - West University Place, Harris County, Texas, United States
+        - Southside Place, Harris County, Texas, United States
+        - Jacinto City, Harris County, Texas, United States
+        - Galena Park, Harris County, Texas, United States
+        - Hunters Creek Village, Harris County, Texas, United States
+        - Piney Point Village, Harris County, Texas, United States
+        - Spring Valley, Harris County, Texas, United States
+        - Hilshire Village, Harris County, Texas, United States
+        - Bunker Hill Village, Harris County, Texas, United States
+        - Hedwig Village, Harris County, Texas, United States
+        - Jersey Village, Harris County, Texas, United States
+        country: US-TX
+        region: NAM
+        orient_order: 0.425
+        circuity_avg: 1.045
+        median_segment_length: 96.2
+        k_avg: 3.027
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Houston,+Harris+County,+Texas,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bellaire,+Harris+County,+Texas,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=West+University+Place,+Harris+County,+Texas,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Southside+Place,+Harris+County,+Texas,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Jacinto+City,+Harris+County,+Texas,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Galena+Park,+Harris+County,+Texas,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Hunters+Creek+Village,+Harris+County,+Texas,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Piney+Point+Village,+Harris+County,+Texas,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Spring+Valley,+Harris+County,+Texas,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Hilshire+Village,+Harris+County,+Texas,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bunker+Hill+Village,+Harris+County,+Texas,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Hedwig+Village,+Harris+County,+Texas,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Jersey+Village,+Harris+County,+Texas,+United+States
+        Η o: 3.052
+        Η w: 3.006
+        P de: 0.127
+        P 4w: 0.307
+        OSM relation:
+        - https://www.openstreetmap.org/relation/2688911
+        - https://www.openstreetmap.org/relation/6586766
+        - https://www.openstreetmap.org/relation/2947146
+        - https://www.openstreetmap.org/relation/2947144
+        - https://www.openstreetmap.org/relation/2947142
+        - https://www.openstreetmap.org/relation/2947138
+        - https://www.openstreetmap.org/relation/2947141
+        - https://www.openstreetmap.org/relation/2947143
+        - https://www.openstreetmap.org/relation/2947145
+        - https://www.openstreetmap.org/relation/2947140
+        - https://www.openstreetmap.org/relation/2947137
+        - https://www.openstreetmap.org/relation/2947139
+        - https://www.openstreetmap.org/relation/4840276
+        osm_id:
+        - 2688911
+        - 6586766
+        - 2947146
+        - 2947144
+        - 2947142
+        - 2947138
+        - 2947141
+        - 2947143
+        - 2947145
+        - 2947140
+        - 2947137
+        - 2947139
+        - 4840276
+        pop_GHSL2023: 2780403.3394391406
+      Las Vegas:
+        query:
+        - Las Vegas, Clark County, Nevada, United States
+        - North Las Vegas, Clark County, Nevada, United States
+        - Henderson, Clark County, Nevada, United States
+        - Winchester, Clark County, Nevada, United States
+        - Spring Valley, Clark County, Nevada, United States
+        - Paradise, Clark County, Nevada, United States
+        - Sunrise Manor, Clark County, Nevada, United States
+        - Enterprise, Clark County, Nevada, United States
+        country: US-NV
+        region: NAM
+        orient_order: 0.542
+        circuity_avg: 1.079
+        median_segment_length: 86.1
+        k_avg: 2.676
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Las+Vegas,+Clark+County,+Nevada,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=North+Las+Vegas,+Clark+County,+Nevada,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Henderson,+Clark+County,+Nevada,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Winchester,+Clark+County,+Nevada,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Spring+Valley,+Clark+County,+Nevada,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Paradise,+Clark+County,+Nevada,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Sunrise+Manor,+Clark+County,+Nevada,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Enterprise,+Clark+County,+Nevada,+United+States
+        Η o: 2.874
+        Η w: 2.775
+        P de: 0.23
+        P 4w: 0.166
+        OSM relation:
+        - https://www.openstreetmap.org/relation/170117
+        - https://www.openstreetmap.org/relation/170118
+        - https://www.openstreetmap.org/relation/170116
+        - https://www.openstreetmap.org/relation/170007
+        - https://www.openstreetmap.org/relation/170049
+        - https://www.openstreetmap.org/relation/170053
+        - https://www.openstreetmap.org/relation/170068
+        - https://www.openstreetmap.org/relation/170132
+        osm_id:
+        - 170117
+        - 170118
+        - 170116
+        - 170007
+        - 170049
+        - 170053
+        - 170068
+        - 170132
+        pop_GHSL2023: 2451129.123220173
+      Los Angeles:
+        query: Los Angeles County, California, United States
+        country: US-CA
+        region: NAM
+        orient_order: 0.348
+        circuity_avg: 1.048
+        median_segment_length: 109.9
+        k_avg: 2.911
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Los+Angeles+County,+California,+United+States
+        Η o: 3.161
+        Η w: 3.145
+        P de: 0.171
+        P 4w: 0.273
+        OSM relation:
+        - https://www.openstreetmap.org/relation/396479
+        osm_id:
+        - 396479
+        pop_GHSL2023: 10131722.735823404
+      Manhattan:
+        query: Manhattan, New York County, New York, United States
+        country: US-NY
+        region: NAM
+        orient_order: 0.669
+        circuity_avg: 1.017
+        median_segment_length: 82.2
+        k_avg: 3.508
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Manhattan,+New+York+County,+New+York,+United+States
+        Η o: 2.65
+        Η w: 2.571
+        P de: 0.027
+        P 4w: 0.572
+        OSM relation:
+        - https://www.openstreetmap.org/relation/8398124
+        osm_id:
+        - 8398124
+        pop_GHSL2023: 1658451.516783237
+      Miami:
+        query: Miami, Miami-Dade County, Florida, United States
+        country: US-FL
+        region: NAM
+        orient_order: 0.811
+        circuity_avg: 1.023
+        median_segment_length: 96.7
+        k_avg: 3.236
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Miami,+Miami-Dade+County,+Florida,+United+States
+        Η o: 2.341
+        Η w: 2.291
+        P de: 0.069
+        P 4w: 0.407
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1216769
+        osm_id:
+        - 1216769
+        pop_GHSL2023: 401627.16193004296
+      Minneapolis:
+        query: Minneapolis, Hennepin County, Minnesota, United States
+        country: US-MN
+        region: NAM
+        orient_order: 0.749
+        circuity_avg: 1.023
+        median_segment_length: 115.4
+        k_avg: 3.393
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Minneapolis,+Hennepin+County,+Minnesota,+United+States
+        Η o: 2.486
+        Η w: 2.464
+        P de: 0.053
+        P 4w: 0.521
+        OSM relation:
+        - https://www.openstreetmap.org/relation/136712
+        osm_id:
+        - 136712
+        pop_GHSL2023: 375276.78887844074
+      Montreal:
+        query: Montreal (administrative region), Quebec, Canada
+        country: CA-QC
+        region: NAM
+        orient_order: 0.204
+        circuity_avg: 1.057
+        median_segment_length: 87.4
+        k_avg: 3.239
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Montreal+(administrative+region),+Quebec,+Canada
+        Η o: 3.346
+        Η w: 3.332
+        P de: 0.051
+        P 4w: 0.344
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1571328
+        osm_id:
+        - 1571328
+        pop_GHSL2023: 1972042.624127009
+      New Orleans:
+        query: New Orleans, Orleans Parish, Louisiana, United States
+        country: US-LA
+        region: NAM
+        orient_order: 0.123
+        circuity_avg: 1.035
+        median_segment_length: 99.6
+        k_avg: 3.378
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=New+Orleans,+Orleans+Parish,+Louisiana,+United+States
+        Η o: 3.444
+        Η w: 3.457
+        P de: 0.077
+        P 4w: 0.526
+        OSM relation:
+        - https://www.openstreetmap.org/relation/131885
+        osm_id:
+        - 131885
+        pop_GHSL2023: 366732.97836517997
+      Orlando:
+        query: Orlando, Orange County, Florida, United States
+        country: US-FL
+        region: NAM
+        orient_order: 0.481
+        circuity_avg: 1.064
+        median_segment_length: 100.1
+        k_avg: 2.914
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Orlando,+Orange+County,+Florida,+United+States
+        Η o: 2.969
+        Η w: 2.929
+        P de: 0.12
+        P 4w: 0.237
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1128379
+        osm_id:
+        - 1128379
+        pop_GHSL2023: 304166.8284669285
+      Philadelphia:
+        query: Philadelphia, Philadelphia County, Pennsylvania, United States
+        country: US-PA
+        region: NAM
+        orient_order: 0.312
+        circuity_avg: 1.03
+        median_segment_length: 83.9
+        k_avg: 3.315
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Philadelphia,+Philadelphia+County,+Pennsylvania,+United+States
+        Η o: 3.209
+        Η w: 3.267
+        P de: 0.047
+        P 4w: 0.398
+        OSM relation:
+        - https://www.openstreetmap.org/relation/188022
+        osm_id:
+        - 188022
+        pop_GHSL2023: 1501334.2557670078
+      Phoenix:
+        query: Phoenix, Maricopa County, Arizona, United States
+        country: US-AZ
+        region: NAM
+        orient_order: 0.586
+        circuity_avg: 1.073
+        median_segment_length: 97.1
+        k_avg: 2.795
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Phoenix,+Maricopa+County,+Arizona,+United+States
+        Η o: 2.801
+        Η w: 2.563
+        P de: 0.186
+        P 4w: 0.171
+        OSM relation:
+        - https://www.openstreetmap.org/relation/111257
+        osm_id:
+        - 111257
+        pop_GHSL2023: 1872464.6450785124
+      Pittsburgh:
+        query:
+        - Pittsburgh, Allegheny County, Pennsylvania, United States
+        - Mount Oliver, Allegheny County, Pennsylvania, United States
+        - Green Tree, Allegheny County, Pennsylvania, United States
+        - Crafton, Allegheny County, Pennsylvania, United States
+        - Ingram, Allegheny County, Pennsylvania, United States
+        country: US-PA
+        region: NAM
+        orient_order: 0.018
+        circuity_avg: 1.054
+        median_segment_length: 94.0
+        k_avg: 2.854
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Pittsburgh,+Allegheny+County,+Pennsylvania,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Mount+Oliver,+Allegheny+County,+Pennsylvania,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Green+Tree,+Allegheny+County,+Pennsylvania,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Crafton,+Allegheny+County,+Pennsylvania,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Ingram,+Allegheny+County,+Pennsylvania,+United+States
+        Η o: 3.564
+        Η w: 3.565
+        P de: 0.173
+        P 4w: 0.231
+        OSM relation:
+        - https://www.openstreetmap.org/relation/188553
+        - https://www.openstreetmap.org/relation/188551
+        - https://www.openstreetmap.org/relation/187458
+        - https://www.openstreetmap.org/relation/187434
+        - https://www.openstreetmap.org/relation/187435
+        osm_id:
+        - 188553
+        - 188551
+        - 187458
+        - 187434
+        - 187435
+        pop_GHSL2023: 309714.70544934267
+      Portland:
+        query:
+        - Portland, Multnomah County, Oregon, United States
+        - Maywood Park, Multnomah County, Oregon, United States
+        country: US-OR
+        region: NAM
+        orient_order: 0.679
+        circuity_avg: 1.041
+        median_segment_length: 82.1
+        k_avg: 3.032
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Portland,+Multnomah+County,+Oregon,+United+States
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Maywood+Park,+Multnomah+County,+Oregon,+United+States
+        Η o: 2.632
+        Η w: 2.68
+        P de: 0.146
+        P 4w: 0.327
+        OSM relation:
+        - https://www.openstreetmap.org/relation/186579
+        - https://www.openstreetmap.org/relation/186714
+        osm_id:
+        - 186579
+        - 186714
+        pop_GHSL2023: 685184.3103695348
+      San Francisco:
+        query: San Francisco, California, United States
+        country: US-CA
+        region: NAM
+        orient_order: 0.278
+        circuity_avg: 1.033
+        median_segment_length: 94.4
+        k_avg: 3.304
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=San+Francisco,+California,+United+States
+        Η o: 3.253
+        Η w: 3.226
+        P de: 0.087
+        P 4w: 0.454
+        OSM relation:
+        - https://www.openstreetmap.org/relation/111968
+        osm_id:
+        - 111968
+        pop_GHSL2023: 823489.8565498033
+      Seattle:
+        query: Seattle, King County, Washington, United States
+        country: US-WA
+        region: NAM
+        orient_order: 0.723
+        circuity_avg: 1.028
+        median_segment_length: 97.2
+        k_avg: 3.107
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Seattle,+King+County,+Washington,+United+States
+        Η o: 2.542
+        Η w: 2.474
+        P de: 0.136
+        P 4w: 0.369
+        OSM relation:
+        - https://www.openstreetmap.org/relation/237385
+        osm_id:
+        - 237385
+        pop_GHSL2023: 710391.1301186976
+      St Louis:
+        query: St. Louis, Missouri, United States
+        country: US-MO
+        region: NAM
+        orient_order: 0.276
+        circuity_avg: 1.023
+        median_segment_length: 107.0
+        k_avg: 3.165
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=St.+Louis,+Missouri,+United+States
+        Η o: 3.256
+        Η w: 3.225
+        P de: 0.098
+        P 4w: 0.374
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1180533
+        osm_id:
+        - 1180533
+        pop_GHSL2023: 312467.4185018753
+      Toronto:
+        query: City of Toronto, Golden Horseshoe, Ontario, Canada
+        country: CA-ON
+        region: NAM
+        orient_order: 0.474
+        circuity_avg: 1.09
+        median_segment_length: 103.1
+        k_avg: 2.994
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=City+of+Toronto,+Golden+Horseshoe,+Ontario,+Canada
+        Η o: 2.98
+        Η w: 2.885
+        P de: 0.109
+        P 4w: 0.217
+        OSM relation:
+        - https://www.openstreetmap.org/relation/324211
+        osm_id:
+        - 324211
+        pop_GHSL2023: 2860231.37706411
+      Vancouver:
+        query: Vancouver, British Columbia, Canada
+        country: CA-BC
+        region: NAM
+        orient_order: 0.749
+        circuity_avg: 1.022
+        median_segment_length: 103.7
+        k_avg: 3.308
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Vancouver,+British+Columbia,+Canada
+        Η o: 2.488
+        Η w: 2.413
+        P de: 0.073
+        P 4w: 0.455
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1852574
+        osm_id:
+        - 1852574
+        pop_GHSL2023: 693480.7865019785
+      Washington:
+        query: Washington, District of Columbia, United States
+        country: US-DC
+        region: NAM
+        orient_order: 0.377
+        circuity_avg: 1.038
+        median_segment_length: 99.5
+        k_avg: 3.252
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Washington,+District+of+Columbia,+United+States
+        Η o: 3.121
+        Η w: 3.113
+        P de: 0.065
+        P 4w: 0.37
+        OSM relation:
+        - https://www.openstreetmap.org/relation/5396194
+        osm_id:
+        - 5396194
+        pop_GHSL2023: 701524.8640937685
+  germany_by_pop:
+    description: List of cities in Germany by population (Wikipedia)
+    cities:
+      Berlin:
+        query: Berlin, Germany
+        country: DE
+        state: Berlin
+        population: 3677472
+        location: 52°31′N 13°23′E / 52.517°N 13.383°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Berlin,+Germany
+        osm_id:
+        - 62422
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62422
+        pop_GHSL2023: 3524738.8939121147
+      Hamburg:
+        query: Hamburg, Germany
+        country: DE
+        state: Hamburg
+        population: 1906411
+        location: 53°33′N 10°0′E / 53.550°N 10.000°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Hamburg,+Germany
+        osm_id:
+        - 62782
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62782
+        pop_GHSL2023: 1761088.7599678198
+      Munich:
+        query: Munich, Bavaria, Germany
+        country: DE
+        state: Bavaria
+        population: 1487708
+        location: 48°8′N 11°34′E / 48.133°N 11.567°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Munich,+Bavaria,+Germany
+        osm_id:
+        - 62428
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62428
+        pop_GHSL2023: 1552833.6185131217
+      Cologne (Köln):
+        query: Cologne, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 1073096
+        location: 50°56′N 6°57′E / 50.933°N 6.950°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Cologne,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62578
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62578
+        pop_GHSL2023: 1171662.0742877943
+      Frankfurt am Main:
+        query: Frankfurt, Hesse, Germany
+        country: DE
+        state: Hesse
+        population: 759224
+        location: 50°7′N 8°41′E / 50.117°N 8.683°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Frankfurt,+Hesse,+Germany
+        osm_id:
+        - 62400
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62400
+        pop_GHSL2023: 821447.1059717236
+      Stuttgart:
+        query: Stuttgart, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 626275
+        location: 48°47′N 9°11′E / 48.783°N 9.183°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Stuttgart,+Baden-Württemberg,+Germany
+        osm_id:
+        - 2793104
+        OSM relation:
+        - https://www.openstreetmap.org/relation/2793104
+        pop_GHSL2023: 608298.9549454299
+      Düsseldorf:
+        query: Dusseldorf, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 619477
+        location: 51°14′N 6°47′E / 51.233°N 6.783°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Dusseldorf,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62539
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62539
+        pop_GHSL2023: 629943.5862600802
+      Leipzig:
+        query: Leipzig, Saxony, Germany
+        country: DE
+        state: Saxony
+        population: 601866
+        location: 51°20′N 12°23′E / 51.333°N 12.383°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Leipzig,+Saxony,+Germany
+        osm_id:
+        - 62649
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62649
+        pop_GHSL2023: 587300.3685810135
+      Dortmund:
+        query: Dortmund, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 586852
+        location: 51°31′N 7°28′E / 51.517°N 7.467°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Dortmund,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 1829065
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1829065
+        pop_GHSL2023: 597406.1646491288
+      Essen:
+        query: Essen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 579432
+        location: 51°27′N 7°1′E / 51.450°N 7.017°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Essen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62713
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62713
+        pop_GHSL2023: 566901.7672717569
+      Bremen:
+        query: Bremen, City of Bremen, Germany
+        country: DE
+        state: Bremen
+        population: 563290
+        location: 53°5′N 8°48′E / 53.083°N 8.800°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bremen,+City+of+Bremen,+Germany
+        osm_id:
+        - 62559
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62559
+        pop_GHSL2023: 569530.6147225898
+      Dresden:
+        query: Dresden, Saxony, Germany
+        country: DE
+        state: Saxony
+        population: 555351
+        location: 51°2′N 13°44′E / 51.033°N 13.733°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Dresden,+Saxony,+Germany
+        osm_id:
+        - 191645
+        OSM relation:
+        - https://www.openstreetmap.org/relation/191645
+        pop_GHSL2023: 604470.7496758811
+      Hanover (Hannover):
+        query: Hanover, Lower Saxony, Germany
+        country: DE
+        state: Lower Saxony
+        population: 535932
+        location: 52°22′N 9°43′E / 52.367°N 9.717°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Hanover,+Lower+Saxony,+Germany
+        osm_id:
+        - 59418
+        OSM relation:
+        - https://www.openstreetmap.org/relation/59418
+        pop_GHSL2023: 536017.4882024525
+      Nuremberg:
+        query: Nuremberg, Bavaria, Germany
+        country: DE
+        state: Bavaria
+        population: 510632
+        location: 49°27′N 11°5′E / 49.450°N 11.083°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Nuremberg,+Bavaria,+Germany
+        osm_id:
+        - 62780
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62780
+        pop_GHSL2023: 499332.5104406102
+      Duisburg:
+        query: Duisburg, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 495152
+        location: 51°26′N 6°46′E / 51.433°N 6.767°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Duisburg,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62456
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62456
+        pop_GHSL2023: 541060.8880877494
+      Bochum:
+        query: Bochum, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 363441
+        location: 51°29′N 7°13′E / 51.483°N 7.217°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bochum,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62644
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62644
+        pop_GHSL2023: 357434.85097885126
+      Wuppertal:
+        query: Wuppertal, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 354572
+        location: 51°16′N 7°11′E / 51.267°N 7.183°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Wuppertal,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62478
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62478
+        pop_GHSL2023: 349787.26579546917
+      Bielefeld:
+        query: Bielefeld, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 334002
+        location: 52°1′N 8°32′E / 52.017°N 8.533°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bielefeld,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62646
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62646
+        pop_GHSL2023: 333409.8926514386
+      Bonn:
+        query: Bonn, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 331885
+        location: 50°44′N 7°6′E / 50.733°N 7.100°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bonn,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62508
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62508
+        pop_GHSL2023: 298244.66710514383
+      Münster:
+        query: Münster, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 317713
+        location: 51°58′N 7°38′E / 51.967°N 7.633°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Münster,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62591
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62591
+        pop_GHSL2023: 341446.0807846858
+      Mannheim:
+        query: Mannheim, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 311831
+        location: 49°29′N 8°28′E / 49.483°N 8.467°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Mannheim,+Baden-Württemberg,+Germany
+        osm_id:
+        - 62691
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62691
+        pop_GHSL2023: 331411.8676640092
+      Karlsruhe:
+        query: Karlsruhe, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 306502
+        location: 49°0′N 8°24′E / 49.000°N 8.400°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Karlsruhe,+Baden-Württemberg,+Germany
+        osm_id:
+        - 62518
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62518
+        pop_GHSL2023: 321957.63255011983
+      Augsburg:
+        query: Augsburg, Bavaria, Germany
+        country: DE
+        state: Bavaria
+        population: 296478
+        location: 48°22′N 10°54′E / 48.367°N 10.900°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Augsburg,+Bavaria,+Germany
+        osm_id:
+        - 62407
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62407
+        pop_GHSL2023: 284132.46682134515
+      Wiesbaden:
+        query: Wiesbaden, Hesse, Germany
+        country: DE
+        state: Hesse
+        population: 278950
+        location: 50°5′N 8°14′E / 50.083°N 8.233°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Wiesbaden,+Hesse,+Germany
+        osm_id:
+        - 62496
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62496
+        pop_GHSL2023: 297597.62034389994
+      Mönchengladbach:
+        query: Mönchengladbach, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 261001
+        location: 51°12′N 6°26′E / 51.200°N 6.433°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Mönchengladbach,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62410
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62410
+        pop_GHSL2023: 267545.6431359052
+      Gelsenkirchen:
+        query: Gelsenkirchen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 260126
+        location: 51°31′N 7°6′E / 51.517°N 7.100°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Gelsenkirchen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62522
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62522
+        pop_GHSL2023: 268021.2257325648
+      Aachen:
+        query: Aachen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 249070
+        location: 50°47′N 6°5′E / 50.783°N 6.083°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Aachen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62564
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62564
+        pop_GHSL2023: 243387.76502981776
+      Braunschweig:
+        query: Braunschweig, Lower Saxony, Germany
+        country: DE
+        state: Lower Saxony
+        population: 248823
+        location: 52°16′N 10°31′E / 52.267°N 10.517°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Braunschweig,+Lower+Saxony,+Germany
+        osm_id:
+        - 62531
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62531
+        pop_GHSL2023: 231285.2623034268
+      Kiel:
+        query: Kiel, Schleswig-Holstein, Germany
+        country: DE
+        state: Schleswig-Holstein
+        population: 246243
+        location: 54°20′N 10°8′E / 54.333°N 10.133°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Kiel,+Schleswig-Holstein,+Germany
+        osm_id:
+        - 27021
+        OSM relation:
+        - https://www.openstreetmap.org/relation/27021
+        pop_GHSL2023: 236948.35277050728
+      Chemnitz:
+        query: Chemnitz, Saxony, Germany
+        country: DE
+        state: Saxony
+        population: 243105
+        location: 50°50′N 12°55′E / 50.833°N 12.917°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Chemnitz,+Saxony,+Germany
+        osm_id:
+        - 62594
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62594
+        pop_GHSL2023: 281487.2192971407
+      Halle (Saale):
+        query: Halle (Saale), Saxony-Anhalt, Germany
+        country: DE
+        state: Saxony-Anhalt
+        population: 238061
+        location: 51°29′N 11°58′E / 51.483°N 11.967°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Halle+(Saale),+Saxony-Anhalt,+Germany
+        osm_id:
+        - 62638
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62638
+        pop_GHSL2023: 226774.07903894776
+      Magdeburg:
+        query: Magdeburg, Saxony-Anhalt, Germany
+        country: DE
+        state: Saxony-Anhalt
+        population: 236188
+        location: 52°8′N 11°37′E / 52.133°N 11.617°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Magdeburg,+Saxony-Anhalt,+Germany
+        osm_id:
+        - 62481
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62481
+        pop_GHSL2023: 239762.95349462883
+      Freiburg im Breisgau:
+        query: Freiburg im Breisgau, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 231848
+        location: 47°59′N 7°51′E / 47.983°N 7.850°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Freiburg+im+Breisgau,+Baden-Württemberg,+Germany
+        osm_id:
+        - 62768
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62768
+        pop_GHSL2023: 252070.2626246958
+      Krefeld:
+        query: Krefeld, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 227050
+        location: 51°20′N 6°34′E / 51.333°N 6.567°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Krefeld,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62748
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62748
+        pop_GHSL2023: 228622.10160866374
+      Mainz:
+        query: Mainz, Rhineland-Palatinate, Germany
+        country: DE
+        state: Rhineland-Palatinate
+        population: 217556
+        location: 50°0′N 8°16′E / 50.000°N 8.267°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Mainz,+Rhineland-Palatinate,+Germany
+        osm_id:
+        - 62630
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62630
+        pop_GHSL2023: 192033.2704339176
+      Lübeck:
+        query: Lübeck, Schleswig-Holstein, Germany
+        country: DE
+        state: Schleswig-Holstein
+        population: 216277
+        location: 53°52′N 10°41′E / 53.867°N 10.683°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Lübeck,+Schleswig-Holstein,+Germany
+        osm_id:
+        - 27027
+        OSM relation:
+        - https://www.openstreetmap.org/relation/27027
+        pop_GHSL2023: 214359.11554070184
+      Erfurt:
+        query: Erfurt, Thuringia, Germany
+        country: DE
+        state: Thuringia
+        population: 213227
+        location: 50°59′N 11°2′E / 50.983°N 11.033°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Erfurt,+Thuringia,+Germany
+        osm_id:
+        - 62745
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62745
+        pop_GHSL2023: 229810.96490019985
+      Oberhausen:
+        query: Oberhausen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 208752
+        location: 51°28′N 6°51′E / 51.467°N 6.850°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Oberhausen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62734
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62734
+        pop_GHSL2023: 210994.3231761455
+      Rostock:
+        query: Rostock, Mecklenburg-Vorpommern, Germany
+        country: DE
+        state: Mecklenburg-Vorpommern
+        population: 208400
+        location: 54°5′N 12°8′E / 54.083°N 12.133°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Rostock,+Mecklenburg-Vorpommern,+Germany
+        osm_id:
+        - 62405
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62405
+        pop_GHSL2023: 180835.00286210616
+      Kassel:
+        query: Kassel, Hesse, Germany
+        country: DE
+        state: Hesse
+        population: 200406
+        location: 51°19′N 9°30′E / 51.317°N 9.500°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Kassel,+Hesse,+Germany
+        osm_id:
+        - 62598
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62598
+        pop_GHSL2023: 195841.11059885466
+      Hagen:
+        query: Hagen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 188713
+        location: 51°22′N 7°29′E / 51.367°N 7.483°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Hagen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 1800297
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1800297
+        pop_GHSL2023: 192985.87121069425
+      Potsdam:
+        query: Potsdam, Brandenburg, Germany
+        country: DE
+        state: Brandenburg
+        population: 183154
+        location: 52°24′N 13°4′E / 52.400°N 13.067°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Potsdam,+Brandenburg,+Germany
+        osm_id:
+        - 62369
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62369
+        pop_GHSL2023: 197204.92013428442
+      Saarbrücken:
+        query: Saarbrücken, Saarland, Germany
+        country: DE
+        state: Saarland
+        population: 179634
+        location: 49°14′N 7°0′E / 49.233°N 7.000°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Saarbrücken,+Saarland,+Germany
+        osm_id:
+        - 1187159
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1187159
+        pop_GHSL2023: 185580.33219028142
+      Hamm:
+        query: Hamm, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 179238
+        location: 51°41′N 7°49′E / 51.683°N 7.817°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Hamm,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62499
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62499
+        pop_GHSL2023: 171828.1519785523
+      Ludwigshafen am Rhein:
+        query: Ludwigshafen am Rhein, Rhineland-Palatinate, Germany
+        country: DE
+        state: Rhineland-Palatinate
+        population: 172145
+        location: 49°29′N 8°26′E / 49.483°N 8.433°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Ludwigshafen+am+Rhein,+Rhineland-Palatinate,+Germany
+        osm_id:
+        - 62347
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62347
+        pop_GHSL2023: 146645.6872336566
+      Mülheim an der Ruhr:
+        query: Mülheim an der Ruhr, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 170739
+        location: 51°26′N 6°53′E / 51.433°N 6.883°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Mülheim+an+der+Ruhr,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62385
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62385
+        pop_GHSL2023: 173668.34945082662
+      Oldenburg:
+        query: Oldenburg, Lower Saxony, Germany
+        country: DE
+        state: Lower Saxony
+        population: 170389
+        location: 53°8′N 8°13′E / 53.133°N 8.217°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Oldenburg,+Lower+Saxony,+Germany
+        osm_id:
+        - 62409
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62409
+        pop_GHSL2023: 149219.0436193719
+      Osnabrück:
+        query: Osnabrück, Lower Saxony, Germany
+        country: DE
+        state: Lower Saxony
+        population: 165034
+        location: 52°17′N 8°3′E / 52.283°N 8.050°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Osnabrück,+Lower+Saxony,+Germany
+        osm_id:
+        - 62631
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62631
+        pop_GHSL2023: 148963.6332005262
+      Leverkusen:
+        query: Leverkusen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 163851
+        location: 51°2′N 6°59′E / 51.033°N 6.983°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Leverkusen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62449
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62449
+        pop_GHSL2023: 151995.9388852119
+      Darmstadt:
+        query: Darmstadt, Hesse, Germany
+        country: DE
+        state: Hesse
+        population: 159631
+        location: 49°52′N 8°39′E / 49.867°N 8.650°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Darmstadt,+Hesse,+Germany
+        osm_id:
+        - 62581
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62581
+        pop_GHSL2023: 143254.62058037517
+      Heidelberg:
+        query: Heidelberg, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 159245
+        location: 49°25′N 8°43′E / 49.417°N 8.717°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Heidelberg,+Baden-Württemberg,+Germany
+        osm_id:
+        - 285864
+        OSM relation:
+        - https://www.openstreetmap.org/relation/285864
+        pop_GHSL2023: 154854.53628560057
+      Solingen:
+        query: Solingen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 158957
+        location: 51°10′N 7°5′E / 51.167°N 7.083°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Solingen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62699
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62699
+        pop_GHSL2023: 158327.46900320047
+      Herne:
+        query: Herne, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 156621
+        location: 51°33′N 7°13′E / 51.550°N 7.217°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Herne,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62396
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62396
+        pop_GHSL2023: 164314.78438377377
+      Regensburg:
+        query: Regensburg, Bavaria, Germany
+        country: DE
+        state: Bavaria
+        population: 153542
+        location: 49°1′N 12°5′E / 49.017°N 12.083°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Regensburg,+Bavaria,+Germany
+        osm_id:
+        - 62411
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62411
+        pop_GHSL2023: 151635.27298718685
+      Neuss:
+        query: Neuss, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 152731
+        location: 51°12′N 6°42′E / 51.200°N 6.700°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Neuss,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 163307
+        OSM relation:
+        - https://www.openstreetmap.org/relation/163307
+        pop_GHSL2023: 169732.4745044112
+      Paderborn:
+        query: Paderborn, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 152531
+        location: 51°43′N 8°46′E / 51.717°N 8.767°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Paderborn,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 5610766
+        OSM relation:
+        - https://www.openstreetmap.org/relation/5610766
+        pop_GHSL2023: 93098.35931211707
+      Ingolstadt:
+        query: Ingolstadt, Bavaria, Germany
+        country: DE
+        state: Bavaria
+        population: 138016
+        location: 48°46′N 11°26′E / 48.767°N 11.433°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Ingolstadt,+Bavaria,+Germany
+        osm_id:
+        - 62381
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62381
+        pop_GHSL2023: 124418.21458852934
+      Offenbach am Main:
+        query: Offenbach am Main, Hesse, Germany
+        country: DE
+        state: Hesse
+        population: 131295
+        location: 50°6′N 8°48′E / 50.100°N 8.800°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Offenbach+am+Main,+Hesse,+Germany
+        osm_id:
+        - 62695
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62695
+        pop_GHSL2023: 109759.49343144891
+      Fürth:
+        query: Fürth, Bavaria, Germany
+        country: DE
+        state: Bavaria
+        population: 129122
+        location: 49°28′N 11°0′E / 49.467°N 11.000°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Fürth,+Bavaria,+Germany
+        osm_id:
+        - 62374
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62374
+        pop_GHSL2023: 147272.84554243082
+      Ulm:
+        query: Ulm, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 126949
+        location: 48°24′N 9°59′E / 48.400°N 9.983°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Ulm,+Baden-Württemberg,+Germany
+        osm_id:
+        - 62495
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62495
+        pop_GHSL2023: 117743.99580718306
+      Würzburg:
+        query: Würzburg, Bavaria, Germany
+        country: DE
+        state: Bavaria
+        population: 126933
+        location: 49°47′N 9°56′E / 49.783°N 9.933°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Würzburg,+Bavaria,+Germany
+        osm_id:
+        - 62464
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62464
+        pop_GHSL2023: 128355.29968417247
+      Heilbronn:
+        query: Heilbronn, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 125613
+        location: 49°9′N 9°13′E / 49.150°N 9.217°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Heilbronn,+Baden-Württemberg,+Germany
+        osm_id:
+        - 62751
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62751
+        pop_GHSL2023: 116836.40956012529
+      Pforzheim:
+        query: Pforzheim, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 125529
+        location: 48°54′N 8°43′E / 48.900°N 8.717°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Pforzheim,+Baden-Württemberg,+Germany
+        osm_id:
+        - 62471
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62471
+        pop_GHSL2023: 114279.89176134576
+      Wolfsburg:
+        query: Wolfsburg, Lower Saxony, Germany
+        country: DE
+        state: Lower Saxony
+        population: 123949
+        location: 52°25′23″N 10°47′14″E / 52.42306°N 10.78722°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Wolfsburg,+Lower+Saxony,+Germany
+        osm_id:
+        - 62418
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62418
+        pop_GHSL2023: 114474.95202474817
+      Bottrop:
+        query: Bottrop, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 117311
+        location: 51°31′29″N 6°55′22″E / 51.52472°N 6.92278°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bottrop,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 62634
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62634
+        pop_GHSL2023: 120419.19062280792
+      Göttingen:
+        query: Göttingen, Lower Saxony, Germany
+        country: DE
+        state: Lower Saxony
+        population: 116557
+        location: 51°32′N 9°56′E / 51.533°N 9.933°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Göttingen,+Lower+Saxony,+Germany
+        osm_id:
+        - 191361
+        OSM relation:
+        - https://www.openstreetmap.org/relation/191361
+        pop_GHSL2023: 124678.53125402467
+      Reutlingen:
+        query: Reutlingen, Baden-Württemberg, Germany
+        country: DE
+        state: Baden-Württemberg
+        population: 116456
+        location: 48°29′N 9°13′E / 48.483°N 9.217°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Reutlingen,+Baden-Württemberg,+Germany
+        osm_id:
+        - 2772661
+        OSM relation:
+        - https://www.openstreetmap.org/relation/2772661
+        pop_GHSL2023: 121992.67420992251
+      Koblenz:
+        query: Koblenz, Rhineland-Palatinate, Germany
+        country: DE
+        state: Rhineland-Palatinate
+        population: 113638
+        location: 50°21′35″N 7°35′52″E / 50.35972°N 7.59778°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Koblenz,+Rhineland-Palatinate,+Germany
+        osm_id:
+        - 62512
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62512
+        pop_GHSL2023: 121517.91575462554
+      Erlangen:
+        query: Erlangen, Bavaria, Germany
+        country: DE
+        state: Bavaria
+        population: 113292
+        location: 49°35′N 11°1′E / 49.583°N 11.017°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Erlangen,+Bavaria,+Germany
+        osm_id:
+        - 62403
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62403
+        pop_GHSL2023: 126349.33028798547
+      Bremerhaven:
+        query: Bremerhaven, Bremen, Germany
+        country: DE
+        state: Bremen
+        population: 113173
+        location: 53°33′N 8°35′E / 53.550°N 8.583°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bremerhaven,+Bremen,+Germany
+        osm_id:
+        - 62658
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62658
+        pop_GHSL2023: 113689.3916842702
+      Remscheid:
+        query: Remscheid, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 111770
+        location: 51°11′N 7°12′E / 51.183°N 7.200°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Remscheid,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 11799931
+        OSM relation:
+        - https://www.openstreetmap.org/relation/11799931
+        pop_GHSL2023: 55548.23748469351
+      Bergisch Gladbach:
+        query: Bergisch Gladbach, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 111645
+        location: 51°6′N 7°7′E / 51.100°N 7.117°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Bergisch+Gladbach,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 173103
+        OSM relation:
+        - https://www.openstreetmap.org/relation/173103
+        pop_GHSL2023: 116460.2804894326
+      Recklinghausen:
+        query: Recklinghausen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 110714
+        location: 51°35′6″N 7°9′43″E / 51.58500°N 7.16194°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Recklinghausen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 56665
+        OSM relation:
+        - https://www.openstreetmap.org/relation/56665
+        pop_GHSL2023: 118133.97546708581
+      Trier:
+        query: Trier, Rhineland-Palatinate, Germany
+        country: DE
+        state: Rhineland-Palatinate
+        population: 110570
+        location: 49°45′N 6°38′E / 49.750°N 6.633°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Trier,+Rhineland-Palatinate,+Germany
+        osm_id:
+        - 172679
+        OSM relation:
+        - https://www.openstreetmap.org/relation/172679
+        pop_GHSL2023: 124173.42026184776
+      Jena:
+        query: Jena, Thuringia, Germany
+        country: DE
+        state: Thuringia
+        population: 110502
+        location: 50°55′38″N 11°35′10″E / 50.92722°N 11.58611°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Jena,+Thuringia,+Germany
+        osm_id:
+        - 62693
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62693
+        pop_GHSL2023: 96349.92435650199
+      Moers:
+        query: Moers, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 103725
+        location: 51°27′33″N 6°37′11″E / 51.45917°N 6.61972°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Moers,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 58623
+        OSM relation:
+        - https://www.openstreetmap.org/relation/58623
+        pop_GHSL2023: 107912.45186328885
+      Salzgitter:
+        query: Salzgitter, Lower Saxony, Germany
+        country: DE
+        state: Lower Saxony
+        population: 103694
+        location: 52°9′N 10°20′E / 52.150°N 10.333°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Salzgitter,+Lower+Saxony,+Germany
+        osm_id:
+        - 62659
+        OSM relation:
+        - https://www.openstreetmap.org/relation/62659
+        pop_GHSL2023: 95014.67304599934
+      Siegen:
+        query: Siegen, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 101516
+        location: 50°53′N 8°1′E / 50.883°N 8.017°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Siegen,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 163256
+        OSM relation:
+        - https://www.openstreetmap.org/relation/163256
+        pop_GHSL2023: 111237.85921204832
+      Gütersloh:
+        query: Gütersloh, North Rhine-Westphalia, Germany
+        country: DE
+        state: North Rhine-Westphalia
+        population: 101158
+        location: 51°54′N 8°23′E / 51.900°N 8.383°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Gütersloh,+North+Rhine-Westphalia,+Germany
+        osm_id:
+        - 138119
+        OSM relation:
+        - https://www.openstreetmap.org/relation/138119
+        pop_GHSL2023: 89440.50304740664
+      Hildesheim:
+        query: Hildesheim, Lower Saxony, Germany
+        country: DE
+        state: Lower Saxony
+        population: 100319
+        location: 52°9′N 9°57′E / 52.150°N 9.950°E
+        nominatim link:
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Hildesheim,+Lower+Saxony,+Germany
+        osm_id:
+        - 1176503
+        OSM relation:
+        - https://www.openstreetmap.org/relation/1176503
+
+        pop_GHSL2023: 108481.75792009567

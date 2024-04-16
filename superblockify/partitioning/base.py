@@ -1,4 +1,5 @@
 """BasePartitioner parent and dummy."""  # pylint: disable=too-many-lines
+
 import pickle
 from abc import ABC, abstractmethod
 from itertools import chain
@@ -35,14 +36,7 @@ from .utils import (
     reduce_graph,
 )
 from .. import attribute
-from ..config import (
-    logger,
-    GRAPH_DIR,
-    RESULTS_DIR,
-    NETWORK_FILTER,
-    PLOT_SUFFIX,
-    MAX_NODES,
-)
+from ..config import logger, Config
 from ..graph_stats import calculate_component_metrics
 from ..metrics.metric import Metric
 from ..plot import save_plot
@@ -85,7 +79,7 @@ class BasePartitioner(ABC):
         unit="time",
         graph=None,
         reload_graph=False,
-        max_nodes=MAX_NODES,
+        max_nodes=Config.MAX_NODES,
     ):
         """Constructing a BasePartitioner
 
@@ -155,7 +149,7 @@ class BasePartitioner(ABC):
             )
 
         # First check weather a graph is found under GRAPH_DIR/city_name.graphml
-        graph_path = join(GRAPH_DIR, f"{city_name}.graphml")
+        graph_path = join(Config.GRAPH_DIR, f"{city_name}.graphml")
         if exists(graph_path):
             self.graph = self.load_or_find_graph(city_name, search_str, reload_graph)
         elif search_str is not None:
@@ -173,7 +167,7 @@ class BasePartitioner(ABC):
         show_graph_stats(self.graph)
 
         # Create results directory
-        self.results_dir = join(RESULTS_DIR, name)
+        self.results_dir = join(Config.RESULTS_DIR, name)
         if not exists(self.results_dir):
             makedirs(self.results_dir)
 
@@ -248,25 +242,31 @@ class BasePartitioner(ABC):
             if self.partitions:
                 fig, _ = plot_partition_graph(self)
                 save_plot(
-                    self.results_dir, fig, f"{self.name}_partition_graph.{PLOT_SUFFIX}"
+                    self.results_dir,
+                    fig,
+                    f"{self.name}_partition_graph.{Config.PLOT_SUFFIX}",
                 )
                 plt.show()
             fig, _ = plot_subgraph_component_size(self, "length")
             save_plot(
                 self.results_dir,
                 fig,
-                f"{self.name}_subgraph_component_size.{PLOT_SUFFIX}",
+                f"{self.name}_subgraph_component_size.{Config.PLOT_SUFFIX}",
             )
             plt.show()
             fig, _ = plot_component_rank_size(self, "length")
             save_plot(
-                self.results_dir, fig, f"{self.name}_component_rank_size.{PLOT_SUFFIX}"
+                self.results_dir,
+                fig,
+                f"{self.name}_component_rank_size.{Config.PLOT_SUFFIX}",
             )
             plt.show()
             if self.components:
                 fig, _ = plot_component_graph(self)
                 save_plot(
-                    self.results_dir, fig, f"{self.name}_component_graph.{PLOT_SUFFIX}"
+                    self.results_dir,
+                    fig,
+                    f"{self.name}_component_graph.{Config.PLOT_SUFFIX}",
                 )
                 plt.show()
             if replace_max_speeds:
@@ -274,7 +274,7 @@ class BasePartitioner(ABC):
                 save_plot(
                     self.results_dir,
                     fig,
-                    f"{self.name}_speed_un_restricted.{PLOT_SUFFIX}",
+                    f"{self.name}_speed_un_restricted.{Config.PLOT_SUFFIX}",
                 )
                 fig.show()
 
@@ -808,7 +808,7 @@ class BasePartitioner(ABC):
         """
 
         # Check if the graph already exists
-        graph_path = join(GRAPH_DIR, city_name + ".graphml")
+        graph_path = join(Config.GRAPH_DIR, city_name + ".graphml")
         if exists(graph_path) and not reload_graph:
             logger.debug("Loading graph from %s", graph_path)
             graph = load_graphml_dtypes(graph_path)
@@ -818,7 +818,7 @@ class BasePartitioner(ABC):
                 save_as=graph_path,
                 search_string=search_str,
                 add_population=True,
-                custom_filter=NETWORK_FILTER,
+                custom_filter=Config.NETWORK_FILTER,
                 simplify=True,
             )
             logger.debug("Saving graph to %s", graph_path)
@@ -896,7 +896,9 @@ class BasePartitioner(ABC):
             # Restore metric
             self.metric = metric
 
-    def save_key_figures(self, save_dir=join(RESULTS_DIR, "key_figures"), name=None):
+    def save_key_figures(
+        self, save_dir=join(Config.RESULTS_DIR, "key_figures"), name=None
+    ):
         """Save key figures.
 
         Only saves graph attributes, essential metrics and the basic graph stats of
@@ -961,13 +963,13 @@ class BasePartitioner(ABC):
         """
 
         # Load partitioner
-        partitioner_path = join(RESULTS_DIR, name, name + ".partitioner")
+        partitioner_path = join(Config.RESULTS_DIR, name, name + ".partitioner")
         logger.debug("Loading partitioner from %s", partitioner_path)
         with open(partitioner_path, "rb") as file:
             partitioner = pickle.load(file)
 
         # Load metric
-        metric_path = join(RESULTS_DIR, name, name + ".metrics")
+        metric_path = join(Config.RESULTS_DIR, name, name + ".metrics")
         if exists(metric_path):
             logger.debug("Loading metric from %s", metric_path)
             partitioner.metric = Metric.load(name)
@@ -995,14 +997,14 @@ class BasePartitioner(ABC):
         """
 
         # Load graph - if possible from RESULTS_DIR, else from GRAPH_DIR
-        graph_path = join(RESULTS_DIR, name, name + ".graphml")
+        graph_path = join(Config.RESULTS_DIR, name, name + ".graphml")
         if exists(graph_path):
             logger.debug("Loading graph from %s", graph_path)
             partitioner.graph = load_graphml_dtypes(
                 graph_path, partitioner.attribute_label, partitioner.attribute_dtype
             )
         else:
-            graph_path = join(GRAPH_DIR, partitioner.city_name + ".graphml")
+            graph_path = join(Config.GRAPH_DIR, partitioner.city_name + ".graphml")
             if exists(graph_path):
                 logger.debug("Loading graph from %s", graph_path)
                 partitioner.graph = load_graphml_dtypes(
@@ -1016,16 +1018,16 @@ class BasePartitioner(ABC):
         if partitioner.components is not None:
             for i, component in enumerate(partitioner.components):
                 if "subgraph" in component:
-                    partitioner.components[i][
-                        "subgraph"
-                    ] = partitioner.graph.edge_subgraph(component["subgraph"].edges)
+                    partitioner.components[i]["subgraph"] = (
+                        partitioner.graph.edge_subgraph(component["subgraph"].edges)
+                    )
         # Graphs of self.partitions need to be converted to be subgraphs of self.graph.
         if partitioner.partitions is not None:
             for i, partition in enumerate(partitioner.partitions):
                 if "subgraph" in partition:
-                    partitioner.partitions[i][
-                        "subgraph"
-                    ] = partitioner.graph.edge_subgraph(partition["subgraph"].edges)
+                    partitioner.partitions[i]["subgraph"] = (
+                        partitioner.graph.edge_subgraph(partition["subgraph"].edges)
+                    )
         # Convert self.sparsified to subgraph of self.graph.
         if partitioner.sparsified is not None:
             partitioner.sparsified = partitioner.graph.edge_subgraph(

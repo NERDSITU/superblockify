@@ -1,4 +1,5 @@
 """Dummy partitioner."""
+
 from networkx import weakly_connected_components
 from numpy import mean, min as npmin, max as npmax
 from typing_extensions import deprecated

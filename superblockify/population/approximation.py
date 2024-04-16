@@ -2,6 +2,7 @@
 
 See reference notebook for a detailed description of the population approximation.
 """
+
 from functools import partial
 from multiprocessing import Pool
 
@@ -193,7 +194,7 @@ def get_edge_population(graph, batch_size=10000, **tess_kwargs):
     ghsl_polygons_index = STRtree(ghsl_polygons.geometry)
 
     # Add columns for population and area
-    edge_cells["population"] = 0
+    edge_cells["population"] = 0.0
     batch_size = int(min(batch_size, len(edge_cells)))
     with Pool() as pool:
         slices = (

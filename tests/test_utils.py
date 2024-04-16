@@ -1,4 +1,6 @@
 """Tests for the utils module."""
+
+from logging import DEBUG
 from os import remove
 from os.path import exists, join
 
@@ -7,7 +9,7 @@ from networkx import Graph, MultiDiGraph
 from numpy import array, array_equal, int32, int64, inf, nan, isnan
 from shapely import MultiPolygon, Polygon
 
-from superblockify.config import TEST_DATA_PATH
+from superblockify.config import Config, set_log_level
 from superblockify.utils import (
     load_graph_from_place,
     has_pairwise_overlap,
@@ -27,7 +29,7 @@ def test_load_graph_from_place(only_cache, max_nodes):
     """Test that the load_graph_from_place function works."""
 
     graph = load_graph_from_place(
-        join(TEST_DATA_PATH, "cities", "Adliswil.graphml"),
+        join(Config.TEST_DATA_PATH, "cities", "Adliswil.graphml"),
         "Adliswil, Bezirk Horgen, Zürich, Switzerland",
         add_population=True,
         network_type="drive",
@@ -70,7 +72,7 @@ def test_load_graph_from_place_search_str_types(city, search_string):
     """Test that the load_graph_from_place function works with different search string
     types."""
     graph = load_graph_from_place(
-        save_as=join(TEST_DATA_PATH, "cities", f"{city}_query_test.graphml"),
+        save_as=join(Config.TEST_DATA_PATH, "cities", f"{city}_query_test.graphml"),
         search_string=search_string,
         network_type="drive",
     )
@@ -85,7 +87,7 @@ def _delete_query_test_graphs():
     """Delete the query test graphs."""
     yield
     for city in ["CPH-str", "CPH-list", "CPH-osmid", "CPH-osmid-list"]:
-        filepath = join(TEST_DATA_PATH, "cities", f"{city}_query_test.graphml")
+        filepath = join(Config.TEST_DATA_PATH, "cities", f"{city}_query_test.graphml")
         if exists(filepath):
             remove(filepath)
 
@@ -363,3 +365,36 @@ def test_compare_components_and_partitions(list1, list2, expected):
         assert compare_components_and_partitions(list1, list1) is True
     else:
         assert compare_components_and_partitions(list1, list2) == expected
+
+
+@pytest.mark.parametrize(
+    "level",
+    [
+        10,
+        20,
+        30,
+        40,
+        50,
+        "DEBUG",
+        "INFO",
+        "WARNING",
+        "ERROR",
+        DEBUG,
+    ],
+)
+def test_set_level(level):
+    """Test `set_log_level`."""
+    set_log_level(level)
+
+
+@pytest.mark.parametrize("level", ["DEBUG1", ""])
+def test_set_level_value_error(level):
+    """Test `set_log_level` exception handling."""
+    with pytest.raises(ValueError):
+        set_log_level(level)
+
+
+def test_set_level_type_error():
+    """Test `set_log_level` exception handling."""
+    with pytest.raises(TypeError):
+        set_log_level(None)  # type: ignore

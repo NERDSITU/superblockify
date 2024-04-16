@@ -1,4 +1,5 @@
 """Tests for the tessellation module."""
+
 import pytest
 from shapely import Polygon, MultiPolygon
 

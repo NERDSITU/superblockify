@@ -1,4 +1,5 @@
 """Tests for the ghsl module."""
+
 from os.path import join, isfile
 from shutil import rmtree
 
@@ -7,7 +8,7 @@ from affine import Affine
 from geopandas import GeoDataFrame
 from numpy import ndarray
 
-from superblockify.config import TEST_DATA_PATH
+from superblockify.config import Config
 from superblockify.population import ghsl
 
 
@@ -190,7 +191,7 @@ BASE_PATH = (
 )
 def test_download_ghsl(urls, _delete_ghsl_tifs):
     """Test the download_ghsl function."""
-    filepaths = ghsl.download_ghsl(urls, save_dir=TEST_DATA_PATH)
+    filepaths = ghsl.download_ghsl(urls, save_dir=Config.TEST_DATA_PATH)
     assert (
         isinstance(filepaths, list)
         and isinstance(urls, list)
@@ -211,11 +212,11 @@ BASE_PATH = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/"
         (  # non-existent tile
             "GHS_POP_GLOBE_R2023A/GHS_POP_E2025_GLOBE_R2023A_54009_100/V1-0/tiles/"
             "GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0_R18_C27.zip",
-            TEST_DATA_PATH,
+            Config.TEST_DATA_PATH,
         ),
         (  # non-zip file
             "copyright.txt",
-            TEST_DATA_PATH,
+            Config.TEST_DATA_PATH,
         ),
     ],
 )
@@ -231,17 +232,17 @@ def test_download_ghsl_create_save_dir(_delete_ghsl_tifs):
         "GHS_POP_GLOBE_R2023A/GHS_POP_E2025_GLOBE_R2023A_54009_100/V1-0/tiles/"
         "GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0_R18_C26.zip"
     )
-    ghsl.download_ghsl(url, save_dir=join(TEST_DATA_PATH, "non-existent-dir"))
+    ghsl.download_ghsl(url, save_dir=join(Config.TEST_DATA_PATH, "non-existent-dir"))
     # Check files exist in save_dir
     assert isfile(
         join(
-            TEST_DATA_PATH,
+            Config.TEST_DATA_PATH,
             "non-existent-dir",
             "GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0_R18_C26.tif",
         )
     )
     # Delete folder
-    rmtree(join(TEST_DATA_PATH, "non-existent-dir"))
+    rmtree(join(Config.TEST_DATA_PATH, "non-existent-dir"))
 
 
 def test_download_ghsl_connection_error():
@@ -266,13 +267,13 @@ def test_download_ghsl_connection_timeout():
     [
         (
             join(
-                TEST_DATA_PATH,
+                Config.TEST_DATA_PATH,
                 "ghsl",
                 "GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0_R10_C29.tif",
             ),
             None,
             join(
-                TEST_DATA_PATH,
+                Config.TEST_DATA_PATH,
                 "ghsl",
                 "GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0_R10_C29.tif",
             ),
@@ -296,9 +297,9 @@ def test_download_ghsl_connection_timeout():
 )
 def test_get_ghsl(full_raster, bbox_moll, expected, monkeypatch, _delete_ghsl_tifs):
     """Test the get_ghsl_urls function.
-    Overwrite the config.FULL_RASTER value with FULL_RASTER_val.
+    Overwrite the config.Config.FULL_RASTER value with full_raster.
     """
-    monkeypatch.setattr(ghsl, "FULL_RASTER", full_raster)
+    Config.FULL_RASTER = full_raster
     # mock download_ghsl not to download the files
     monkeypatch.setattr(ghsl, "download_ghsl", lambda ghsl_urls: ghsl_urls)
     urls = ghsl.get_ghsl(bbox_moll=bbox_moll)
@@ -325,10 +326,10 @@ def test_get_ghsl(full_raster, bbox_moll, expected, monkeypatch, _delete_ghsl_ti
         ),
     ],
 )
-def test_get_ghsl_invalid(full_raster, bbox_moll, monkeypatch):
+def test_get_ghsl_invalid(full_raster, bbox_moll):
     """Test the get_ghsl_urls with invalid inputs.
-    Overwrite the config.FULL_RASTER value with FULL_RASTER_val.
+    Overwrite the config.Config.FULL_RASTER value with full_raster.
     """
-    monkeypatch.setattr(ghsl, "FULL_RASTER", full_raster)
+    Config.FULL_RASTER = full_raster
     with pytest.raises(ValueError):
         ghsl.get_ghsl(bbox_moll=bbox_moll)

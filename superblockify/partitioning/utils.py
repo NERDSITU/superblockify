@@ -1,4 +1,5 @@
 """Utility functions for Partitioners."""
+
 from os import remove
 from os.path import exists, join
 from uuid import uuid4
@@ -6,7 +7,8 @@ from uuid import uuid4
 from geopandas import GeoDataFrame
 from networkx import set_edge_attributes, strongly_connected_components
 from numpy import generic
-from osmnx import graph_to_gdfs, get_undirected
+from osmnx import graph_to_gdfs
+from osmnx.convert import to_undirected
 from pandas import DataFrame
 from shapely import Point, Geometry
 from shapely.ops import substring
@@ -384,7 +386,7 @@ def split_up_isolated_edges_directed(graph, sparsified):
             if (u, v, k) not in sparsified.edges(keys=True)
         ]
     )
-    rest_un = get_undirected(rest)
+    rest_un = to_undirected(rest)
 
     # for u, v, k, d in rest.edges(keys=True, data=True):
     for u_isol, v_isol in [
@@ -450,22 +452,22 @@ def split_up_isolated_edges_directed(graph, sparsified):
                     middle_id,
                     k,
                     **data_p,
-                    cell_id=cell_id
-                    if cell_id is None
-                    else cell_id
-                    if u_parallel == start_node
-                    else -cell_id,
+                    cell_id=(
+                        cell_id
+                        if cell_id is None
+                        else cell_id if u_parallel == start_node else -cell_id
+                    ),
                 )
                 graph.add_edge(
                     middle_id,
                     v_parallel,
                     k,
                     **data_p,
-                    cell_id=cell_id
-                    if cell_id is None
-                    else cell_id
-                    if v_parallel == start_node
-                    else -cell_id,
+                    cell_id=(
+                        cell_id
+                        if cell_id is None
+                        else cell_id if v_parallel == start_node else -cell_id
+                    ),
                 )
 
             else:
@@ -476,11 +478,11 @@ def split_up_isolated_edges_directed(graph, sparsified):
                     k,
                     **data_p,
                     geometry=substring(geom, 0, geom.project(middle)),
-                    cell_id=cell_id
-                    if cell_id is None
-                    else cell_id
-                    if u_parallel == start_node
-                    else -cell_id,
+                    cell_id=(
+                        cell_id
+                        if cell_id is None
+                        else cell_id if u_parallel == start_node else -cell_id
+                    ),
                 )
                 graph.add_edge(
                     middle_id,
@@ -488,11 +490,11 @@ def split_up_isolated_edges_directed(graph, sparsified):
                     k,
                     **data_p,
                     geometry=substring(geom, geom.project(middle), geom.length),
-                    cell_id=cell_id
-                    if cell_id is None
-                    else cell_id
-                    if v_parallel == start_node
-                    else -cell_id,
+                    cell_id=(
+                        cell_id
+                        if cell_id is None
+                        else cell_id if v_parallel == start_node else -cell_id
+                    ),
                 )
             # Remove the original edge
             graph.remove_edge(u_parallel, v_parallel, k)

@@ -1,4 +1,5 @@
 """Check which cities are done."""
+
 from itertools import product
 from os.path import join, dirname, exists
 from sys import path
@@ -11,16 +12,14 @@ path.append(join(dirname(__file__), "..", ".."))
 
 from scripts.analysis.config import combinations, short_name_combination
 
-from superblockify.config import (
-    RESULTS_DIR,
-    PLACES_100_CITIES,
-    PLACES_GERMANY,
-)
+from superblockify.config import Config
 
 if __name__ == "__main__":
     # For every city in the list of cities check how many folders with the file done
     # exist
-    PLACES_100_CITIES = list(PLACES_100_CITIES.keys()) + list(PLACES_GERMANY.keys())
+    PLACES_100_CITIES = list(Config.PLACES_100_CITIES.keys()) + list(
+        Config.PLACES_GERMANY.keys()
+    )
     combinations = list(combinations)
     # Pandas dataframe with all cities and combinations
     availability = DataFrame(
@@ -34,7 +33,9 @@ if __name__ == "__main__":
     for i, row in availability.iterrows():
         city, combination, _ = row
         availability.loc[i, "combination"] = short_name_combination(combination)
-        folder = join(RESULTS_DIR, city + "_" + availability.loc[i, "combination"])
+        folder = join(
+            Config.RESULTS_DIR, city + "_" + availability.loc[i, "combination"]
+        )
         if exists(join(folder, "done")):
             availability.loc[i, "done"] = True
         elif exists(join(folder, "load_err")):

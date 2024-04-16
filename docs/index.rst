@@ -1,13 +1,16 @@
 :notoc:
 
 ***************************
-Superblockify documentation
+superblockify documentation
 ***************************
 
-On these pages you can find documentation for Superblockify.
+On these pages you can find documentation for superblockify.
 
-To set up Superblockify, see the `Getting started <getting_started>`__ page, more on
-the details of the inner workings can be found on the `Reference pages <guide>`__.
+To set up superblockify, see the `Installation <installation>`__ page.
+To use superblockify, the `Usage <usage>`__ page
+is a good place to start.
+More on the details of the inner workings can be found on
+the `Reference pages <guide>`__.
 Furthermore, you can also find the `API documentation <api/index.html>`__.
 
 .. toctree::
@@ -15,7 +18,8 @@ Furthermore, you can also find the `API documentation <api/index.html>`__.
    :maxdepth: 1
    :glob:
 
-   getting_started
+   installation
+   usage
    guide/index
    api/index
    changelog

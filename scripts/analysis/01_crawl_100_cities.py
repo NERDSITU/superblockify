@@ -131,6 +131,10 @@ def update_nominatim_links():
 
     # update nominatim links and add a link to first found OSM relation
     for place_list in cities["place_lists"]:
+        # ask if user wants to update this list
+        print(f"Do you want to update the Nominatim links for {place_list}? (y/n)")
+        if input().lower() != "y":
+            continue
         for data in tqdm(
             cities["place_lists"][place_list]["cities"].values(),
             desc=f"Updating {place_list}",
@@ -203,6 +207,10 @@ def add_population_approximations():
 
     # add population approximations
     for place_list in cities["place_lists"]:
+        # ask if user wants to update this list
+        print(f"Do you want to add population approximations for {place_list}? (y/n)")
+        if input().lower() != "y":
+            continue
         for place_name, data in tqdm(
             cities["place_lists"][place_list]["cities"].items(),
             desc=f"Updating {place_list}",

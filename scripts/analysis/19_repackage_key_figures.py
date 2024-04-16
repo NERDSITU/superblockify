@@ -9,6 +9,7 @@ For each configuration we will combine all key figures into one dataframe and
 save it as a .feather file. Is then called how the configuration is called
 plus "_key_figures.feather".
 """
+
 from glob import glob
 from os.path import join
 

@@ -1,4 +1,5 @@
 """Tests for the graph statistics module."""
+
 import pytest
 from shapely import Polygon, MultiPolygon
 

@@ -2,6 +2,7 @@
 larger `MAX_NODES` than you want to work with, you can use this script to reduce the
 already saved graphs.
 """
+
 from os import listdir
 from os.path import join
 from shutil import move
@@ -9,7 +10,7 @@ from shutil import move
 from osmnx import save_graphml
 
 from superblockify.partitioning.utils import reduce_graph
-from superblockify.config import logger, GRAPH_DIR
+from superblockify.config import logger, Config
 from superblockify.utils import load_graphml_dtypes
 
 # from sys import path
@@ -19,10 +20,10 @@ MAX_NODES = 20_000
 
 if __name__ == "__main__":
     # Loop over all graphs in GRAPH_DIR (.graphml files)
-    for graph_file in listdir(GRAPH_DIR):
+    for graph_file in listdir(Config.GRAPH_DIR):
         if not graph_file.endswith(".graphml"):
             continue
-        graph_path = join(GRAPH_DIR, graph_file)
+        graph_path = join(Config.GRAPH_DIR, graph_file)
         logger.info("Loading graph from %s", graph_path)
         graph = load_graphml_dtypes(graph_path)
         if graph.number_of_nodes() <= MAX_NODES:
@@ -33,7 +34,7 @@ if __name__ == "__main__":
         graph = reduce_graph(graph, max_nodes=MAX_NODES)
         # Backup graph - move to subfolder "unreduced"
         logger.info("Moving old graph to subfolder 'unreduced'")
-        move(graph_path, join(GRAPH_DIR, "unreduced", graph_file))
+        move(graph_path, join(Config.GRAPH_DIR, "unreduced", graph_file))
         # Save graph
         logger.info("Saving graph to %s", graph_path)
         save_graphml(graph, graph_path)

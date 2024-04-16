@@ -1,4 +1,5 @@
 """A approximation of the minimum Steiner tree."""
+
 from networkx import set_edge_attributes, strongly_connected_components
 from networkx.algorithms.approximation.steinertree import steiner_tree
 from numpy import min as npmin, max as npmax, sum as npsum
@@ -137,10 +138,12 @@ class MinimumPartitioner(AttributePartitioner):
         set_edge_attributes(
             self.graph,
             {
-                (u, v, k): 1
-                if (u, v) in st_trees.edges(keys=False)
-                or (v, u) in st_trees.edges(keys=False)
-                else 0
+                (u, v, k): (
+                    1
+                    if (u, v) in st_trees.edges(keys=False)
+                    or (v, u) in st_trees.edges(keys=False)
+                    else 0
+                )
                 for u, v, k in self.graph.edges(keys=True)
             },
             name=self.attribute_label,

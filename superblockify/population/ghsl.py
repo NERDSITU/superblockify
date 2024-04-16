@@ -1,6 +1,8 @@
 """GHSL IO functions for the population submodule of the superblockify package."""
+
 from io import BytesIO
-from os import path, mkdir
+from os import path
+from pathlib import Path
 from zipfile import ZipFile
 
 import requests
@@ -9,7 +11,7 @@ from rasterio import open as rasopen
 from rasterio.enums import Resampling
 from rasterio.windows import Window
 
-from ..config import logger, GHSL_DIR, FULL_RASTER, DOWNLOAD_TIMEOUT
+from ..config import logger, Config
 
 
 def resample_load_window(file, resample_factor=1, window=None, res_strategy=None):
@@ -112,13 +114,13 @@ def get_ghsl(bbox_moll=None):
     ValueError
         If the bounding box has invalid coordinates.
     """
-    if FULL_RASTER:
-        if not path.isfile(FULL_RASTER):
+    if Config.FULL_RASTER:
+        if not path.isfile(Config.FULL_RASTER):
             raise ValueError(
-                f"The given full GHSL raster path {FULL_RASTER} does not exist."
+                f"The given full GHSL raster path {Config.FULL_RASTER} does not exist."
             )
-        logger.info("Using the full GHSL raster at %s.", FULL_RASTER)
-        return FULL_RASTER
+        logger.info("Using the full GHSL raster at %s.", Config.FULL_RASTER)
+        return Config.FULL_RASTER
     if bbox_moll is None:
         raise ValueError(
             "The full GHSL raster is not available, and no bounding box was given. "
@@ -229,7 +231,7 @@ def row_col(y_moll, x_moll):
     return row, min(col, 36)
 
 
-def download_ghsl(urls, save_dir=GHSL_DIR, timeout=DOWNLOAD_TIMEOUT):
+def download_ghsl(urls, save_dir=Config.GHSL_DIR, timeout=Config.DOWNLOAD_TIMEOUT):
     """Download the GHSL population raster tile.
 
     Check if the raster tiles are already downloaded, and if not, download and unpack
@@ -264,7 +266,7 @@ def download_ghsl(urls, save_dir=GHSL_DIR, timeout=DOWNLOAD_TIMEOUT):
     """
     if not path.exists(save_dir):
         logger.debug("Creating GHSL directory at %s...", save_dir)
-        mkdir(save_dir)
+        Path(save_dir).mkdir(exist_ok=True, parents=True)
     files = []
     for url in urls if isinstance(urls, (list, tuple)) else [urls]:
         # Check if file already exists at the save_dir

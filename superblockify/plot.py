@@ -1,4 +1,5 @@
 """Plotting functions."""
+
 from os import path
 
 import networkx as nx
@@ -8,6 +9,8 @@ from matplotlib import pyplot as plt
 
 from .attribute import determine_minmax_val, new_edge_attribute_by_function
 from .config import logger
+
+plt.set_loglevel("info")
 
 
 def paint_streets(graph, cmap="hsv", **pg_kwargs):
@@ -164,9 +167,9 @@ def plot_by_attribute(
             make_edge_color_list(
                 graph,
                 attr=edge_attr,
-                cmap=plt.get_cmap(edge_cmap)
-                if isinstance(edge_cmap, str)
-                else edge_cmap,
+                cmap=(
+                    plt.get_cmap(edge_cmap) if isinstance(edge_cmap, str) else edge_cmap
+                ),
                 attr_types=edge_attr_types,
                 minmax_val=edge_minmax_val,
                 none_color=(0, 0, 0, 1),  # black
@@ -187,9 +190,9 @@ def plot_by_attribute(
             make_node_color_list(
                 graph,
                 attr=node_attr,
-                cmap=plt.get_cmap(node_cmap)
-                if isinstance(node_cmap, str)
-                else node_cmap,
+                cmap=(
+                    plt.get_cmap(node_cmap) if isinstance(node_cmap, str) else node_cmap
+                ),
                 attr_types=node_attr_types,
                 minmax_val=node_minmax_val,
                 none_color=(0, 0, 0, 0),  # transparent
@@ -398,16 +401,20 @@ def make_color_list(
         minmax_val = determine_minmax_val(graph, minmax_val, attr, attr_type=obj_type)
         if obj_type == "edge":
             return [
-                cmap((attr_val - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
-                if attr_val is not None
-                else none_color
+                (
+                    cmap((attr_val - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
+                    if attr_val is not None
+                    else none_color
+                )
                 for u, v, k, attr_val in graph.edges(keys=True, data=attr)
             ]
         # obj_type == "node"
         return [
-            cmap((attr_val - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
-            if attr_val is not None
-            else none_color
+            (
+                cmap((attr_val - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
+                if attr_val is not None
+                else none_color
+            )
             for u, attr_val in graph.nodes(data=attr)
         ]
     if attr_types == "categorical":
@@ -437,16 +444,20 @@ def make_color_list(
 
         if obj_type == "edge":
             return [
-                cmap(unique_vals.index(attr_val) / (len(unique_vals) - 1))
-                if attr_val is not None
-                else none_color
+                (
+                    cmap(unique_vals.index(attr_val) / (len(unique_vals) - 1))
+                    if attr_val is not None
+                    else none_color
+                )
                 for u, v, k, attr_val in graph.edges(keys=True, data=attr)
             ]
         # obj_type == "node"
         return [
-            cmap(unique_vals.index(attr_val) / (len(unique_vals) - 1))
-            if attr_val is not None
-            else none_color
+            (
+                cmap(unique_vals.index(attr_val) / (len(unique_vals) - 1))
+                if attr_val is not None
+                else none_color
+            )
             for u, attr_val in graph.nodes(data=attr)
         ]
     # If attr_types is not 'numerical' or 'categorical', raise an error
@@ -565,17 +576,21 @@ def plot_component_size(
     axe.scatter(
         component_values,
         component_size,
-        c=[
-            colormap((v - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
-            if i is False
-            else "gray"
-            for v, i in zip(component_values, ignore)
-        ]
-        if ignore is not None
-        else [
-            colormap((v - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
-            for v in component_values
-        ],
+        c=(
+            [
+                (
+                    colormap((v - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
+                    if i is False
+                    else "gray"
+                )
+                for v, i in zip(component_values, ignore)
+            ]
+            if ignore is not None
+            else [
+                colormap((v - minmax_val[0]) / (minmax_val[1] - minmax_val[0]))
+                for v in component_values
+            ]
+        ),
         alpha=0.5,
         zorder=2,
         **kwargs,

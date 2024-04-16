@@ -1,11 +1,13 @@
 """Tests for the partitioning utils."""
+
 from os.path import join, exists
 from uuid import UUID, uuid4
 
 import pytest
 from networkx import gnp_random_graph
 from numpy import int64, float64
-from osmnx import graph_to_gdfs, get_undirected
+from osmnx import graph_to_gdfs
+from osmnx.convert import to_undirected
 
 from superblockify.partitioning.utils import (
     show_highway_stats,
@@ -127,7 +129,7 @@ def test_split_up_isolated_edges_directed_higher_orders(
             if (u, v, k) not in part.sparsified.edges(keys=True)
         ]
     )
-    rest_un = get_undirected(rest)
+    rest_un = to_undirected(rest)
     isolated = [
         (u, v)
         for u, v in rest_un.edges()
@@ -141,7 +143,7 @@ def test_split_up_isolated_edges_directed_higher_orders(
     part.graph.add_edges_from(
         [(u_id, v_id, -deg) for deg in range(0, degree - 2)]
         + [(v_id, u_id, -deg) for deg in range(0, degree - 2)],
-        **part.graph.edges[(u_id, v_id, 0)]
+        **part.graph.edges[(u_id, v_id, 0)],
     )
     num_edges, num_nodes = len(part.graph.edges), len(part.graph.nodes)
     split_up_isolated_edges_directed(part.graph, part.sparsified)

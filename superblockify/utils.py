@@ -1,4 +1,5 @@
 """Utility functions for superblockify."""
+
 from ast import literal_eval
 from itertools import chain
 from os.path import getsize
@@ -20,12 +21,12 @@ from numpy import (
     isinf,
     nan,
 )
-from osmnx._errors import CacheOnlyModeInterrupt
+from osmnx._errors import CacheOnlyInterruptError
 from osmnx.stats import count_streets_per_node
 from shapely import wkt
 
 from .partitioning.utils import reduce_graph
-from .config import logger, MAX_NODES
+from .config import logger, Config
 from .graph_stats import basic_graph_stats
 from .population.approximation import add_edge_population
 
@@ -78,7 +79,7 @@ def load_graph_from_place(
     search_string,
     add_population=False,
     only_cache=False,
-    max_nodes=MAX_NODES,
+    max_nodes=Config.MAX_NODES,
     **gfp_kwargs,
 ):
     """Load a graph from a place and save it to a file.
@@ -132,7 +133,7 @@ def load_graph_from_place(
     ox.settings.cache_only_mode = only_cache
     try:
         graph = ox.graph_from_polygon(mult_polygon.geometry.unary_union, **gfp_kwargs)
-    except CacheOnlyModeInterrupt:  # pragma: no cover
+    except CacheOnlyInterruptError:  # pragma: no cover
         logger.debug("Only loaded graph from cache")
         return None
     logger.debug("Downloaded graph - Preprocessing")

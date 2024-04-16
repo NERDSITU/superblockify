@@ -1,4 +1,5 @@
 """Distance calculation for the network metrics."""
+
 from datetime import timedelta
 from os import environ
 from time import time
@@ -108,6 +109,25 @@ def calculate_path_distance_matrix(
     graph_matrix = to_scipy_sparse_array(
         graph, weight=weight, format="csr", nodelist=node_order
     )
+
+    # Try to downcast indices to int32
+    if graph_matrix.indices.dtype != np.int32:
+        logger.debug("Downcasting indices to int32.")
+        downcasted_indices = graph_matrix.indices.astype(np.int32)
+        if np.array_equal(downcasted_indices, graph_matrix.indices):
+            graph_matrix.indices = downcasted_indices
+        else:
+            logger.warning("Downcasting indices to int32 failed.")  # pragma: no cover
+
+    # Try to downcast indptr to int32
+    if graph_matrix.indptr.dtype != np.int32:
+        logger.debug("Downcasting indptr to int32.")
+        downcasted_indptr = graph_matrix.indptr.astype(np.int32)
+        if np.array_equal(downcasted_indptr, graph_matrix.indptr):
+            graph_matrix.indptr = downcasted_indptr
+        else:
+            logger.warning("Downcasting indptr to int32 failed.")  # pragma: no cover
+
     start_time = time()
     dist_full_graph, predecessors = dijkstra(
         graph_matrix, directed=True, return_predecessors=True, unweighted=False
@@ -597,7 +617,7 @@ def shortest_paths_restricted(
             environ.get(  # different types of memory
                 "SLURM_MEM_PER_NODE",  # already in MB - total memory per node
                 # https://slurm.schedmd.com/sbatch.html#SECTION_OUTPUT-ENVIRONMENT-VARIABLES
-                virtual_memory().available / 1024 / 1024  # convert from bytes to MB
+                virtual_memory().available / 1024 / 1024,  # convert from bytes to MB
                 # available memory on the machine
             )
         )

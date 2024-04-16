@@ -1,0 +1,155 @@
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "superblockify"
+authors = [{ name = "Carlson Büth", email = "carlson@cbueth.de" }]
+maintainers = [{ name = "superblockify contributors" }]
+license = { text = "APGL-3.0-or-later" }
+readme = "README.md"
+description = "Automated Generation, Visualization, and Analysis of potential Superblocks in Cities"
+keywords = ["Low Traffic Neighborhoods", "GIS", "Networks", "OpenStreetMap", "Urban Planning", "Urban Mobility", "Urban Data"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Natural Language :: English",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dynamic = ["version"]
+requires-python = ">=3.10"
+dependencies = [
+    "osmnx",
+    "geopandas",
+    "rasterio",
+    "shapely",
+    "pyrosm",
+    "numba",
+    "tqdm",
+    "contextily",
+    "ruamel.yaml",
+    "pyarrow",
+    "seaborn",
+    "psutil",
+    "typing-extensions",
+]
+
+[project.urls]
+Documentation = "https://NERDSITU.github.io/superblockify"
+Repository = "https://github.com/NERDSITU/superblockify"
+Changelog = "https://NERDSITU.github.io/superblockify/changelog/"
+
+[project.optional-dependencies]
+lint = ["blackd", "isort", "pylint"]
+test = ["pytest", "pytest-cov", "coverage"]
+doc = ["sphinx", "numpydoc", "myst-nb", "sphinx-book-theme", "rasterstats", "momepy"]
+all = ["superblockify[lint,test,doc]"]
+
+[tool.setuptools.packages.find]
+exclude = [
+    "examples*",
+    "tests*",
+    "docs*",
+    "data*",
+    "scripts*",
+]
+namespaces = false
+
+[tool.setuptools.dynamic]
+readme = { file = ["README.md", "LICENSE"] }
+version = { attr = "superblockify._version.__version__" }
+
+[tool.setuptools.package-data]
+superblockify = ["*.cfg", "*.yml"]
+
+# --------------------------------------------------------------------------------------
+# Linting
+# --------------------------------------------------------------------------------------
+[tool.pylint.main]
+# Number of processes to use to do the linting.
+jobs = 5
+# Pickle collected data for later comparisons.
+persistent = true
+# When enabled, pylint would attempt to guess common misconfiguration and emit
+# user-friendly hints instead of false-positive error messages.
+suggestion-mode = true
+
+[tool.pylint.basic]
+# Regular expression matching correct module names. Overrides module-naming-
+# style. Additionally to snake case allows for a prepended 'yyyymmdd-' string.
+module-rgx = "(\\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])-)?(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$"
+
+[tool.pylint.format]
+# Maximum number of characters on a single line.
+max-line-length = 88
+
+[tool.pylint.messages_control]
+disable = "too-many-arguments"
+
+# --------------------------------------------------------------------------------------
+# Testing
+# --------------------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["superblockify"]
+relative_files = true
+
+# --------------------------------------------------------------------------------------
+# Logging
+# --------------------------------------------------------------------------------------
+[tool.loggers]
+keys = "root"
+
+[tool.handlers]
+keys = ["consoleHandler", "RotatingFileHandler"]
+
+[tool.formatters]
+keys = ["simpleFormatter"]
+
+[tool.loggers.root]
+level = "INFO"
+handlers = ["consoleHandler"]
+
+[tool.loggers.superblockify]
+level = "INFO"
+handlers = ["consoleHandler", "RotatingFileHandler"]
+qualname = "superblockify"
+propagate = 1
+
+[tool.handlers.consoleHandler]
+class = "logging.StreamHandler"
+level = "INFO"
+formatter = "simpleFormatter"
+args = "(sys.stdout,)"
+
+[tool.handlers.tqdmHandler]
+class = "logging.StreamHandler"
+level = "INFO"
+formatter = "simpleFormatter"
+args = "(sys.stdout,)"
+qualname = "tqdm"
+
+[tool.handlers.RotatingFileHandler]
+class = "logging.handlers.RotatingFileHandler"
+level = "DEBUG"
+formatter = "simpleFormatter"
+args = "('superblockify.log', 'w+', 1e6, 3)"
+
+[tool.formatters.simpleFormatter]
+format = "%(asctime)s | %(levelname)8s | %(filename)s:%(lineno)d | %(message)s"

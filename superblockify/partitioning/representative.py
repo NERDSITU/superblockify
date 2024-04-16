@@ -1,4 +1,5 @@
 """Methods for finding representative nodes in components and partitions."""
+
 from geopandas.array import GeometryArray
 from osmnx import graph_to_gdfs
 

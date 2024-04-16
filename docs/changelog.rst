@@ -2,6 +2,29 @@
 Changelog
 *********
 
+Version 1.0.0 (2024-XX-XX)
+**************************
+
+* ✨ First major release ✨
+* 📦 Prepared for osmnx 2.0.0 and shipped `cities.yml` in pypi package.
+* ⚙️ Added function to set log level and added python versions 3.11 and 3.12.
+* 🔄 Merged several pull requests improving settings, README, dependencies, and project structure.
+* 🐛 Fixed coverage for special case, tests, and code style issues.
+* 📝 Updated README with CI/CD badges, improved documentation, and unified capitalization.
+* 🗒️ Updated Changelog, Version, and Website Copyright.
+* 📝 Licensed work under GNU AGPLv3.
+* 📊 IO operations enhanced with graph reduction.
+* 🗒️ Logging improvements: silenced numba compilation, reprojected debug messages.
+* ⚙️ Parallelization updates: removed `num_workers` and `chunk_size`.
+* 🧪 Testing updates: increased util coverage, added response 502 as `xfail`.
+* 🆕 New features: Betweenness Centrality Cutoff, Reduced path filling.
+* 🐛 Fixes: notebook formatting, GEOSException in tesselation, missing attribute.
+* 🔄 Merged pull request: `🌐 Added Betweenness Centrality Cutoff
+  <https://github.com/NERDSITU/superblockify/pull/82>`_.
+* 📝 Misc changes: deactivated colormap logging,
+  unified nodes and edges into one variable.
+* 📊 Improved analysis scripts
+
 Version 0.2.2 (2023-06-27)
 **************************
 
@@ -30,8 +53,8 @@ Version 0.2.1 (2023-06-22)
   resolved to polygons. Normally, only the edges are exported.
   Added general graph stats with OSM boundary polygon.
 
-.. |codecov-badge| image:: https://codecov.io/gh/cbueth/Superblockify/branch/main/graph/badge.svg?token=AS72IFT2Q4
-   :target: https://codecov.io/gh/cbueth/Superblockify
+.. |codecov-badge| image:: https://codecov.io/gh/NERDSITU/superblockify/branch/main/graph/badge.svg?token=AS72IFT2Q4
+   :target: https://codecov.io/gh/NERDSITU/superblockify
    :height: 2ex
 
 Version 0.2.0 (2023-06-20)
@@ -83,4 +106,4 @@ Version 0.0.0
 *************
 
 * See changes before in the repository under the tag `0.0.0
-  <https://github.com/cbueth/Superblockify/tags>`_.
+  <https://github.com/NERDSITU/superblockify/tags>`_.

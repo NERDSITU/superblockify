@@ -1,55 +1,70 @@
-# Superblockify
+# superblockify
 
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://cbueth.github.io/Superblockify/)
-[![codecov](https://codecov.io/gh/cbueth/Superblockify/branch/main/graph/badge.svg?token=AS72IFT2Q4)](https://codecov.io/gh/cbueth/Superblockify)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://NERDSITU.github.io/superblockify/)
+[![PyPI Version](https://badge.fury.io/py/superblockify.svg)](https://pypi.org/project/superblockify/)
+[![Python Version](https://img.shields.io/pypi/pyversions/superblockify)](https://pypi.org/project/superblockify/)
 [![linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/PyCQA/pylint)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![PyPI License](https://img.shields.io/pypi/l/superblockify)](https://pypi.org/project/superblockify/)
+
+[![Docs](https://github.com/NERDSITU/superblockify/actions/workflows/docs.yml/badge.svg)](https://github.com/NERDSITU/superblockify/actions/workflows/docs.yml)
+[![Lint](https://github.com/NERDSITU/superblockify/actions/workflows/lint.yml/badge.svg)](https://github.com/NERDSITU/superblockify/actions/workflows/lint.yml)
+[![Test](https://github.com/NERDSITU/superblockify/actions/workflows/test.yml/badge.svg)](https://github.com/NERDSITU/superblockify/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/NERDSITU/superblockify/branch/main/graph/badge.svg?token=AS72IFT2Q4)](https://codecov.io/gh/NERDSITU/superblockify)
 
 Source code for blockifying existing street networks.
 
 ---
 
-## Set up
+## Installation
 
-The environment to run the projects' code can be set up using the
-`environment.yaml` by running:
+We recommend
+using [`micromamba`](https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html)
+to create a virtual environment and installing the package in editable mode.
+Alternatively, one can
+use [`conda`](https://docs.conda.io/projects/conda/en/latest/index.html)
+or [`mamba`](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html)
+to create the environment (they can be used interchangeably).
+After cloning the repository, navigate to the root folder and
+create the environment with the wished python version and the development dependencies.
 
 ```bash
-conda env create --file=environment.yml
+micromamba create -n sb_env -c conda-forge python=3.12 osmnx
+micromamba activate sb_env
+pip install superblockify
 ```
 
-This initializes a conda environment by the name `sb_env`, which can be
-activated using `sb_env`.
-If you want to use `mamba` or `micromamba` for faster package resolution, just replace 
-`conda` with the respective. For `micromamba`:
-    
+This installs the package and its dependencies,
+ready for use when activating the environment.
+Learn more about `superblockify` by reading
+the [documentation](https://NERDSITU.github.io/superblockify/)
+with the [usage section](https://nerdsitu.github.io/superblockify/usage/)
+or
+the [minimal working example](https://github.com/NERDSITU/superblockify/blob/main/scripts/examples/mwe.py).
+
+## Development Setup
+
+For development, clone the repository, navigate to the root folder and
+create the environment with the wished python version and the development dependencies.
+
 ```bash
-micromamba env create --file=environment.yml
+micromamba create -n sb_env -c conda-forge python=3.12 --file=environment.yml
+micromamba activate sb_env
 ```
 
-Alternatively a version-less setup can be done by executing 
-(`environmentSetupVersionless.sh` in the working directory)
+Now it is possible to import the package relatively to the root folder.
+Optionally, register the package in editable mode with `pip`:
 
 ```bash
-conda create -n sb_env -c conda-forge python=3.10 --file requirements.txt
-conda activate sb_env
-conda env export | grep -v "^prefix: " > environment.yml
-```
-
-which does not have explicit versions, but might resolve dependency issues. Using
-`git diff environment.yml` the changes can be inspected.
-With `mamba` this can be done by running
-
-```bash
-mamba create -n sb_env -c conda-forge python=3.10 --file requirements.txt
-mamba activate sb_env
-mamba env export | grep -v "^prefix: " > environment.yml
+pip install --no-build-isolation --no-deps -e .
 ```
 
 ## Usage
 
-For a quick start there are example scripts in the [`examples/`](scripts/examples/)
-folder and a [minimal working example](scripts/mwe.py).
+For a quick start there are example scripts in
+the [`examples/`](https://github.com/NERDSITU/superblockify/blob/main/scripts/examples/)
+folder and
+a [minimal working example](https://github.com/NERDSITU/superblockify/blob/main/scripts/examples/mwe.py).
 
 ## Logging
 

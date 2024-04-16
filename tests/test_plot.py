@@ -1,10 +1,11 @@
 """Tests for the plot module."""
+
 from os.path import join
 
 import pytest
 from matplotlib import pyplot as plt
 
-from superblockify.config import TEST_DATA_PATH, PLOT_SUFFIX
+from superblockify.config import Config
 from superblockify.plot import (
     paint_streets,
     plot_by_attribute,
@@ -25,7 +26,9 @@ def test_paint_streets(test_city_all_copy, e_l, n_a, save):
         edge_linewidth=e_l,
         node_alpha=n_a,
         save=save,
-        filepath=join(TEST_DATA_PATH, "output", f"{city_path}.{PLOT_SUFFIX}"),
+        filepath=join(
+            Config.TEST_DATA_PATH, "output", f"{city_path}.{Config.PLOT_SUFFIX}"
+        ),
     )
     plt.close()
 

@@ -1,4 +1,5 @@
 """Plotting functions for the partitioners."""
+
 from matplotlib import pyplot as plt
 from matplotlib.cm import ScalarMappable
 from matplotlib.colors import ListedColormap, Normalize
@@ -7,7 +8,7 @@ from numpy import linspace, array
 
 from .. import plot
 from ..attribute import determine_minmax_val
-from ..config import logger, V_MAX_LTN, V_MAX_SPARSE
+from ..config import logger, Config
 
 
 def plot_partition_graph(partitioner, **pba_kwargs):
@@ -308,8 +309,8 @@ def plot_subgraph_component_size(partitioner, measure, xticks=None, **pcs_kwargs
 def plot_speed_un_restricted(
     graph,
     sparsified,
-    v_s=V_MAX_SPARSE,
-    v_ltn=V_MAX_LTN,
+    v_s=Config.V_MAX_SPARSE,
+    v_ltn=Config.V_MAX_LTN,
     cmap="viridis",
 ):
     """Plot the speed limit of the edges of a graph before and after restrictions.

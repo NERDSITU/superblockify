@@ -590,9 +590,9 @@ to see a difference.
 :tags: [hide-input, hide-output]
 from superblockify import ResidentialPartitioner
 from superblockify.metrics.distances import calculate_path_distance_matrix
-from superblockify.config import PLACES_SMALL
+from superblockify.config import Config
 
-CITY_NAME, SEARCH_STR = PLACES_SMALL[1]
+CITY_NAME, SEARCH_STR = Config.PLACES_SMALL[1]
 part = ResidentialPartitioner(
     name=CITY_NAME + "_main", city_name=CITY_NAME, search_str=SEARCH_STR, unit="time"
 )

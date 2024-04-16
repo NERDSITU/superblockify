@@ -1,4 +1,5 @@
 """Plotting functions for the network measures."""
+
 from itertools import product
 
 import numpy as np
@@ -94,7 +95,7 @@ def plot_distance_matrices(metric, name=None):
     # Share y-axis
     axes[0].set_ylabel("Node $i$")
     for axe in axes[1:]:
-        axe.get_shared_y_axes().join(axes[0], axe)
+        axe.get_shared_y_axes().joined(axes[0], axe)
 
     # Plot colorbar on the right side of the figure
     fig.colorbar(dist_im, ax=axes, fraction=0.046, pad=0.04)

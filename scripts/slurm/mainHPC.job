@@ -12,7 +12,7 @@
 
 eval "$(conda shell.bash hook)"
 conda activate sb_env
-cd ~/Superblockify/
+cd ~/superblockify/
 # Add root directory to PYTHONPATH
 export PYTHONPATH=$PYTHONPATH:$(pwd)
 python scripts/slurm/mainHPC.py
