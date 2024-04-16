@@ -1,4 +1,4 @@
-![superblockify_logo.png](superblockify_logo.png "superblockify")
+![superblockify](superblockify_logo.png "superblockify")
 
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://NERDSITU.github.io/superblockify/)
 [![PyPI Version](https://badge.fury.io/py/superblockify.svg)](https://pypi.org/project/superblockify/)
@@ -15,6 +15,9 @@
 Source code to `superblockify` an urban street network
 
 ---
+
+`superblockify` is a Python package for partitioning an urban street network into
+Superblock-like neighborhoods and for visualizing and analyzing the partition results. A Superblock is a set of adjacent urban blocks where vehicular through traffic is prevented or pacified, giving priority to people walking and cycling. 
 
 ## Installation
 
