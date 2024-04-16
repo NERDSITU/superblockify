@@ -25,8 +25,6 @@ Alternatively, one can
 use [`conda`](https://docs.conda.io/projects/conda/en/latest/index.html)
 or [`mamba`](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html)
 to create the environment (they can be used interchangeably).
-After cloning the repository, navigate to the root folder and
-create the environment with the wished python version and the development dependencies.
 
 ```bash
 micromamba create -n sb_env -c conda-forge python=3.12 osmnx
