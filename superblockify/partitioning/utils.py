@@ -7,7 +7,8 @@ from uuid import uuid4
 from geopandas import GeoDataFrame
 from networkx import set_edge_attributes, strongly_connected_components
 from numpy import generic
-from osmnx import graph_to_gdfs, get_undirected
+from osmnx import graph_to_gdfs
+from osmnx.convert import to_undirected
 from pandas import DataFrame
 from shapely import Point, Geometry
 from shapely.ops import substring
@@ -385,7 +386,7 @@ def split_up_isolated_edges_directed(graph, sparsified):
             if (u, v, k) not in sparsified.edges(keys=True)
         ]
     )
-    rest_un = get_undirected(rest)
+    rest_un = to_undirected(rest)
 
     # for u, v, k, d in rest.edges(keys=True, data=True):
     for u_isol, v_isol in [
