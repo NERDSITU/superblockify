@@ -37,8 +37,8 @@ First, import the package.
 ```{code-cell} ipython3
 import superblockify as sb
 
-# sb.config.set_log_level("DEBUG")   # set to see debug logs
-sb.config.Config.FULL_RASTER = None  # set if you own the full ghsl raster
+# sb.config.set_log_level("DEBUG")     # set to see debug logs
+# sb.config.Config.FULL_RASTER = None  # set if you own the full ghsl raster
 # (GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0.tif)
 # otherwise the package will automatically download the needed tiles
 ```
