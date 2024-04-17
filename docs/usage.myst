@@ -27,7 +27,7 @@ necessary. Maps are downloaded from the OpenStreetMap API and population data is
 downloaded from the [GHSL-POP 2023](https://human-settlement.emergency.copernicus.eu/ghs_pop2023.php)
 dataset. Only tiles needed are being cached in the `data/ghsl` folder.
 
-As example, we will try to partition the French city of Lyon with the
+As example, we will try to partition Scheveningen, a district of The Hague, using the
 `ResidentialPartitioner` class.
 Afterward we will save the results to a geopackage file that can easily be opened and
 edited in QGIS.
@@ -57,7 +57,7 @@ part = sb.ResidentialPartitioner(
 )
 ```
 
-This will download the map of Lyon, preprocess it, output some statistics
+This will download the map of Scheveningen, preprocess it, output some statistics
 and store it in the `data/graphs` folder for use later.
 Any other partitioner for Scheveningen, given the same `city_name`, will use the same
 preprocessed, locally stored map.
@@ -96,7 +96,7 @@ geopackage file. This file can be opened in [QGIS](https://www.qgis.org/en/site/
 sb.save_to_gpkg(part, save_path=None)
 ```
 
-This will save the partitioning results to `data/results/Scheveningen_test/Scheveningen_test.gpkg`.
+This will save the partitioning results to `data/results/Scheveningen_test/{city_name}.gpkg`.
 If you calculated the metrics before, they will be available in the layers, for each
 LTN. This includes more metrics than shown in the plots earlier.
 The name of the components is saved into a `classification` edge
@@ -125,8 +125,9 @@ The deciding string for the area to download is the `search_str`.
 Finding a fitting OSM area is via the Nominatim API.
 If you want to see your area before downloading, use
 the [Nominatim Search](https://nominatim.openstreetmap.org/ui/search.html).
-It helps to be more specific, e.g. "Lyon, France" instead of just "Lyon".
-Otherwise, OSM relations IDs, e.g. `R120965`, can be used.
+It helps to be more specific, e.g. "Scheveningen, The Hague, Netherlands"
+instead of just "Scheveningen".
+Otherwise, OSM relations IDs, e.g. `R13751467`, can be used.
 
 To re-download the map, pass `reload_graph=True` when initializing the partitioner.
 

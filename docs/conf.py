@@ -84,7 +84,7 @@ html_theme_options = {
     # "home_page_in_toc": True,
     "launch_buttons": {
         "binderhub_url": "https://mybinder.org",
-        "colab_url": "https://colab.research.google.com/",
+        # "colab_url": "https://colab.research.google.com/",
         "deepnote_url": "https://deepnote.com/",
         "notebook_interface": "jupyterlab",
     },
