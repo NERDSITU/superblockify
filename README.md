@@ -17,7 +17,9 @@ Source code to `superblockify` an urban street network
 ---
 
 `superblockify` is a Python package for partitioning an urban street network into
-Superblock-like neighborhoods and for visualizing and analyzing the partition results. A Superblock is a set of adjacent urban blocks where vehicular through traffic is prevented or pacified, giving priority to people walking and cycling. 
+Superblock-like neighborhoods and for visualizing and analyzing the partition results. A
+Superblock is a set of adjacent urban blocks where vehicular through traffic is
+prevented or pacified, giving priority to people walking and cycling.
 
 ## Installation
 
@@ -62,7 +64,10 @@ pip install --no-build-isolation --no-deps -e .
 
 ## Usage
 
-For a quick start there are example scripts in
+For a quick start after installation,
+refer to the [usage section](https://nerdsitu.github.io/superblockify/usage/)
+in the documentation.
+Additionally, there are example scripts in
 the [`examples/`](https://github.com/NERDSITU/superblockify/blob/main/scripts/examples/)
 folder and
 a [minimal working example](https://github.com/NERDSITU/superblockify/blob/main/scripts/examples/mwe.py).
