@@ -14,10 +14,10 @@ kernelspec:
 
 ```{code-cell} ipython3
 :tags: [remove-input, remove-output]
-# Import path of superblockify, from here two directories up
+# Import path of superblockify, from here one directory up
 import sys, os
 os.environ['USE_PYGEOS'] = '0'
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir, os.pardir)))
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
 ```
 
 # Usage
