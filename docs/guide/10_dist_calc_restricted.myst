@@ -249,7 +249,7 @@ def colored_predecessors(preds, graph=G, node_order=node_order,
                          node_order_indices=node_order_indices):
     return pd.DataFrame(preds, index=node_order_indices,
                         columns=node_order_indices).style. \
-        applymap(lambda x: f"color: {graph.nodes[node_order[x]]['partition']}"
+        map(lambda x: f"color: {graph.nodes[node_order[x]]['partition']}"
     if x != -9999 else "")
 
 
@@ -333,8 +333,11 @@ differences are the following:
 
 ```{code-cell} ipython3
 :tags: [hide-input]
+G_sparse = nx.to_scipy_sparse_array(G, nodelist=list(G.nodes))
+G_sparse.indices, G_sparse.indptr = G_sparse.indices.astype(
+    np.int32), G_sparse.indptr.astype(np.int32)
 display(colored_distances(
-    dist_le - dijkstra(nx.to_scipy_sparse_array(G, nodelist=list(G.nodes)),
+    dist_le - dijkstra(G_sparse,
                        directed=True,
                        return_predecessors=False),
     1, 'Reds')
@@ -490,8 +493,11 @@ To finish, the difference between the unrestricted and restricted graph distance
 
 ```{code-cell} ipython3
 :tags: [hide-input]
+G_2_sparse = nx.to_scipy_sparse_array(G_2, nodelist=node_order_2)
+G_2_sparse.indices, G_2_sparse.indptr = G_2_sparse.indices.astype(
+    np.int32), G_2_sparse.indptr.astype(np.int32)
 display(colored_distances(
-    dist - dijkstra(nx.to_scipy_sparse_array(G_2, nodelist=node_order_2),
+    dist - dijkstra(G_2_sparse,
                     directed=True,
                     return_predecessors=False),
     1, 'Reds', node_order=node_order_2). \

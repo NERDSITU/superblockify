@@ -147,9 +147,11 @@ restricted to the sparsified nodes.
 
 ```{code-cell} ipython3
 node_order = list(range(len(G.nodes)))
-dist, pred = dijkstra(
-    nx.to_scipy_sparse_array(G, nodelist=node_order, weight="weight"),
-    directed=True, indices=node_order, return_predecessors=True)
+G_sparse = nx.to_scipy_sparse_array(G, nodelist=node_order, weight="weight")
+G_sparse.indices, G_sparse.indptr = G_sparse.indices.astype(
+    np.int32), G_sparse.indptr.astype(np.int32)
+dist, pred = dijkstra(G_sparse, directed=True, indices=node_order,
+                      return_predecessors=True)
 dist_restr, pred_restr = shortest_paths_restricted(G, partitions, weight="weight",
                                                    node_order=node_order)
 ```
@@ -351,8 +353,8 @@ display(pd.DataFrame({
 ).sort_values(by=[("", "C_B")], ascending=False)
         .style.background_gradient(cmap="Blues", axis=None)
         .format(precision=3)
-        .applymap_index(lambda x: f"color: {G.nodes[x]['partition']}" if x in G
-                        .nodes else ""). \
+        .map_index(lambda x: f"color: {G.nodes[x]['partition']}" if x in G
+                   .nodes else ""). \
         set_table_attributes('style="font-size: 12px"'),
         )
 ```
@@ -375,8 +377,8 @@ display(pd.DataFrame({
 ).sort_values(by=[("Lin scales", "C_B_e_restr")], ascending=False)
         .style.background_gradient(cmap="Blues", axis=None)
         .format(precision=3)
-        .applymap_index(lambda x: f"color: {G.nodes[x]['partition']}" if x in G
-                        .nodes else ""). \
+        .map_index(lambda x: f"color: {G.nodes[x]['partition']}" if x in G
+                   .nodes else ""). \
         set_table_attributes('style="font-size: 12px"'),
         )
 ```
@@ -589,7 +591,6 @@ to see a difference.
 ```{code-cell} ipython3
 :tags: [hide-input, hide-output]
 from superblockify import ResidentialPartitioner
-from superblockify.metrics.distances import calculate_path_distance_matrix
 from superblockify.config import Config
 
 CITY_NAME, SEARCH_STR = Config.PLACES_SMALL[1]
@@ -601,18 +602,18 @@ part.run(calculate_metrics=False)
 # Intended use usually only with `run` method
 # or `calculate_metrics_before` partitioning
 node_list = part.get_sorted_node_list()
-dist, pred = calculate_path_distance_matrix(
-    part.graph,
-    weight="travel_time",
-    node_order=node_list,
-)
 ```
 
 ```{code-cell} ipython3
 from superblockify.metrics.measures import betweenness_centrality
-%timeit betweenness_centrality(part.graph, node_list, dist, pred, weight="travel_time")
+from superblockify.metrics.distances import calculate_path_distance_matrix
+%timeit betweenness_centrality(part.graph, node_list, *calculate_path_distance_matrix(part.graph, weight = "travel_time", node_order = node_list), weight="travel_time")
 %timeit nx.betweenness_centrality(part.graph, weight="travel_time")
 ```
+
+Now, the speedup is obvious. The simplified version is about 10 times faster than the
+original networkx implementation, already for a street graph that can be considered
+small.
 
 The code scales with the number of nodes and number of edges. As in real world cities
 the edges do not scale with the number of nodes, the runtime is well bearable for
