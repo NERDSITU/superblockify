@@ -41,7 +41,7 @@ class Metric:
     There are different network measures
     - :math:`d_E(i, j)`: Euclidean
     - :math:`d_S(i, j)`: Shortest path on full graph
-    - :math:`d_N(i, j)`: Shortest path with ban through LTNs
+    - :math:`d_N(i, j)`: Shortest path with ban through Superblocks
 
     We define several types of combinations of these metrics:
     (i, j are nodes in the graph)

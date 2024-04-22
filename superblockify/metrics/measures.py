@@ -764,21 +764,21 @@ def __calculate_high_bc_anisotropy(coord_high_bc):
 
 
 def add_ltn_means(components, edge_attr):
-    """Add mean of attributes to each LTN.
+    """Add mean of attributes to each Superblock.
 
-    Writes the mean of the specified edge attribute(s) to each LTN in the list of
-    components. The mean is calculated as the mean of each attribute in the LTN
+    Writes the mean of the specified edge attribute(s) to each Superblock in the list of
+    components. The mean is calculated as the mean of each attribute in the Superblock
     subgraph.
-    Works in-place and adds `mean_{attr}` to each LTN.
+    Works in-place and adds `mean_{attr}` to each Superblock.
 
     Parameters
     ----------
     components : list of dict
-        List of dictionaries of LTN components.
+        List of dictionaries of Superblock components.
     edge_attr : key or list of keys
         Edge attribute(s) to calculate the mean of.
     """
-    # Loop over LTNs
+    # Loop over Superblocks
     for component in components:
         # Loop over attributes
         for attr in edge_attr if isinstance(edge_attr, list) else [edge_attr]:
@@ -789,15 +789,15 @@ def add_ltn_means(components, edge_attr):
 
 
 def add_relative_changes(components, attr_pairs):
-    """Add relative difference of attributes to each LTN.
+    """Add relative difference of attributes to each Superblock.
 
     Measured in terms of percentual increase using
     :func:`superblockify.utils.percentual_increase`.
 
     Write the relative percentual change of the specified edge attribute(s) to each
-    LTN in the list of components. The relative change is the percentual change of
+    Superblock in the list of components. The relative change is the percentual change of
     the first to the second attribute.
-    Works in-place and adds `change_{attr1}` to each LTN.
+    Works in-place and adds `change_{attr1}` to each Superblock.
     If `attr1` has a value of 2 and `attr2` has a value of 1, the relative change is
     -0.5, a 50% decrease. If `attr1` has a value of 4 and `attr2` has a value of 6,
     the relative change is 0.5, a 50% increase.
@@ -805,16 +805,16 @@ def add_relative_changes(components, attr_pairs):
     Parameters
     ----------
     components : list of dict
-        List of dictionaries of LTN components.
+        List of dictionaries of Superblock components.
     attr_pairs : list of tuples with two keys
         List of attribute pairs to calculate the relative change of.
 
     Raises
     ------
     KeyError
-        If any key cannot be found in the LTNs.
+        If any key cannot be found in the Superblocks.
     """
-    # Loop over LTNs
+    # Loop over Superblocks
     for component in components:
         # Loop over attribute pairs
         for attr1, attr2 in (
@@ -826,4 +826,4 @@ def add_relative_changes(components, attr_pairs):
                     component[attr1], component[attr2]
                 )
             except KeyError as err:
-                raise KeyError(f"Key {err} not found in LTNs.") from err
+                raise KeyError(f"Key {err} not found in Superblocks.") from err

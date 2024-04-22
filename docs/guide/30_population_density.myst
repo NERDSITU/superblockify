@@ -392,8 +392,8 @@ get_population(bogota_gdf, file_colombia)
 ```
 
 This result differs a bit from the first one, as we do not use resampling in this
-function. The difference is of numerical nature. For our application with small LTNs,
-we need the up-scaling to get good estimates of the population in the LTNs.
+function. The difference is of numerical nature. For our application with small Superblocks,
+we need the up-scaling to get good estimates of the population in the Superblocks.
 
 ### Places on tile edges
 
@@ -537,5 +537,5 @@ The differences are due to the difference in character of the data sources.
 While the official numbers are based on the governmental census, the predictions
 might use a different border for the city, which is likely to cut off some, or
 include some rural areas. Regarding this, the result is acceptable, especially
-with the context that we will use it for small LTNs and only as a rough approximation
+with the context that we will use it for small Superblocks and only as a rough approximation
 of the population and population density.

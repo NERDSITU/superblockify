@@ -19,7 +19,7 @@ class AttributePartitioner(BasePartitioner, ABC):
     A child class needs to write boolean edge attribute (`True`/`1` or `False`/`0`)
     to the :attr:`attribute_label` of the graph :attr:`self.graph`.
     All edges with the `True` belong to the sparsified graph, as well as all touching
-    nodes. The rest of the graph falls apart into LTNs.
+    nodes. The rest of the graph falls apart into Superblocks.
     """
 
     @abstractmethod
@@ -34,7 +34,7 @@ class AttributePartitioner(BasePartitioner, ABC):
     def partition_graph(self, make_plots=False, **kwargs):
         """Group by boolean attribute and remove small components.
 
-        Construct sparsified graph from boolean attribute and LTN subgraphs for the
+        Construct sparsified graph from boolean attribute and Superblock subgraphs for the
         components that fall apart.
 
         Parameters
@@ -62,5 +62,5 @@ class AttributePartitioner(BasePartitioner, ABC):
         self.sparsified = get_edge_subgraph_with_attribute_value(
             self.sparsified, self.attribute_label, 1
         )
-        # Set the components of the graph - LTNs that fall apart
+        # Set the components of the graph - Superblocks that fall apart
         self.set_components_from_sparsified()
