@@ -240,7 +240,7 @@ sparsified network at cell borders, but at the same time, the sparsified network
 also have a volume as there might be people living on it. Finally, we will implement our
 own method, inspired by this technique, a solution sewed to our needs.
 
-## Indepentent Tessellation
+## Independent Tessellation
 
 When looking into the code, {py:mod}`momepy` uses {py:class}`scipy.spatial.Voronoi`
 to generate the tessellation for every enclosure. This is done with a dense point array
