@@ -30,27 +30,27 @@ prevented or pacified, giving priority to people walking and cycling.
 Use [`conda`](https://docs.conda.io/projects/conda/en/latest/index.html)
 or [`mamba`](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html)
 or [`micromamba`](https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html)
-to create and activate the virtual environment `sb_env` via
-the [`environment.yml`](https://github.com/NERDSITU/superblockify/blob/main/environment.yml)
-file:
-
-```bash
-conda env create --file environment.yml
-conda activate sb_env
-```
-
-*Alternatively*, or if you run into issues, run:
+to create the virtual environment `sb_env`:
 
 ```bash
 conda create -n sb_env -c conda-forge python=3.12 osmnx=1.9.2
-conda activate sb_env
+```
+
+*Alternatively*, or if you run into issues, [clone this repository](https://github.com/NERDSITU/superblockify/archive/refs/heads/main.zip) and create the environment via
+the [`environment.yml`](https://github.com/NERDSITU/superblockify/blob/main/environment.yml)
+file:
+:
+
+```bash
+conda env create --file environment.yml
 ```
 
 ### Install package
 
-Next, install the package:
+Next, activate the environment and install the package:
 
 ```bash
+conda activate sb_env
 pip install superblockify
 ```
 
@@ -74,7 +74,7 @@ We provide a minimum working example in two formats:
 * [Python script (`00-mwe.py`)](https://github.com/NERDSITU/superblockify/blob/main/examples/00-mwe.py)
 
 For a guided start after installation, see
-the [usage section](https://superblockify.city/usage/) in the documentation.
+the [usage section](https://superblockify.city/usage/) in the documentation. See the [`examples/`](https://github.com/NERDSITU/superblockify/blob/main/examples/) folder for more example scripts.
 
 ## Documentation
 
