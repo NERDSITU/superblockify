@@ -26,8 +26,13 @@ prevented or pacified, giving priority to people walking and cycling.
 ## Installation
 
 ### Set up environment
-Use [`conda`](https://docs.conda.io/projects/conda/en/latest/index.html) or [`mamba`](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html) or [`micromamba`](https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html)
-to create and activate the virtual environment `sb_env` via the [`environment.yml`](environment.yml) file:
+
+Use [`conda`](https://docs.conda.io/projects/conda/en/latest/index.html)
+or [`mamba`](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html)
+or [`micromamba`](https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html)
+to create and activate the virtual environment `sb_env` via
+the [`environment.yml`](https://github.com/NERDSITU/superblockify/blob/main/environment.yml)
+file:
 
 ```bash
 conda env create --file environment.yml
@@ -42,6 +47,7 @@ conda activate sb_env
 ```
 
 ### Install package
+
 Next, install the package:
 
 ```bash
@@ -49,6 +55,7 @@ pip install superblockify
 ```
 
 ### Set up Jupyter kernel
+
 If you want to use `superblockify` with its environment `sb_env` in Jupyter, run:
 
 ```bash
@@ -56,32 +63,37 @@ pip install --user ipykernel
 python -m ipykernel install --user --name=sb_env
 ```
 
-This allows you to run Jupyter with the kernel `sb_env` (Kernel > Change Kernel > sb_env)
-
+This allows you to run Jupyter with the kernel `sb_env` (Kernel > Change Kernel >
+sb_env)
 
 ## Usage
 
-We provide a minimum working example in two formats: 
+We provide a minimum working example in two formats:
 
-* [Jupyter notebook (`00-mwe.ipynb`)](examples/00-mwe.ipynb)
-* [Python script (`00-mwe.py`)](examples/00-mwe.py)
+* [Jupyter notebook (`00-mwe.ipynb`)](https://github.com/NERDSITU/superblockify/blob/main/examples/00-mwe.ipynb)
+* [Python script (`00-mwe.py`)](https://github.com/NERDSITU/superblockify/blob/main/examples/00-mwe.py)
 
-For a guided start after installation, see the [usage section](https://superblockify.city/usage/) in the documentation.
+For a guided start after installation, see
+the [usage section](https://superblockify.city/usage/) in the documentation.
 
 ## Documentation
 
-Read the [documentation](https://superblockify.city) to learn more about `superblockify`.
-
+Read the [documentation](https://superblockify.city) to learn more
+about `superblockify`.
 
 ## Testing
 
-The tests are specified using the `pytest` signature, see [`tests/`](tests/) folder, and
+The tests are specified using the `pytest` signature,
+see [`tests/`](https://github.com/NERDSITU/superblockify/blob/main/tests/) folder, and
 can be run using a test runner of choice.
-A pipeline is set up, see [`.github/workflows/test.yml`](.github/workflows/test.yml).
+A pipeline is set up,
+see [`.github/workflows/test.yml`](https://github.com/NERDSITU/superblockify/blob/main/.github/workflows/test.yml).
 
 ## Credits & Funding
+
 * Carlson M. Büth (Implementation)
 * Anastassia Vybornova (Supervision)
 * Michael Szell (Concept)
 
-Funded by the European Union, [EU Horizon grant JUST STREETS](https://cordis.europa.eu/project/id/101104240)
+Funded by the European
+Union, [EU Horizon grant JUST STREETS](https://cordis.europa.eu/project/id/101104240)
