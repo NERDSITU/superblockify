@@ -126,7 +126,7 @@ class Config:  # pylint: disable=too-few-public-methods
     RESULTS_DIR = join(WORK_DIR, "data", "results")
     GHSL_DIR = join(WORK_DIR, "data", "ghsl")
 
-    # LTN
+    # Superblock
     # Max speeds in km/h for the restricted calculation of travel times
     V_MAX_LTN = 15.0
     V_MAX_SPARSE = 50.0

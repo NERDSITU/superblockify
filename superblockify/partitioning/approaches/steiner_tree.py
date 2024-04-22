@@ -33,8 +33,8 @@ class MinimumPartitioner(AttributePartitioner):
         into which the residual graph decomposes.
 
         Edges that are `oneway` can be excluded with `remove_oneway_edges`.
-        The idea is so this approach can produce LTNs that are reachable from every
-        other LTN, as Steiner trees are calculated on undirected graphs. But htis
+        The idea is so this approach can produce Superblocks that are reachable from every
+        other Superblock, as Steiner trees are calculated on undirected graphs. But htis
         highly depends on how the place was mapped. If arterial roads in two directions
         are mapped as two separate ways, this is not the way out.
 
@@ -43,8 +43,8 @@ class MinimumPartitioner(AttributePartitioner):
         centrality of the nodes, in the respective betweenness type. This way, the rest
         graph should fall into more components.
 
-        This approach violates the requirement that every LTN is reachable from
-        every other LTN.
+        This approach violates the requirement that every Superblock is reachable from
+        every other Superblock.
 
         Parameters
         ----------

@@ -39,17 +39,17 @@ Version 0.2.2 (2023-06-27)
 * 🗒️ Adjust logging for better usefullness. Add and remove some log messages.
 * 📚️ Added `mamba` to the installation instructions and changed standard environment
   name.
-* ⬆️ Demand Change: Added LTN aggregate statistics for the betweennesses.
+* ⬆️ Demand Change: Added Superblock aggregate statistics for the betweennesses.
 
 Version 0.2.1 (2023-06-22)
 **************************
 
 * ✨ Second release ✨
-* ⬆️ Integrated final graph statistics and LTN statistics.
+* ⬆️ Integrated final graph statistics and Superblock statistics.
 * 🏡 Moved Coverage to Codecov |codecov-badge|.
 * ⬆️ Display basic graph stats at Partitioner initialization.
   Abstract base class :class:`superblockify.partitioning.base.BasePartitioner`.
-* ⬆️ Geopackage export: Resolve LTN cell option. If set to True, the LTN cells are
+* ⬆️ Geopackage export: Resolve Superblock cell option. If set to True, the Superblock cells are
   resolved to polygons. Normally, only the edges are exported.
   Added general graph stats with OSM boundary polygon.
 
@@ -62,7 +62,7 @@ Version 0.2.0 (2023-06-20)
 
 * 🔧 Sped up population distribution in
   :func:`superblockify.population.approximation.get_edge_population`.
-* ⬆️ Add population and density to LTNs
+* ⬆️ Add population and density to Superblocks
 * 🐛 Fix: Graph import projection order. Un-skewed distance attribute.
 
 Version 0.1.3 (2023-06-19)

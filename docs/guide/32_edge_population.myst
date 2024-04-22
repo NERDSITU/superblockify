@@ -17,7 +17,7 @@ kernelspec:
 In the last two notebooks, we worked on how to determine the population of any given
 area using the raster dataset GHS-POP (Global Human Settlement Population Layer) for
 the P2023 release[^1]. As our goal is to repeatedly determine the population density of
-LTNs, we want to have an effective way to do this. As the LTNs are made up of
+Superblocks, we want to have an effective way to do this. As the Superblocks are made up of
 subgraphs of our road network, we showed a way to tessellate using roads.
 
 
@@ -74,7 +74,7 @@ plt.show()
 To keep the code effective, we renounce calculating the Voronoi tessellation for each
 partition of the road network. Instead, tessellate the whole road network once using
 roads and calculate the population and area of each road cell. Then, we can use this
-information to determine the population density of each LTN repeatedly.
+information to determine the population density of each Superblock repeatedly.
 More on the edge tesselation in the previous chapter
 [Street Tessellation](31_tessellation.myst).
 
@@ -174,7 +174,7 @@ Here we also see cells with a population density of 0. This is the case on Barro
 in the Mississippi River, as it should, or industrial areas. For especially small
 cells, the uncertainty introduced by the raster is higher in comparison to the absolute
 population. This effect might be visible here, when specifically looking at the
-cells, but when dissolving the cells into LTNs, the effect will compensate itself.
+cells, but when dissolving the cells into Superblocks, the effect will compensate itself.
 
 ## Polygonized Raster Data
 
@@ -270,15 +270,15 @@ overestimation in low-density or sparsely populated outskirts of cities can be e
 bigger. Underestimation can happen for high-density residential areas. Crucial is
 also, there is no one accepted standard for the uncertainty estimation of population
 data [^4]. This means while our population estimates are not perfect, we can expect
-them to show differences between the LTN estimates.
+them to show differences between the Superblock estimates.
 
 In our calculation, we do not need a separate numerical uncertainty estimate, as the
 mathematical operations we do are only additive and multiplicative. For the cell area
 we do not add an uncertainty. Due to this choice, the final uncertainty estimate of
-each LTNs aggregated population density has a standard deviation
-$u(\rho_\mathrm{LTN}) = \sqrt{\sum_{i=1}^N \left(\frac{u(p_i)}{A_i}\right)^2} =
-\frac{\rho_\mathrm{LTN}\cdot \mathrm{MAPE}_\mathrm{urban}}{\sqrt{6}}$, where $N$ is
-the number of cells in the LTN and $A_i$ is the area of the $i$-th cell.
+each Superblocks aggregated population density has a standard deviation
+$u(\rho_\mathrm{Superblock}) = \sqrt{\sum_{i=1}^N \left(\frac{u(p_i)}{A_i}\right)^2} =
+\frac{\rho_\mathrm{Superblock}\cdot \mathrm{MAPE}_\mathrm{urban}}{\sqrt{6}}$, where $N$ is
+the number of cells in the Superblock and $A_i$ is the area of the $i$-th cell.
 
 [^1]: Schiavina, M., Freire, S. & MacManus, K. GHS-POP R2023A - GHS population grid
 multitemporal (1975-2030). (2023)
@@ -295,7 +295,7 @@ Study. Remote Sensing 12, 1105 (2020).
 Millions in Maps: Exploring Causes of Uncertainties in Global Gridded Population
 Datasets. ISPRS International Journal of Geo-Information 11, 403 (2022).
 
-## Comparison with the LTN population density
+## Comparison with the Superblock population density
 
 To compare the two approaches, we will show the population densities in a scatter
 plot. We will calculate a fit with uncertainties to see the correlation
@@ -438,7 +438,7 @@ plt.show()
 The average relative difference is around $\pm 2 \times 10^{-1} \approx \pm 0
 .2\%$. For smaller population densities, the relative difference is larger, but
 the absolute difference is smaller. Again, this effect might be visible for single
-cells, but when dissolving the cells into LTNs, the effect will compensate itself.
+cells, but when dissolving the cells into Superblocks, the effect will compensate itself.
 
 ```{code-cell} ipython3
 :tags: [hide-input, hide-output]
@@ -469,7 +469,7 @@ Furthermore, there is the function [`get_population_area`](get_population_area) 
 you can pass a graph to summarize the population and area, respecting the edges with the
 same geometry. Cells with the same geometry share the same cell, `cell_id` is used to
 identify the cells. The function returns a tuple of the population and area. As for
-many different LTN configurations we want to calculate the population density,
+many different Superblock configurations we want to calculate the population density,
 [`add_edge_population`](add_edge_population) is called when loading the graph the first
 time, so this preprocessing step is only done once.
 

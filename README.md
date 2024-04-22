@@ -1,4 +1,4 @@
-![superblockify](superblockify_logo.png "superblockify")
+![superblockify logo](assets/superblockify_logo.png)
 
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://NERDSITU.github.io/superblockify/)
 [![PyPI Version](https://badge.fury.io/py/superblockify.svg)](https://pypi.org/project/superblockify/)
@@ -21,59 +21,79 @@ Superblock-like neighborhoods and for visualizing and analyzing the partition re
 Superblock is a set of adjacent urban blocks where vehicular through traffic is
 prevented or pacified, giving priority to people walking and cycling.
 
+![superblockify concept](assets/superblockify_concept.png "superblockify partitions an urban street network into Superblock-like neighborhoods")
+
 ## Installation
 
-We recommend
-using [`micromamba`](https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html)
-to create a virtual environment and installing the package in editable mode.
-Alternatively, one can
-use [`conda`](https://docs.conda.io/projects/conda/en/latest/index.html)
+### Set up environment
+
+Use [`conda`](https://docs.conda.io/projects/conda/en/latest/index.html)
 or [`mamba`](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html)
-to create the environment (they can be used interchangeably).
+or [`micromamba`](https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html)
+to create the virtual environment `sb_env`:
 
 ```bash
-micromamba create -n sb_env -c conda-forge python=3.12 osmnx
-micromamba activate sb_env
+conda create -n sb_env -c conda-forge python=3.12 osmnx=1.9.2
+```
+
+*Alternatively*, or if you run into issues, [clone this repository](https://github.com/NERDSITU/superblockify/archive/refs/heads/main.zip) and create the environment via
+the [`environment.yml`](https://github.com/NERDSITU/superblockify/blob/main/environment.yml)
+file:
+:
+
+```bash
+conda env create --file environment.yml
+```
+
+### Install package
+
+Next, activate the environment and install the package:
+
+```bash
+conda activate sb_env
 pip install superblockify
 ```
 
-This installs the package and its dependencies,
-ready for use when activating the environment.
-Learn more about `superblockify` by reading
-the [documentation](https://NERDSITU.github.io/superblockify/)
-with the [usage section](https://nerdsitu.github.io/superblockify/usage/)
-or
-the [minimal working example](https://github.com/NERDSITU/superblockify/blob/main/scripts/examples/mwe.py).
+### Set up Jupyter kernel
 
-## Development Setup
-
-For development, clone the repository, navigate to the root folder and
-create the environment with the wished python version and the development dependencies.
+If you want to use `superblockify` with its environment `sb_env` in Jupyter, run:
 
 ```bash
-micromamba create -n sb_env -c conda-forge python=3.12 --file=environment.yml
-micromamba activate sb_env
+pip install --user ipykernel
+python -m ipykernel install --user --name=sb_env
 ```
 
-Now it is possible to import the package relatively to the root folder.
-Optionally, register the package in editable mode with `pip`:
-
-```bash
-pip install --no-build-isolation --no-deps -e .
-```
+This allows you to run Jupyter with the kernel `sb_env` (Kernel > Change Kernel >
+sb_env)
 
 ## Usage
 
-For a quick start after installation,
-refer to the [usage section](https://nerdsitu.github.io/superblockify/usage/)
-in the documentation.
-Additionally, there are example scripts in
-the [`examples/`](https://github.com/NERDSITU/superblockify/blob/main/scripts/examples/)
-folder and
-a [minimal working example](https://github.com/NERDSITU/superblockify/blob/main/scripts/examples/mwe.py).
+We provide a minimum working example in two formats:
+
+* [Jupyter notebook (`00-mwe.ipynb`)](https://github.com/NERDSITU/superblockify/blob/main/examples/00-mwe.ipynb)
+* [Python script (`00-mwe.py`)](https://github.com/NERDSITU/superblockify/blob/main/examples/00-mwe.py)
+
+For a guided start after installation, see
+the [usage section](https://superblockify.city/usage/) in the documentation. See the [`examples/`](https://github.com/NERDSITU/superblockify/blob/main/examples/) folder for more example scripts.
+
+## Documentation
+
+Read the [documentation](https://superblockify.city) to learn more
+about `superblockify`.
 
 ## Testing
 
-The tests are specified using the `pytest` signature, see [`tests/`](tests/) folder, and
+The tests are specified using the `pytest` signature,
+see [`tests/`](https://github.com/NERDSITU/superblockify/blob/main/tests/) folder, and
 can be run using a test runner of choice.
-A pipeline is set up, see [`.github/workflows/test.yml`](.github/workflows/test.yml).
+A pipeline is set up,
+see [`.github/workflows/test.yml`](https://github.com/NERDSITU/superblockify/blob/main/.github/workflows/test.yml).
+
+## Credits & Funding
+
+* Carlson M. Büth (Implementation)
+* Anastassia Vybornova (Supervision)
+* Michael Szell (Concept)
+
+Funded by the European
+Union, [EU Horizon grant JUST STREETS](https://cordis.europa.eu/project/id/101104240)

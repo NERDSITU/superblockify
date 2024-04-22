@@ -25,43 +25,59 @@ sys.path.append(os.path.abspath(os.path.join(os.getcwd(), os.pardir)))
 The `superblockify` package works out of the box, meaning no further downloads are
 necessary. Maps are downloaded from the OpenStreetMap API and population data is
 downloaded from the [GHSL-POP 2023](https://human-settlement.emergency.copernicus.eu/ghs_pop2023.php)
-dataset. Only tiles needed are being cached in the `data/ghsl` folder.
+dataset. Only those map tiles that are needed are cached in the `data/ghsl` folder.
 
-As example, we will try to partition Scheveningen, a district of The Hague, using the
+The following example uses `superblockify` to partition the street network of Scheveningen, a district of The Hague, using the
 `ResidentialPartitioner` class.
-Afterward we will save the results to a geopackage file that can easily be opened and
-edited in QGIS.
+After partitioning, the results will be saved to a GeoPackage file (`.gpkg`) that can be opened and
+edited with a GIS software like [QGIS](https://qgis.org/).
 
-First, import the package.
+## Import
+First, import the package. By convention, `superblockify` is shortened as `sb`:
 
 ```{code-cell} ipython3
 import superblockify as sb
-
-# sb.config.set_log_level("DEBUG")     # set to see debug logs
-# sb.config.Config.FULL_RASTER = None  # set if you own the full ghsl raster
-# (GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0.tif)
-# otherwise the package will automatically download the needed tiles
 ```
+
+## Configuration
+
+There are several options to configure `superblockify`, see the [API Reference](api/superblockify/#module-superblockify.config).
+
+Common ones are, for example, to log at the "debug" level:
+
+```{code-cell} ipython3
+sb.config.set_log_level("DEBUG")
+```
+
+If you already have the GHSL raster file, you can skip its download. In this case, if you already have the file `GHS_POP_E2025_GLOBE_R2023A_54009_100_V1_0.tif` inside the `data/ghsl` folder, you could set the `FULL_RASTER` parameter to `NONE`:
+
+```{code-cell} ipython3
+sb.config.Config.FULL_RASTER = None
+```
+
 
 ## Initialization
 
 For this example we will use the `ResidentialPartitioner` class.
-It is a class that partitions a city into superblocks based on the residential
-street tags in OpenStreetMap.
-First, we initialize the partitioner with the city name and a search string.
+It is a class that partitions a city into superblocks based on the residential street tags in OpenStreetMap.
+First, initialize the partitioner with the city name and a search string.
 
 ```{code-cell} ipython3
 part = sb.ResidentialPartitioner(
-    name="Scheveningen_test", city_name="Scheveningen", search_str="Scheveningen, NL",
+    name="Scheveningen_test",
+    city_name="Scheveningen",
+    search_str="Scheveningen, NL",
     unit="time",  # "time", "distance", any other edge attribute, or None to count edges
 )
 ```
 
 This will download the map of Scheveningen, preprocess it, output some statistics
-and store it in the `data/graphs` folder for use later.
+and store it in the `data/graphs` folder for later use.
 Any other partitioner for Scheveningen, given the same `city_name`, will use the same
 preprocessed, locally stored map.
 Population tiles are cached in the `data/ghsl` folder (if not using the full raster).
+
+If you want to select a different city, find the corresponding search string (`search_str`) at [https://nominatim.openstreetmap.org/](https://nominatim.openstreetmap.org/ui/search.html?q=Scheveningen%2C+NL). The smaller the place, the quicker the partitioning. For large places sufficient memory is required.
 
 ## Partitioning
 
@@ -73,7 +89,7 @@ part.run(
     calculate_metrics=True,  # set to False if you are not interested in metrics
     make_plots=True,  # set to False if you are not interested in plots
     replace_max_speeds=False,  # set to true to overwrite the OSM speed limits
-    # -> with 15 km/h inside LTNs and 50 km/h outside
+    # -> with 15 km/h inside Superblocks and 50 km/h outside
     # If the approach has specific parameters, you can set them here
 )
 ```
@@ -98,14 +114,14 @@ sb.save_to_gpkg(part, save_path=None)
 
 This will save the partitioning results to `data/results/Scheveningen_test/{city_name}.gpkg`.
 If you calculated the metrics before, they will be available in the layers, for each
-LTN. This includes more metrics than shown in the plots earlier.
+Superblock. This includes more metrics than shown in the plots earlier.
 The name of the components is saved into a `classification` edge
 attribute. The sparse graph is saved with the value "SPARSE" into the
 `classification` edge attribute.
 
 To learn more about the inner workings and background of the package, please
 see the next Reference section. Otherwise, you can also check out the
-[API documentation](api/index)
+[API documentation](api/index).
 
 ## FAQ
 
@@ -131,14 +147,13 @@ Otherwise, OSM relations IDs, e.g. `R13751467`, can be used.
 
 To re-download the map, pass `reload_graph=True` when initializing the partitioner.
 
-### The LTNs look too big/small/random when using the `ResidentialPartitioner`, why is that?
+### The Superblocks look too big/small/random when using the `ResidentialPartitioner`, why is that?
 
 The `ResidentialPartitioner` uses the residential street tags to find the
-LTNs.
-OSM data quality and the way streets are tagged varies, this is reflected for this approach.
-The `BetweennessPartitioner` tries to combat this by using the betweenness
-centrality of the streets, not the tags. Try this approach if the LTNs are not
-satisfactory.
+Superblocks.
+The variation in OSM data quality and street tagging practices can be reflected when using this approach.
+The `BetweennessPartitioner` instead does not rely on OSM tags but uses the betweenness
+centrality - a topological property of the street network. Try this approach if the Superblocks from the `ResidentialPartitioner` are not satisfactory .
 
 (betweenness_partitioner)=
 ```{eval-rst}
@@ -157,7 +172,7 @@ set the parameters for the partitioning, like
 ### My country has another maximum speed limit, can I change this?
 
 When calculating the metrics and using `replace_max_speeds=True`,
-the maximum speed limits are set to 15 km/h inside Low Traffic Neighbourhoods (LTNs)
+the maximum speed limits are set to 15 km/h inside the Superblocks
 and 50 km/h outside of them. If you want to change these values, you can do so
 by setting the `V_MAX_LTN` and `V_MAX_SPARSE` attributes in the `Config` class.
 

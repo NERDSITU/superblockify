@@ -321,7 +321,7 @@ class BasePartitioner(ABC):
         There are different network measures
         - :math:`d_E(i, j)`: Euclidean
         - :math:`d_S(i, j)`: Shortest path on full graph
-        - :math:`d_N(i, j)`: Shortest path with a ban through LTNs
+        - :math:`d_N(i, j)`: Shortest path with a ban through Superblocks
 
         Parameters
         ----------
@@ -661,7 +661,7 @@ class BasePartitioner(ABC):
             comp["cell"] = cells.dissolve()["geometry"].iloc[0]
 
     def get_ltns(self):
-        """Get LTN list.
+        """Get Superblock list.
 
         Returns
         -------

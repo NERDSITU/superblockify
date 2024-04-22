@@ -23,7 +23,7 @@ def save_to_gpkg(
     save_path=None,
     ltn_boundary=False,
 ):
-    """Save the partitioner's graph and LTNs to a geodatapackage.
+    """Save the partitioner's graph and Superblocks to a geodatapackage.
 
     The name of the components (/partitions) is saved into a "classification" edge
     attribute. The sparse graph is saved with the value "SPARSE" into the
@@ -37,8 +37,8 @@ def save_to_gpkg(
         The path to save the geodatapackage to. If None, it will be saved to the
         partitioners folder at (part.results_dir, part.name + ".gpkg")
     ltn_boundary : bool, optional
-        If True, the boundary of the LTNs will be saved as a polygon into the `cell`
-        attribute of the LTNs layer. For this, the tessellation needs to be calculated.
+        If True, the boundary of the Superblocks will be saved as a polygon into the `cell`
+        attribute of the Superblocks layer. For this, the tessellation needs to be calculated.
 
     Raises
     ------
@@ -98,12 +98,12 @@ def save_to_gpkg(
     if partitioner.components:
         parts = partitioner.components
         logger.info(
-            "Using components attribute to save LTNs to geodatapackage %s", filepath
+            "Using components attribute to save Superblocks to geodatapackage %s", filepath
         )
     elif partitioner.partitions:
         parts = partitioner.partitions
         logger.info(
-            "Using partitions attribute to save LTNs to geodatapackage %s", filepath
+            "Using partitions attribute to save Superblocks to geodatapackage %s", filepath
         )
 
     if not isinstance(parts, list):
@@ -123,10 +123,10 @@ def save_to_gpkg(
             "'name' key."
         )
 
-    # Bake the LTNs into the graph
+    # Bake the Superblocks into the graph
     for _, part in enumerate(parts):
         # As part["subgraph"] is connected to partitioner.graph, we can just
-        # change the edge attribute in the whole subgraph, applying the LTN
+        # change the edge attribute in the whole subgraph, applying the Superblock
         set_edge_attributes(part["subgraph"], part["name"], "classification")
     # Sparsified edges are saved with the value "SPARSE" into the "classification"
     # edge attribute
@@ -143,7 +143,7 @@ def save_to_gpkg(
     # list attributes in nodes and edges
     logger.info("Node attributes: %s", nodes.columns)
     logger.info("Edge attributes: %s", edges.columns)
-    logger.info("LTN attributes: %s", ltns.columns)
+    logger.info("Superblock attributes: %s", ltns.columns)
     logger.info("Graph meta attributes: %s", graph_meta.columns)
 
     # Remove certain attributes
@@ -168,7 +168,7 @@ def save_to_gpkg(
     edges.to_file(filepath, layer="edges", index=False, mode="w")
     logger.info("Saved %d edges to %s", len(edges), filepath)
     ltns.to_file(filepath, layer="ltns", index=False, mode="w")
-    logger.info("Saved %d LTNs to %s", len(ltns), filepath)
+    logger.info("Saved %d Superblocks to %s", len(ltns), filepath)
     graph_meta.to_file(filepath, layer="graph_meta", index=False, mode="w")
     logger.info("Saved graph meta to %s", filepath)
 

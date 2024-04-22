@@ -55,8 +55,8 @@ part = sb.ResidentialPartitioner(
 part.run(calculate_metrics=False, make_plots=True)
 ```
 
-The partitioner has been run and for each LTN it produces a partition, inclusing a
-subgraph object, which includes the nodes and edges of the LTN. One of them looks like
+The partitioner has been run and for each Superblock it produces a partition, inclusing a
+subgraph object, which includes the nodes and edges of the Superblock. One of them looks like
 this:
 
 ```{code-cell} ipython3
@@ -85,7 +85,7 @@ plt.show()
 This approach is quick and easy, but it has some drawbacks. It might be larger than
 we are looking for. For example, a star shaped neighborhood would result in a hull
 spanning around all areas between the streets, even if it might include areas that
-belong to another LTN. Also, it might be smaller than we are looking for. For example,
+belong to another Superblock. Also, it might be smaller than we are looking for. For example,
 a neighborhood that is linear, one long street with houses on both sides, would result
 in a hull that is just a line, which is not what we are looking for.
 The latter problem can be solved by buffering the edges before taking the convex hull.
@@ -148,7 +148,7 @@ that a shape with lower ratio is not necessarily fully included in a shape with 
 higher ratio, see the two lowest ratios on the bottom right. This solution still does
 not satisfy us.
 
-Optimally all LTN cells would not overlap each other and form a tiling, also called
+Optimally all Superblock cells would not overlap each other and form a tiling, also called
 tesselation, of the city.
 
 ## Morphological Tessellation
@@ -176,7 +176,7 @@ as a way of partitioning space: Improving consistency in urban morphology at the
 scale. Computers, Environment and Urban Systems 80, 101441 (2020).
 
 In our case the input geometries can be the smaller neighborhood boundaries, and the
-tesselation fills up the gaps. For the LTNs we will use an union of the edges of the
+tesselation fills up the gaps. For the Superblocks we will use an union of the edges of the
 subgraphs and buffer them a small bit. As we do not want the polygons to overlap wich
 each other, we'll buffer using a flat cap style.
 
@@ -240,7 +240,7 @@ sparsified network at cell borders, but at the same time, the sparsified network
 also have a volume as there might be people living on it. Finally, we will implement our
 own method, inspired by this technique, a solution sewed to our needs.
 
-## Indepentent Tessellation
+## Independent Tessellation
 
 When looking into the code, {py:mod}`momepy` uses {py:class}`scipy.spatial.Voronoi`
 to generate the tessellation for every enclosure. This is done with a dense point array
@@ -259,7 +259,7 @@ from scipy.spatial import Voronoi, voronoi_plot_2d
 ```
 
 Now, we will create Voronoi cells for each edge, so we can later dissolve them to
-LTN cells. As we are working in a `MultiDiGraph` two way streets are represented by two
+Superblock cells. As we are working in a `MultiDiGraph` two way streets are represented by two
 directed edges with the same geometry, both should share the same cell, so grouping the
 edges is a crucial part. First we will group the edges connecting the same nodes `u` and
 `v` and then we will merge the edges with the same or reverse geometry.

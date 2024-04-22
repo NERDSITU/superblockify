@@ -43,7 +43,7 @@ Partition Requirements
 ^^^^^^^^^^^^^^^^^^^^^^
 
 The street graph :math:`G` will be split into partitions, one for each
-LTN and one for the sparse network. This can be described by a
+Superblock and one for the sparse network. This can be described by a
 partitioning
 :math:`\mathcal{P} : G \mapsto \left(G_\mathrm{sp} \cup G_1 \cup \dots \cup G_k\right)`
 returning subgraphs :math:`G_i\subseteq G`, one sparse
@@ -76,10 +76,10 @@ is a subset
 :math:`p \subseteq E_\mathrm{s} \cup E_\mathrm{sp} \cup E_\mathrm{t}`,
 including paths starting or ending in the sparse network. To satisfy
 connectivity for :math:`\mathcal{P}`, a sufficient condition is that the
-sparse network is strongly connected and that the LTNs are connected to
+sparse network is strongly connected and that the Superblocks are connected to
 the sparse network. From anywhere in a neighborhood, it must be possible
-to reach anywhere else in a city, without passing a foreign LTN.
-However, it is possible that with a start and end inside the same LTN
+to reach anywhere else in a city, without passing a foreign Superblock.
+However, it is possible that with a start and end inside the same Superblock
 one must, by car, use the sparse network.
 
 

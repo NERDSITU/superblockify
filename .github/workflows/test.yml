@@ -41,7 +41,7 @@ jobs:
         uses: mamba-org/setup-micromamba@v1
         with:
           create-args: python=${{ matrix.python-version }}
-          environment-file: environment.yml
+          environment-file: environment-dev.yml
           cache-environment: true
           cache-environment-key: W${{ env.WEEK }}
 
@@ -83,7 +83,7 @@ jobs:
         uses: mamba-org/setup-micromamba@v1
         with:
           create-args: python=${{ matrix.python-version }}
-          environment-file: environment.yml
+          environment-file: environment-dev.yml
           cache-environment: true
           cache-environment-key: W${{ env.WEEK }}
 
