@@ -5,11 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "superblockify"
 authors = [
-  { name = "Carlson Büth", email = "carlson@cbueth.de" },
+  { name = "Carlson Büth" },
   { name = "Anastassia Vybornova" },
   { name = "Michael Szell" },
 ]
-maintainers = [{ name = "superblockify contributors" }]
+maintainers = [{ name = "Carlson Büth", email = "carlson@cbueth.de" }]
 license = { text = "APGL-3.0-or-later" }
 readme = "README.md"
 description = "Automated Generation, Visualization, and Analysis of potential Superblocks in Cities"
