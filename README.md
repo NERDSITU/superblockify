@@ -41,7 +41,6 @@ issues, [clone this repository](https://github.com/NERDSITU/superblockify/archiv
 and create the environment via
 the [`environment.yml`](https://github.com/NERDSITU/superblockify/blob/main/environment.yml)
 file:
-:
 
 ```bash
 conda env create --file environment.yml
