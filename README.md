@@ -63,8 +63,8 @@ This allows you to run Jupyter with the kernel `sb_env` (Kernel > Change Kernel 
 
 We provide a minimum working example in two formats: 
 
-* [Jupyter notebook (`mwe.ipynb`)](mwe.ipynb)
-* [Python script (`mwe.py`)](scripts/examples/mwe.py)
+* [Jupyter notebook (`00-mwe.ipynb`)](examples/00-mwe.ipynb)
+* [Python script (`00-mwe.py`)](examples/00-mwe.py)
 
 For a guided start after installation, see the [usage section](https://superblockify.city/usage/) in the documentation.
 
