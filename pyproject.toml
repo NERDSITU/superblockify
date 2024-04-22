@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "superblockify"
-authors = [{ name = "Carlson Büth", email = "carlson@cbueth.de" }]
+authors = [{ name = "superblockify developers", email = "carlson@cbueth.de" }]
 maintainers = [{ name = "superblockify contributors" }]
 license = { text = "APGL-3.0-or-later" }
 readme = "README.md"

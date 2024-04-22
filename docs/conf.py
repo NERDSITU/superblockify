@@ -22,8 +22,8 @@ sys.path.insert(0, os.path.abspath(".."))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "superblockify"
-copyright = "2023-2024, Carlson Büth"
-author = "Carlson Büth"
+copyright = "2023-2024, superblockify developers"
+author = "superblockify developers"
 release = "1.0.0rc6"
 
 # -- General configuration ---------------------------------------------------

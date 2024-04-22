@@ -78,3 +78,10 @@ Read the [documentation](https://superblockify.city) to learn more about `superb
 The tests are specified using the `pytest` signature, see [`tests/`](tests/) folder, and
 can be run using a test runner of choice.
 A pipeline is set up, see [`.github/workflows/test.yml`](.github/workflows/test.yml).
+
+## Credits & Funding
+* Carlson M. Büth (Implementation)
+* Anastassia Vybornova (Supervision)
+* Michael Szell (Concept)
+
+Funded by the European Union, [EU Horizon grant JUST STREETS](https://cordis.europa.eu/project/id/101104240)
