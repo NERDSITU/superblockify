@@ -5,7 +5,7 @@ channels:
   - defaults
 dependencies:
   # Dependencies
-  - osmnx
+  - osmnx>=1.6.0
   - geopandas
   - rasterio
   - shapely
@@ -17,18 +17,3 @@ dependencies:
   - seaborn
   - psutil
   - typing-extensions
-  - rasterstats  # only used in one reference notebook
-  - momepy  # only used in one reference notebook
-  # Code Quality
-  - blackd
-  - isort
-  - pylint
-  # Testing
-  - pytest
-  - pytest-cov
-  - coverage
-  # Documentation
-  - sphinx
-  - numpydoc
-  - myst-nb
-  - sphinx-book-theme
