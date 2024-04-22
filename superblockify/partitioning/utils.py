@@ -37,8 +37,9 @@ def save_to_gpkg(
         The path to save the geodatapackage to. If None, it will be saved to the
         partitioners folder at (part.results_dir, part.name + ".gpkg")
     ltn_boundary : bool, optional
-        If True, the boundary of the Superblocks will be saved as a polygon into the `cell`
-        attribute of the Superblocks layer. For this, the tessellation needs to be calculated.
+        If True, the boundary of the Superblocks will be saved as a polygon into the
+        `cell` attribute of the Superblocks layer. For this, the tessellation needs
+        to be calculated.
 
     Raises
     ------
@@ -98,12 +99,14 @@ def save_to_gpkg(
     if partitioner.components:
         parts = partitioner.components
         logger.info(
-            "Using components attribute to save Superblocks to geodatapackage %s", filepath
+            "Using components attribute to save Superblocks to geodatapackage %s",
+            filepath,
         )
     elif partitioner.partitions:
         parts = partitioner.partitions
         logger.info(
-            "Using partitions attribute to save Superblocks to geodatapackage %s", filepath
+            "Using partitions attribute to save Superblocks to geodatapackage %s",
+            filepath,
         )
 
     if not isinstance(parts, list):
