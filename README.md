@@ -1,6 +1,6 @@
 ![superblockify logo](assets/superblockify_logo.png)
 
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://NERDSITU.github.io/superblockify/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://superblockify.city/)
 [![PyPI Version](https://badge.fury.io/py/superblockify.svg)](https://pypi.org/project/superblockify/)
 [![Python Version](https://img.shields.io/pypi/pyversions/superblockify)](https://pypi.org/project/superblockify/)
 [![linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/PyCQA/pylint)
@@ -36,7 +36,9 @@ to create the virtual environment `sb_env`:
 conda create -n sb_env -c conda-forge python=3.12 osmnx=1.9.2
 ```
 
-*Alternatively*, or if you run into issues, [clone this repository](https://github.com/NERDSITU/superblockify/archive/refs/heads/main.zip) and create the environment via
+*Alternatively*, or if you run into
+issues, [clone this repository](https://github.com/NERDSITU/superblockify/archive/refs/heads/main.zip)
+and create the environment via
 the [`environment.yml`](https://github.com/NERDSITU/superblockify/blob/main/environment.yml)
 file:
 :
@@ -74,7 +76,9 @@ We provide a minimum working example in two formats:
 * [Python script (`00-mwe.py`)](https://github.com/NERDSITU/superblockify/blob/main/examples/00-mwe.py)
 
 For a guided start after installation, see
-the [usage section](https://superblockify.city/usage/) in the documentation. See the [`examples/`](https://github.com/NERDSITU/superblockify/blob/main/examples/) folder for more example scripts.
+the [usage section](https://superblockify.city/usage/) in the documentation. See
+the [`examples/`](https://github.com/NERDSITU/superblockify/blob/main/examples/) folder
+for more example scripts.
 
 ## Documentation
 
