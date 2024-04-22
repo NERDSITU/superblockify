@@ -91,7 +91,7 @@ suggestion-mode = true
 [tool.pylint.basic]
 # Regular expression matching correct module names. Overrides module-naming-
 # style. Additionally to snake case allows for a prepended 'yyyymmdd-' string.
-module-rgx = "(\\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])-)?(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$"
+module-rgx = "(0*\\d+-)?(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$"
 
 [tool.pylint.format]
 # Maximum number of characters on a single line.

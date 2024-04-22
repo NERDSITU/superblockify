@@ -34,8 +34,8 @@ class AttributePartitioner(BasePartitioner, ABC):
     def partition_graph(self, make_plots=False, **kwargs):
         """Group by boolean attribute and remove small components.
 
-        Construct sparsified graph from boolean attribute and Superblock subgraphs for the
-        components that fall apart.
+        Construct sparsified graph from boolean attribute and Superblock subgraphs
+        for the components that fall apart.
 
         Parameters
         ----------

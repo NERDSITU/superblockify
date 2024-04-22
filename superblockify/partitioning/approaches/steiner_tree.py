@@ -33,10 +33,10 @@ class MinimumPartitioner(AttributePartitioner):
         into which the residual graph decomposes.
 
         Edges that are `oneway` can be excluded with `remove_oneway_edges`.
-        The idea is so this approach can produce Superblocks that are reachable from every
-        other Superblock, as Steiner trees are calculated on undirected graphs. But htis
-        highly depends on how the place was mapped. If arterial roads in two directions
-        are mapped as two separate ways, this is not the way out.
+        The idea is so this approach can produce Superblocks that are reachable from
+        every other Superblock, as Steiner trees are calculated on undirected graphs.
+        But this highly depends on how the place was mapped. If arterial roads in two
+        directions are mapped as two separate ways, this is not the way out.
 
         Normally, the sampling probability is uniform, but if `low_betweenness_mode` is
         set, the sampling probability is inversely proportional to the betweenness

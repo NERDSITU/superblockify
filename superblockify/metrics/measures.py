@@ -795,8 +795,8 @@ def add_relative_changes(components, attr_pairs):
     :func:`superblockify.utils.percentual_increase`.
 
     Write the relative percentual change of the specified edge attribute(s) to each
-    Superblock in the list of components. The relative change is the percentual change of
-    the first to the second attribute.
+    Superblock in the list of components.
+    The relative change is the percentual change of the first to the second attribute.
     Works in-place and adds `change_{attr1}` to each Superblock.
     If `attr1` has a value of 2 and `attr2` has a value of 1, the relative change is
     -0.5, a 50% decrease. If `attr1` has a value of 4 and `attr2` has a value of 6,
