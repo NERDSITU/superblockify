@@ -7,6 +7,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI License](https://img.shields.io/pypi/l/superblockify)](https://pypi.org/project/superblockify/)
 
+[![status](https://joss.theoj.org/papers/87426e988ebd0a6d7f592eb16d1fd209/status.svg)](https://joss.theoj.org/papers/87426e988ebd0a6d7f592eb16d1fd209)
 [![Docs](https://github.com/NERDSITU/superblockify/actions/workflows/docs.yml/badge.svg)](https://github.com/NERDSITU/superblockify/actions/workflows/docs.yml)
 [![Lint](https://github.com/NERDSITU/superblockify/actions/workflows/lint.yml/badge.svg)](https://github.com/NERDSITU/superblockify/actions/workflows/lint.yml)
 [![Test](https://github.com/NERDSITU/superblockify/actions/workflows/test.yml/badge.svg)](https://github.com/NERDSITU/superblockify/actions/workflows/test.yml)
