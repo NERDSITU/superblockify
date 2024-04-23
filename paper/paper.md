@@ -32,7 +32,7 @@ affiliations:
     index: 3
   - name: Complexity Science Hub Vienna, 1080 Vienna, Austria
     index: 4
-date: 5 March 2024
+date: 23 April 2024
 bibliography: paper.bib
 ---
 
