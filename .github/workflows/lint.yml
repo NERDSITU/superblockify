@@ -23,7 +23,6 @@ jobs:
         with:
           src: './superblockify ./tests ./examples'
           options: '--exclude "/(\.png|\.jpg|\.jpeg)/"'
-          use_pyproject: true
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
