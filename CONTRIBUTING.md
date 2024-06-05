@@ -78,7 +78,7 @@ us fix any potential bug as fast as possible.
 - To see if other users have experienced (and potentially already solved) the same issue
   you are having, check if there is not already a bug report existing for your bug or
   error in
-  the [bug tracker](https://github.com/NERDSITU/superblockifyissues?q=label%3Abug).
+  the [bug tracker](https://github.com/NERDSITU/superblockify/issues?q=label%3Abug).
 - Also make sure to search the internet (including Stack Overflow) to see if users
   outside of the GitHub community have discussed the issue.
 - Collect information about the bug:
