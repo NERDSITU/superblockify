@@ -60,19 +60,6 @@ nb_execution_timeout = 180
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "sphinx_book_theme"
-html_sidebars = {
-    "index": [
-        "navbar-logo.html",
-        # "sbt-sidebar-nav.html",
-        "search-field.html",
-        # "globaltoc.html",
-    ],
-    # "api/*": [
-    #     "navbar-logo.html",
-    #     # "sbt-sidebar-nav.html",
-    #     "sidebar-nav-bs",
-    # ],
-}
 html_static_path = ["_static"]
 html_theme_options = {
     "repository_url": "https://github.com/NERDSITU/superblockify/",

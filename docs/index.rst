@@ -32,6 +32,12 @@ More on the details of the inner workings can be found on
 the `Reference pages <guide>`__.
 Furthermore, you can also find the `API documentation <api/index.html>`__.
 
+Contributing
+============
+If you want to contribute to the development of superblockify, please read the
+`CONTRIBUTING.md <https://github.com/NERDSITU/superblockify/blob/main/CONTRIBUTING.md>`__
+file.
+
 .. toctree::
    :caption: Overview
    :maxdepth: 1
