@@ -96,6 +96,7 @@ def save_to_gpkg(
         if save_path is not None
         else join(partitioner.results_dir, partitioner.name + ".gpkg")
     )
+    parts = None
     if partitioner.components:
         parts = partitioner.components
         logger.info(

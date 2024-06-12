@@ -190,6 +190,8 @@ def plot_distance_matrices_pairwise_relative_difference(metric, name=None):
     # Iterate over all combinations of keys, for the upper triangle make the axes
     # invisible
     # Only write labels on the left and bottom axes
+    dist_im = None
+    diff_im = None
     for i, (key_i, key_j) in enumerate(product(metric.distance_matrix, repeat=2)):
         axe = axes[i // len(metric.distance_matrix), i % len(metric.distance_matrix)]
 
