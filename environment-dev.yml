@@ -10,10 +10,10 @@ dependencies:
   - rasterio
   - shapely
   - numba
+  - scipy
   - tqdm
   - contextily
   - ruamel.yaml
-  - pyarrow
   - seaborn
   - psutil
   - typing-extensions

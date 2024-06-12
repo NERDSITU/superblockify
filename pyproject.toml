@@ -34,15 +34,15 @@ classifiers = [
 dynamic = ["version"]
 requires-python = ">=3.10"
 dependencies = [
-    "osmnx",
+    "osmnx>=1.6.0",
     "geopandas",
     "rasterio",
     "shapely",
     "numba",
+    "scipy",
     "tqdm",
     "contextily",
     "ruamel.yaml",
-    "pyarrow",
     "seaborn",
     "psutil",
     "typing-extensions",
