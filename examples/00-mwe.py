@@ -2,15 +2,15 @@
 
 # While this script is running, figures will be generated on screen.
 # Close the figure windows to proceed with the script execution.
-
+# A data/ folder will be created in the current working directory.
 
 from superblockify import ResidentialPartitioner
 
 if __name__ == "__main__":
     # --- Initialize the partitioner ---
     partitioner = ResidentialPartitioner(
-        name="Scheveningen_test",
-        city_name="Scheveningen",
+        name="Scheveningen_test",  # result folder: .data/results/Scheveningen_test/
+        city_name="Scheveningen",  #         cache: .data/graphs/Scheveningen.graphml
         search_str="Scheveningen, NL",
         unit="time",
         # "time", "distance", any other edge attribute, or None to count edges
