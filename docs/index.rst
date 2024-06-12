@@ -32,6 +32,15 @@ More on the details of the inner workings can be found on
 the `Reference pages <guide>`__.
 Furthermore, you can also find the `API documentation <api/index.html>`__.
 
+Statement of Need
+=================
+
+`superblockify` is designed to address the need for an open, general-use, and extendable software package for Superblock delineation, visualization, and analysis. The Superblock model is an urban planning intervention that creates more liveable and sustainable cities by forming human-centric neighborhoods with reduced vehicular traffic. However, the planning and implementation of Superblocks is a complex process that requires extensive stakeholder involvement and careful consideration of trade-offs.
+
+With the advent of new computational tools and datasets, there is an opportunity to simplify this process by allowing for easy computational analysis and visualization of urban street networks. `superblockify` seizes this opportunity, filling a gap in the current landscape of research efforts.
+
+The target audience for `superblockify` includes urban planners, researchers in urban studies, data scientists interested in urban data, and policymakers involved in urban development. By providing a tool for Superblock analysis, `superblockify` aims to support these professionals in their work towards creating safer, quieter, and more environmentally friendly urban environments.
+
 Contributing
 ============
 If you want to contribute to the development of superblockify, please read the
