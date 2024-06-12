@@ -27,10 +27,6 @@ the experience for all involved. The community looks forward to your contributio
     - [Reporting Bugs](#reporting-bugs)
     - [Suggesting Enhancements](#suggesting-enhancements)
     - [Your First Code Contribution](#your-first-code-contribution)
-    - [Improving The Documentation](#improving-the-documentation)
-- [Styleguides](#styleguides)
-    - [Commit Messages](#commit-messages)
-- [Join The Project Team](#join-the-project-team)
 
 ## I Have a Question
 
@@ -165,7 +161,37 @@ as [GitHub issues](https://github.com/NERDSITU/superblockify/issues).
 
 <!-- You might want to create an issue template for enhancement suggestions that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
 
-<!-- omit in toc -->
+### Your First Code Contribution
+
+If you prefer to directly put your enhancement into code, you are welcome to submit a
+pull request.
+When doing so, we reccomend to set up your development environment with the
+development dependencies and an editable installation of the package, like so:
+
+```bash
+conda create -n sb_env -c conda-forge python=3.12 -f environment-dev.yml
+conda activate sb_env
+pip install --no-build-isolation --no-deps -e .
+```
+
+This will install the package in editable mode, so you can make changes to the code and
+see the effects immediately.
+Take into consideration the same guidelines as
+for [enhancement suggestions](#suggesting-enhancements) when submitting a pull request.
+
+Additionally, make sure to include tests for your changes.
+To test your changes, you can run all tests with:
+
+```bash
+pytest tests/
+```
+
+Before submitting a pull request, make sure to lint the code with `pylint` and `black`:
+
+```bash
+pylint -d E0401 superblockify/
+black superblockify/ tests/
+```
 
 ## Attribution
 
