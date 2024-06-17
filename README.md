@@ -37,6 +37,8 @@ to create the virtual environment `sb_env`:
 conda create -n sb_env -c conda-forge python=3.12 osmnx=1.9.2
 ```
 
+> **Note:** While `pip` can install OSMnx, it's not officially supported due to potential issues with C dependencies. If unsure, use `conda` as instructed above to avoid problems. 
+
 *Alternatively*, or if you run into
 issues, [clone this repository](https://github.com/NERDSITU/superblockify/archive/refs/heads/main.zip)
 and create the environment via
