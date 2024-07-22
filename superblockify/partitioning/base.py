@@ -246,12 +246,6 @@ class BasePartitioner(ABC):
                     fig,
                     f"{self.name}_partition_graph.{Config.PLOT_SUFFIX}",
                 )
-            fig, _ = plot_subgraph_component_size(self, "length")
-            save_plot(
-                self.results_dir,
-                fig,
-                f"{self.name}_subgraph_component_size.{Config.PLOT_SUFFIX}",
-            )
             fig, _ = plot_component_rank_size(self, "length")
             save_plot(
                 self.results_dir,
