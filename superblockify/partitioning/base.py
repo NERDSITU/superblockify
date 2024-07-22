@@ -20,7 +20,6 @@ from ruamel.yaml import YAML
 from .checks import is_valid_partitioning
 from .plot import (
     plot_partition_graph,
-    plot_subgraph_component_size,
     plot_component_rank_size,
     plot_component_graph,
     plot_speed_un_restricted,

@@ -324,7 +324,11 @@ class Metric:
         self.calculate_all_measure_sums()
 
         write_relative_increase_to_edges(
-            partitioner.graph, self.distance_matrix, self.node_list, "N", "S"
+            partitioner.graph,
+            self.distance_matrix,
+            self.node_list,
+            "N",
+            "S",
         )
         add_ltn_means(
             partitioner.get_ltns(),
@@ -385,12 +389,13 @@ class Metric:
                 self,
                 "N",
                 "S",
-                title=f"{partitioner.name} - Relative difference in {self.__class__.__name__}",
+                title=f"{partitioner.name} - Relative difference in "
+                f"{self.__class__.__name__}",
             )
             save_plot(
                 partitioner.results_dir,
                 fig,
-                f"{partitioner.name}_relative_difference_SN.{Config.PLOT_SUFFIX}",
+                f"{partitioner.name}_relative_difference_SN." f"{Config.PLOT_SUFFIX}",
             )
         fig, _ = plot_component_wise_travel_increase(
             partitioner,
