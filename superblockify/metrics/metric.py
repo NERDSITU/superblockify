@@ -382,7 +382,10 @@ class Metric:
                 f"{partitioner.name}_distance_matrices.{Config.PLOT_SUFFIX}",
             )
             fig, _ = plot_relative_difference(
-                self, "N", "S", title=f"{partitioner.name} - Relative difference in {self.__class__.__name__}"
+                self,
+                "N",
+                "S",
+                title=f"{partitioner.name} - Relative difference in {self.__class__.__name__}",
             )
             save_plot(
                 partitioner.results_dir,
