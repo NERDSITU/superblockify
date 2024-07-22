@@ -363,7 +363,6 @@ def plot_speed_un_restricted(
         edge_cmap=cmap,
         edge_minmax_val=minmax_val,
         ax=axes[0],
-        show=False,
     )
 
     # Plot restricted max speed limits on right side
@@ -373,7 +372,6 @@ def plot_speed_un_restricted(
         edge_cmap=cmap,
         edge_minmax_val=minmax_val,
         ax=axes[1],
-        show=False,
     )
 
     # Set titles
