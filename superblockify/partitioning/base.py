@@ -246,21 +246,18 @@ class BasePartitioner(ABC):
                     fig,
                     f"{self.name}_partition_graph.{Config.PLOT_SUFFIX}",
                 )
-                plt.show()
             fig, _ = plot_subgraph_component_size(self, "length")
             save_plot(
                 self.results_dir,
                 fig,
                 f"{self.name}_subgraph_component_size.{Config.PLOT_SUFFIX}",
             )
-            plt.show()
             fig, _ = plot_component_rank_size(self, "length")
             save_plot(
                 self.results_dir,
                 fig,
                 f"{self.name}_component_rank_size.{Config.PLOT_SUFFIX}",
             )
-            plt.show()
             if self.components:
                 fig, _ = plot_component_graph(self)
                 save_plot(
@@ -268,7 +265,6 @@ class BasePartitioner(ABC):
                     fig,
                     f"{self.name}_component_graph.{Config.PLOT_SUFFIX}",
                 )
-                plt.show()
             if replace_max_speeds:
                 fig, _ = plot_speed_un_restricted(self.graph, self.sparsified)
                 save_plot(
@@ -276,7 +272,6 @@ class BasePartitioner(ABC):
                     fig,
                     f"{self.name}_speed_un_restricted.{Config.PLOT_SUFFIX}",
                 )
-                fig.show()
 
         if calculate_metrics:
             self.calculate_metrics(
@@ -284,6 +279,9 @@ class BasePartitioner(ABC):
                 replace_max_speeds=replace_max_speeds,
             )
             calculate_component_metrics(self.get_ltns())
+
+        if make_plots:
+            plt.show()
 
     @abstractmethod
     def partition_graph(self, make_plots=False, **kwargs):  # pragma: no cover

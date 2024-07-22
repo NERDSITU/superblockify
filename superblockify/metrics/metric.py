@@ -382,7 +382,6 @@ class Metric:
             fig,
             f"{partitioner.name}_distance_matrices.{Config.PLOT_SUFFIX}",
         )
-        fig.show()
         fig, _ = plot_distance_matrices_pairwise_relative_difference(
             self, name=f"{partitioner.name} - {partitioner.__class__.__name__}"
         )
@@ -392,7 +391,6 @@ class Metric:
             f"{partitioner.name}_distance_matrices_"
             f"pairwise_relative_difference.{Config.PLOT_SUFFIX}",
         )
-        fig.show()
         fig, _ = plot_relative_difference(
             self, "N", "S", title=f"{partitioner.name} - {self.__class__.__name__}"
         )
@@ -401,7 +399,6 @@ class Metric:
             fig,
             f"{partitioner.name}_relative_difference_SN.{Config.PLOT_SUFFIX}",
         )
-        fig.show()
         fig, _ = plot_component_wise_travel_increase(
             partitioner,
             self.distance_matrix,

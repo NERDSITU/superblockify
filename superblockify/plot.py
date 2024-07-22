@@ -216,6 +216,7 @@ def plot_by_attribute(
             node_color=node_color if node_color else (0, 0, 0, 0),
             edge_linewidth=edge_linewidth,
             bgcolor=(0, 0, 0, 0),
+            show=False,
             **pg_kwargs,
         )
     # If only node_attr is set
@@ -228,6 +229,7 @@ def plot_by_attribute(
             node_color=n_c,
             edge_linewidth=edge_linewidth,
             bgcolor=(0, 0, 0, 0),
+            show=False,
             **pg_kwargs,
         )
     # If both edge_attr and node_attr are set
@@ -238,6 +240,7 @@ def plot_by_attribute(
         node_color=n_c,
         edge_linewidth=edge_linewidth,
         bgcolor=(0, 0, 0, 0),
+        show=False,
         **pg_kwargs,
     )
 

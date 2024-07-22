@@ -47,8 +47,6 @@ def plot_distance_distributions(
     axe[1].set_xlabel(labels[0])
     axe[1].set_ylabel(labels[1])
     plt.tight_layout()
-    plt.show()
-
 
 def plot_distance_matrices(metric, name=None):
     """Show the distance matrices for the network measures.
