@@ -156,7 +156,7 @@ def calculate_path_distance_matrix(
                 [graph.nodes[node]["y"] for node in node_order],
             ),
             coord_title="Projected coordinates of nodes",
-            labels=("Longitude [m]", "Latitude [m]"),
+            labels=("Longitude (m)", "Latitude (m)"),
             distance_unit=unit_symbol,
         )
 
@@ -230,7 +230,7 @@ def calculate_euclidean_distance_matrix_projected(
             dist_title="Distribution of Euclidean distances",
             coords=(x_coord, y_coord),
             coord_title="Scatter plot of projected coordinates",
-            labels=("Longitude [m]", "Latitude [m]"),
+            labels=("Longitude (m)", "Latitude (m)"),
         )
 
     return dist_matrix
@@ -448,7 +448,7 @@ def calculate_partitioning_distance_matrix(
                 [partitioner.graph.nodes[node]["y"] for node in node_order],
             ),
             coord_title="Projected coordinates of nodes",
-            labels=("Longitude [m]", "Latitude [m]"),
+            labels=("Longitude (m)", "Latitude (m)"),
             distance_unit=unit_symbol,
         )
 

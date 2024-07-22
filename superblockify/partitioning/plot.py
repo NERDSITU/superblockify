@@ -212,7 +212,7 @@ def plot_component_rank_size(partitioner, measure):
         zorder=2,
     )
     axe.set_xlabel("Superblock rank", fontsize=12)
-    axe.set_ylabel(f"Superblock size ({measure} [m])", fontsize=12)
+    axe.set_ylabel(f"Superblock size ({measure} (m))", fontsize=12)
     axe.set_title(
         f"Superblock size rank for {partitioner.name} with attribute "
         f"`{partitioner.attribute_label}`",

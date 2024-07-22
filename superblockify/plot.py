@@ -504,7 +504,7 @@ def plot_component_size(
         Value of the partition for each component
     size_measure_label : str
         Label of the size measure (e.g. "Number of edges", "Number of nodes",
-        "Length [m]")
+        "Length (m)")
     ignore : list, optional
         List of values to ignore, plot in gray. If None, no values are ignored.
     title : str, optional
