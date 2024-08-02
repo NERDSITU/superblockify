@@ -165,9 +165,12 @@ centrality - a topological property of the street network. Try this approach if 
     :noindex:
 ```
 
-Pass the kwargs from the write_attribute method to the `BetweennessPartitioner` to
-set the parameters for the partitioning, like
-`BetweennessPartitioner(..., percentile=85.0, scaling="normal", max_range=None)`.
+Pass the kwargs from the `write_attribute()` method (as seen above or in the
+API documentation) to the `BetweennessPartitioner.run(...)`
+method to set the parameters for the partitioning.
+After initializing a `BetweennessPartitioner`, `part = BetweennessPartitioner(...)`,
+run the partitioning with the optional parameters, e.g.
+`part.run(percentile=85.0, scaling="normal", max_range=None)`.
 
 ### My country has another maximum speed limit, can I change this?
 
