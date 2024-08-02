@@ -45,7 +45,7 @@ There are several options to configure `superblockify`, see the [API Reference](
 
 Common ones are, for example, to log at the "debug" level:
 
-```{code-cell} ipython3
+```python
 sb.config.set_log_level("DEBUG")
 ```
 

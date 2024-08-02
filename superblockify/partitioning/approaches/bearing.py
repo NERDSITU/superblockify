@@ -94,7 +94,6 @@ class BearingPartitioner(BasePartitioner):  # pragma: no cover
             save_plot(
                 self.results_dir, fig, f"{self.name}_peakfinding.{Config.PLOT_SUFFIX}"
             )
-            plt.show()
 
         # Make boundaries
         self.__make_boundaries()
@@ -106,7 +105,6 @@ class BearingPartitioner(BasePartitioner):  # pragma: no cover
                 fig,
                 f"{self.name}_interval_splitting.{Config.PLOT_SUFFIX}",
             )
-            plt.show()
 
         # Write grouping attribute to graph
         self.attribute_label = "bearing_group"

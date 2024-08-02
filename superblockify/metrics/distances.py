@@ -155,8 +155,8 @@ def calculate_path_distance_matrix(
                 [graph.nodes[node]["x"] for node in node_order],
                 [graph.nodes[node]["y"] for node in node_order],
             ),
-            coord_title="Coordinates of nodes",
-            labels=("x", "y"),
+            coord_title="Projected coordinates of nodes",
+            labels=("x (m)", "y (m)"),
             distance_unit=unit_symbol,
         )
 
@@ -230,7 +230,7 @@ def calculate_euclidean_distance_matrix_projected(
             dist_title="Distribution of Euclidean distances",
             coords=(x_coord, y_coord),
             coord_title="Scatter plot of projected coordinates",
-            labels=("x", "y"),
+            labels=("x (m)", "y (m)"),
         )
 
     return dist_matrix
@@ -325,8 +325,8 @@ def calculate_euclidean_distance_matrix_haversine(
             dist_matrix,
             dist_title="Distribution of Euclidean distances",
             coords=(node1_lon, node1_lat),
-            coord_title="Scatter plot of lat/lon",
-            labels=("Longitude", "Latitude"),
+            coord_title="Scatter plot of unprojected coordinates",
+            labels=("Longitude [°]", "Latitude [°]"),
         )
 
     return dist_matrix
@@ -447,8 +447,8 @@ def calculate_partitioning_distance_matrix(
                 [partitioner.graph.nodes[node]["x"] for node in node_order],
                 [partitioner.graph.nodes[node]["y"] for node in node_order],
             ),
-            coord_title="Coordinates of nodes",
-            labels=("x", "y"),
+            coord_title="Projected coordinates of nodes",
+            labels=("x (m)", "y (m)"),
             distance_unit=unit_symbol,
         )
 

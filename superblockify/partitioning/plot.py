@@ -211,10 +211,10 @@ def plot_component_rank_size(partitioner, measure):
         color="k",
         zorder=2,
     )
-    axe.set_xlabel("Component rank", fontsize=12)
-    axe.set_ylabel(f"Component size ({measure} [m])", fontsize=12)
+    axe.set_xlabel("Superblock rank", fontsize=12)
+    axe.set_ylabel(f"Superblock size ({measure} (m))", fontsize=12)
     axe.set_title(
-        f"Component size rank for {partitioner.name} with attribute "
+        f"Superblock size rank for {partitioner.name} with attribute "
         f"`{partitioner.attribute_label}`",
         fontsize=13,
     )
@@ -363,7 +363,6 @@ def plot_speed_un_restricted(
         edge_cmap=cmap,
         edge_minmax_val=minmax_val,
         ax=axes[0],
-        show=False,
     )
 
     # Plot restricted max speed limits on right side
@@ -373,7 +372,6 @@ def plot_speed_un_restricted(
         edge_cmap=cmap,
         edge_minmax_val=minmax_val,
         ax=axes[1],
-        show=False,
     )
 
     # Set titles

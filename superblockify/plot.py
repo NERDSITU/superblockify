@@ -216,6 +216,7 @@ def plot_by_attribute(
             node_color=node_color if node_color else (0, 0, 0, 0),
             edge_linewidth=edge_linewidth,
             bgcolor=(0, 0, 0, 0),
+            show=False,
             **pg_kwargs,
         )
     # If only node_attr is set
@@ -228,6 +229,7 @@ def plot_by_attribute(
             node_color=n_c,
             edge_linewidth=edge_linewidth,
             bgcolor=(0, 0, 0, 0),
+            show=False,
             **pg_kwargs,
         )
     # If both edge_attr and node_attr are set
@@ -238,6 +240,7 @@ def plot_by_attribute(
         node_color=n_c,
         edge_linewidth=edge_linewidth,
         bgcolor=(0, 0, 0, 0),
+        show=False,
         **pg_kwargs,
     )
 
@@ -501,7 +504,7 @@ def plot_component_size(
         Value of the partition for each component
     size_measure_label : str
         Label of the size measure (e.g. "Number of edges", "Number of nodes",
-        "Length [m]")
+        "Length (m)")
     ignore : list, optional
         List of values to ignore, plot in gray. If None, no values are ignored.
     title : str, optional

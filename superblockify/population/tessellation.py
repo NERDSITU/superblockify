@@ -151,7 +151,6 @@ def get_edge_cells(graph, limit=None, segment=25, show_plot=False):
         axe.set_axis_off()
         axe.set_title("Edge tessellation")
         fig.tight_layout()
-        plt.show()
 
     logger.info(
         "Tessellated %d edge cells in %s.",

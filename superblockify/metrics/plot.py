@@ -38,16 +38,18 @@ def plot_distance_distributions(
     # Plot distribution of distances
     axe[0].hist(dist_matrix.flatten(), bins=100)
     axe[0].set_title(dist_title)
-    axe[0].set_xlabel(f"Distance [{distance_unit}]")
+    axe[0].set_xlabel(
+        "Travel time (s)" if distance_unit == "s" else f"Distance ({distance_unit})"
+    )
     axe[0].set_ylabel("Count")
     # Plot scatter plot of lat/lon, aspect ratio should be 1:1
     axe[1].set_aspect("equal")
     axe[1].scatter(coords[0], coords[1], alpha=0.5, s=1)
+    axe[1].ticklabel_format(axis="both", style="sci", scilimits=(0, 0))
     axe[1].set_title(coord_title)
     axe[1].set_xlabel(labels[0])
     axe[1].set_ylabel(labels[1])
     plt.tight_layout()
-    plt.show()
 
 
 def plot_distance_matrices(metric, name=None):
@@ -329,7 +331,7 @@ def plot_component_wise_travel_increase(
     )
     # Label the colorbar, vertical alignment, latex math mode
     cbar.ax.set_ylabel(
-        rf"Part. increase ({unit}) "
+        rf"Travel distance increase in superblock ({unit}) "
         rf"$d_{{{measure1}}} (i, j)$ / $d_{{{measure2}}} (i, j)$",
         rotation=270,
         labelpad=20,
@@ -393,7 +395,7 @@ def plot_relative_difference(metric, key_i, key_j, title=None):
     )
     axe.set_title(
         f"{title} ({metric.unit_symbol()}) | "
-        f"$\\frac{{d_{{{key_j}}}(i, j)}}{{d_{{{key_i}}}(i, j)}}$"
+        f"$\\frac{{d_{{{key_i}}}(i, j)}}{{d_{{{key_j}}}(i, j)}}$"
     )
     axe.set_xlabel("Node $j$")
     axe.set_ylabel("Node $i$")
@@ -443,7 +445,7 @@ def plot_relative_increase_on_graph(graph, unit_symbol, **pg_kwargs):
     # Label the colorbar, vertical alignment, latex math mode
     cbar.ax.set_ylabel(
         f"Travel distance increase ({unit_symbol}) "
-        "(all to all demand) $d_{S}(i, j)$ / $d_{N}(i, j)$",
+        "(all to all demand) $d_{N}(i, j)$ / $d_{S}(i, j)$",
         rotation=270,
         labelpad=20,
         fontsize=15,
