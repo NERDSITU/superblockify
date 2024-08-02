@@ -38,7 +38,9 @@ def plot_distance_distributions(
     # Plot distribution of distances
     axe[0].hist(dist_matrix.flatten(), bins=100)
     axe[0].set_title(dist_title)
-    axe[0].set_xlabel(f"Distance ({distance_unit})")
+    axe[0].set_xlabel(
+        "Travel time (s)" if distance_unit == "s" else f"Distance ({distance_unit})"
+    )
     axe[0].set_ylabel("Count")
     # Plot scatter plot of lat/lon, aspect ratio should be 1:1
     axe[1].set_aspect("equal")
