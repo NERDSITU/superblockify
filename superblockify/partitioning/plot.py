@@ -44,12 +44,14 @@ def plot_partition_graph(partitioner, **pba_kwargs):
         partitioner.name,
         partitioner.attribute_label,
     )
-    return plot.plot_by_attribute(
+    fig, axe = plot.plot_by_attribute(
         partitioner.graph,
         edge_attr=partitioner.attribute_label,
         edge_minmax_val=partitioner.attr_value_minmax,
         **pba_kwargs,
     )
+    axe.set_title(f"Street network for {partitioner.name}")
+    return fig, axe
 
 
 def plot_component_graph(partitioner, **pba_kwargs):
@@ -113,7 +115,7 @@ def plot_component_graph(partitioner, **pba_kwargs):
         array([cmap(i) for i in range(cmap.N)]) * array([0.75, 0.75, 0.75, 1])
     )
 
-    return plot.plot_by_attribute(
+    fig, axe = plot.plot_by_attribute(
         partitioner.graph,
         edge_attr="component_name",
         edge_attr_types="categorical",
@@ -127,6 +129,38 @@ def plot_component_graph(partitioner, **pba_kwargs):
         node_zorder=2,
         **pba_kwargs,
     )
+    axe.set_title(f"Street network with colored Superblocks for {partitioner.name}")
+    # Add a legend with dummy entries
+    # - black line: Sparse Network
+    # - colored line: Superblocks
+    # - circle of same color: Representative node
+    legend_handles = [
+        plt.Line2D([0], [0], color="black", lw=2, label="Sparse Network"),
+    ]
+    # Extract colors from colormap
+    num_colors = len(partitioner.components)
+    colors = [cmap(i / num_colors) for i in range(num_colors)]
+    for i, color in enumerate(colors[:2]):  # Only show first two Superblocks
+        legend_handles.append(
+            plt.Line2D([0], [0], color=color, lw=2, label=f"Superblock {i + 1}")
+        )
+        legend_handles.append(
+            plt.Line2D(
+                [0],
+                [0],
+                color=color,
+                lw=0,
+                marker="o",
+                label=f"Representative node {i + 1}",
+            )
+        )
+    # Add a "..." entry to indicate more Superblocks
+    legend_handles.append(plt.Line2D([0], [0], color="gray", lw=2, label="..."))
+    # place legend outside of plot
+    axe.legend(handles=legend_handles, loc="upper left", bbox_to_anchor=(1, 1))
+    # tight layout
+    fig.tight_layout()
+    return fig, axe
 
 
 def plot_component_rank_size(partitioner, measure):
@@ -212,7 +246,9 @@ def plot_component_rank_size(partitioner, measure):
         zorder=2,
     )
     axe.set_xlabel("Superblock rank", fontsize=12)
-    axe.set_ylabel(f"Superblock size ({measure} (m))", fontsize=12)
+    unit = "m" if measure == "length" else "nodes" if measure == "nodes" else "edges"
+    measure = "street length" if measure == "length" else measure
+    axe.set_ylabel(f"Superblock size ({measure} ({unit}))", fontsize=12)
     axe.set_title(
         f"Superblock size rank for {partitioner.name} with attribute "
         f"`{partitioner.attribute_label}`",
