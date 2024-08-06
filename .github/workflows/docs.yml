@@ -38,6 +38,14 @@ jobs:
       run:
         shell: bash -el {0}
     steps:
+      - name: Check if GHSL site is under maintenance
+        run: |
+          content=$(curl -s https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/)
+          if echo "$content" | grep -q "Under Maintenance"; then
+            echo "GHSL site is under maintenance. Exiting."
+            exit 1
+          fi
+
       - name: Check out Git repository
         uses: actions/checkout@v4
 
