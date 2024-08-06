@@ -387,6 +387,7 @@ For a more intuitive comparison, we can plot the betweenness values for the edge
 (and nodes) on the graph. The size of the nodes is proportional to the node betweenness
 and the color of the edges is proportional to the edge betweenness.
 
+(betweenness_visualization)=
 ```{code-cell} ipython3
 :tags: [hide-input]
 def betweenness_plot(G, cb, cb_e, title):

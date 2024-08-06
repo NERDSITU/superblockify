@@ -12,6 +12,7 @@ kernelspec:
   name: python
 ---
 
+(head_dist_calc_restricted)=
 # Restricted Distance Calculation
 
 ````{sidebar} [Partition Requirements](./00_partition_requirements)

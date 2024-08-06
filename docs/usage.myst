@@ -85,6 +85,12 @@ Next, we will show the quickest way to partition the city and calculate the metr
 all in one go.
 
 ```{code-cell} ipython3
+:tags: [remove-input, remove-output]
+sb.config.Config.PLOT_SUFFIX = "png"
+```
+
+```{code-cell} ipython3
+:tags: [remove-output]
 part.run(
     calculate_metrics=True,  # set to False if you are not interested in metrics
     make_plots=True,  # set to False if you are not interested in plots
@@ -94,15 +100,90 @@ part.run(
 )
 ```
 
-As you see, this partitions the city and shows the relative increase of the distance metric.
-All shown plots are saved as pdf to the `data/results/Scheveningen_test` folder.
+```{code-cell} ipython3
+:tags: [remove-input, remove-output]
+# copy only png files to the _static/Scheveningen_test folder with python
+import shutil
+import os
+os.makedirs("_static/Scheveningen_test", exist_ok=True)
+for file in os.listdir("data/results/Scheveningen_test"):
+    if file.endswith(".png"):
+        shutil.copy(f"data/results/Scheveningen_test/{file}", f"_static/Scheveningen_test/{file}")
+```
 
-At any time, is possible to save and load a partitioner object to continue the work
+```{figure} _static/Scheveningen_test/Scheveningen_test_partition_graph.png
+:scale: 60%
+:alt: Street network of Scheveningen
+
+Simple street network of Scheveningen.
+```
+
+First, you want to see the street network of the city you are working with.
+This should look like the street network of the place you want to analyze,
+if it does not, check the `search_str` or the OSM relation ID.
+Some streets at the outer edges might be cut off, this is due to the requirement that
+the street network needs to be [strongly connected](https://en.wikipedia.org/wiki/Strongly_connected_component),
+in other words, you should be able to reach every street from every other street.
+For in- and outgoing highways, this might not be the case, so they are cut off.
+Furthermore, the [network filter](#network_filter) decides which streets are included in the start.
+
+
+```{figure} _static/Scheveningen_test/Scheveningen_test_component_rank_size.png
+:scale: 80%
+:alt: Component rank size plot for street length of Superblocks
+
+Superblock street length rank size plot.
+```
+
+Generally, a rank-size plot shows the distribution of a quantity in descending order.
+In this case, the street length of the generated Superblocks is shown on a logaritmic scale.
+If you are more interested in the [tesselated Superblock areas](#independent_tessellation),
+instead of the street length, you can find this information in the geopackage file saved later.
+
+```{figure} _static/Scheveningen_test/Scheveningen_test_component_graph.png
+:scale: 90%
+:alt: Superblocks of Scheveningen
+
+Generated Superblocks for Scheveningen. Each Superblock is colored differently with one representative point for visual aid.
+```
+
+A central feature of this package is the distance calculation between every point on the map before
+$d_S(i,j)$ and after introducing the Superblocks $d_N(i,j)$.
+This is done to evaluate the generated Superblock configuration.
+The way the distance calculation works is explained in the [Restricted Distance Calculation](#head_dist_calc_restricted) section.
+The restriction imposed by the Superblocks is that after implementing them,
+one is not allowed to travel through a Superblock that does not contain the starting or ending point.
+Another visualization of this restriction is shown on the [Betweenness Centrality](#betweenness_visualization) explainer page.
+
+```{figure} _static/Scheveningen_test/Scheveningen_test_relative_increase_on_graph.png
+:scale: 70%
+:alt: Relative increase of the distance metric on the graph
+
+Relative increase of the distance metric on the graph.
+```
+
+The fraction of the two distances $d_N(i,j)/d_S(i,j)$ is shown on the street network.
+If this is close to $1$, the Superblocks do not restrict the travel distance much.
+A value of $1.1$ means that the travel distance is increased by $10\%$.
+As we specified the unit as "time" in the initialization (`unit="time"`),
+the distance metric is in minutes and one can talk about a $10\%$ increase in travel time.
+
+```{figure} _static/Scheveningen_test/Scheveningen_test_component_wise_travel_increase.png
+:scale: 70%
+:alt: Component-wise travel increase
+
+Travel increase for each Superblock.
+```
+
+Finally, the travel increase is shown as arithmetic mean for each Superblock.
+
+All shown plots are saved as pdf to the `data/results/Scheveningen_test` folder.
+Here, is possible to save and load a partitioner object to continue the work
 later.
 
-```{code-cell} ipython3
-# part.save()
-# part.load("Scheveningen_test")
+```python
+part.save()
+part.load("Scheveningen_test")
 ```
 
 The most illustrative and interactive way to view the results is to save them to a
@@ -147,6 +228,14 @@ Otherwise, OSM relations IDs, e.g. `R13751467`, can be used.
 
 To re-download the map, pass `reload_graph=True` when initializing the partitioner.
 
+```python
+part = sb.ResidentialPartitioner(
+    name="Scheveningen_test",
+    ...,
+    reload_graph=True,
+)
+```
+
 ### The Superblocks look too big/small/random when using the `ResidentialPartitioner`, why is that?
 
 The `ResidentialPartitioner` uses the residential street tags to find the
@@ -184,6 +273,7 @@ sb.config.Config.V_MAX_LTN = 30  # km/h
 sb.config.Config.V_MAX_SPARSE = 60  # km/h
 ```
 
+(network_filter)=
 ### Some streets I know are not being used in the partitioning, why is that?
 
 When downloading the map from OpenStreetMap, we use a specific network filter, which
@@ -192,6 +282,10 @@ should include the car network.
 ```{code-cell} ipython3
 sb.config.Config.NETWORK_FILTER
 ```
+
+If you want to include more streets, you can change the network filter to include
+more or less streets. When changing the network filter, you might want to remove the
+cached graphs, or set `reload_graph=True` when initializing the partitioner.
 
 ### Some process is taking too long or suddenly stops, what can I do?
 
