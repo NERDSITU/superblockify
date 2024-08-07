@@ -156,7 +156,7 @@ For analysis, the package calculates various graph metrics of the street network
 - Betweenness centrality [@brandes2008]: Identifies which streets might bear increased traffic load after Superblock implementation.
 - Spatial clustering and anisotropy of high betweenness centrality nodes [@kirkley2018]: Describes how clustered and non-uniformly distributed the expected traffic bottlenecks are.
 - Street orientation-order [@boeing2019]: Quantifies how grid-like each Superblock is.
-- Average circuity [@boeing2019a]: Measures the windiness of routes compared to straight-line distances.
+- Average circuity [@boeing2019a]: Measures the length increase of routes on the street network compared to straight-line distances.
 
 These metrics are calculated for the entire street network and for each Superblock
 individually, providing insights into how the Superblock implementation might affect the
