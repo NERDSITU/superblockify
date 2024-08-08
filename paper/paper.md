@@ -133,7 +133,7 @@ In its current version 1.0.0, `superblockify` comes with two partitioners:
 
 The choice between these two approaches depends on the data quality and the desired outcome.
 The residential approach is appropriate for using residential data, if available and accurate.
-The betweenness approach is a flow-based alternative.
+The betweenness approach is an alternative based on traffic flow approximation.
 The resulting Superblocks can be exported in GeoPackage (`.gpkg`) format for further
 use.
 
@@ -145,13 +145,13 @@ by betweenness centrality.
 Example Superblock configurations for two cities are shown in Fig.
 \ref{fig:combined_graphs}.
 
-![Automated generation of Superblocks. Athens (top row) and Baltimore (bottom row) Superblocks generated using the residential partitioner (left column) and the betweenness partitioner (right column). The streets of each Superblock are colored, the rest of the streets are black. Colored nodes denote representative nodes within each Superblock for easier visual recognition. Map data from OpenStreetMap. \label{fig:combined_graphs}](combined_graphs.png)
+![Automated generation of Superblocks. Athens (top row) and Baltimore (bottom row) Superblocks generated using the residential partitioner (left column) and the betweenness partitioner (right column). Each Superblock is plotted in a different color, the rest of the streets are black. For easier visual recognition, each Superblock is also highlighted by a representative node of the same color. Map data from OpenStreetMap. \label{fig:combined_graphs}](combined_graphs.png)
 
 ## Analysis
 
 For analysis, the package calculates various graph metrics of the street network, including:
 
-- Global efficiency [@latora2001]: In the context of Superblocks, this measures how the overall ease of movement across the city might change after implementation.
+- Global efficiency [@latora2001]: In the context of Superblocks, this measures how the overall ease of vehicular movement across the city might change after implementation.
 - Directness [@szell2022]: This indicates how Superblock implementation might affect the directness of routes, potentially increasing or decreasing detours.
 - Betweenness centrality [@brandes2008]: Identifies which streets might bear increased traffic load after Superblock implementation.
 - Spatial clustering and anisotropy of high betweenness centrality nodes [@kirkley2018]: Describes how clustered and non-uniformly distributed the expected traffic bottlenecks are.
