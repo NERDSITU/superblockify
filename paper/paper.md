@@ -145,7 +145,7 @@ by betweenness centrality.
 Example Superblock configurations for two cities are shown in Fig.
 \ref{fig:combined_graphs}.
 
-![Automated generation of Superblocks. Athens (top row) and Baltimore (bottom row) Superblocks generated using the residential partitioner (left column) and the betweenness partitioner (right column). Each Superblock is plotted in a different color, the rest of the streets are black. For easier visual recognition, each Superblock is also highlighted by a representative node of the same color. Map data from OpenStreetMap. \label{fig:combined_graphs}](combined_graphs.png)
+![Automated generation of Superblocks. Athens, GR (top row) and Baltimore, MD, USA (bottom row) Superblocks generated using the residential partitioner (left column) and the betweenness partitioner (right column). Each Superblock is plotted in a different color, the rest of the streets are black. For easier visual recognition, each Superblock is also highlighted by a representative node of the same color. Map data from OpenStreetMap. \label{fig:combined_graphs}](combined_graphs.png)
 
 ## Analysis
 
