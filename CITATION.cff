@@ -1,0 +1,52 @@
+cff-version: 1.2.0
+message: "If you use this source code, please cite it as below. Cite the journal article separately."
+title: superblockify: A Python Package for Automated Generation, Visualization, and Analysis of Potential Superblocks in Cities
+type: software
+authors:
+    - family-names: "Büth"
+      given-names: "Carlson Moses"
+      orcid: "https://orcid.org/0000-0003-2298-8438"
+    - family-names: "Vybornova"
+      given-names: "Anastassia"
+      orcid: "https://orcid.org/0000-0001-6915-2561"
+    - family-names: "Szell"
+      given-names: "Michael"
+      orcid: "https://orcid.org/0000-0003-3022-2483"
+repository-code: 'https://github.com/NERDSITU/superblockify'
+url: 'https://superblockify.city/'
+keywords:
+  - Python
+  - urban planning
+  - low traffic neighborhood
+  - geospatial analysis
+  - network analysis
+  - urban mobility
+  - urban data
+license: AGPL-3.0-or-later
+version: 1.0.0
+doi: 10.5281/zenodo.13300611
+date-released: 2024-08-12
+
+# add when article published in JOSS
+# preferred-citation:
+#   type: article
+#   authors:
+#     - family-names: "Büth"
+#       given-names: "Carlson Moses"
+#       orcid: "https://orcid.org/0000-0003-2298-8438"
+#     - family-names: "Vybornova"
+#       given-names: "Anastassia"
+#       orcid: "https://orcid.org/0000-0001-6915-2561"
+#     - family-names: "Szell"
+#       given-names: "Michael"
+#       orcid: "https://orcid.org/0000-0003-3022-2483"
+#   doi: "10.0000/00000"
+#   journal: "JOURNAL"
+#   month: 1
+#   start: 1
+#   end: 2
+#   title: "PROJECTNAME"
+#   issue: 1
+#   volume: 1
+#   year: YYYY
+#   abstract: "ABSTRACT"
