@@ -1,5 +1,5 @@
 ---
-title: '`superblockify`: A Python Package for Automated Generation, Visualization, and Analysis of Potential Superblocks in Cities'
+title: 'superblockify: A Python Package for Automated Generation, Visualization, and Analysis of Potential Superblocks in Cities'
 tags:
   - Python
   - urban planning
