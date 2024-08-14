@@ -1,0 +1,51 @@
+cff-version: "1.2.0"
+title: "superblockify: A Python Package for Automated Generation,
+  Visualization, and Analysis of Potential Superblocks in Cities"
+authors:
+- family-names: Büth
+  given-names: Carlson M.
+  orcid: "https://orcid.org/0000-0003-2298-8438"
+- family-names: Vybornova
+  given-names: Anastassia
+  orcid: "https://orcid.org/0000-0001-6915-2561"
+- family-names: Szell
+  given-names: Michael
+  orcid: "https://orcid.org/0000-0003-3022-2483"
+repository-code: 'https://github.com/NERDSITU/superblockify'
+url: 'https://superblockify.city/'
+keywords:
+  - Python
+  - urban planning
+  - low traffic neighborhood
+  - geospatial analysis
+  - network analysis
+  - urban mobility
+  - urban data
+license: AGPL-3.0-or-later
+doi: 10.5281/zenodo.13300611
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Büth
+    given-names: Carlson M.
+    orcid: "https://orcid.org/0000-0003-2298-8438"
+  - family-names: Vybornova
+    given-names: Anastassia
+    orcid: "https://orcid.org/0000-0001-6915-2561"
+  - family-names: Szell
+    given-names: Michael
+    orcid: "https://orcid.org/0000-0003-3022-2483"
+  date-published: 2024-08-14
+  doi: 10.21105/joss.06798
+  issn: 2475-9066
+  issue: 100
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 6798
+  title: "superblockify: A Python Package for Automated Generation,
+    Visualization, and Analysis of Potential Superblocks in Cities"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.06798"
+  volume: 9
