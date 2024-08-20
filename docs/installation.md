@@ -8,24 +8,22 @@ or [`micromamba`](https://mamba.readthedocs.io/en/latest/installation/micromamba
 to create the virtual environment `sb_env`:
 
 ```bash
-conda create -n sb_env -c conda-forge python=3.12 osmnx=1.9.2
+conda create -n sb_env -c conda-forge superblockify
+conda activate sb_env
 ```
 
-> **Note:** While `pip` can install OSMnx, it's not officially supported due to potential issues with C dependencies. If unsure, use `conda` as instructed above to avoid problems.
+> **Note:** While `pip` can install `superblockify`, it's not officially supported due
+> to potential issues with C dependencies needed for OSMnx. If unsure, use `conda` as
+> instructed above to avoid problems.
 
-*Alternatively*, or if you run into issues, [clone this repository](https://github.com/NERDSITU/superblockify/archive/refs/heads/main.zip) and create the environment via
+*Alternatively*, or if you run into
+issues, [clone this repository](https://github.com/NERDSITU/superblockify/archive/refs/heads/main.zip)
+and create the environment via
 the [`environment.yml`](https://github.com/NERDSITU/superblockify/blob/main/environment.yml)
 file:
 
 ```bash
 conda env create --file environment.yml
-```
-
-### Install package
-
-Next, activate the environment and install the package:
-
-```bash
 conda activate sb_env
 pip install superblockify
 ```
@@ -41,6 +39,5 @@ python -m ipykernel install --user --name=sb_env
 
 This allows you to run Jupyter with the kernel `sb_env` (Kernel > Change Kernel >
 sb_env)
-
 
 For a guided start after installation, see the following [Usage section](#usage).
