@@ -8,10 +8,18 @@
 
    <div style="height: 10px;"></div>
    <div style="text-align: center;">
-     <img src="https://joss.theoj.org/papers/10.21105/joss.06798/status.svg" alt="JOSS status" style="margin: 0 10px;" />
-     <img src="https://img.shields.io/conda/vn/conda-forge/superblockify.svg" alt="Conda version" style="margin: 0 10px;" />
-     <img src="https://img.shields.io/pypi/pyversions/superblockify" alt="Python version" style="margin: 0 10px;" />
-     <img src="https://img.shields.io/pypi/l/superblockify" alt="License" style="margin: 0 10px;" />
+     <a href="https://doi.org/10.21105/joss.06798" style="margin: 0 10px; display: inline-block;">
+       <img src="https://joss.theoj.org/papers/10.21105/joss.06798/status.svg" alt="JOSS status" />
+     </a>
+     <a href="https://anaconda.org/conda-forge/superblockify" style="margin: 0 10px; display: inline-block;">
+       <img src="https://img.shields.io/conda/vn/conda-forge/superblockify.svg" alt="Conda version" />
+     </a>
+     <a href="https://pypi.org/project/superblockify/" style="margin: 0 10px; display: inline-block;">
+       <img src="https://img.shields.io/pypi/pyversions/superblockify" alt="Python version" />
+     </a>
+     <a href="https://pypi.org/project/superblockify/" style="margin: 0 10px; display: inline-block;">
+       <img src="https://img.shields.io/pypi/l/superblockify" alt="License" />
+     </a>
    </div>
    <div style="height: 10px;"></div>
 
