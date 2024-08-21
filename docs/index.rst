@@ -7,31 +7,13 @@
 .. raw:: html
 
    <div style="height: 10px;"></div>
-
-.. |spacer| raw:: html
-
-   <div style="width: 10px; display: inline-block;"></div>
-
-.. list-table::
-   :widths: auto
-   :header-rows: 0
-   :align: center
-
-   * - .. image:: https://joss.theoj.org/papers/10.21105/joss.06798/status.svg
-         :target: https://doi.org/10.21105/joss.06798
-         :alt: JOSS status
-     - |spacer|
-     - .. image:: https://img.shields.io/conda/vn/conda-forge/superblockify.svg
-         :target: https://anaconda.org/conda-forge/superblockify
-         :alt: Conda version
-     - |spacer|
-     - .. image:: https://img.shields.io/pypi/pyversions/superblockify
-         :target: https://pypi.org/project/superblockify/
-         :alt: Python version
-     - |spacer|
-     - .. image:: https://img.shields.io/pypi/l/superblockify
-         :target: https://pypi.org/project/superblockify/
-         :alt: License
+   <div style="text-align: center;">
+     <img src="https://joss.theoj.org/papers/10.21105/joss.06798/status.svg" alt="JOSS status" style="margin: 0 10px;" />
+     <img src="https://img.shields.io/conda/vn/conda-forge/superblockify.svg" alt="Conda version" style="margin: 0 10px;" />
+     <img src="https://img.shields.io/pypi/pyversions/superblockify" alt="Python version" style="margin: 0 10px;" />
+     <img src="https://img.shields.io/pypi/l/superblockify" alt="License" style="margin: 0 10px;" />
+   </div>
+   <div style="height: 10px;"></div>
 
 On these pages you can find documentation for superblockify.
 
