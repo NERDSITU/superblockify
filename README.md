@@ -94,9 +94,10 @@ see [`.github/workflows/test.yml`](https://github.com/NERDSITU/superblockify/blo
 
 ## Credits & Funding
 
-* Carlson M. Büth (Implementation)
-* Anastassia Vybornova (Supervision)
-* Michael Szell (Concept)
+* Carlson M. Büth, [@cbueth](https://github.com/cbueth) (Implementation)
+* Anastassia Vybornova, [@anastassiavybornova](https://github.com/anastassiavybornova)
+  (Supervision)
+* Michael Szell, [@mszell](https://github.com/mszell) (Concept)
 
 Funded by the European
 Union, [EU Horizon grant JUST STREETS](https://cordis.europa.eu/project/id/101104240)
