@@ -4,9 +4,34 @@
   :width: 1121
   :alt: superblockify logo
 
-***************************
-superblockify documentation
-***************************
+.. raw:: html
+
+   <div style="height: 10px;"></div>
+
+.. |spacer| raw:: html
+
+   <div style="width: 10px; display: inline-block;"></div>
+
+.. list-table::
+   :widths: auto
+   :header-rows: 0
+   :align: center
+
+   * - .. image:: https://joss.theoj.org/papers/10.21105/joss.06798/status.svg
+         :target: https://doi.org/10.21105/joss.06798
+         :alt: JOSS status
+     - |spacer|
+     - .. image:: https://img.shields.io/conda/vn/conda-forge/superblockify.svg
+         :target: https://anaconda.org/conda-forge/superblockify
+         :alt: Conda version
+     - |spacer|
+     - .. image:: https://img.shields.io/pypi/pyversions/superblockify
+         :target: https://pypi.org/project/superblockify/
+         :alt: Python version
+     - |spacer|
+     - .. image:: https://img.shields.io/pypi/l/superblockify
+         :target: https://pypi.org/project/superblockify/
+         :alt: License
 
 On these pages you can find documentation for superblockify.
 
@@ -40,6 +65,13 @@ Statement of Need
 With the advent of new computational tools and datasets, there is an opportunity to simplify this process by allowing for easy computational analysis and visualization of urban street networks. `superblockify` seizes this opportunity, filling a gap in the current landscape of research efforts.
 
 The target audience for `superblockify` includes urban planners, researchers in urban studies, data scientists interested in urban data, and policymakers involved in urban development. By providing a tool for Superblock analysis, `superblockify` aims to support these professionals in their work towards creating safer, quieter, and more environmentally friendly urban environments.
+
+How to cite
+===========
+If you use `superblockify` in your research, please cite the
+JOSS paper `doi:10.21105/joss.06798 <https://doi.org/10.21105/joss.06798>`__, e.g.:
+
+    Büth et al., (2024). superblockify: A Python Package for Automated Generation, Visualization, and Analysis of Potential Superblocks in Cities. Journal of Open Source Software, 9(100), 6798, https://doi.org/10.21105/joss.06798
 
 Contributing
 ============

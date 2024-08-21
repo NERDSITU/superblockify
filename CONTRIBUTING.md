@@ -165,7 +165,7 @@ as [GitHub issues](https://github.com/NERDSITU/superblockify/issues).
 
 If you prefer to directly put your enhancement into code, you are welcome to submit a
 pull request.
-When doing so, we reccomend to set up your development environment with the
+When doing so, we recommend setting up your development environment with the
 development dependencies and an editable installation of the package, like so:
 
 ```bash
