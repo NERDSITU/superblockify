@@ -2,7 +2,7 @@
 Changelog
 *********
 
-Version 1.0.0 (2024-XX-XX)
+Version 1.0.0 (2024-08-12)
 **************************
 
 * ✨ First major release ✨
