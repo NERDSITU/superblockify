@@ -108,6 +108,8 @@ jobs:
         with:
           name: coverage-${{ matrix.submodule.name }}
           path: ".coverage.${{ matrix.submodule.name }}"
+          if-no-files-found: error
+          include-hidden-files: true
 
   coverage:
     name: Merge Coverage
