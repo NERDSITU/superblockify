@@ -127,12 +127,12 @@ def load_graph_from_place(
     # geopandas.GeoDataFrame, every column is polygon
     # make shapely.geometry.MultiPolygon from all polygons
     # Project to WGS84 to query OSM
-    mult_polygon = ox.project_gdf(mult_polygon, to_crs="epsg:4326")
+    mult_polygon = ox.projection.project_gdf(mult_polygon, to_crs="epsg:4326")
     logger.debug("Reprojected boundary to WGS84 - Downloading graph")
     # Get graph - automatically adds distances before simplifying
     ox.settings.cache_only_mode = only_cache
     try:
-        graph = ox.graph_from_polygon(mult_polygon.geometry.unary_union, **gfp_kwargs)
+        graph = ox.graph_from_polygon(mult_polygon.geometry.union_all(), **gfp_kwargs)
     except CacheOnlyInterruptError:  # pragma: no cover
         logger.debug("Only loaded graph from cache")
         return None
@@ -167,9 +167,9 @@ def load_graph_from_place(
         add_edge_population(graph)
 
     # Add boundary as union of all polygons as attribute - in UTM crs of centroid
-    mult_polygon = ox.project_gdf(mult_polygon)
+    mult_polygon = ox.projection.project_gdf(mult_polygon)
     graph.graph["boundary_crs"] = mult_polygon.crs
-    graph.graph["boundary"] = mult_polygon.geometry.unary_union
+    graph.graph["boundary"] = mult_polygon.geometry.union_all()
     graph.graph["area"] = graph.graph["boundary"].area
     # update graph attributes with basic graph stats
     graph.graph.update(basic_graph_stats(graph, area=graph.graph["area"]))
