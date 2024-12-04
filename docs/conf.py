@@ -11,6 +11,7 @@
 #
 import os
 import sys
+from datetime import datetime
 
 sys.path.insert(0, os.path.abspath(".."))
 
@@ -22,9 +23,9 @@ sys.path.insert(0, os.path.abspath(".."))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "superblockify"
-copyright = "2023-2024, superblockify developers"
+copyright = f"2023-{datetime.now().year}, superblockify developers"
 author = "superblockify developers"
-release = "1.0.0"
+release = "1.0.1"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
