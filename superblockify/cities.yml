@@ -120,11 +120,11 @@ place_lists:
         - 1572779
         pop_GHSL2023: 328740.3926395578
       Liechtenstein:
-        query: Liechtenstein, Europe
+        query: Liechtenstein
         country: LI
         region: EU
         nominatim link:
-        - https://nominatim.openstreetmap.org/ui/search.html?q=Liechtenstein,+Europe
+        - https://nominatim.openstreetmap.org/ui/search.html?q=Liechtenstein
         OSM relation:
         - https://www.openstreetmap.org/relation/1155955
         osm_id:

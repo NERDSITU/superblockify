@@ -368,7 +368,10 @@ def load_graphml_dtypes(filepath=None, attribute_label=None, attribute_dtype=Non
         The graph.
     """
 
-    node_dtypes = {}
+    node_dtypes = {
+        "y": float,
+        "x": float,
+    }
     edge_dtypes = {
         "bearing": float,
         "length": float,
