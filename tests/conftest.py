@@ -367,12 +367,10 @@ def mark_xfail_flaky_download(test_func):
             test_func(*args, **kwargs)
         except (MaxRetryError, ConnectTimeout) as err:
             pytest.xfail(f"Download failed for {test_func.__name__}: {err}")
-            raise err
         # Also for Exception if the test includes "Bad Gateway"
         except Exception as err:  # pylint: disable=broad-except
             if "Bad Gateway" in str(err):  # specific error
                 pytest.xfail(f"Download failed for {test_func.__name__}: {err}")
-                raise err
             raise err  # broader error - not marked as xfail
 
     return test_func_wrapper

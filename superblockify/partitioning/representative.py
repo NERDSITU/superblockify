@@ -60,7 +60,7 @@ def find_representative_node_id(graph):
     nodes = graph_to_gdfs(G=graph, nodes=True, edges=False, fill_edge_geometry=False)
 
     # 1. create polygon that contains all points
-    hull_nodes: GeometryArray = nodes.unary_union.convex_hull  # Polygon geometry
+    hull_nodes: GeometryArray = nodes.union_all().convex_hull  # Polygon geometry
 
     # 2. find representative point of the polygon: Point geometry
     hull_nodes_reppoint: GeometryArray = hull_nodes.representative_point()

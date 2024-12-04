@@ -2,6 +2,15 @@
 Changelog
 *********
 
+Version 1.0.1 (2024-12-04)
+**************************
+
+* 🧹 Lint: Reconfigured linting settings.
+* 🐛 Fixes: Removed unused Haversine distance function and adapted to `osmnx` API changes.
+* 🛠️ Update: Updated `test.yml` for artifacts v4.4.0 breaking change.
+* 📝 Documentation: Various updates including changelog, badge links,
+  mobile optimization, GitHub handles, installation instructions, `CITATION.cff`, and `paper.md`.
+
 Version 1.0.0 (2024-08-12)
 **************************
 

@@ -70,7 +70,7 @@ that might come to one's mind is the convex hull of the linestrings.
 
 ```{code-cell} ipython3
 # From subgraph_edges we want to get a hull that encloses all edges
-convex_hull = subgraph_edges.unary_union.convex_hull
+convex_hull = subgraph_edges.union_all().convex_hull
 # Make gdf from convex hull with the same crs as the subgraph
 convex_hull_gdf = gpd.GeoDataFrame(
     geometry=[convex_hull], crs=subgraph_edges.crs
@@ -102,7 +102,7 @@ from numpy import linspace
 def plot_concave_hull(ax, subgraph_edges, ratio=0.4, allow_holes=False,
                       color="crimson"):
     concave_hull = shp.concave_hull(
-        subgraph_edges.unary_union,
+        subgraph_edges.union_all(),
         ratio=ratio,
         allow_holes=allow_holes,
     )
@@ -186,7 +186,7 @@ each other, we'll buffer using a flat cap style.
     Does work well with small buffer values."""
     edges = ox.graph_to_gdfs(subgraph, nodes=False, edges=True)
     # First buffer with flat cap style to avoid self-intersections
-    polygon = shp.Polygon(edges.unary_union.buffer(2 * buffer, cap_style='flat')
+    polygon = shp.Polygon(edges.union_all().buffer(2 * buffer, cap_style='flat')
                           .exterior)
     # Simplify the polygon to remove small artifacts of flat cap style at curved edges
     # polygon = polygon.simplify(buffer*2, preserve_topology=True)
@@ -335,7 +335,7 @@ geometries. Then we can also split up the hull into points and add them to the p
 array.
 
 ```{code-cell} ipython3
-hull = shp.Polygon(edges.unary_union.buffer(100).exterior)
+hull = shp.Polygon(edges.union_all().buffer(100).exterior)
 # interpolate points along the hull - double the distance
 hull_points = shp.line_interpolate_point(
     hull.boundary,

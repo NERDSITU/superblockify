@@ -124,11 +124,11 @@ For that, we take the union of all road cells and get the bounding box of it. Wh
 looking at the union, the _skewness_ of our projection is visible.
 
 ```{code-cell} ipython3
-lc_road_cells.unary_union
+lc_road_cells.union_all()
 ```
 
 ```{code-cell} ipython3
-lc_bbox = lc_road_cells.unary_union.bounds
+lc_bbox = lc_road_cells.union_all().bounds
 lc_ghsl = get_ghsl(lc_bbox)
 ```
 

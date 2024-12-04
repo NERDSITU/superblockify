@@ -182,7 +182,7 @@ def get_edge_population(graph, batch_size=10000, **tess_kwargs):
     edge_cells = get_edge_cells(graph, **tess_kwargs)
     # Project to World Mollweide
     edge_cells = edge_cells.to_crs("World Mollweide")
-    bbox_moll = edge_cells.unary_union.buffer(100).bounds
+    bbox_moll = edge_cells.union_all().buffer(100).bounds
     ghsl_file = get_ghsl(bbox_moll)
 
     with rasopen(ghsl_file) as src:

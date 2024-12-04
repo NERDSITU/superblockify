@@ -106,10 +106,10 @@ def get_edge_cells(graph, limit=None, segment=25, show_plot=False):
     logger.debug("Prepared %d edge polygons. Next, interpolating points.", len(edges))
     # Make limit polygon
     if limit is None:
-        limit = Polygon(edges.unary_union.buffer(100).exterior)
+        limit = Polygon(edges.union_all().buffer(100).exterior)
     else:
         # Check if limit and edges are disjoint
-        if limit.disjoint(edges.unary_union):
+        if limit.disjoint(edges.union_all()):
             raise ValueError(
                 "The limit and the edge points are disjoint. "
                 "Please provide a limit that intersects the edges."

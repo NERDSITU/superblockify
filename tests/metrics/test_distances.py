@@ -7,7 +7,6 @@ from numpy import inf
 from superblockify.metrics.distances import (
     calculate_path_distance_matrix,
     calculate_euclidean_distance_matrix_projected,
-    calculate_euclidean_distance_matrix_haversine,
     calculate_partitioning_distance_matrix,
 )
 
@@ -89,48 +88,6 @@ def test_calculate_euclidean_distance_matrix_projected_unprojected_graph(
     graph.graph.pop("crs")
     with pytest.raises(ValueError):
         calculate_euclidean_distance_matrix_projected(graph)
-
-
-def test_calculate_euclidean_distance_matrix_haversine(test_city_small_copy):
-    """Test calculating all pairwise Euclidean distances for the full graphs.
-    Haversine."""
-    _, graph = test_city_small_copy
-    calculate_euclidean_distance_matrix_haversine(graph, plot_distributions=True)
-    # With node ordering
-    calculate_euclidean_distance_matrix_haversine(
-        graph, node_order=list(graph.nodes), plot_distributions=True
-    )
-    plt.close("all")
-
-
-@pytest.mark.parametrize(
-    "key,value",
-    [
-        ("lat", None),
-        ("lon", None),
-        ("lat", "a"),
-        ("lon", "a"),
-        ("lat", -90.1),
-        ("lon", -180.1),
-        ("lat", 90.1),
-        ("lon", 180.1),
-        ("lat", inf),
-        ("lon", inf),
-        ("lat", -inf),
-        ("lon", -inf),
-    ],
-)
-def test_calculate_euclidean_distance_matrix_haversine_faulty_coords(
-    test_city_small_copy, key, value
-):
-    """Test calculating all pairwise Euclidean distances for the full graphs
-    with missing coordinates. Haversine.
-    """
-    _, graph = test_city_small_copy
-    # Change key attribute of first node
-    graph.nodes[list(graph.nodes)[0]][key] = value
-    with pytest.raises(ValueError):
-        calculate_euclidean_distance_matrix_haversine(graph)
 
 
 @pytest.mark.parametrize("predefined_node_order", [True, False])

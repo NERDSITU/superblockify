@@ -48,9 +48,9 @@ from rasterstats import zonal_stats
 ## 1. Area Boundary
 
 ```{code-cell} ipython3
-bogota_gdf = ox.geocode_to_gdf('Bogotá, Colombia')
+bogota_gdf = ox.geocode_to_gdf('Bogotá, Capital District, RAP (Especial) Central, Colombia')
 # Project to UTM, so we can treat it as flat Cartesian coordinates (meters)
-bogota_gdf = ox.project_gdf(bogota_gdf)
+bogota_gdf = ox.projection.project_gdf(bogota_gdf)
 print(f"The area of Bogotá is {round(bogota_gdf.area[0] / 10 ** 6, 2)} km²")
 bogota_gdf.explore()
 ```
@@ -405,7 +405,9 @@ One such example is the city of Jönköping in Sweden, it falls on two tiles.
 
 ```{code-cell} ipython3
 :tags: [hide-input]
-def get_population(place_gdf, pop_raster_files, resample_factor=1, place_name=None):
+def get_population(
+        place_gdf, pop_raster_files, resample_factor=1, place_name=None, low_cutoff=0
+):
     """Get the population for a place.
 
     Parameters
@@ -419,6 +421,8 @@ def get_population(place_gdf, pop_raster_files, resample_factor=1, place_name=No
         up-scaling.
     place_name : str, optional
         Name of the place. The default is None.
+    low_cutoff : float, optional
+        The least considered value for the population. The default is 0.
 
     Returns
     -------
@@ -427,7 +431,8 @@ def get_population(place_gdf, pop_raster_files, resample_factor=1, place_name=No
     """
     fig, axe = plt.subplots(figsize=(6, 6))
     pop_sum = 0
-    for pop_raster_file in pop_raster_files if isinstance(pop_raster_files, list) else [pop_raster_files]:
+    for pop_raster_file in pop_raster_files if isinstance(pop_raster_files, list) else [
+        pop_raster_files]:
         # Window of place, buffered by 100m
         with rasterio.open(pop_raster_file) as src:
             window = src.window(*place_gdf.buffer(100).total_bounds)
@@ -442,6 +447,9 @@ def get_population(place_gdf, pop_raster_files, resample_factor=1, place_name=No
         pop_raster = pop_raster / resample_factor ** 2  # Correct for resampling
         # Set masked values to 0
         pop_raster = pop_raster.filled(0)
+        # Cut off low values
+        pop_raster[pop_raster < low_cutoff] = 0
+
         # Get population
         zs_place = zonal_stats(place_gdf_raster_crs, pop_raster, affine=affine,
                                stats="sum", nodata=0)
