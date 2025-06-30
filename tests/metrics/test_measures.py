@@ -1,5 +1,5 @@
 """Tests for the measure calculation module."""
-
+from sys import version_info
 from dataclasses import dataclass
 from math import isclose
 from random import Random
@@ -417,6 +417,9 @@ def _downcast_(sparse_graph):
         ),
     ],
 )
+@pytest.mark.skipif(
+    version_info < (3, 11), reason="skip for python < 3.11"
+)
 def test_calculate_betweenness_scales(graph, expected):
     """Test calculation of edge betweenness with scaled results of toy graphs."""
     set_edge_attributes(graph, 1, "weight")
@@ -542,6 +545,9 @@ def test_calculate_betweenness_scales(graph, expected):
             },
         ),
     ],
+)
+@pytest.mark.skipif(
+    version_info < (3, 11), reason="skip for python < 3.11"
 )
 def test__calculate_betweenness_unscaled(graph, expected):
     """Test calculation of betweenness centrality graph to dict, unscaled."""
