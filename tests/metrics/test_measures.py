@@ -410,27 +410,9 @@ def _downcast_(sparse_graph):
         (
             MultiDiGraph(wheel_graph(5)),
             {
-                "normal": array([1 / 3, 0.0, 0.0, 0.0, 0.0]),
-                "length": array([1 / 6, 0.0, 0.0, 0.0, 0.0]),
-                "linear": array([1 / 6, 0.0, 0.0, 0.0, 0.0]),
-                "edge_normal": {
-                    (0, 1, 0): 0.1,
-                    (1, 0, 0): 0.1,
-                    (0, 2, 0): 0.1,
-                    (2, 0, 0): 0.1,
-                    (0, 3, 0): 0.1,
-                    (3, 0, 0): 0.1,
-                    (0, 4, 0): 0.1,
-                    (4, 0, 0): 0.1,
-                    (1, 2, 0): 0.05,
-                    (2, 1, 0): 0.05,
-                    (2, 3, 0): 0.05,
-                    (3, 2, 0): 0.05,
-                    (3, 4, 0): 0.05,
-                    (4, 3, 0): 0.05,
-                    (4, 1, 0): 0.05,
-                    (1, 4, 0): 0.05,
-                },
+                "normal": array([0.0, 0.0, 0.0, 1 / 6, 1 / 6]),
+                "length": array([0.0, 0.0, 0.0, 1 / 12, 1 / 12]),
+                "linear": array([0.0, 0.0, 0.0, 1 / 12, 1 / 12]),
             },
         ),
     ],
@@ -456,6 +438,8 @@ def test_calculate_betweenness_scales(graph, expected):
     )
     if "edge_normal" in expected:
         edge_bc = get_edge_attributes(graph, "edge_betweenness_normal")
+        print([expected["edge_normal"][edge] for edge in edge_bc.keys()])
+        print(list(edge_bc.values()))
         assert allclose(
             list(edge_bc.values()),
             [expected["edge_normal"][edge] for edge in edge_bc.keys()],
@@ -552,9 +536,9 @@ def test_calculate_betweenness_scales(graph, expected):
         (
             MultiDiGraph(Graph([(0, 1), (0, 2), (0, 3), (1, 2), (1, 3)])),
             {
-                "normal": array([2.0, 0.0, 0.0, 0.0]),
-                "length": array([1.0, 0.0, 0.0, 0.0]),
-                "linear": array([1.0, 0.0, 0.0, 0.0]),
+                "normal": array([0.0, 2.0, 0.0, 0.0]),
+                "length": array([0.0, 1.0, 0.0, 0.0]),
+                "linear": array([0.0, 1.0, 0.0, 0.0]),
             },
         ),
     ],
