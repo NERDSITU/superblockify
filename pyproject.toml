@@ -32,7 +32,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
 ]
 dynamic = ["version"]
-requires-python = ">=3.10,<3.13"
+requires-python = "3.10"
 dependencies = [
     "osmnx>=1.6.0,<3",
     "geopandas>=1.0,<2",
