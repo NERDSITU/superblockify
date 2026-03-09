@@ -167,9 +167,9 @@ def calculate_coverage(partitioner, weight):
     if partitioner.graph.number_of_edges() == partitioner.sparsified.number_of_edges():
         return 0
 
-    return 1 - npsum(
+    return 1 - sum(
         d[weight] for u, v, d in partitioner.sparsified.edges(data=True)
-    ) / npsum(d[weight] for u, v, d in partitioner.graph.edges(data=True))
+    ) / sum(d[weight] for u, v, d in partitioner.graph.edges(data=True))
 
 
 def rel_increase(value_i, value_j):
