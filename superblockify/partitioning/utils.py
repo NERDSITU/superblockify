@@ -273,7 +273,9 @@ def show_highway_stats(graph):
     )
     # Warning if 'str' is underrepresented
     str_proportion_series = dtype_counts.loc[dtype_counts.index == str, "proportion"]
-    str_proportion = str_proportion_series.iloc[0] if not str_proportion_series.empty else 0.0
+    str_proportion = (
+        str_proportion_series.iloc[0] if not str_proportion_series.empty else 0.0
+    )
     if str_proportion < 0.98:
         logger.warning(
             "The dtype of the 'highway' attribute is not 'str' in %d%% of the edges.",
