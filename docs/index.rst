@@ -20,6 +20,9 @@
      <a href="https://pypi.org/project/superblockify/" style="margin: 0 10px; display: inline-block;">
        <img src="https://img.shields.io/pypi/l/superblockify" alt="License" />
      </a>
+     <a href="https://cbueth.de/assets/pdf/cbueth_MA_Superblockify.pdf" style="margin: 0 10px; display: inline-block;">
+       <img src="https://img.shields.io/badge/Master_Thesis-PDF-purple" alt="Master Thesis" />
+     </a>
    </div>
    <div style="height: 10px;"></div>
 
@@ -62,6 +65,11 @@ If you use `superblockify` in your research, please cite the
 JOSS paper `doi:10.21105/joss.06798 <https://doi.org/10.21105/joss.06798>`__, e.g.:
 
     Büth et al., (2024). superblockify: A Python Package for Automated Generation, Visualization, and Analysis of Potential Superblocks in Cities. Journal of Open Source Software, 9(100), 6798, https://doi.org/10.21105/joss.06798
+
+Further reading
+===============
+For more detailed background, methodology, and evaluation, see the
+`Master Thesis (PDF) <https://cbueth.de/assets/pdf/cbueth_MA_Superblockify.pdf>`__.
 
 Contributing
 ============
