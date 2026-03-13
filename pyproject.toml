@@ -50,7 +50,7 @@ dependencies = [
 
 [project.urls]
 Documentation = "https://superblockify.city/"
-Repository = "https://github.com/NERDSITU/superblockify"
+Repository = "https://github.com/BikeNetKit/superblockify"
 Changelog = "https://superblockify.city/changelog/"
 
 [project.optional-dependencies]

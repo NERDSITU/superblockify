@@ -306,6 +306,6 @@ For further settings, see the other attributes in the `Config` class.
 ```
 
 If you run into any other issues, feel free to look into the [API documentation](api/index),
-[Source Code](https://github.com/NERDSITU/superblockify/),
+[Source Code](https://github.com/BikeNetKit/superblockify/),
 activate debug logs `sb.config.set_log_level("DEBUG")`
-or finally [open a new issue](https://github.com/NERDSITU/superblockify/issues/new).
+or finally [open a new issue](https://github.com/BikeNetKit/superblockify/issues/new).
