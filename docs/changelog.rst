@@ -29,7 +29,7 @@ Version 1.0.0 (2024-08-12)
 * 🆕 New features: Betweenness Centrality Cutoff, Reduced path filling.
 * 🐛 Fixes: notebook formatting, GEOSException in tesselation, missing attribute.
 * 🔄 Merged pull request: `🌐 Added Betweenness Centrality Cutoff
-  <https://github.com/NERDSITU/superblockify/pull/82>`_.
+  <https://github.com/BikeNetKit/superblockify/pull/82>`_.
 * 📝 Misc changes: deactivated colormap logging,
   unified nodes and edges into one variable.
 * 📊 Improved analysis scripts
@@ -62,8 +62,8 @@ Version 0.2.1 (2023-06-22)
   resolved to polygons. Normally, only the edges are exported.
   Added general graph stats with OSM boundary polygon.
 
-.. |codecov-badge| image:: https://codecov.io/gh/NERDSITU/superblockify/branch/main/graph/badge.svg?token=AS72IFT2Q4
-   :target: https://codecov.io/gh/NERDSITU/superblockify
+.. |codecov-badge| image:: https://codecov.io/gh/BikeNetKit/superblockify/branch/main/graph/badge.svg?token=AS72IFT2Q4
+   :target: https://codecov.io/gh/BikeNetKit/superblockify
    :height: 2ex
 
 Version 0.2.0 (2023-06-20)
@@ -115,4 +115,4 @@ Version 0.0.0
 *************
 
 * See changes before in the repository under the tag `0.0.0
-  <https://github.com/NERDSITU/superblockify/tags>`_.
+  <https://github.com/BikeNetKit/superblockify/tags>`_.

@@ -66,7 +66,7 @@ JOSS paper `doi:10.21105/joss.06798 <https://doi.org/10.21105/joss.06798>`__, e.
 Contributing
 ============
 If you want to contribute to the development of superblockify, please read the
-`CONTRIBUTING.md <https://github.com/NERDSITU/superblockify/blob/main/CONTRIBUTING.md>`__
+`CONTRIBUTING.md <https://github.com/BikeNetKit/superblockify/blob/main/CONTRIBUTING.md>`__
 file.
 
 .. toctree::

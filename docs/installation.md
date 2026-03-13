@@ -17,9 +17,9 @@ conda activate sb_env
 > instructed above to avoid problems.
 
 *Alternatively*, or if you run into
-issues, [clone this repository](https://github.com/NERDSITU/superblockify/archive/refs/heads/main.zip)
+issues, [clone this repository](https://github.com/BikeNetKit/superblockify/archive/refs/heads/main.zip)
 and create the environment via
-the [`environment.yml`](https://github.com/NERDSITU/superblockify/blob/main/environment.yml)
+the [`environment.yml`](https://github.com/BikeNetKit/superblockify/blob/main/environment.yml)
 file:
 
 ```bash

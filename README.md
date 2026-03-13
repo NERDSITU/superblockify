@@ -9,10 +9,10 @@
 
 [![status](https://joss.theoj.org/papers/87426e988ebd0a6d7f592eb16d1fd209/status.svg)](https://joss.theoj.org/papers/87426e988ebd0a6d7f592eb16d1fd209)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13300610.svg)](https://doi.org/10.5281/zenodo.13300610)
-[![Docs](https://github.com/NERDSITU/superblockify/actions/workflows/docs.yml/badge.svg)](https://github.com/NERDSITU/superblockify/actions/workflows/docs.yml)
-[![Lint](https://github.com/NERDSITU/superblockify/actions/workflows/lint.yml/badge.svg)](https://github.com/NERDSITU/superblockify/actions/workflows/lint.yml)
-[![Test](https://github.com/NERDSITU/superblockify/actions/workflows/test.yml/badge.svg)](https://github.com/NERDSITU/superblockify/actions/workflows/test.yml)
-[![codecov](https://codecov.io/gh/NERDSITU/superblockify/branch/main/graph/badge.svg?token=AS72IFT2Q4)](https://codecov.io/gh/NERDSITU/superblockify)
+[![Docs](https://github.com/BikeNetKit/superblockify/actions/workflows/docs.yml/badge.svg)](https://github.com/BikeNetKit/superblockify/actions/workflows/docs.yml)
+[![Lint](https://github.com/BikeNetKit/superblockify/actions/workflows/lint.yml/badge.svg)](https://github.com/BikeNetKit/superblockify/actions/workflows/lint.yml)
+[![Test](https://github.com/BikeNetKit/superblockify/actions/workflows/test.yml/badge.svg)](https://github.com/BikeNetKit/superblockify/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/BikeNetKit/superblockify/branch/main/graph/badge.svg?token=AS72IFT2Q4)](https://codecov.io/gh/BikeNetKit/superblockify)
 
 Source code to `superblockify` an urban street network
 
@@ -44,9 +44,9 @@ conda activate sb_env
 > If unsure, use `conda` as instructed above to avoid problems.
 
 *Alternatively*, or if you run into
-issues, [clone this repository](https://github.com/NERDSITU/superblockify/archive/refs/heads/main.zip)
+issues, [clone this repository](https://github.com/BikeNetKit/superblockify/archive/refs/heads/main.zip)
 and create the environment via
-the [`environment.yml`](https://github.com/NERDSITU/superblockify/blob/main/environment.yml)
+the [`environment.yml`](https://github.com/BikeNetKit/superblockify/blob/main/environment.yml)
 file:
 
 ```bash
@@ -71,12 +71,12 @@ sb_env)
 
 We provide a minimum working example in two formats:
 
-* [Jupyter notebook (`00-mwe.ipynb`)](https://github.com/NERDSITU/superblockify/blob/main/examples/00-mwe.ipynb)
-* [Python script (`00-mwe.py`)](https://github.com/NERDSITU/superblockify/blob/main/examples/00-mwe.py)
+* [Jupyter notebook (`00-mwe.ipynb`)](https://github.com/BikeNetKit/superblockify/blob/main/examples/00-mwe.ipynb)
+* [Python script (`00-mwe.py`)](https://github.com/BikeNetKit/superblockify/blob/main/examples/00-mwe.py)
 
 For a guided start after installation, see
 the [usage section](https://superblockify.city/usage/) in the documentation. See
-the [`examples/`](https://github.com/NERDSITU/superblockify/blob/main/examples/) folder
+the [`examples/`](https://github.com/BikeNetKit/superblockify/blob/main/examples/) folder
 for more example scripts.
 
 ## Documentation
@@ -87,10 +87,10 @@ about `superblockify`.
 ## Testing
 
 The tests are specified using the `pytest` signature,
-see [`tests/`](https://github.com/NERDSITU/superblockify/blob/main/tests/) folder, and
+see [`tests/`](https://github.com/BikeNetKit/superblockify/blob/main/tests/) folder, and
 can be run using a test runner of choice.
 A pipeline is set up,
-see [`.github/workflows/test.yml`](https://github.com/NERDSITU/superblockify/blob/main/.github/workflows/test.yml).
+see [`.github/workflows/test.yml`](https://github.com/BikeNetKit/superblockify/blob/main/.github/workflows/test.yml).
 
 ## Credits & Funding
 
