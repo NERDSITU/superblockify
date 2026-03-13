@@ -31,6 +31,8 @@ jobs:
         os: [ubuntu-latest]
     name: Generate documentation
     runs-on: ${{ matrix.os }}
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     environment:
       name: Deploy to github pages
       url: ${{ steps.deployment.outputs.page_url }}

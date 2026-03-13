@@ -11,6 +11,8 @@ jobs:
   run-black:
     name: Run Black codestyle
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Check out Git repository
