@@ -32,13 +32,13 @@ jobs:
     name: Cache for ${{ matrix.python-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Get week number
         run: echo "WEEK=$(date +'%V')" >> $GITHUB_ENV
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: mamba-org/setup-micromamba@v1
+        uses: mamba-org/setup-micromamba@v2
         with:
           create-args: python=${{ matrix.python-version }}
           environment-file: environment-dev.yml
@@ -75,13 +75,13 @@ jobs:
         shell: bash -el {0}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Get week number
         run: echo "WEEK=$(date +'%V')" >> $GITHUB_ENV
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: mamba-org/setup-micromamba@v1
+        uses: mamba-org/setup-micromamba@v2
         with:
           create-args: python=${{ matrix.python-version }}
           environment-file: environment-dev.yml
@@ -105,7 +105,7 @@ jobs:
 
       - name: Store coverage file
         if: matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-${{ matrix.submodule.name }}
           path: ".coverage.${{ matrix.submodule.name }}"
@@ -122,10 +122,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Load coverages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         id: download
         with:
           path: coverage
@@ -139,6 +139,6 @@ jobs:
         run: coverage combine coverage/
 
       - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
