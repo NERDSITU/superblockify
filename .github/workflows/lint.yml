@@ -11,10 +11,12 @@ jobs:
   run-black:
     name: Run Black codestyle
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
 
@@ -24,7 +26,7 @@ jobs:
           src: './superblockify ./tests ./examples'
           options: '--exclude "/(\.png|\.jpg|\.jpeg)/"'
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: Fix code style issues with Black
           commit_user_name: ${{ github.actor }}
@@ -42,10 +44,10 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
