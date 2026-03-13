@@ -6,6 +6,7 @@
 [![linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/PyCQA/pylint)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![PyPI License](https://img.shields.io/pypi/l/superblockify)](https://pypi.org/project/superblockify/)
+[![Master Thesis](https://img.shields.io/badge/Master_Thesis-PDF-purple)](https://cbueth.de/assets/pdf/cbueth_MA_Superblockify.pdf)
 
 [![status](https://joss.theoj.org/papers/87426e988ebd0a6d7f592eb16d1fd209/status.svg)](https://joss.theoj.org/papers/87426e988ebd0a6d7f592eb16d1fd209)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13300610.svg)](https://doi.org/10.5281/zenodo.13300610)
@@ -101,3 +102,7 @@ see [`.github/workflows/test.yml`](https://github.com/BikeNetKit/superblockify/b
 
 Funded by the European
 Union, [EU Horizon grant JUST STREETS](https://cordis.europa.eu/project/id/101104240)
+
+## More Information
+
+* [Master Thesis (PDF)](https://cbueth.de/assets/pdf/cbueth_MA_Superblockify.pdf) - Detailed background, methodology, and evaluation
