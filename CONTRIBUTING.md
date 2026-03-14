@@ -27,6 +27,7 @@ the experience for all involved. The community looks forward to your contributio
     - [Reporting Bugs](#reporting-bugs)
     - [Suggesting Enhancements](#suggesting-enhancements)
     - [Your First Code Contribution](#your-first-code-contribution)
+    - [Conventional Commits](#conventional-commits)
 
 ## I Have a Question
 
@@ -191,6 +192,26 @@ Before submitting a pull request, make sure to lint the code with `pylint` and `
 ```bash
 pylint -d E0401 superblockify/
 black superblockify/ tests/
+```
+
+### Conventional Commits
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) for automated versioning and changelog generation. Please use the following format for your commit messages:
+
+- `feat:` - A new feature (triggers minor version bump)
+- `fix:` - A bug fix (triggers patch version bump)
+- `docs:` - Documentation only changes
+- `style:` - Changes that do not affect the meaning of the code
+- `refactor:` - Code change that neither fixes a bug nor adds a feature
+- `perf:` - Code change that improves performance
+- `test:` - Adding missing tests or correcting existing tests
+- `build:` - Changes that affect the build system or external dependencies
+- `ci:` - Changes to CI configuration files and scripts
+- `chore:` - Other changes that don't modify src or test files
+
+For breaking changes, add `!` after the type:
+```
+feat!: break something
 ```
 
 ## Attribution

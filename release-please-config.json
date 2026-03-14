@@ -1,0 +1,11 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "python",
+      "extra-files": [
+        "superblockify/_version.py",
+        "docs/conf.py"
+      ]
+    }
+  }
+}
