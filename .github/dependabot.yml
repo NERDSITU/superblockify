@@ -1,0 +1,16 @@
+version: 2
+
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    target-branch: main
+
+  - package-ecosystem: conda
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    target-branch: main
