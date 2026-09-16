@@ -112,6 +112,15 @@ class TestMetric:
             assert component["change_mean_edge_betweenness_length"] is not None
             assert component["change_mean_edge_betweenness_linear"] is not None
 
+    def test_calculate_metrics_without_plots(self, test_city_small_precalculated_copy):
+        """Test that rel_increase_comp is calculated without make_plots."""
+        part = test_city_small_precalculated_copy
+        part.calculate_metrics(make_plots=False)
+        for component in part.get_ltns():
+            assert "rel_increase" in component
+            for edge in component["subgraph"].edges:
+                assert "rel_increase_comp" in part.graph.edges[edge]
+
     @pytest.mark.parametrize("unit", ["time", "distance"])
     def test_calculate_metrics_before(self, test_one_city_precalculated_copy, unit):
         """Test the metric calculation for before partitioning."""

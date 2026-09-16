@@ -254,19 +254,17 @@ def plot_distance_matrices_pairwise_relative_difference(metric, name=None):
 def plot_component_wise_travel_increase(
     partitioner, distance_matrix, node_list, measure1, measure2, unit, **pg_kwargs
 ):
-    """Calculate and plot the component-wise travel increase.
+    """Plot the component-wise travel increase.
 
-    For every component of the partitioner, calculate the relative travel increase.
-    This is the mean of the relative travel increase for all pairs of nodes in the
-    component. Relative travel increase is the percentual increase of the travel between
-    measure 1 and measure 2.
-
-    Mean of d_1(i, j) / d_1(i, j) if i in the concerning component.
+    Plots the relative travel increase per Superblock, as calculated by
+    :func:`superblockify.metrics.measures.write_component_wise_travel_increase`
+    and stored in the `rel_increase` key of the Superblocks and the
+    `rel_increase_comp` edge attribute.
 
     Parameters
     ----------
     partitioner : Partitioner
-        The partitioner to calculate the component-wise travel increase for.
+        The partitioner to plot the component-wise travel increase for.
     distance_matrix : dict
         The distance matrix to calculate the component-wise travel increase for.
     node_list : list
@@ -284,36 +282,13 @@ def plot_component_wise_travel_increase(
     -------
     fig, axes : matplotlib.figure.Figure, matplotlib.axes.Axes
         The figure and axes of the plot.
-    """  # pylint: disable=too-many-locals
+    """  # pylint: disable=unused-argument
 
-    partition_nodes = partitioner.get_partition_nodes()
-
-    rel_incr = rel_increase(distance_matrix[measure1], distance_matrix[measure2])
-
-    for component in partition_nodes:
-        # Calculate mean of the relative travel increase: Take all increases from inside
-        # the component to all other nodes and reverse. All rows and columns with
-        # Indices in the component
-        nodes_idx = [
-            node_list.index(node)
-            for node in component["subgraph"].nodes
-            if node not in partitioner.sparsified.nodes
-        ]
-        # column from nodes to all other nodes
-        col = rel_incr[:, nodes_idx]
-        # row from all other nodes to nodes
-        row = rel_incr[nodes_idx, :]
-        # Take the mean of the union where the values are not np.inf
-        rel_increase_component = np.mean(
-            np.union1d(
-                col[~np.isinf(col)],
-                row[~np.isinf(row)],
-            )
-        )
-        component["rel_increase"] = rel_increase_component
-        # Write this to the edges of the subgraph
-        for edge in component["subgraph"].edges:
-            partitioner.graph.edges[edge]["rel_increase_comp"] = rel_increase_component
+    partition_nodes = [
+        component
+        for component in partitioner.get_ltns()
+        if component.get("ignore") is not True
+    ]
 
     _, axes = plt.subplots(1, 1, figsize=(10, 10))
     # Add colorbar

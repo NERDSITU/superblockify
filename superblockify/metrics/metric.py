@@ -12,6 +12,7 @@ from .measures import (
     calculate_global_efficiency,
     calculate_directness,
     write_relative_increase_to_edges,
+    write_component_wise_travel_increase,
     calculate_coverage,
     betweenness_centrality,
     calculate_high_bc_clustering,
@@ -325,6 +326,13 @@ class Metric:
 
         write_relative_increase_to_edges(
             partitioner.graph,
+            self.distance_matrix,
+            self.node_list,
+            "N",
+            "S",
+        )
+        write_component_wise_travel_increase(
+            partitioner,
             self.distance_matrix,
             self.node_list,
             "N",

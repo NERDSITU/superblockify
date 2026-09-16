@@ -379,6 +379,7 @@ def load_graphml_dtypes(filepath=None, attribute_label=None, attribute_dtype=Non
         "travel_time": float,
         "travel_time_restricted": float,
         "rel_increase": float,
+        "rel_increase_comp": float,
         "population": float,
         "area": float,
         "cell_id": int,
