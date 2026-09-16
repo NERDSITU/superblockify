@@ -229,6 +229,65 @@ def write_relative_increase_to_edges(
         )
 
 
+def write_component_wise_travel_increase(
+    partitioner, distance_matrix, node_list, measure1, measure2
+):
+    """Write the component-wise relative travel increase to the Superblocks.
+
+    For every Superblock of the partitioner, calculate the relative travel increase.
+    This is the mean of the relative travel increase for all pairs of nodes in the
+    Superblock. Relative travel increase is the percentual increase of the travel
+    between measure 1 and measure 2.
+
+    Mean of d_1(i, j) / d_2(i, j) if i in the concerning component.
+
+    The mean is written to the `rel_increase` key of the Superblock and to the
+    `rel_increase_comp` attribute of the edges of the Superblock's subgraph.
+
+    Parameters
+    ----------
+    partitioner : Partitioner
+        The partitioner to calculate the component-wise travel increase for.
+    distance_matrix : dict
+        The distance matrix to calculate the component-wise travel increase for.
+    node_list : list
+        The list of nodes the distance matrices are sorted by.
+    measure1 : str
+        The name of the first measure. Key for the distance matrix.
+    measure2 : str
+        The name of the second measure. Key for the distance matrix.
+    """
+
+    rel_incr = rel_increase(distance_matrix[measure1], distance_matrix[measure2])
+
+    for component in partitioner.get_ltns():
+        if component.get("ignore") is True:
+            continue
+        # Calculate mean of the relative travel increase: Take all increases from
+        # inside the component to all other nodes and reverse. All rows and columns
+        # with indices in the component
+        nodes_idx = [
+            node_list.index(node)
+            for node in component["subgraph"].nodes
+            if node not in partitioner.sparsified.nodes
+        ]
+        # column from nodes to all other nodes
+        col = rel_incr[:, nodes_idx]
+        # row from all other nodes to nodes
+        row = rel_incr[nodes_idx, :]
+        # Take the mean of the union where the values are not np.inf
+        rel_increase_component = np.mean(
+            np.union1d(
+                col[~np.isinf(col)],
+                row[~np.isinf(row)],
+            )
+        )
+        component["rel_increase"] = rel_increase_component
+        # Write this to the edges of the subgraph
+        for edge in component["subgraph"].edges:
+            partitioner.graph.edges[edge]["rel_increase_comp"] = rel_increase_component
+
+
 @nx.utils.py_random_state(7)
 def betweenness_centrality(
     graph,
